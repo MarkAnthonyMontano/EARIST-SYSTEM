@@ -1,6 +1,6 @@
 import React, { useState, useEffect, } from "react";
 import axios from "axios";
-import { Button, Box, Container, Typography, Checkbox, FormControl, FormControlLabel } from "@mui/material";
+import { Button, Box, Container, Typography, Checkbox, FormControl, FormControlLabel, FormHelperText } from "@mui/material";
 import { Link } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
 import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
@@ -93,31 +93,19 @@ const Dashboard5 = () => {
     }
   };
 
-const [errors, setErrors] = useState({});
-
+  const [errors, setErrors] = useState({});
   const isFormValid = () => {
-    const requiredFields = [
-      // Original fields
-      "termsOfAgreement"
-    ];
-
     let newErrors = {};
     let isValid = true;
 
-    requiredFields.forEach((field) => {
-      const value = person[field];
-      const stringValue = value?.toString().trim();
-
-      if (!stringValue) {
-        newErrors[field] = true;
-        isValid = false;
-      }
-    });
+    if (person.termsOfAgreement !== 1) {
+      newErrors.termsOfAgreement = true;
+      isValid = false;
+    }
 
     setErrors(newErrors);
     return isValid;
   };
-
 
 
   // dot not alter
@@ -308,8 +296,7 @@ const [errors, setErrors] = useState({});
             <Typography style={{ fontSize: "12px", fontFamily: "Arial", textAlign: "Left" }}>
               I certify that the information given above are true, complete, and accurate to the best of my knowledge and belief. I promise to abide by the rules and regulations of Eulogio "Amang" Rodriguez Institute of Science and Technology regarding the ECAT and my possible admission. I am aware that any false or misleading information and/or statement may result in the refusal or disqualification of my admission to the institution.
             </Typography>
-            <br />
-            
+       
             <FormControl required error={!!errors.termsOfAgreement} component="fieldset" sx={{ mb: 2 }}>
               <FormControlLabel
                 control={
@@ -364,7 +351,7 @@ const [errors, setErrors] = useState({});
                   handleUpdate(); // Save data
 
                   if (isFormValid()) {
-                    navigate("/dashboard5"); // Proceed only if valid
+                    navigate("/requirements_uploader"); // Proceed only if valid
                   } else {
                     alert("Please complete all required fields before submitting.");
                   }
