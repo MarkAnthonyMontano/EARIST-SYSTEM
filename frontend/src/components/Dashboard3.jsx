@@ -78,8 +78,15 @@ const Dashboard3 = () => {
   const fetchPersonData = async (id) => {
     try {
       const res = await axios.get(`http://localhost:5000/api/person/${id}`);
-      setPerson(res.data);
-    } catch (error) { }
+
+      const safePerson = Object.fromEntries(
+        Object.entries(res.data).map(([key, val]) => [key, val ?? ""])
+      );
+
+      setPerson(safePerson);
+    } catch (error) {
+      console.error("Failed to fetch person data", error);
+    }
   };
 
   // Do not alter

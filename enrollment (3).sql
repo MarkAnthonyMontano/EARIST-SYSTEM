@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 29, 2025 at 06:20 AM
+-- Generation Time: Jun 29, 2025 at 02:08 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -309,7 +309,8 @@ INSERT INTO `dprtmnt_section_table` (`id`, `curriculum_id`, `section_id`, `dssta
 (10, 1, 11, 0),
 (11, 1, 12, 0),
 (12, 7, 6, 0),
-(13, 2, 4, 0);
+(13, 2, 4, 0),
+(14, 1, 1, 0);
 
 -- --------------------------------------------------------
 
@@ -1485,7 +1486,7 @@ ALTER TABLE `dprtmnt_room_table`
 -- AUTO_INCREMENT for table `dprtmnt_section_table`
 --
 ALTER TABLE `dprtmnt_section_table`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `dprtmnt_table`

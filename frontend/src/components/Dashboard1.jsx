@@ -62,6 +62,7 @@ const Dashboard1 = () => {
     presentProvince: "",
     presentMunicipality: "",
     presentDswdHouseholdNumber: "",
+    sameAsPresentAddress: "",
     permanentStreet: "",
     permanentBarangay: "",
     permanentZipCode: "",
@@ -1708,34 +1709,40 @@ const Dashboard1 = () => {
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={sameAsPresent}
+                  name="same_as_present_address"
+                  checked={person.same_as_present_address === 1}
                   onChange={(e) => {
                     const checked = e.target.checked;
-                    setSameAsPresent(checked);
-                    if (checked) {
-                      // Copy all present address values to permanent
-                      setPerson((prev) => ({
-                        ...prev,
-                        permanentStreet: prev.presentStreet,
-                        permanentZipCode: prev.presentZipCode,
-                        permanentRegion: prev.presentRegion,
-                        permanentProvince: prev.presentProvince,
-                        permanentMunicipality: prev.presentMunicipality,
-                        permanentBarangay: prev.presentBarangay,
-                        permanentDswdHouseholdNumber: prev.presentDswdHouseholdNumber,
-                      }));
 
-                      // Optional: Sync dependent dropdowns too
+                    const updatedPerson = {
+                      ...person,
+                      same_as_present_address: checked ? 1 : 0,
+                    };
+
+                    if (checked) {
+                      updatedPerson.permanentStreet = person.presentStreet;
+                      updatedPerson.permanentZipCode = person.presentZipCode;
+                      updatedPerson.permanentRegion = person.presentRegion;
+                      updatedPerson.permanentProvince = person.presentProvince;
+                      updatedPerson.permanentMunicipality = person.presentMunicipality;
+                      updatedPerson.permanentBarangay = person.presentBarangay;
+                      updatedPerson.permanentDswdHouseholdNumber = person.presentDswdHouseholdNumber;
+
                       setPermanentRegion(person.presentRegion);
                       setPermanentProvince(person.presentProvince);
                       setPermanentCity(person.presentMunicipality);
                       setPermanentBarangay(person.presentBarangay);
                     }
+
+                    setPerson(updatedPerson);
+                    handleUpdate(updatedPerson); // optional: real-time save
                   }}
+                  onBlur={handleBlur}
                 />
               }
               label="Same as Present Address"
             />
+
 
             {/* Street & Zip Code */}
             <Box display="flex" gap={2} mb={2}>
