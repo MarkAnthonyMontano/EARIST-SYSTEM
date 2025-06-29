@@ -200,6 +200,31 @@ const PersonalDataForm = () => {
   };
 
 
+  const [curriculumOptions, setCurriculumOptions] = useState([]);
+
+  useEffect(() => {
+    const fetchCurriculums = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/applied_program");
+        setCurriculumOptions(response.data);
+      } catch (error) {
+        console.error("Error fetching curriculum options:", error);
+      }
+    };
+
+    fetchCurriculums();
+  }, []);
+
+  console.log("person.program:", person.program);
+  console.log("curriculumOptions:", curriculumOptions);
+
+  {
+    curriculumOptions.find(
+      (item) => item.curriculum_id.toString() === person.program.toString()
+    )?.program_description || person.program
+  }
+
+
 
 
 
@@ -584,18 +609,23 @@ const PersonalDataForm = () => {
                     <div style={{ fontWeight: "bold" }}>COURSE (COMPLETE NAME)</div>
                     <input
                       type="text"
-                      value={person.program ? person.program.toUpperCase() : ""}
+                      value={
+                        curriculumOptions.find(
+                          (item) => item.curriculum_id.toString() === person.program?.toString()
+                        )?.program_description?.toUpperCase() || ""
+                      }
                       readOnly
                       style={{
                         marginTop: "5px",
                         width: "100%",
                         border: "none",
                         outline: "none",
-                        fontSize: "15px",
-                        fontFamily: "Times new Roman",
+                        fontSize: "12px",
+                        fontFamily: "Times New Roman",
                         textTransform: "uppercase", // ensures visual uppercase
                       }}
                     />
+
                   </td>
 
                   {/* YEAR LEVEL */}

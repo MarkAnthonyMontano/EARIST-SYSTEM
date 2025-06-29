@@ -2598,6 +2598,8 @@ app.get("/api/applied_program", async (req, res) => {
     res.status(500).json({ error: "Database error" });
   }
 });
+
+
 // PUT update person details by person_id
 app.put("/api/person/:id", async (req, res) => {
   const { id } = req.params;

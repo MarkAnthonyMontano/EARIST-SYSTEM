@@ -181,6 +181,31 @@ const ECATApplicationForm = () => {
     }
   };
 
+  const [curriculumOptions, setCurriculumOptions] = useState([]);
+
+  useEffect(() => {
+    const fetchCurriculums = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/applied_program");
+        setCurriculumOptions(response.data);
+      } catch (error) {
+        console.error("Error fetching curriculum options:", error);
+      }
+    };
+
+    fetchCurriculums();
+  }, []);
+
+  console.log("person.program:", person.program);
+  console.log("curriculumOptions:", curriculumOptions);
+
+  {
+    curriculumOptions.find(
+      (item) => item.curriculum_id.toString() === person.program.toString()
+    )?.program_description || person.program
+  }
+
+
 
   return (
 
@@ -392,7 +417,6 @@ const ECATApplicationForm = () => {
                           </td>
                         </tr>
 
-                        {/* Second row: Course & Major */}
                         <tr>
                           <td colSpan={1}></td>
                           <td
@@ -408,9 +432,16 @@ const ECATApplicationForm = () => {
                             }}
                           >
                             Course & Major: <br />
-                            {person.program}
+                            {
+                              curriculumOptions.length > 0
+                                ? curriculumOptions.find(
+                                  (item) => item.curriculum_id.toString() === person.program.toString()
+                                )?.program_description || person.program
+                                : "Loading..."
+                            }
                           </td>
                         </tr>
+
 
 
                       </tbody>
@@ -826,10 +857,10 @@ const ECATApplicationForm = () => {
                           width: "100%",
                         }}
                       >
-                        <div style={{ width: "20%", fontSize: "12px", fontFamily: "Times new roman", textAlign: "center" }}>{person.presentStreet}</div>
+                        <div style={{ width: "25%", fontSize: "12px", fontFamily: "Times new roman", textAlign: "center" }}>{person.presentStreet}</div>
                         <div style={{ width: "20%", fontSize: "12px", fontFamily: "Times new roman", textAlign: "center" }}>{person.presentBarangay}</div>
                         <div style={{ width: "20%", fontSize: "12px", fontFamily: "Times new roman", textAlign: "center" }}>{person.presentMunicipality}</div>
-                        <div style={{ width: "20%", fontSize: "12px", fontFamily: "Times new roman", textAlign: "center" }}>{person.presentProvince}</div>
+                        <div style={{ width: "30%", fontSize: "12px", fontFamily: "Times new roman", textAlign: "center" }}>{person.presentProvince}</div>
                         <div style={{ width: "20%", fontSize: "12px", fontFamily: "Times new roman", textAlign: "center" }}>{person.presentZipCode}</div>
                       </div>
                     </span>

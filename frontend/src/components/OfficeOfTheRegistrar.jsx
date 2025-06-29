@@ -178,6 +178,33 @@ const OfficeOfTheRegistrar = () => {
     }
   };
 
+  const [curriculumOptions, setCurriculumOptions] = useState([]);
+
+  useEffect(() => {
+    const fetchCurriculums = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/applied_program");
+        setCurriculumOptions(response.data);
+      } catch (error) {
+        console.error("Error fetching curriculum options:", error);
+      }
+    };
+
+    fetchCurriculums();
+  }, []);
+
+  console.log("person.program:", person.program);
+  console.log("curriculumOptions:", curriculumOptions);
+
+  {
+    curriculumOptions.find(
+      (item) => item.curriculum_id.toString() === person.program.toString()
+    )?.program_description || person.program
+  }
+
+
+
+
 
 
   return (
@@ -543,15 +570,18 @@ const OfficeOfTheRegistrar = () => {
                     fontSize: "12px",
                     paddingTop: "5px",
                     marginTop: 0,
-                    fontWeight: "bold",
+             
                     textAlign: "center",
                     border: "1px solid black",
                     height: "30px"
                   }}
                 >
-                  {person.program || ""}
+                  {
+                    curriculumOptions.find(
+                      (item) => item.curriculum_id.toString() === person.program?.toString()
+                    )?.program_description?.toUpperCase() || person.program || ""
+                  }
                 </td>
-
 
                 <td
                   colSpan={10}
