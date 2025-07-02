@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Container, } from "@mui/material";
 import EaristLogo from "../assets/EaristLogo.png";
 
 
@@ -220,17 +220,32 @@ const PersonalDataForm = () => {
 
   {
     curriculumOptions.find(
-      (item) => item.curriculum_id.toString() === person.program.toString()
-    )?.program_description || person.program
+      (item) =>
+        item?.curriculum_id?.toString() === (person?.program ?? "").toString()
+    )?.program_description || (person?.program ?? "")
+
   }
 
 
-
+ // 🔒 Disable right-click, F12, F11, Ctrl+Shift+I, etc.
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
+  document.addEventListener('keydown', (e) => {
+    if (
+      e.key === 'F12' || // DevTools
+      e.key === 'F11' || // Fullscreen toggle
+      (e.ctrlKey && e.shiftKey && e.key === 'I') || // Ctrl+Shift+I
+      (e.ctrlKey && e.shiftKey && e.key === 'J') || // Ctrl+Shift+J
+      (e.ctrlKey && e.key === 'U') // View Source
+    ) {
+      e.preventDefault();
+      alert('Action not allowed.');
+    }
+  });
 
 
 
   return (
-    <Box sx={{ height: 'calc(100vh - 120px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
+    <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
       <Container>
         <h1 style={{ fontSize: "40px", fontWeight: "bold", textAlign: "Left", color: "maroon", marginTop: "25px" }}>PERSONAL DATA FORM</h1>
         <hr style={{ border: "1px solid #ccc", width: "41%" }} />
@@ -279,16 +294,19 @@ const PersonalDataForm = () => {
             <div
               className="student-table"
               style={{
+
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center", // Center horizontally
                 padding: "10px 20px",
                 width: "100%",
+
                 boxSizing: "border-box"
               }}>
               {/* Wrapper to contain logo and text side by side without stretching */}
               <div style={{
                 display: "flex",
+
                 alignItems: "center"
               }}>
                 {/* Logo */}
@@ -393,7 +411,7 @@ const PersonalDataForm = () => {
                         Print Legibly. Mark appropriate boxes.
                       </span>
 
-                      <label style={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold" }}>
+                      <label style={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold",  }}>
                         <input
                           type="checkbox"
                           checked // or controlled via state
@@ -404,6 +422,7 @@ const PersonalDataForm = () => {
                             border: "1px solid black",
                             backgroundColor: "white",
                             appearance: "none",
+                     
                             WebkitAppearance: "none",
                             MozAppearance: "none",
                             display: "inline-block",
@@ -493,7 +512,8 @@ const PersonalDataForm = () => {
                   <td colSpan={34} style={{ border: "1px solid black", padding: "8px" }}>
                     <input
                       type="text"
-                      value={person.last_name ? person.last_name.toUpperCase() : ""}
+                      value={person?.last_name?.toUpperCase() || ""}
+                      readOnly
                       style={{
                         width: "100%",
                         border: "none",
@@ -515,7 +535,9 @@ const PersonalDataForm = () => {
                   <td colSpan={34} style={{ border: "1px solid black", padding: "8px" }}>
                     <input
                       type="text"
-                      value={person.first_name ? person.first_name.toUpperCase() : ""}
+                      value={person?.first_name?.toUpperCase() || ""}
+
+                      readOnly
                       style={{
                         width: "100%",
                         border: "none",
@@ -552,7 +574,8 @@ const PersonalDataForm = () => {
                   }}>
                     <input
                       type="text"
-                      value={person.middle_name ? person.middle_name.toUpperCase() : ""}
+                      value={person?.middle_name?.toUpperCase() || ""}
+                      readOnly
                       style={{
 
                         width: "100%",
@@ -580,7 +603,8 @@ const PersonalDataForm = () => {
                     NAME EXTENSION (e.g. Jr., Sr.)
                     <input
                       type="text"
-                      value={person.extension ? person.extension.toUpperCase() : ""}
+                      value={person?.extension?.toUpperCase() || ""}
+                      readOnly
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -597,22 +621,28 @@ const PersonalDataForm = () => {
                 {/* COURSE */}
                 <tr>
                   {/* COURSE (COMPLETE NAME) */}
-                  <td colSpan={30} style={{
-                    border: "1px solid black",
-                    textAlign: "left",
-
-
-                    fontSize: "14px",
-                    fontFamily: "Times new Roman",
-                    verticalAlign: "top"
-                  }}>
+                  <td
+                    colSpan={30}
+                    style={{
+                      border: "1px solid black",
+                      textAlign: "left",
+                      fontSize: "14px",
+                      fontFamily: "Times New Roman",
+                      verticalAlign: "top",
+                    }}
+                  >
                     <div style={{ fontWeight: "bold" }}>COURSE (COMPLETE NAME)</div>
                     <input
                       type="text"
                       value={
-                        curriculumOptions.find(
-                          (item) => item.curriculum_id.toString() === person.program?.toString()
-                        )?.program_description?.toUpperCase() || ""
+                        curriculumOptions.length > 0
+                          ? curriculumOptions.find(
+                            (item) =>
+                              item?.curriculum_id?.toString() ===
+                              (person?.program ?? "").toString()
+                          )?.program_description?.toUpperCase() ||
+                          (person?.program?.toString()?.toUpperCase() ?? "")
+                          : "LOADING..."
                       }
                       readOnly
                       style={{
@@ -622,10 +652,9 @@ const PersonalDataForm = () => {
                         outline: "none",
                         fontSize: "12px",
                         fontFamily: "Times New Roman",
-                        textTransform: "uppercase", // ensures visual uppercase
+                        textTransform: "uppercase", // visual effect
                       }}
                     />
-
                   </td>
 
                   {/* YEAR LEVEL */}
@@ -641,7 +670,8 @@ const PersonalDataForm = () => {
                     <div style={{ fontWeight: "bold" }}>YEAR LEVEL (1,2,3,4,5)</div>
                     <input
                       type="text"
-                      value={person.yearLevel ? person.yearLevel.toString().toUpperCase() : ""}
+                      value={person?.yearLevel?.toUpperCase() || ""}
+
                       readOnly
                       style={{
                         marginTop: "5px",
@@ -707,7 +737,7 @@ const PersonalDataForm = () => {
                     <div style={{ fontWeight: "bold" }}>PLACE OF BIRTH</div>
                     <input
                       type="text"
-                      value={person.birthPlace ? person.birthPlace : ""}
+                      value={person.birthPlace || ""}
                       readOnly
                       style={{
                         marginTop: "5px",
@@ -736,7 +766,8 @@ const PersonalDataForm = () => {
 
                     <input
                       type="text"
-                      value={person.tribeEthnicGroup ? person.tribeEthnicGroup : ""}
+                      value={person.tribeEthnicGroup || ""}
+                      readOnly
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -752,7 +783,7 @@ const PersonalDataForm = () => {
                 <tr>
                   {/* STUDENT ID NUMBER */}
                   <td colSpan={13}
-                    value={person.studentID}
+
                     style={{
                       border: "1px solid black",
                       textAlign: "left",
@@ -791,9 +822,12 @@ const PersonalDataForm = () => {
                     <div style={{ fontWeight: "bold" }}>LEARNER’S REFERENCE NUMBER</div>
                     <input
                       type="text"
-                      value={person.lrnNumber ? person.lrnNumber : ""}
+                      readOnly
+                      value={person.lrnNumber || ""}
+
                       style={{
                         marginTop: "5px",
+
                         width: "100%",
                         border: "none",
                         outline: "none",
@@ -817,7 +851,9 @@ const PersonalDataForm = () => {
                     <input
 
                       type="text"
-                      value={person.pwdType ? person.pwdType : ""}
+                      readOnly
+                      value={person.pwdType || ""}
+
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -948,7 +984,8 @@ const PersonalDataForm = () => {
                     <div style={{ fontWeight: "bold" }}>E-MAIL ADDRESS</div>
                     <input
                       type="text"
-                      value={person.emailAddress ? person.emailAddress : ""}
+                      value={person.emailAddress || ""}
+                      readOnly
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -1073,7 +1110,7 @@ const PersonalDataForm = () => {
                       </div>
                     </div>
 
-                    {/* ✓ Style for custom checkbox */}
+
                     <style>
                       {`
       .custom-checkbox:checked::after {
@@ -1124,7 +1161,7 @@ const PersonalDataForm = () => {
                     />
 
 
-                    {/* Divider line */}
+
                     <div
                       style={{
                         marginTop: "10px",
@@ -1136,8 +1173,10 @@ const PersonalDataForm = () => {
                     >
                       <div style={{ fontWeight: "bold" }}>HOUSEHOLD</div>
                       <input
+                        readOnly
                         type="text"
-                        value={person.presentDswdHouseholdNumber ? person.presentDswdHouseholdNumber : ""}
+                        value={person.presentDswdHouseholdNumber || ""}
+
                         style={{
                           width: "100%",
                           marginTop: "5px",
@@ -1165,8 +1204,9 @@ const PersonalDataForm = () => {
                   }}>
                     <div style={{ fontWeight: "bold" }}>ZIP CODE</div>
                     <input
+                      readOnly
                       type="text"
-                      value={person.presentZipCode ? person.presentZipCode : ""}
+                      value={person.presentZipCode || ""}
                       style={{
                         width: "100%",
                         marginTop: "5px",
@@ -1195,8 +1235,9 @@ const PersonalDataForm = () => {
                   }}>
                     <div style={{ fontWeight: "bold" }}>CITIZENSHIP</div>
                     <input
+                      readOnly
                       type="text"
-                      value={person.citizenship ? person.citizenship : ""}
+                      value={person.citizenship || ""}
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -1217,8 +1258,9 @@ const PersonalDataForm = () => {
                   }}>
                     <div style={{ fontWeight: "bold" }}>HEIGHT (m)</div>
                     <input
+                      readOnly
                       type="text"
-                      value={person.height ? person.height : ""}
+                      value={person.height || ""}
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -1239,8 +1281,9 @@ const PersonalDataForm = () => {
                   }}>
                     <div style={{ fontWeight: "bold" }}>WEIGHT (kg)</div>
                     <input
+                      readOnly
                       type="text"
-                      value={person.weight ? person.weight : ""}
+                      value={person.weight || ""}
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -1287,7 +1330,8 @@ const PersonalDataForm = () => {
 
                     <input
                       type="text"
-                      value={person.cellphoneNumber ? person.cellphoneNumber : ""}
+                      value={person.cellphoneNumber || ""}
+                      readOnly
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -1326,15 +1370,16 @@ const PersonalDataForm = () => {
                 </tr>
 
                 <tr>
-                  {/* FATHER'S SURNAME / FAMILY NAME */}
-                  <td colSpan={10} style={{
-                    border: "1px solid black",
-                    textAlign: "left",
-                    paddingLeft: "10px",
-                    fontWeight: "bold",
-                    fontFamily: "Times new roman",
-                    fontSize: "14px"
-                  }}>
+
+                  <td colSpan={10}
+                    style={{
+                      border: "1px solid black",
+                      textAlign: "left",
+                      paddingLeft: "10px",
+                      fontWeight: "bold",
+                      fontFamily: "Times new roman",
+                      fontSize: "14px"
+                    }}>
                     FATHER'S NAME
 
                   </td>
@@ -1351,7 +1396,8 @@ const PersonalDataForm = () => {
 
                     <input
                       type="text"
-                      value={person.father_family_name ? person.father_family_name : ""}
+                      value={person.father_family_name || ""}
+                      readOnly
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -1374,7 +1420,8 @@ const PersonalDataForm = () => {
                     <div style={{ fontWeight: "bold" }}>GIVEN NAME</div>
                     <input
                       type="text"
-                      value={person.father_given_name ? person.father_given_name : ""}
+                      value={person.father_given_name || ""}
+                      readOnly
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -1397,7 +1444,8 @@ const PersonalDataForm = () => {
                     <div style={{ fontWeight: "bold" }}>MIDDLE NAME</div>
                     <input
                       type="text"
-                      value={person.father_middle_name ? person.father_middle_name : ""}
+                      value={person.father_middle_name || ""}
+                      readOnly
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -1420,15 +1468,16 @@ const PersonalDataForm = () => {
 
 
                 <tr>
-                  {/* MOTHER'S SURNAME (Not yet married) */}
-                  <td colSpan={10} style={{
-                    border: "1px solid black",
-                    textAlign: "left",
-                    paddingLeft: "10px",
-                    fontWeight: "bold",
-                    fontSize: "14px",
-                    fontFamily: "Times new Roman",
-                  }}>
+
+                  <td colSpan={10}
+                    style={{
+                      border: "1px solid black",
+                      textAlign: "left",
+                      paddingLeft: "10px",
+                      fontWeight: "bold",
+                      fontSize: "14px",
+                      fontFamily: "Times new Roman",
+                    }}>
                     MOTHER`S NAME
 
                   </td>
@@ -1445,7 +1494,8 @@ const PersonalDataForm = () => {
 
                     <input
                       type="text"
-                      value={person.mother_family_name ? person.mother_family_name : ""}
+                      value={person.mother_family_name || ""}
+                      readOnly
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -1469,7 +1519,8 @@ const PersonalDataForm = () => {
                     <div style={{ fontWeight: "bold" }}>GIVEN NAME</div>
                     <input
                       type="text"
-                      value={person.mother_given_name ? person.mother_given_name : ""}
+                      value={person.mother_given_name || ""}
+                      readOnly
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -1492,7 +1543,8 @@ const PersonalDataForm = () => {
 
                     <input
                       type="text"
-                      value={person.mother_middle_name ? person.mother_middle_name : ""}
+                      value={person.mother_middle_name || ""}
+                      readOnly
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -1576,12 +1628,12 @@ const PersonalDataForm = () => {
                   </td>
                 </tr>
 
-                <tr style={{ height: "5px" }}> {/* Set the height for the entire row */}
-                  {/* FATHER'S SURNAME / FAMILY NAME */}
+                <tr style={{ height: "5px" }}>
+
                   <td colSpan={7} style={{
                     border: "1px solid black",
                     textAlign: "center",
-                    padding: "2px",  // Reduced padding to fit in 10px height
+                    padding: "2px",
                     fontWeight: "bold",
                     fontSize: "14px",
                     fontFamily: "Times new roman"
@@ -1590,20 +1642,20 @@ const PersonalDataForm = () => {
 
                   </td>
 
-                  {/* GIVEN NAME */}
+
                   <td colSpan={13}
 
                     style={{
                       border: "1px solid black",
                       textAlign: "left",
-                      padding: "2px",  // Reduced padding to fit in 10px height
+                      padding: "2px",
                       fontFamily: "Times new Roman",
                       fontSize: "12px"
                     }}>
                     <input
                       type="text"
                       value={`${person.father_given_name || ""} ${person.father_middle_name || ""} ${person.father_family_name || ""}`}
-
+                      readOnly
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -1617,18 +1669,19 @@ const PersonalDataForm = () => {
 
                   </td>
 
-                  {/* MIDDLE NAME */}
+
                   <td colSpan={10}
                     style={{
                       border: "1px solid black",
                       textAlign: "left",
-                      padding: "2px",  // Reduced padding to fit in 10px height
+                      padding: "2px",
                       fontFamily: "Times new Roman",
                       fontSize: "14px"
                     }}>
                     <input
                       type="text"
-                      value={person.father_occupation ? person.father_occupation : ""}
+                      value={person.father_occupation || ""}
+                      readOnly
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -1642,17 +1695,17 @@ const PersonalDataForm = () => {
 
                   </td>
 
-                  {/* PERMANENT CONTACT NUMBER */}
                   <td colSpan={10} style={{
                     border: "1px solid black",
                     textAlign: "left",
-                    padding: "2px",  // Reduced padding to fit in 10px height
+                    padding: "2px",
                     fontFamily: "Times new Roman",
                     fontSize: "14px"
                   }}>
                     <input
                       type="text"
-                      value={person.father_income ? person.father_income : ""}
+                      value={person.father_income || ""}
+                      readOnly
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -1668,8 +1721,7 @@ const PersonalDataForm = () => {
                   </td>
                 </tr>
 
-                <tr style={{ height: "5px" }}> {/* Set the height for the entire row */}
-                  {/* FATHER'S SURNAME / FAMILY NAME */}
+                <tr style={{ height: "5px" }}>
                   <td colSpan={7} style={{
                     border: "1px solid black",
                     textAlign: "center",
@@ -1693,7 +1745,7 @@ const PersonalDataForm = () => {
                     <input
                       type="text"
                       value={`${person.mother_given_name || ""} ${person.mother_middle_name || ""} ${person.mother_family_name || ""}`}
-
+                      readOnly
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -1718,7 +1770,8 @@ const PersonalDataForm = () => {
                   }}>
                     <input
                       type="text"
-                      value={person.mother_occupation ? person.mother_occupation : ""}
+                      value={person.mother_occupation || ""}
+                      readOnly
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -1743,7 +1796,8 @@ const PersonalDataForm = () => {
                   }}>
                     <input
                       type="text"
-                      value={person.mother_income ? person.mother_income : ""}
+                      value={person.mother_income || ""}
+                      readOnly
                       style={{
                         marginTop: "5px",
                         width: "100%",
@@ -1760,8 +1814,8 @@ const PersonalDataForm = () => {
 
 
 
-                <tr style={{ height: "5px" }}> {/* Set the height for the entire row */}
-                  {/* FATHER'S SURNAME / FAMILY NAME */}
+                <tr style={{ height: "5px" }}>
+
                   <td colSpan={7} style={{
                     border: "1px solid black",
                     textAlign: "center",
@@ -1813,8 +1867,8 @@ const PersonalDataForm = () => {
 
 
 
-                <tr style={{ height: "5px" }}> {/* Set the height for the entire row */}
-                  {/* FATHER'S SURNAME / FAMILY NAME */}
+                <tr style={{ height: "5px" }}>
+
                   <td colSpan={7} style={{
                     border: "1px solid black",
                     textAlign: "right",
@@ -1866,8 +1920,8 @@ const PersonalDataForm = () => {
 
 
 
-                <tr style={{ height: "5px" }}> {/* Set the height for the entire row */}
-                  {/* FATHER'S SURNAME / FAMILY NAME */}
+                <tr style={{ height: "5px" }}>
+
                   <td colSpan={7} style={{
                     border: "1px solid black",
                     textAlign: "right",
@@ -1920,8 +1974,8 @@ const PersonalDataForm = () => {
 
 
 
-                <tr style={{ height: "5px" }}> {/* Set the height for the entire row */}
-                  {/* FATHER'S SURNAME / FAMILY NAME */}
+                <tr style={{ height: "5px" }}>
+
                   <td colSpan={7} style={{
                     border: "1px solid black",
                     textAlign: "right",
@@ -1973,13 +2027,13 @@ const PersonalDataForm = () => {
 
 
 
-                <tr style={{ height: "5px" }}> {/* Set the height for the entire row */}
-                  {/* FATHER'S SURNAME / FAMILY NAME */}
+                <tr style={{ height: "5px" }}>
+
                   <td colSpan={7} style={{
                     border: "1px solid black",
                     textAlign: "right",
                     fontFamily: "Times new Roman",
-                    padding: "2px",  // Reduced padding to fit in 10px height
+                    padding: "2px",
                     fontWeight: "bold",
                     fontSize: "15px"
                   }}>
@@ -2026,8 +2080,8 @@ const PersonalDataForm = () => {
                 </tr>
 
 
-                <tr style={{ height: "5px" }}> {/* Set the height for the entire row */}
-                  {/* FATHER'S SURNAME / FAMILY NAME */}
+                <tr style={{ height: "5px" }}>
+
                   <td colSpan={7} style={{
                     border: "1px solid black",
                     textAlign: "right",
@@ -2079,8 +2133,8 @@ const PersonalDataForm = () => {
                 </tr>
 
 
-                <tr style={{ height: "5px" }}> {/* Set the height for the entire row */}
-                  {/* FATHER'S SURNAME / FAMILY NAME */}
+                <tr style={{ height: "5px" }}>
+
                   <td colSpan={7} style={{
                     border: "1px solid black",
                     textAlign: "right",
@@ -2132,8 +2186,8 @@ const PersonalDataForm = () => {
                 </tr>
 
 
-                <tr style={{ height: "5px" }}> {/* Set the height for the entire row */}
-                  {/* FATHER'S SURNAME / FAMILY NAME */}
+                <tr style={{ height: "5px" }}>
+
                   <td colSpan={7} style={{
                     border: "1px solid black",
                     textAlign: "right",
@@ -2176,7 +2230,7 @@ const PersonalDataForm = () => {
                     border: "1px solid black",
                     textAlign: "left",
                     padding: "2px",
-                    fontFamily: "arial",
+
                     fontSize: "15px",
                     fontFamily: "Times new Roman",
                   }}>

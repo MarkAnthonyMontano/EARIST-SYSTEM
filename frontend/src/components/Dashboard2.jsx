@@ -98,13 +98,40 @@ const Dashboard2 = () => {
   // Real-time save on every character typed
   const handleChange = (e) => {
     const { name, type, checked, value } = e.target;
+
     const updatedPerson = {
       ...person,
       [name]: type === "checkbox" ? (checked ? 1 : 0) : value,
     };
+
+    // If updating either mother_income or father_income, calculate total and set annual_income
+    if (name === "mother_income" || name === "father_income") {
+      const motherIncome = parseFloat(name === "mother_income" ? value : updatedPerson.mother_income) || 0;
+      const fatherIncome = parseFloat(name === "father_income" ? value : updatedPerson.father_income) || 0;
+      const totalIncome = motherIncome + fatherIncome;
+
+      let annualIncomeBracket = "";
+      if (totalIncome <= 80000) {
+        annualIncomeBracket = "80,000 and below";
+      } else if (totalIncome <= 135000) {
+        annualIncomeBracket = "80,000 to 135,000";
+      } else if (totalIncome <= 250000) {
+        annualIncomeBracket = "135,000 to 250,000";
+      } else if (totalIncome <= 500000) {
+        annualIncomeBracket = "250,000 to 500,000";
+      } else if (totalIncome <= 1000000) {
+        annualIncomeBracket = "500,000 to 1,000,000";
+      } else {
+        annualIncomeBracket = "1,000,000 and above";
+      }
+
+      updatedPerson.annual_income = annualIncomeBracket;
+    }
+
     setPerson(updatedPerson);
     handleUpdate(updatedPerson); // No delay, real-time save
   };
+
 
   const handleBlur = async () => {
     try {
@@ -189,15 +216,17 @@ const Dashboard2 = () => {
     const requiredFields = [
       // Father
       "father_family_name", "father_given_name", "father_middle_name", "father_nickname",
-      "father_contact", "father_occupation", "father_employer", "father_income", "father_email",
+      "father_contact", "father_occupation", "father_employer", "father_income",
+      "father_education_level", "father_last_school", "father_course", "father_year_graduated", "father_school_address",
 
       // Mother
-      "mother_family_name", "mother_given_name", "mother_middle_name", "mother_ext", "mother_nickname",
-      "mother_contact", "mother_occupation", "mother_employer", "mother_income", "mother_email",
+      "mother_family_name", "mother_given_name", "mother_middle_name", "mother_nickname",
+      "mother_contact", "mother_occupation", "mother_employer", "mother_income",
+      "mother_education_level", "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address",
 
       // Guardian
       "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
-      "guardian_nickname", "guardian_address", "guardian_contact", "guardian_email",
+      "guardian_nickname", "guardian_address", "guardian_contact",
 
       // Family income
       "annual_income"
@@ -220,8 +249,23 @@ const Dashboard2 = () => {
     return isValid;
   };
 
-
   const [soloParentChoice, setSoloParentChoice] = useState("");
+
+  
+  // 🔒 Disable right-click, F12, F11, Ctrl+Shift+I, etc.
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
+  document.addEventListener('keydown', (e) => {
+    if (
+      e.key === 'F12' || // DevTools
+      e.key === 'F11' || // Fullscreen toggle
+      (e.ctrlKey && e.shiftKey && e.key === 'I') || // Ctrl+Shift+I
+      (e.ctrlKey && e.shiftKey && e.key === 'J') || // Ctrl+Shift+J
+      (e.ctrlKey && e.key === 'U') // View Source
+    ) {
+      e.preventDefault();
+      alert('Action not allowed.');
+    }
+  });
 
   // dot not alter
   return (
@@ -618,7 +662,7 @@ const Dashboard2 = () => {
 
                   {/* Father Educational Details (conditionally rendered) */}
                   {person.father_education !== 1 && (
-                    <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                    <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap' }}>
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="subtitle2" mb={1}>Father Education Level</Typography>
                         <TextField
@@ -629,11 +673,13 @@ const Dashboard2 = () => {
                           value={person.father_education_level}
                           onChange={handleChange}
                           onBlur={handleBlur}
+                          error={errors.father_education_level}
+                          helperText={errors.father_education_level ? "This field is required." : ""}
                         />
                       </Box>
+
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="subtitle2" mb={1}>Father Last School</Typography>
-
                         <TextField
                           fullWidth
                           size="small"
@@ -642,11 +688,13 @@ const Dashboard2 = () => {
                           value={person.father_last_school}
                           onChange={handleChange}
                           onBlur={handleBlur}
+                          error={errors.father_last_school}
+                          helperText={errors.father_last_school ? "This field is required." : ""}
                         />
                       </Box>
+
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="subtitle2" mb={1}>Father Course</Typography>
-
                         <TextField
                           fullWidth
                           size="small"
@@ -655,8 +703,11 @@ const Dashboard2 = () => {
                           value={person.father_course}
                           onChange={handleChange}
                           onBlur={handleBlur}
+                          error={errors.father_course}
+                          helperText={errors.father_course ? "This field is required." : ""}
                         />
                       </Box>
+
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="subtitle2" mb={1}>Father Year Graduated</Typography>
                         <TextField
@@ -667,18 +718,23 @@ const Dashboard2 = () => {
                           value={person.father_year_graduated}
                           onChange={handleChange}
                           onBlur={handleBlur}
+                          error={errors.father_year_graduated}
+                          helperText={errors.father_year_graduated ? "This field is required." : ""}
                         />
                       </Box>
+
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="subtitle2" mb={1}>Father School Address</Typography>
                         <TextField
                           fullWidth
                           size="small"
                           name="father_school_address"
-                          placeholder="Enter Father First Name"
+                          placeholder="Enter Father School Address"
                           value={person.father_school_address}
                           onChange={handleChange}
                           onBlur={handleBlur}
+                          error={errors.father_school_address}
+                          helperText={errors.father_school_address ? "This field is required." : ""}
                         />
                       </Box>
                     </Box>
@@ -734,6 +790,7 @@ const Dashboard2 = () => {
                         error={errors.father_employer} helperText={errors.father_employer ? "This field is required." : ""}
                       />
                     </Box>
+                    {/* Father Income */}
                     <Box sx={{ flex: 1 }}>
                       <Typography variant="subtitle2" mb={0.5}>Father Income</Typography>
                       <TextField
@@ -745,7 +802,8 @@ const Dashboard2 = () => {
                         value={person.father_income}
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        error={errors.father_income} helperText={errors.father_income ? "This field is required." : ""}
+                        error={errors.father_income}
+                        helperText={errors.father_income ? "This field is required." : ""}
                       />
                     </Box>
                   </Box>
@@ -761,7 +819,7 @@ const Dashboard2 = () => {
                       value={person.father_email}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={errors.father_email} helperText={errors.father_email ? "This field is required." : ""}
+
                     />
                   </Box>
                 </>
@@ -855,7 +913,7 @@ const Dashboard2 = () => {
                     {/* Mother Extension */}
                     <Box sx={{ flex: 1 }}>
                       <Typography variant="subtitle2" mb={1}>Mother Extension</Typography>
-                      <FormControl fullWidth size="small" required error={!!errors.mother_ext}>
+                      <FormControl fullWidth size="small" >
                         <InputLabel id="mother-ext-label">Extension</InputLabel>
                         <Select
                           labelId="mother-ext-label"
@@ -875,9 +933,7 @@ const Dashboard2 = () => {
                           <MenuItem value="IV">IV</MenuItem>
                           <MenuItem value="V">V</MenuItem>
                         </Select>
-                        {errors.mother_ext && (
-                          <FormHelperText>This field is required.</FormHelperText>
-                        )}
+
                       </FormControl>
                     </Box>
 
@@ -939,7 +995,7 @@ const Dashboard2 = () => {
 
                   {/* Mother Educational Details (conditionally rendered) */}
                   {person.mother_education !== 1 && (
-                    <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                    <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap' }}>
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="subtitle2" mb={1}>Mother Education Level</Typography>
                         <TextField
@@ -950,8 +1006,11 @@ const Dashboard2 = () => {
                           value={person.mother_education_level}
                           onChange={handleChange}
                           onBlur={handleBlur}
+                          error={errors.mother_education_level}
+                          helperText={errors.mother_education_level ? "This field is required." : ""}
                         />
                       </Box>
+
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="subtitle2" mb={1}>Mother Last School</Typography>
                         <TextField
@@ -962,8 +1021,11 @@ const Dashboard2 = () => {
                           value={person.mother_last_school}
                           onChange={handleChange}
                           onBlur={handleBlur}
+                          error={errors.mother_last_school}
+                          helperText={errors.mother_last_school ? "This field is required." : ""}
                         />
                       </Box>
+
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="subtitle2" mb={1}>Mother Course</Typography>
                         <TextField
@@ -974,8 +1036,11 @@ const Dashboard2 = () => {
                           value={person.mother_course}
                           onChange={handleChange}
                           onBlur={handleBlur}
+                          error={errors.mother_course}
+                          helperText={errors.mother_course ? "This field is required." : ""}
                         />
                       </Box>
+
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="subtitle2" mb={1}>Mother Year Graduated</Typography>
                         <TextField
@@ -986,8 +1051,11 @@ const Dashboard2 = () => {
                           value={person.mother_year_graduated}
                           onChange={handleChange}
                           onBlur={handleBlur}
+                          error={errors.mother_year_graduated}
+                          helperText={errors.mother_year_graduated ? "This field is required." : ""}
                         />
                       </Box>
+
                       <Box sx={{ flex: 1 }}>
                         <Typography variant="subtitle2" mb={1}>Mother School Address</Typography>
                         <TextField
@@ -998,12 +1066,12 @@ const Dashboard2 = () => {
                           value={person.mother_school_address}
                           onChange={handleChange}
                           onBlur={handleBlur}
+                          error={errors.mother_school_address}
+                          helperText={errors.mother_school_address ? "This field is required." : ""}
                         />
                       </Box>
                     </Box>
                   )}
-
-
 
                   <Typography sx={{ fontSize: '20px', color: '#6D2323', fontWeight: 'bold', mt: 3 }}>
                     Mother's Contact Information
@@ -1054,6 +1122,8 @@ const Dashboard2 = () => {
                         error={errors.mother_employer} helperText={errors.mother_employer ? "This field is required." : ""}
                       />
                     </Box>
+
+                    {/* Mother Income */}
                     <Box sx={{ flex: 1 }}>
                       <Typography variant="subtitle2" mb={0.5}>Mother Income</Typography>
                       <TextField
@@ -1065,7 +1135,8 @@ const Dashboard2 = () => {
                         value={person.mother_income}
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        error={errors.mother_income} helperText={errors.mother_income ? "This field is required." : ""}
+                        error={errors.mother_income}
+                        helperText={errors.mother_income ? "This field is required." : ""}
                       />
                     </Box>
                   </Box>
@@ -1081,7 +1152,7 @@ const Dashboard2 = () => {
                       value={person.mother_email}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={errors.mother_email} helperText={errors.mother_email ? "This field is required." : ""}
+
                     />
                   </Box>
                 </>
@@ -1120,9 +1191,7 @@ const Dashboard2 = () => {
                   <MenuItem value="Spouse">Spouse</MenuItem>
                   <MenuItem value="Others">Others</MenuItem>
                 </Select>
-                {errors.guardian && (
-                  <FormHelperText>This field is required.</FormHelperText>
-                )}
+
               </FormControl>
             </Box>
 
@@ -1274,7 +1343,7 @@ const Dashboard2 = () => {
                   value={person.guardian_email}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  error={errors.guardian_email} helperText={errors.guardian_email ? "This field is required." : ""}
+                 
                 />
               </Box>
             </Box>
@@ -1283,10 +1352,9 @@ const Dashboard2 = () => {
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <br />
 
+            {/* Annual Income */}
             <Box sx={{ width: '100%', mb: 2 }}>
-              <Typography variant="subtitle2" mb={1}>
-                Annual Income
-              </Typography>
+              <Typography variant="subtitle2" mb={1}>Annual Income</Typography>
               <FormControl fullWidth size="small" required error={!!errors.annual_income}>
                 <InputLabel id="annual-income-label">Annual Income</InputLabel>
                 <Select
@@ -1310,7 +1378,6 @@ const Dashboard2 = () => {
                 )}
               </FormControl>
             </Box>
-
 
 
             <Box display="flex" justifyContent="space-between" mt={4}>

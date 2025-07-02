@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
-import { Button, Box, TextField, Container, Typography } from "@mui/material";
+import { useRef } from "react";
+import { Box, Container, } from "@mui/material";
 import EaristLogo from "../assets/EaristLogo.png";
 import { jwtDecode } from "jwt-decode";
 import ForwardIcon from '@mui/icons-material/Forward';
@@ -281,7 +280,7 @@ const AdmissionFormProcess = () => {
 
               <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
                 <td colSpan={13}>
-                  <label><b>Tel. / Cell No.:</b></label>
+                  <label><b>Cellphone No:</b></label>
                   <span style={{
                     display: "inline-block",
                     borderBottom: "1px solid black",
@@ -830,7 +829,7 @@ const AdmissionFormProcess = () => {
 
               <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
                 <td colSpan={13}>
-                  <label><b>Tel. / Cell No.:</b></label>
+                  <label><b>Cellphone No:</b></label>
                   <span style={{
                     display: "inline-block",
                     borderBottom: "1px solid black",

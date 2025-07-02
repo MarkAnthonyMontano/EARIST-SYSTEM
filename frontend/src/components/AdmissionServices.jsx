@@ -1,10 +1,7 @@
-import { useEffect, useState, useRef } from "react";
-import axios from "axios";
-import { Box, Button, Paper, TextField, Container } from "@mui/material";
+import { useRef } from "react";
+import { Box, Container } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
-import FreeTuitionImage from "../assets/FREETUITION.png";
 import EaristLogo from "../assets/EaristLogo.png";
-import React from "react";
 import SentimentVerySatisfiedIcon from '@mui/icons-material/SentimentVerySatisfied';
 import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
 import MoodBadIcon from '@mui/icons-material/MoodBad';

@@ -99,51 +99,6 @@ const Dashboard4 = () => {
   const [clickedSteps, setClickedSteps] = useState(Array(steps.length).fill(false));
   const [errors, setErrors] = useState({});
 
-  const isFormValid = () => {
-    const requiredFields = [
-      // Original required field
-      "termsOfAgreement",
-
-      // New checkboxes or values to validate
-      "hospitalized",
-      "hadCovid",
-
-      // Medical history checkboxes
-      "asthma",
-      "faintingSpells",
-      "heartDisease",
-      "tuberculosis",
-      "frequentHeadaches",
-      "hernia",
-      "chronicCough",
-      "headNeckInjury",
-      "hiv",
-      "highBloodPressure",
-      "diabetesMellitus",
-      "allergies",
-      "cancer",
-      "smokingCigarette",
-      "alcoholDrinking"
-    ];
-
-    let newErrors = {};
-    let isValid = true;
-
-    requiredFields.forEach((field) => {
-      const value = person[field];
-      const stringValue = value?.toString().trim();
-
-      // For checkboxes, check if value is exactly 0 or 1
-      if (value !== 0 && value !== 1 && !stringValue) {
-        newErrors[field] = true;
-        isValid = false;
-      }
-    });
-
-    setErrors(newErrors);
-    return isValid;
-  };
-
 
 
   const inputStyle = {
@@ -155,6 +110,23 @@ const Dashboard4 = () => {
     backgroundColor: "white",
     color: "black",
   };
+
+  
+  // 🔒 Disable right-click, F12, F11, Ctrl+Shift+I, etc.
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
+  document.addEventListener('keydown', (e) => {
+    if (
+      e.key === 'F12' || // DevTools
+      e.key === 'F11' || // Fullscreen toggle
+      (e.ctrlKey && e.shiftKey && e.key === 'I') || // Ctrl+Shift+I
+      (e.ctrlKey && e.shiftKey && e.key === 'J') || // Ctrl+Shift+J
+      (e.ctrlKey && e.key === 'U') // View Source
+    ) {
+      e.preventDefault();
+      alert('Action not allowed.');
+    }
+  });
+
 
   // dot not alter
   return (
@@ -448,12 +420,7 @@ const Dashboard4 = () => {
                                 </div>
                               </div>
 
-                              {/* Error Message */}
-                              {errors[key] && (
-                                <FormHelperText error sx={{ ml: 1, fontSize: "11px" }}>
-                                  This field is required.
-                                </FormHelperText>
-                              )}
+                            
                             </div>
                           </td>
                         </React.Fragment>
@@ -513,12 +480,7 @@ const Dashboard4 = () => {
                       label="No"
                     />
 
-                    {/* 🔴 Error Beside "No" */}
-                    {errors.hospitalized && (
-                      <FormHelperText error sx={{ fontSize: "12px", ml: 1 }}>
-                        This field is required.
-                      </FormHelperText>
-                    )}
+                
                   </Box>
                 </Box>
               </Box>
@@ -647,12 +609,7 @@ const Dashboard4 = () => {
                           />
                           <span style={{ fontSize: "15px", fontFamily: "Arial" }}>NO</span>
 
-                          {/* 🔴 Error shown beside NO */}
-                          {errors.hadCovid && (
-                            <FormHelperText error sx={{ fontSize: "12px", ml: 1 }}>
-                              This field is required.
-                            </FormHelperText>
-                          )}
+                       
                         </Box>
                       </Box>
 
@@ -1025,11 +982,7 @@ const Dashboard4 = () => {
                 onClick={(e) => {
                   handleUpdate();
 
-                  if (isFormValid()) {
-                    navigate("/dashboard5");
-                  } else {
-                    alert("Please complete all required fields before proceeding.");
-                  }
+               
                 }}
                 endIcon={
                   <ArrowForwardIcon

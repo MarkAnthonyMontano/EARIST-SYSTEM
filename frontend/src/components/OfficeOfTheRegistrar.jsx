@@ -38,8 +38,6 @@ const OfficeOfTheRegistrar = () => {
     tribeEthnicGroup: "",
     cellphoneNumber: "",
     emailAddress: "",
-    telephoneNumber: "",
-    facebookAccount: "",
     presentStreet: "",
     presentBarangay: "",
     presentZipCode: "",
@@ -57,7 +55,7 @@ const OfficeOfTheRegistrar = () => {
     father_family_name: "", father_given_name: "", father_middle_name: "", father_ext: "", father_contact: "", father_occupation: "",
     father_income: "", father_email: "", mother_family_name: "", mother_given_name: "", mother_middle_name: "",
     mother_contact: "", mother_occupation: "", mother_income: "", guardian: "", guardian_family_name: "", guardian_given_name: "",
-    guardian_middle_name: "", guardian_ext: "", guardian_nickname: "", guardian_address: "", guardian_contact: "", guardian_email: "",
+    guardian_middle_name: "", guardian_ext: "", guardian_nickname: "", guardian_address: "", guardian_contact: "", guardian_email: "", generalAverage1: "",
   });
   // ✅ Fetch person data from backend
   const fetchPersonData = async (id) => {
@@ -88,19 +86,6 @@ const OfficeOfTheRegistrar = () => {
     } else {
       window.location.href = "/login";
     }
-  }, []);
-
-  useEffect(() => {
-    const fetchFullPrograms = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/full_applied_program");
-        setCurriculumOptions(response.data); // array of student_number, curriculum_id, program_description
-      } catch (error) {
-        console.error("Error fetching full program data:", error);
-      }
-    };
-
-    fetchFullPrograms();
   }, []);
 
 
@@ -198,17 +183,32 @@ const OfficeOfTheRegistrar = () => {
 
   {
     curriculumOptions.find(
-      (item) => item.curriculum_id.toString() === person.program.toString()
-    )?.program_description || person.program
+      (item) =>
+        item?.curriculum_id?.toString() === (person?.program ?? "").toString()
+    )?.program_description || (person?.program ?? "")
+
   }
 
 
-
+ // 🔒 Disable right-click, F12, F11, Ctrl+Shift+I, etc.
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
+  document.addEventListener('keydown', (e) => {
+    if (
+      e.key === 'F12' || // DevTools
+      e.key === 'F11' || // Fullscreen toggle
+      (e.ctrlKey && e.shiftKey && e.key === 'I') || // Ctrl+Shift+I
+      (e.ctrlKey && e.shiftKey && e.key === 'J') || // Ctrl+Shift+J
+      (e.ctrlKey && e.key === 'U') // View Source
+    ) {
+      e.preventDefault();
+      alert('Action not allowed.');
+    }
+  });
 
 
 
   return (
-    <Box sx={{ height: 'calc(100vh - 120px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
+    <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
       <Container>
         <h1 style={{ fontSize: "40px", fontWeight: "bold", textAlign: "Left", color: "maroon", marginTop: "25px" }}> OFFICE OF THE REGISTRAR</h1>
         <hr style={{ border: "1px solid #ccc", width: "45%" }} />
@@ -375,7 +375,7 @@ const OfficeOfTheRegistrar = () => {
 
               </tr>
               <tr>
-                <td colspan="40" style={{ height: "20px" }}>
+                <td colSpan="40" style={{ height: "20px" }}>
 
                 </td>
               </tr>
@@ -542,7 +542,7 @@ const OfficeOfTheRegistrar = () => {
 
               </tr>
               <tr>
-                <td colspan="40" style={{ height: "20px" }}>
+                <td colSpan="40" style={{ height: "20px" }}>
 
                 </td>
               </tr>
@@ -570,18 +570,23 @@ const OfficeOfTheRegistrar = () => {
                     fontSize: "12px",
                     paddingTop: "5px",
                     marginTop: 0,
-             
                     textAlign: "center",
                     border: "1px solid black",
-                    height: "30px"
+                    height: "30px",
                   }}
                 >
                   {
-                    curriculumOptions.find(
-                      (item) => item.curriculum_id.toString() === person.program?.toString()
-                    )?.program_description?.toUpperCase() || person.program || ""
+                    curriculumOptions.length > 0
+                      ? curriculumOptions.find(
+                        (item) =>
+                          item?.curriculum_id?.toString() ===
+                          (person?.program ?? "").toString()
+                      )?.program_description?.toUpperCase() ||
+                      (person?.program?.toString()?.toUpperCase() ?? "")
+                      : "LOADING..."
                   }
                 </td>
+
 
                 <td
                   colSpan={10}
@@ -1319,7 +1324,6 @@ const OfficeOfTheRegistrar = () => {
                     marginTop: 0,
                     textAlign: "left",
                     border: "1px solid black",
-
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "10px", marginLeft: "10px" }}>
@@ -1327,15 +1331,24 @@ const OfficeOfTheRegistrar = () => {
                       ({person.citizenship?.toLowerCase() === "filipino" ? "✓" : " "}) Filipino
                     </span>
                     <span>
-                      ({person.citizenship?.toLowerCase() !== "filipino" ? "✓" : " "}) Foreign:
-                      {person.citizenship?.toLowerCase() !== "filipino" && (
-                        <span style={{ marginLeft: "5px", textDecoration: "underline" }}>
-                          {person.citizenship}
-                        </span>
-                      )}
+                      (
+                      {
+                        person.citizenship &&
+                          person.citizenship.toLowerCase() !== "filipino"
+                          ? "✓"
+                          : " "
+                      }
+                      ) Foreign:
+                      {person.citizenship &&
+                        person.citizenship.toLowerCase() !== "filipino" && (
+                          <span style={{ marginLeft: "5px", textDecoration: "underline" }}>
+                            {person.citizenship}
+                          </span>
+                        )}
                     </span>
                   </div>
                 </td>
+
 
                 <td
                   colSpan={2}
@@ -1461,7 +1474,7 @@ const OfficeOfTheRegistrar = () => {
 
                   }}
                 >
-                  Tel. No./CP No. :
+                  Cellphone No:
                 </td>
                 <td
                   colSpan={13}
@@ -1478,8 +1491,10 @@ const OfficeOfTheRegistrar = () => {
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
                     <div style={{ width: "50%", textAlign: "left" }}>{person.cellphoneNumber}</div>
-                    <div>/</div>
-                    <div style={{ width: "50%", textAlign: "right" }}>{person.telephoneNumber}</div>
+                    <div>
+
+                    </div>
+
                   </div>
                 </td>
 
@@ -1754,7 +1769,7 @@ const OfficeOfTheRegistrar = () => {
                   }}
                 >
                   <span style={{ fontWeight: "bold", marginRight: "30px", textAlign: "left" }}>
-                    Elementary School
+                    Junior High School
                   </span>{" "}
 
                 </td>
@@ -2015,7 +2030,7 @@ const OfficeOfTheRegistrar = () => {
 
                   }}
                 >
-                  Secondary School
+                  Senior High School
                 </td>
                 <td
                   colSpan={7}
@@ -2364,7 +2379,7 @@ const OfficeOfTheRegistrar = () => {
                     fontSize: "12px",
                     paddingTop: "5px",  // you can reduce this if needed
                     marginTop: 0,
-                    fontWeight: "bold",
+
                     textAlign: "center",
                     border: "1px solid black",
 
@@ -2373,7 +2388,7 @@ const OfficeOfTheRegistrar = () => {
 
                   }}
                 >
-
+                  {person.generalAverage1 || ""}
                 </td>
                 <td
                   colSpan={2}

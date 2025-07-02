@@ -26,8 +26,6 @@ const Dashboard3 = () => {
     honor: "",
     generalAverage: "",
     yearGraduated: "",
-
-    // Newly added fields
     schoolLevel1: "",
     schoolLastAttended1: "",
     schoolAddress1: "",
@@ -38,7 +36,6 @@ const Dashboard3 = () => {
 
     strand: "",
   });
-
 
   // dot not alter
   useEffect(() => {
@@ -60,19 +57,6 @@ const Dashboard3 = () => {
       window.location.href = "/login";
     }
   }, []);
-
-
-  const steps = [
-    { label: "Personal Information", icon: <PersonIcon />, path: "/dashboard1", onChange: () => handleChange({ label: "Personal Information", path: "/dashboard1" }) },
-    { label: "Family Background", icon: <FamilyRestroomIcon />, path: "/dashboard2", onChange: () => handleChange({ label: "Family Background", path: "/dashboard2" }) },
-    { label: "Educational Attainment", icon: <SchoolIcon />, path: "/dashboard3", onChange: () => handleChange({ label: "Educational Attainment", path: "/dashboard3" }) },
-    { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: "/dashboard4", onChange: () => handleChange({ label: "Health Medical Records", path: "/dashboard4" }) },
-    { label: "Other Information", icon: <InfoIcon />, path: "/dashboard5", onChange: () => handleChange({ label: "Other Information", path: "/dashboard5" }) },
-  ];
-
-
-  const [activeStep, setActiveStep] = useState(2);
-  const [clickedSteps, setClickedSteps] = useState(Array(steps.length).fill(false));
 
   // Do not alter
   const fetchPersonData = async (id) => {
@@ -121,6 +105,21 @@ const Dashboard3 = () => {
     }
   };
 
+
+
+  const steps = [
+    { label: "Personal Information", icon: <PersonIcon />, path: "/dashboard1", onChange: () => handleChange({ label: "Personal Information", path: "/dashboard1" }) },
+    { label: "Family Background", icon: <FamilyRestroomIcon />, path: "/dashboard2", onChange: () => handleChange({ label: "Family Background", path: "/dashboard2" }) },
+    { label: "Educational Attainment", icon: <SchoolIcon />, path: "/dashboard3", onChange: () => handleChange({ label: "Educational Attainment", path: "/dashboard3" }) },
+    { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: "/dashboard4", onChange: () => handleChange({ label: "Health Medical Records", path: "/dashboard4" }) },
+    { label: "Other Information", icon: <InfoIcon />, path: "/dashboard5", onChange: () => handleChange({ label: "Other Information", path: "/dashboard5" }) },
+  ];
+
+
+  const [activeStep, setActiveStep] = useState(2);
+  const [clickedSteps, setClickedSteps] = useState(Array(steps.length).fill(false));
+
+  
   const [errors, setErrors] = useState({});
 
   const isFormValid = () => {
@@ -150,6 +149,23 @@ const Dashboard3 = () => {
     setErrors(newErrors);
     return isValid;
   };
+
+  
+  // 🔒 Disable right-click, F12, F11, Ctrl+Shift+I, etc.
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
+  document.addEventListener('keydown', (e) => {
+    if (
+      e.key === 'F12' || // DevTools
+      e.key === 'F11' || // Fullscreen toggle
+      (e.ctrlKey && e.shiftKey && e.key === 'I') || // Ctrl+Shift+I
+      (e.ctrlKey && e.shiftKey && e.key === 'J') || // Ctrl+Shift+J
+      (e.ctrlKey && e.key === 'U') // View Source
+    ) {
+      e.preventDefault();
+      alert('Action not allowed.');
+    }
+  });
+
 
 
   return (
@@ -315,7 +331,7 @@ const Dashboard3 = () => {
           </Container>
 
           <Container maxWidth="100%" sx={{ backgroundColor: "white", border: "2px solid black", padding: 4, borderRadius: 2, boxShadow: 3 }}>
-            <Typography style={{ fontSize: "20px", color: "#6D2323", fontWeight: "bold" }}>High School - Background:</Typography>
+            <Typography style={{ fontSize: "20px", color: "#6D2323", fontWeight: "bold" }}>Junior High School - Background:</Typography>
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <br />
 

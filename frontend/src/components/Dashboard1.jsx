@@ -16,6 +16,7 @@ import provinces from "../data/province.json";
 import cities from "../data/city.json";
 import barangays from "../data/barangay.json";
 
+
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard1 = () => {
@@ -40,6 +41,7 @@ const Dashboard1 = () => {
     height: "",
     weight: "",
     lrnNumber: "",
+    nolrnNumber: "",
     gender: "",
     pwdType: "",
     pwdId: "",
@@ -53,8 +55,6 @@ const Dashboard1 = () => {
     tribeEthnicGroup: "",
     cellphoneNumber: "",
     emailAddress: "",
-    telephoneNumber: "",
-    facebookAccount: "",
     presentStreet: "",
     presentBarangay: "",
     presentZipCode: "",
@@ -102,7 +102,6 @@ const Dashboard1 = () => {
     { label: "Other Information", icon: <InfoIcon />, path: "/dashboard5", onChange: () => handleChange({ label: "Other Information", path: "/dashboard5" }) },
   ];
 
-
   const [activeStep, setActiveStep] = useState(0);
   const [clickedSteps, setClickedSteps] = useState(Array(steps.length).fill(false));
 
@@ -135,13 +134,25 @@ const Dashboard1 = () => {
   // Real-time save on every character typed
   const handleChange = (e) => {
     const { name, type, checked, value } = e.target;
+
+    // Determine base update value
+    let updatedValue = type === "checkbox" ? (checked ? 1 : 0) : value;
+
+    // Create a copy of the person object with the updated field
     const updatedPerson = {
       ...person,
-      [name]: type === "checkbox" ? (checked ? 1 : 0) : value,
+      [name]: updatedValue,
     };
+
+    // If classifiedAs is set to Freshman (First Year), set yearLevel automatically
+    if (name === "classifiedAs" && value === "Freshman (First Year)") {
+      updatedPerson.yearLevel = "First Year";
+    }
+
     setPerson(updatedPerson);
     handleUpdate(updatedPerson); // No delay, real-time save
   };
+
 
 
   const handleBlur = async () => {
@@ -180,16 +191,29 @@ const Dashboard1 = () => {
     if (!file) return;
 
     const validTypes = ["image/jpeg", "image/jpg", "image/png"];
-    if (validTypes.includes(file.type)) {
-      setSelectedFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => setPreview(reader.result);
-      reader.readAsDataURL(file);
-    } else {
+    const maxSizeInBytes = 2 * 1024 * 1024; // 2MB
+
+    // Check file type
+    if (!validTypes.includes(file.type)) {
+      alert("Invalid file type. Please select a JPEG or PNG file.");
       setSelectedFile(null);
       setPreview(null);
-      alert("Invalid file type. Please select a JPEG or PNG file.");
+      return;
     }
+
+    // Check file size
+    if (file.size > maxSizeInBytes) {
+      alert("File is too large. Maximum allowed size is 2MB.");
+      setSelectedFile(null);
+      setPreview(null);
+      return;
+    }
+
+    // If valid, set file and preview
+    setSelectedFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setPreview(reader.result);
+    reader.readAsDataURL(file);
   };
 
   const handleUpload = async () => {
@@ -233,12 +257,29 @@ const Dashboard1 = () => {
   const handleCheckboxChange = (event) => {
     setIsChecked(event.target.checked);
   };
+
+  const handlePwdCheck = (event) => {
+    const checked = event.target.checked;
+
+    setPerson((prev) => ({
+      ...prev,
+      pwdMember: checked ? 1 : 0,
+      pwdType: checked ? prev.pwdType || "" : "",
+      pwdId: checked ? prev.pwdId || "" : "",
+    }));
+  };
+
+  const [lrnNAFlag, setLrnNAFlag] = useState("0");
+
   const handleLrnCheck = (event) => {
     const checked = event.target.checked;
     setIsLrnNA(checked);
-    if (checked) {
-      setPerson((prev) => ({ ...prev, lrnNumber: "" })); // Clear LRN in person state
-    }
+    setLrnNAFlag(checked ? "1" : "0");
+
+    setPerson((prev) => ({
+      ...prev,
+      lrnNumber: checked ? "nolrnNumber" : "" // Store "nolrnNumber" as marker
+    }));
   };
 
   // ✅ ADDRESS STATE
@@ -386,8 +427,8 @@ const Dashboard1 = () => {
       "campus", "academicProgram", "classifiedAs", "program", "program2", "program3",
       "yearLevel", "profile_img", "last_name", "first_name", "middle_name", "nickname",
       "height", "weight", "gender", "birthOfDate", "age", "birthPlace",
-      "languageDialectSpoken", "citizenship", "religion", "civilStatus", "tribeEthnicGroup", "otherEthnicGroup",
-      "cellphoneNumber", "emailAddress", "telephoneNumber", "facebookAccount",
+      "languageDialectSpoken", "citizenship", "religion", "civilStatus", "tribeEthnicGroup",
+      "cellphoneNumber", "emailAddress",
       "presentStreet", "presentZipCode", "presentRegion", "presentProvince",
       "presentMunicipality", "presentBarangay", "presentDswdHouseholdNumber",
       "permanentStreet", "permanentZipCode", "permanentRegion", "permanentProvince",
@@ -397,6 +438,7 @@ const Dashboard1 = () => {
     let newErrors = {};
     let isValid = true;
 
+    // Generic required fields
     requiredFields.forEach((field) => {
       const value = person[field];
       const stringValue = value?.toString().trim();
@@ -407,9 +449,49 @@ const Dashboard1 = () => {
       }
     });
 
+    // ✅ LRN Number: required only if N/A is NOT checked
+    if (!isLrnNA) {
+      const lrnValue = person.lrnNumber?.toString().trim();
+      if (!lrnValue) {
+        newErrors.lrnNumber = true;
+        isValid = false;
+      }
+    }
+
+    // ✅ PWD fields: required only if PWD checkbox is checked
+    if (person.pwdMember === 1) {
+      const pwdTypeValue = person.pwdType?.toString().trim();
+      const pwdIdValue = person.pwdId?.toString().trim();
+
+      if (!pwdTypeValue) {
+        newErrors.pwdType = true;
+        isValid = false;
+      }
+
+      if (!pwdIdValue) {
+        newErrors.pwdId = true;
+        isValid = false;
+      }
+    }
+
     setErrors(newErrors);
     return isValid;
   };
+
+  // 🔒 Disable right-click, F12, F11, Ctrl+Shift+I, etc.
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
+  document.addEventListener('keydown', (e) => {
+    if (
+      e.key === 'F12' || // DevTools
+      e.key === 'F11' || // Fullscreen toggle
+      (e.ctrlKey && e.shiftKey && e.key === 'I') || // Ctrl+Shift+I
+      (e.ctrlKey && e.shiftKey && e.key === 'J') || // Ctrl+Shift+J
+      (e.ctrlKey && e.key === 'U') // View Source
+    ) {
+      e.preventDefault();
+      alert('Action not allowed.');
+    }
+  });
 
 
 
@@ -586,20 +668,29 @@ const Dashboard1 = () => {
                   labelId="campus-label"
                   id="campus-select"
                   name="campus"
-                  value={person.campus ?? ""}
+                  value={person.campus !== undefined && person.campus !== null ? String(person.campus) : ""}
                   label="Campus (Manila/Cavite)"
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    // convert back to number before saving in state
+                    handleChange({
+                      target: {
+                        name: "campus",
+                        value: parseInt(e.target.value),
+                      },
+                    });
+                  }}
                   onBlur={handleBlur}
                 >
                   <MenuItem value=""><em>Select Campus</em></MenuItem>
-                  <MenuItem value={0}>MANILA</MenuItem>
-                  <MenuItem value={1}>CAVITE</MenuItem>
+                  <MenuItem value="0">MANILA</MenuItem>
+                  <MenuItem value="1">CAVITE</MenuItem>
                 </Select>
                 {errors.campus && (
                   <FormHelperText>This field is required.</FormHelperText>
                 )}
               </FormControl>
             </div>
+
 
             <div className="flex items-center mb-4 gap-4">
               <label className="w-40 font-medium">Academic Program:</label>
@@ -813,7 +904,7 @@ const Dashboard1 = () => {
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <br />
 
-            <Box display="flex" gap={2} Th={2} mb={2}>
+            <Box display="flex" gap={2} mb={2}>
               {/* Last Name */}
               <Box flex="1 1 20%">
                 <Typography mb={1} fontWeight="medium">Last Name</Typography>
@@ -929,7 +1020,7 @@ const Dashboard1 = () => {
                     error={!!errors.height}
                     fullWidth
                   />
-                  <Typography variant="body2">cm</Typography>
+                  <Typography variant="body2">cm.</Typography>
                 </Box>
                 {errors.height && (
                   <Typography color="error" variant="caption" mt={0.5}>
@@ -974,28 +1065,45 @@ const Dashboard1 = () => {
               <TextField
                 id="lrnNumber"
                 name="lrnNumber"
-                label="LRN Number"
-                value={person.lrnNumber || ""}
+                required={person.lrnNumber !== "nolrnNumber"}
+                label="Enter your LRN Number"
+                value={person.lrnNumber === "nolrnNumber" ? "" : person.lrnNumber || ""}
                 onChange={handleChange}
-                disabled={isLrnNA}
+                onBlur={handleBlur}
+                disabled={person.lrnNumber === "nolrnNumber"}
                 size="small"
                 sx={{ width: 220 }}
                 InputProps={{ sx: { height: 40 } }}
                 inputProps={{ style: { height: 40, padding: "10.5px 14px" } }}
+                error={errors.lrnNumber}
+                helperText={errors.lrnNumber ? "This field is required." : ""}
               />
 
-              {/* LRN N/A Checkbox */}
+
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={isLrnNA}
-                    onChange={handleLrnCheck}
-                    inputProps={{ "aria-label": "N/A Checkbox" }}
+                    name="lrn_na"
+                    checked={person.lrnNumber === "nolrnNumber"}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      const updatedPerson = {
+                        ...person,
+                        lrnNumber: checked ? "nolrnNumber" : "",
+                      };
+
+                      setPerson(updatedPerson);
+                      setIsLrnNA(checked);         // optional: if you're tracking this separately
+                      setLrnNAFlag(checked ? "1" : "0"); // optional: if you're sending this to backend
+                    }}
+                    onBlur={handleBlur}
                   />
                 }
                 label="N/A"
                 sx={{ mr: 2 }}
               />
+
+
 
               {/* Gender */}
               <TextField
@@ -1004,17 +1112,26 @@ const Dashboard1 = () => {
                 label="Gender"
                 name="gender"
                 required
-                value={person.gender ?? ""}
-                onChange={handleChange}
+                value={person.gender !== undefined && person.gender !== null ? String(person.gender) : ""}
+                onChange={(e) => {
+                  handleChange({
+                    target: {
+                      name: "gender",
+                      value: parseInt(e.target.value),
+                    },
+                  });
+                }}
                 onBlur={handleBlur}
                 error={Boolean(errors.gender)}
                 sx={{ width: 150 }}
                 InputProps={{ sx: { height: 40 } }}
                 inputProps={{ style: { height: 40 } }}
               >
-                <MenuItem value={0}>MALE</MenuItem>
-                <MenuItem value={1}>FEMALE</MenuItem>
+                <MenuItem value=""><em>Select Gender</em></MenuItem>
+                <MenuItem value="0">MALE</MenuItem>
+                <MenuItem value="1">FEMALE</MenuItem>
               </TextField>
+
 
               {/* Gender Error */}
               {errors.gender && (
@@ -1027,8 +1144,8 @@ const Dashboard1 = () => {
               <FormControlLabel
                 control={
                   <Checkbox
-                    checked={isChecked}
-                    onChange={handleCheckboxChange}
+                    checked={person.pwdMember === 1}
+                    onChange={handlePwdCheck}
                     inputProps={{ "aria-label": "PWD Checkbox" }}
                   />
                 }
@@ -1036,55 +1153,73 @@ const Dashboard1 = () => {
                 sx={{ ml: 2 }}
               />
 
-              {/* PWD Type */}
-              <TextField
-                select
-                size="small"
-                label="PWD Type"
-                name="pwdType"
-                value={person.pwdType || ""}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                disabled={!isChecked}
-                sx={{ width: 220 }}
-                InputProps={{ sx: { height: 40 } }}
-                inputProps={{ style: { height: 40 } }}
-              >
-                <MenuItem value=""><em>None</em></MenuItem>
-                <MenuItem value="Blindness">Blindness</MenuItem>
-                <MenuItem value="Low-vision">Low-vision</MenuItem>
-                <MenuItem value="Leprosy Cured persons">Leprosy Cured persons</MenuItem>
-                <MenuItem value="Hearing Impairment">Hearing Impairment</MenuItem>
-                <MenuItem value="Locomotor Disability">Locomotor Disability</MenuItem>
-                <MenuItem value="Dwarfism">Dwarfism</MenuItem>
-                <MenuItem value="Intellectual Disability">Intellectual Disability</MenuItem>
-                <MenuItem value="Mental Illness">Mental Illness</MenuItem>
-                <MenuItem value="Autism Spectrum Disorder">Autism Spectrum Disorder</MenuItem>
-                <MenuItem value="Cerebral Palsy">Cerebral Palsy</MenuItem>
-                <MenuItem value="Muscular Dystrophy">Muscular Dystrophy</MenuItem>
-                <MenuItem value="Chronic Neurological conditions">Chronic Neurological conditions</MenuItem>
-                <MenuItem value="Specific Learning Disabilities">Specific Learning Disabilities</MenuItem>
-                <MenuItem value="Multiple Sclerosis">Multiple Sclerosis</MenuItem>
-                <MenuItem value="Speech and Language disability">Speech and Language disability</MenuItem>
-                <MenuItem value="Thalassemia">Thalassemia</MenuItem>
-                <MenuItem value="Hemophilia">Hemophilia</MenuItem>
-                <MenuItem value="Sickle cell disease">Sickle cell disease</MenuItem>
-                <MenuItem value="Multiple Disabilities including">Multiple Disabilities including</MenuItem>
-              </TextField>
+              {person.pwdMember === 1 && (
+                <>
+                  {/* PWD Type */}
+                  <TextField
+                    select
+                    size="small"
+                    label="PWD Type"
+                    name="pwdType"
+                    value={person.pwdType || ""}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    required={person.pwdMember === 1}
+                    error={person.pwdMember === 1 && !!errors.pwdType}
+                    helperText={
+                      person.pwdMember === 1 && errors.pwdType
+                        ? "This field is required."
+                        : ""
+                    }
+                    sx={{ width: 220 }}
+                    InputProps={{ sx: { height: 40 } }}
+                    inputProps={{ style: { height: 40 } }}
+                  >
+                    <MenuItem value=""><em>None</em></MenuItem>
+                    <MenuItem value="Blindness">Blindness</MenuItem>
+                    <MenuItem value="Low-vision">Low-vision</MenuItem>
+                    <MenuItem value="Leprosy Cured persons">Leprosy Cured persons</MenuItem>
+                    <MenuItem value="Hearing Impairment">Hearing Impairment</MenuItem>
+                    <MenuItem value="Locomotor Disability">Locomotor Disability</MenuItem>
+                    <MenuItem value="Dwarfism">Dwarfism</MenuItem>
+                    <MenuItem value="Intellectual Disability">Intellectual Disability</MenuItem>
+                    <MenuItem value="Mental Illness">Mental Illness</MenuItem>
+                    <MenuItem value="Autism Spectrum Disorder">Autism Spectrum Disorder</MenuItem>
+                    <MenuItem value="Cerebral Palsy">Cerebral Palsy</MenuItem>
+                    <MenuItem value="Muscular Dystrophy">Muscular Dystrophy</MenuItem>
+                    <MenuItem value="Chronic Neurological conditions">Chronic Neurological conditions</MenuItem>
+                    <MenuItem value="Specific Learning Disabilities">Specific Learning Disabilities</MenuItem>
+                    <MenuItem value="Multiple Sclerosis">Multiple Sclerosis</MenuItem>
+                    <MenuItem value="Speech and Language disability">Speech and Language disability</MenuItem>
+                    <MenuItem value="Thalassemia">Thalassemia</MenuItem>
+                    <MenuItem value="Hemophilia">Hemophilia</MenuItem>
+                    <MenuItem value="Sickle cell disease">Sickle cell disease</MenuItem>
+                    <MenuItem value="Multiple Disabilities including">Multiple Disabilities including</MenuItem>
+                  </TextField>
 
-              {/* PWD ID */}
-              <TextField
-                size="small"
-                label="PWD ID"
-                name="pwdId"
-                value={person.pwdId || ""}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                disabled={!isChecked}
-                sx={{ width: 200 }}
-                InputProps={{ sx: { height: 40 } }}
-                inputProps={{ style: { height: 40 } }}
-              />
+                  {/* PWD ID */}
+                  <TextField
+                    size="small"
+                    label="PWD ID"
+                    name="pwdId"
+                    value={person.pwdId || ""}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    required={person.pwdMember === 1}
+                    error={person.pwdMember === 1 && !!errors.pwdId}
+                    helperText={
+                      person.pwdMember === 1 && errors.pwdId
+                        ? "This field is required."
+                        : ""
+                    }
+                    sx={{ width: 200 }}
+                    InputProps={{ sx: { height: 40 } }}
+                    inputProps={{ style: { height: 40 } }}
+                  />
+                </>
+              )}
+
+
             </Box>
 
             {/* Row 1: Birth Place + Citizenship */}
@@ -1100,9 +1235,19 @@ const Dashboard1 = () => {
                 <Typography mb={1} fontWeight="medium">
                   Age
                 </Typography>
-                <TextField fullWidth size="small" name="age" value={person.age} placeholder="Enter your Age" required onBlur={handleBlur} onChange={handleChange} error={!!errors.age}
+                <TextField
+                  fullWidth
+                  size="small"
+                  name="age"
+                  value={person.age === 0 ? "" : person.age}
+                  placeholder="Enter your Age"
+                  required
+                  onBlur={handleBlur}
+                  onChange={handleChange}
+                  error={!!errors.age}
                   helperText={errors.age ? "This field is required." : ""}
                 />
+
               </Box>
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
@@ -1111,11 +1256,7 @@ const Dashboard1 = () => {
                 <TextField fullWidth size="small" name="birthPlace" placeholder="Enter your Birth Place" value={person.birthPlace} required onBlur={handleBlur} onChange={handleChange} error={!!errors.birthPlace}
                   helperText={errors.birthPlace ? "This field is required." : ""} />
               </Box>
-            </Box>
-
-            {/* Row 2: Religion + Civil Status */}
-            <Box display="flex" gap={2}>
-              <Box flex={1} mb={2}>
+              <Box flex={1} >
                 <Typography mb={1} fontWeight="medium">
                   Language/Dialect Spoken
                 </Typography>
@@ -1123,6 +1264,11 @@ const Dashboard1 = () => {
                   helperText={errors.languageDialectSpoken ? "This field is required." : ""}
                 />
               </Box>
+            </Box>
+
+
+            <Box display="flex" gap={2}>
+
 
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
@@ -1313,10 +1459,6 @@ const Dashboard1 = () => {
                 </FormControl>
 
               </Box>
-            </Box>
-
-            {/* Civil Status, Tribe/Ethnic Group, Other Ethnic Group - 3 in one row */}
-            <Box display="flex" gap={2} mb={2}>
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
                   Civil Status
@@ -1347,7 +1489,6 @@ const Dashboard1 = () => {
                 </FormControl>
 
               </Box>
-
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">
                   Tribe/Ethnic Group
@@ -1419,30 +1560,24 @@ const Dashboard1 = () => {
                 </FormControl>
 
               </Box>
-
-              <Box flex={1}>
-                <Typography mb={1} fontWeight="medium">
-                  Other Ethnic Group
-                </Typography>
-                <TextField fullWidth size="small" name="otherEthnicGroup" placeholder="Enter your Other Ethnic Group" value={person.otherEthnicGroup} onBlur={handleBlur} onChange={handleChange} error={!!errors.otherEthnicGroup}
-                  helperText={errors.languageDialectSpoken ? "This field is required." : ""} />
-              </Box>
             </Box>
 
+            <br />
             <Typography style={{ fontSize: "20px", color: "#6D2323", fontWeight: "bold" }}>Contact Information:</Typography>
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <br />
-            {/* Contact Information Fields - In Rows with 50% Width Each */}
+
             <Box display="flex" gap={2} mb={2}>
-              <Box flex={1}>
-                <Typography mb={1} fontWeight="medium">
-                  Cellphone Number
+
+              <Box flex={1} display="flex" alignItems="center" gap={2}>
+                <Typography sx={{ width: 180 }} fontWeight="medium">
+                  Cellphone Number:
                 </Typography>
                 <TextField
                   fullWidth
                   size="small"
                   name="cellphoneNumber"
-                  placeholder="Enter your Cellphone Number"
+                  placeholder="Enter your Cellphone Number +63"
                   required
                   value={person.cellphoneNumber}
                   onBlur={handleBlur}
@@ -1452,9 +1587,10 @@ const Dashboard1 = () => {
                 />
               </Box>
 
-              <Box flex={1}>
-                <Typography mb={1} fontWeight="medium">
-                  Email Address
+
+              <Box flex={1} display="flex" alignItems="center" gap={2}>
+                <Typography sx={{ width: 180 }} fontWeight="medium">
+                  Email Address:
                 </Typography>
                 <TextField
                   fullWidth
@@ -1463,7 +1599,6 @@ const Dashboard1 = () => {
                   required
                   value={person.emailAddress}
                   placeholder="Enter your Email Address (e.g., username@gmail.com)"
-
                   onBlur={handleBlur}
                   onChange={handleChange}
                   error={!!errors.emailAddress}
@@ -1472,51 +1607,14 @@ const Dashboard1 = () => {
               </Box>
             </Box>
 
-            <Box display="flex" gap={2} mb={2}>
-              <Box flex={1}>
-                <Typography mb={1} fontWeight="medium">
-                  Telephone Number
-                </Typography>
-                <TextField
-                  fullWidth
-                  size="small"
-                  name="telephoneNumber"
-                  placeholder="Enter your Telephone Number"
-                  required
-                  value={person.telephoneNumber}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  error={!!errors.telephoneNumber}
-                  helperText={errors.telephoneNumber && "This field is required."}
-                />
-              </Box>
-
-              <Box flex={1}>
-                <Typography mb={1} fontWeight="medium">
-                  Facebook Account
-                </Typography>
-                <TextField
-                  fullWidth
-                  size="small"
-                  name="facebookAccount"
-                  required
-                  value={person.facebookAccount}
-                  placeholder="Enter your Facebook URL (e.g., facebook.com/username)"
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  error={!!errors.facebookAccount}
-                  helperText={errors.facebookAccount && "This field is required."}
-                />
-              </Box>
-            </Box>
 
 
-            {/* Present Address Heading */}
+
             <Typography style={{ fontSize: "20px", color: "#6D2323", fontWeight: "bold" }}>Present Address:</Typography>
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <br />
 
-            {/* Street & Zip */}
+
             <Box display="flex" gap={2} mb={2}>
               <Box flex={1}>
                 <Typography mb={1} fontWeight="medium">Present Street</Typography>
@@ -1549,9 +1647,9 @@ const Dashboard1 = () => {
               </Box>
             </Box>
 
-            {/* Region & Province */}
+
             <Box display="flex" gap={2} mb={2}>
-              {/* Present Region */}
+
               <FormControl fullWidth size="small" required error={!!errors.presentRegion}>
                 <InputLabel id="present-region-label">Region</InputLabel>
                 <Select
@@ -1586,7 +1684,7 @@ const Dashboard1 = () => {
                 )}
               </FormControl>
 
-              {/* Present Province */}
+
               <FormControl fullWidth size="small" required error={!!errors.presentProvince}>
                 <InputLabel id="present-province-label">Province</InputLabel>
                 <Select
@@ -2068,7 +2166,11 @@ const Dashboard1 = () => {
                       - Face: Centered, direct camera
                       <br />
                       - File types: JPEG, JPG, PNG
-                      <br />- Attire: Formal
+                      <br />
+                      - Attire:
+                      <br />
+                      - Required File Size: 2mb
+
                     </Box>
 
                     <Typography variant="body1" fontWeight="bold" mt={2}>

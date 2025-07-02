@@ -153,7 +153,7 @@ const ECATApplicationForm = () => {
       }
 
          .student-table {
-    margin-top: -100px !important;
+    margin-top: -95px !important;
   }
 
 
@@ -201,15 +201,17 @@ const ECATApplicationForm = () => {
 
   {
     curriculumOptions.find(
-      (item) => item.curriculum_id.toString() === person.program.toString()
-    )?.program_description || person.program
+      (item) =>
+        item?.curriculum_id?.toString() === (person?.program ?? "").toString()
+    )?.program_description || (person?.program ?? "")
+
   }
 
 
 
   return (
 
-    <Box sx={{ height: 'calc(100vh - 120px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
+    <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
       <div ref={divToPrintRef}>
         <div>
           <style>
@@ -253,14 +255,8 @@ const ECATApplicationForm = () => {
 
         <Container>
 
-          <Container>
-            <br />
-
-
-
-          </Container>
           <br />
-
+          <br />
 
 
           <form>
@@ -357,13 +353,17 @@ const ECATApplicationForm = () => {
                     </table>
                   </td>
                 </tr>
+
+
                 <tr>
                   <td colSpan={40} style={{
                     height: "20px",            // Adjust height as needed
 
                     padding: 0,
                     border: "none"
-                  }}></td>
+                  }}>
+
+                  </td>
                 </tr>
 
 
@@ -416,7 +416,6 @@ const ECATApplicationForm = () => {
                             COURSE APPLIED FOR (Preferred Course):
                           </td>
                         </tr>
-
                         <tr>
                           <td colSpan={1}></td>
                           <td
@@ -432,20 +431,22 @@ const ECATApplicationForm = () => {
                             }}
                           >
                             Course & Major: <br />
-                            {
-                              curriculumOptions.length > 0
-                                ? curriculumOptions.find(
-                                  (item) => item.curriculum_id.toString() === person.program.toString()
-                                )?.program_description || person.program
-                                : "Loading..."
-                            }
+                            {curriculumOptions.length > 0
+                              ? curriculumOptions.find(
+                                (item) =>
+                                  item?.curriculum_id?.toString() === (person?.program ?? "").toString()
+                              )?.program_description || (person?.program ?? "")
+                              : "Loading..."}
                           </td>
                         </tr>
 
 
 
+
                       </tbody>
                     </table>
+
+
                   </td>
                 </tr>
 
@@ -558,6 +559,7 @@ const ECATApplicationForm = () => {
                   </td>
                 </tr>
                 <br />
+
                 <tr>
                   <td colSpan={40} style={{ fontFamily: "Times New Roman", fontSize: "15px", paddingTop: "5px" }}>
                     <span style={{ fontWeight: "bold", marginRight: "10px", marginLeft: "1px" }}>Name:</span>{" "}
@@ -567,15 +569,16 @@ const ECATApplicationForm = () => {
                         borderBottom: "1px solid black",
                         width: "88%",
                         position: "relative",
-                        paddingBottom: "5px", // creates space for labels
+                        paddingBottom: "-10px", // creates space for labels
+                        marginTop: "10px"
                       }}
                     >
-                      <div style={{ display: "flex", justifyContent: "space-between", position: "absolute", top: "-10px", width: "100%" }}>
-                        <div style={{ width: "20%", textAlign: "center" }}>{person.last_name}</div>
-                        <div style={{ width: "20%", textAlign: "center" }}>{person.first_name}</div>
-                        <div style={{ width: "20%", textAlign: "center" }}>{person.middle_name}</div>
-                        <div style={{ width: "20%", textAlign: "center" }}>{person.extension}</div>
-                        <div style={{ width: "20%", textAlign: "center" }}>{person.nickname}</div>
+                      <div style={{ display: "flex", justifyContent: "space-between", position: "absolute", top: "-13px", width: "100%" }}>
+                        <div style={{ width: "20%", textAlign: "center", marginTop: "-5px" }}>{person.last_name}</div>
+                        <div style={{ width: "20%", textAlign: "center", marginTop: "-5px" }}>{person.first_name}</div>
+                        <div style={{ width: "20%", textAlign: "center", marginTop: "-5px" }}>{person.middle_name}</div>
+                        <div style={{ width: "20%", textAlign: "center", marginTop: "-5px" }}>{person.extension}</div>
+                        <div style={{ width: "20%", textAlign: "center", marginTop: "-5px" }}>{person.nickname}</div>
                       </div>
                     </span>
                   </td>
@@ -587,7 +590,7 @@ const ECATApplicationForm = () => {
                     style={{
                       fontFamily: "Times New Roman",
                       fontSize: "14px",
-                      paddingTop: "2px",
+                      paddingTop: "1px",
                     }}
                   >
                     <div
@@ -783,12 +786,12 @@ const ECATApplicationForm = () => {
                 <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
                   {/* Cel / Tel No. */}
                   <td colSpan={20} style={{ position: "relative" }}>
-                    <b>Cel / Tel No.:</b>{" "}
+                    <b>Cellphone Number:</b>{" "}
                     <span
                       style={{
                         display: "inline-block",
                         borderBottom: "1px solid black",
-                        width: "280px",
+                        width: "230px",
                         marginLeft: "10px",
                         position: "relative",
                         paddingTop: "12px",
@@ -981,9 +984,10 @@ const ECATApplicationForm = () => {
 
                     </span>
                     <span style={{ fontWeight: "normal", fontSize: "14px" }}>
-                      ({person.father_deceased === "No" ? "✓" : " "}) Living&nbsp;&nbsp;
-                      ({person.father_deceased === "Yes" ? "✓" : " "}) Deceased
+                      ({person.father_deceased === "1" ? " " : "✓"}) Living&nbsp;&nbsp;
+                      ({person.father_deceased === "1" ? "✓" : " "}) Deceased
                     </span>
+
 
                   </td>
                 </tr>
@@ -1055,7 +1059,7 @@ const ECATApplicationForm = () => {
 
                     </span>{" "}
                     <span style={{ fontWeight: "normal", fontSize: "14px" }}>
-                      ({person.mother_deceased === "No" ? "✓" : " "}) Living&nbsp;&nbsp;
+                      ({person.mother_deceased === "Yes" ? " " : "✓"}) Living&nbsp;&nbsp;
                       ({person.mother_deceased === "Yes" ? "✓" : " "}) Deceased
                     </span>
 
@@ -1358,6 +1362,7 @@ const ECATApplicationForm = () => {
                   </td>
                 </tr>
 
+                {/* ✅ New Table OUTSIDE <tbody> and <table> */}
                 <table
                   style={{
                     border: "2px solid black",
@@ -1367,45 +1372,35 @@ const ECATApplicationForm = () => {
                     margin: "0 auto",
                     textAlign: "center",
                     tableLayout: "fixed",
-
+                    marginTop: "20px"
                   }}
                 >
                   <tbody>
                     <tr>
-                      <td
-                        colSpan={40}
-                        style={{
-                          height: "0.2in",
-                          fontSize: "12px",
-                          textAlign: "justify",
-                          color: "black",
-                          fontFamily: "arial",
-                          borderRight: "2px solid black",
-
-                          padding: "8px", // added padding for readability
-                          lineHeight: "1.5",
-                        }}
-                      >
+                      <td colSpan={40} style={{
+                        fontSize: "12px",
+                        textAlign: "justify",
+                        color: "black",
+                        fontFamily: "arial",
+                        padding: "8px",
+                        lineHeight: "1.5",
+                      }}>
                         <strong>
                           I certify that the information given above is true, complete, and accurate to the best of my knowledge and belief.
                           <br />
                           I promise to abide by the rules and regulations of Eulogio "Amang" Rodriguez Institute of Science and Technology
                           regarding the ECAT and my possible admission.
-                          <br />
-                          <br />
+                          <br /><br />
                           I am aware that any false or misleading information and/or statement may result in the refusal or disqualification
                           of my admission to the Institution.
                         </strong>
                       </td>
                     </tr>
-
                     <tr>
-                      {/* Name Field in One Line */}
                       <td colSpan={20} style={{
                         textAlign: "center",
                         fontSize: "12px",
                         fontFamily: "Arial, sans-serif",
-                        verticalAlign: "top",
                         fontWeight: "bold",
                       }}>
                         <div style={{
@@ -1414,33 +1409,26 @@ const ECATApplicationForm = () => {
                           width: "350px",
                           marginTop: "-4px",
                           textAlign: "center",
-                          fontSize: "14px", // Slightly larger for visibility
+                          fontSize: "14px",
                           fontFamily: "Times New Roman",
                         }}>
                           {`${person.first_name || ""} ${person.middle_name || ""} ${person.last_name || ""} ${person.extension || ""}`.toUpperCase()}
                         </div>
                         <br />
-                        <span style={{ fontSize: "12px", fontFamily: "Arial, sans-serif", fontWeight: "bold" }}>Applicant</span>
-                        <br />
-                        <span style={{ fontSize: "12px", fontFamily: "Arial, sans-serif", fontWeight: "bold" }}>(signature over printed name)</span>
+                        <span>Applicant</span><br />
+                        <span>(signature over printed name)</span>
                       </td>
-
-
-                      {/* Date Section (unchanged) */}
                       <td colSpan={20} style={{
                         textAlign: "center",
                         padding: "8px",
                         fontWeight: "bold",
                         fontSize: "12px",
                         fontFamily: "Arial, sans-serif",
-                        verticalAlign: "top",
-                        borderRight: "2px solid black",
                       }}>
                         <input
                           type="text"
                           value={"_________________________________"}
                           style={{
-                            paddingTop: "-1px",
                             color: "black",
                             textAlign: "center",
                             fontWeight: "bold",
@@ -1469,10 +1457,12 @@ const ECATApplicationForm = () => {
                         />
                       </td>
                     </tr>
-
                   </tbody>
                 </table>
+
                 <br />
+
+
                 <tr>
                   <td colSpan={40} style={{ padding: 0, border: "none" }}>
                     <table

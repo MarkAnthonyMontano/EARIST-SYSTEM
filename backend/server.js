@@ -2605,9 +2605,9 @@ app.put("/api/person/:id", async (req, res) => {
   const { id } = req.params;
   const {
     profile_img, campus, academicProgram, classifiedAs, program, program2, program3, yearLevel,
-    last_name, first_name, middle_name, extension, nickname, height, weight, lrnNumber, gender, pwdType, pwdId,
-    birthOfDate, age, birthPlace, languageDialectSpoken, citizenship, religion, civilStatus, tribeEthnicGroup, otherEthnicGroup,
-    cellphoneNumber, emailAddress, telephoneNumber, facebookAccount,
+    last_name, first_name, middle_name, extension, nickname, height, weight, lrnNumber, nolrnNumber, gender, pwdMember, pwdType, pwdId,
+    birthOfDate, age, birthPlace, languageDialectSpoken, citizenship, religion, civilStatus, tribeEthnicGroup,
+    cellphoneNumber, emailAddress, 
     presentStreet, presentBarangay, presentZipCode, presentRegion, presentProvince, presentMunicipality, presentDswdHouseholdNumber, sameAsPresentAddress,
     permanentStreet, permanentBarangay, permanentZipCode, permanentRegion, permanentProvince, permanentMunicipality, permanentDswdHouseholdNumber,
     solo_parent, father_deceased, father_family_name, father_given_name, father_middle_name, father_ext, father_nickname, father_education, father_education_level,
@@ -2628,9 +2628,9 @@ app.put("/api/person/:id", async (req, res) => {
   try {
     const [result] = await db.execute(`UPDATE person_table SET
       profile_img=?, campus=?, academicProgram=?, classifiedAs=?, program=?, program2=?, program3=?, yearLevel=?,
-      last_name=?, first_name=?, middle_name=?, extension=?, nickname=?, height=?, weight=?, lrnNumber=?, gender=?, pwdType=?, pwdId=?,
-      birthOfDate=?, age=?, birthPlace=?, languageDialectSpoken=?, citizenship=?, religion=?, civilStatus=?, tribeEthnicGroup=?, otherEthnicGroup=?,
-      cellphoneNumber=?, emailAddress=?, telephoneNumber=?, facebookAccount=?,
+      last_name=?, first_name=?, middle_name=?, extension=?, nickname=?, height=?, weight=?, lrnNumber=?, nolrnNumber=?, gender=?, pwdMember=?, pwdType=?, pwdId=?,
+      birthOfDate=?, age=?, birthPlace=?, languageDialectSpoken=?, citizenship=?, religion=?, civilStatus=?, tribeEthnicGroup=?, 
+      cellphoneNumber=?, emailAddress=?,
       presentStreet=?, presentBarangay=?, presentZipCode=?, presentRegion=?, presentProvince=?, presentMunicipality=?, presentDswdHouseholdNumber=?, 	sameAsPresentAddress=?,
       permanentStreet=?, permanentBarangay=?, permanentZipCode=?, permanentRegion=?, permanentProvince=?, permanentMunicipality=?, permanentDswdHouseholdNumber=?,
       solo_parent=?, father_deceased=?, father_family_name=?, father_given_name=?, father_middle_name=?, father_ext=?, father_nickname=?, father_education=?, father_education_level=?,
@@ -2648,9 +2648,9 @@ app.put("/api/person/:id", async (req, res) => {
       chestXray=?, cbc=?, urinalysis=?, otherworkups=?, symptomsToday=?, remarks=?, termsOfAgreement=?
       WHERE person_id=?`, [
       profile_img, campus, academicProgram, classifiedAs, program, program2, program3, yearLevel,
-      last_name, first_name, middle_name, extension, nickname, height, weight, lrnNumber, gender, pwdType, pwdId,
-      birthOfDate, age, birthPlace, languageDialectSpoken, citizenship, religion, civilStatus, tribeEthnicGroup, otherEthnicGroup,
-      cellphoneNumber, emailAddress, telephoneNumber, facebookAccount,
+      last_name, first_name, middle_name, extension, nickname, height, weight, lrnNumber, nolrnNumber, gender, pwdMember, pwdType, pwdId,
+      birthOfDate, age, birthPlace, languageDialectSpoken, citizenship, religion, civilStatus, tribeEthnicGroup, 
+      cellphoneNumber, emailAddress,
       presentStreet, presentBarangay, presentZipCode, presentRegion, presentProvince, presentMunicipality, presentDswdHouseholdNumber, sameAsPresentAddress,
       permanentStreet, permanentBarangay, permanentZipCode, permanentRegion, permanentProvince, permanentMunicipality, permanentDswdHouseholdNumber,
       solo_parent, father_deceased, father_family_name, father_given_name, father_middle_name, father_ext, father_nickname, father_education, father_education_level,
