@@ -227,25 +227,27 @@ const PersonalDataForm = () => {
   }
 
 
- // 🔒 Disable right-click, F12, F11, Ctrl+Shift+I, etc.
+  // 🔒 Disable right-click
   document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+  // 🔒 Block DevTools shortcuts silently
   document.addEventListener('keydown', (e) => {
-    if (
-      e.key === 'F12' || // DevTools
-      e.key === 'F11' || // Fullscreen toggle
-      (e.ctrlKey && e.shiftKey && e.key === 'I') || // Ctrl+Shift+I
-      (e.ctrlKey && e.shiftKey && e.key === 'J') || // Ctrl+Shift+J
-      (e.ctrlKey && e.key === 'U') // View Source
-    ) {
+    const isBlockedKey =
+      e.key === 'F12' ||
+      e.key === 'F11' ||
+      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+      (e.ctrlKey && e.key === 'U');
+
+    if (isBlockedKey) {
       e.preventDefault();
-      alert('Action not allowed.');
+      e.stopPropagation();
     }
   });
 
 
 
   return (
-    <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
+    <Box sx={{ height: 'calc(95vh - 80px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
       <Container>
         <h1 style={{ fontSize: "40px", fontWeight: "bold", textAlign: "Left", color: "maroon", marginTop: "25px" }}>PERSONAL DATA FORM</h1>
         <hr style={{ border: "1px solid #ccc", width: "41%" }} />
@@ -411,7 +413,7 @@ const PersonalDataForm = () => {
                         Print Legibly. Mark appropriate boxes.
                       </span>
 
-                      <label style={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold",  }}>
+                      <label style={{ display: "flex", alignItems: "center", gap: "5px", fontWeight: "bold", }}>
                         <input
                           type="checkbox"
                           checked // or controlled via state
@@ -422,7 +424,7 @@ const PersonalDataForm = () => {
                             border: "1px solid black",
                             backgroundColor: "white",
                             appearance: "none",
-                     
+
                             WebkitAppearance: "none",
                             MozAppearance: "none",
                             display: "inline-block",

@@ -153,7 +153,7 @@ const ECATApplicationForm = () => {
       }
 
          .student-table {
-    margin-top: -95px !important;
+    margin-top: 130px !important;
   }
 
 
@@ -207,11 +207,26 @@ const ECATApplicationForm = () => {
 
   }
 
+// 🔒 Disable right-click
+document.addEventListener('contextmenu', (e) => e.preventDefault());
 
+// 🔒 Block DevTools shortcuts silently
+document.addEventListener('keydown', (e) => {
+  const isBlockedKey =
+    e.key === 'F12' ||
+    e.key === 'F11' ||
+    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+    (e.ctrlKey && e.key === 'U');
+
+  if (isBlockedKey) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+});
 
   return (
 
-    <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
+    <Box sx={{ height: 'calc(95vh - 80px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
       <div ref={divToPrintRef}>
         <div>
           <style>
@@ -253,233 +268,231 @@ const ECATApplicationForm = () => {
           </button>
         </Container>
 
-        <Container>
 
-          <br />
-          <br />
+        <table
+          className="student-table"
+          style={{
+            borderCollapse: "collapse",
+            fontFamily: "Arial, Helvetica, sans-serif",
+            width: "8in",
+            margin: "0 auto",
+            textAlign: "center",
+            tableLayout: "fixed",
+            border: "2px solid black"
+          }}
+        >
+          <tbody>
+            <tr>
+              {/* LEFT - Logo */}
+              <td colSpan={9} style={{ textAlign: "center" }}>
+                <img
+                  src={EaristLogo}
+                  alt="Earist Logo"
+                  style={{
+                    width: "120px",
+                    height: "120px",
+                    display: "block",
+                    marginTop: "-7px",
+                  }}
+                />
+              </td>
 
-
-          <form>
-
-            <table
-              className="student-table"
-              style={{
-
-                borderCollapse: "collapse",
-                fontFamily: "Arial, Helvetica, sans-serif",
-                width: "8in",
-                margin: "0 auto",
+              {/* CENTER - School Info */}
+              <td colSpan={15} style={{
                 textAlign: "center",
-                tableLayout: "fixed",
-              }}
-            >
-              <tbody>
+                fontFamily: "Arial",
+                fontSize: "10px",
+                lineHeight: "1.5",
+              }}>
+                <div style={{ fontSize: "12px", letterSpacing: "1px", marginLeft: "-60px" }}>Republic of the Philippines</div>
+                <div style={{ fontSize: "12px", letterSpacing: "1px", marginLeft: "-60px" }}><b>EULOGIO "AMANG" RODRIGUEZ</b></div>
+                <div style={{ fontSize: "12px", letterSpacing: "1px", marginLeft: "-60px" }}><b>INSTITUTE OF SCIENCE AND TECHNOLOGY </b></div>
+                <div style={{ fontSize: "12px", letterSpacing: "1px", marginLeft: "-60px" }}>Nagtahan, Sampaloc, Manila 1008</div>
+                <div style={{ fontSize: "9px", marginLeft: "-60px" }}><b>STUDENT ADMISSION REGISTRATION AND RECORDS MANAGEMENT SERVICES</b></div>
 
+                <div style={{ fontSize: "20px", fontWeight: "bold", marginLeft: "-60px", letterSpacing: "1px" }}>
+                  ECAT APPLICATION FORM
+                </div>
+              </td>
 
-
-                {/* Title: PERSONAL DATA FORM */}
-
-                <tr>
-                  <td colSpan={40} style={{ border: "2px solid black", padding: 0 }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                      <tbody>
-                        <tr>
-                          {/* LEFT - Logo */}
-                          <td colSpan={9} style={{ textAlign: "center" }}>
-                            <img
-                              src={EaristLogo}
-                              alt="Earist Logo"
-                              style={{
-                                width: "120px",
-                                height: "120px",
-                                display: "block",
-                                marginTop: "-7px",
-                              }}
-                            />
-                          </td>
-
-                          {/* CENTER - School Info */}
-                          <td colSpan={15} style={{ textAlign: "center", fontFamily: "Arial", fontSize: "10px", lineHeight: "1.5", }}>
-                            <div style={{ fontSize: "12px", letterSpacing: "1px", fontFamily: "Arial", }}>Republic of the Philippines</div>
-                            <div style={{ fontSize: "12px", letterSpacing: "1px", fontFamily: "Arial", }}><b>EULOGIO "AMANG" RODRIGUEZ</b></div>
-                            <div style={{ fontSize: "12px", letterSpacing: "1px", fontFamily: "Arial", }}><b>INSTITUTE OF SCIENCE AND TECHNOLOGY </b></div>
-                            <div style={{ fontSize: "12px", letterSpacing: "1px", fontFamily: "Arial", }}>Nagtahan, Sampaloc, Manila 1008</div>
-                            <div style={{ fontSize: "10px", fontFamily: "Arial", }}><b>STUDENT ADMISSION REGISTRATION AND RECORDS MANAGEMENT SERVICES</b></div>
-
-                            <div style={{ fontSize: "20px", fontWeight: "bold", letterSpacing: "1px" }}>
-                              ECAT APPLICATION FORM
-                            </div>
-                          </td>
-
-                          {/* RIGHT - Document Metadata Table */}
-                          <td colSpan={15} style={{ padding: 0 }}>
-                            <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "Arial, sans-serif", textAlign: "Left", fontSize: "11px" }}>
-                              <tbody>
-                                {[
-                                  "Document No.",
-                                  "Revision No.",
-                                  "Process Type:",
-                                  "Effective Date:",
-                                ].map((label, index) => (
-                                  <tr key={index}>
-                                    <td style={{ border: "2px solid black", padding: "4px", fontWeight: "bold" }}>{label}</td>
-                                    <td style={{ border: "2px solid black", padding: "4px" }}>
-                                      <input
-                                        type="text"
-                                        style={{
-                                          width: "100%",
-                                          border: "none",
-                                          outline: "none",
-                                          fontSize: "12px",
-                                          textAlign: "left",
-                                          background: "none",
-                                        }}
-                                      />
-                                    </td>
-                                  </tr>
-                                ))}
-
-                                {/* Page Number */}
-                                <tr>
-                                  <td colSpan={2} style={{ border: "2px solid black", textAlign: "center", padding: "4px", fontWeight: "bold" }}>
-                                    Page 1 of 1
-                                  </td>
-                                </tr>
-                              </tbody>
-                            </table>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                </tr>
-
-
-                <tr>
-                  <td colSpan={40} style={{
-                    height: "20px",            // Adjust height as needed
-
-                    padding: 0,
-                    border: "none"
-                  }}>
-
-                  </td>
-                </tr>
-
-
-                <tr>
-                  <td colSpan={40} style={{ padding: 0, border: "none" }}>
-                    <table
-                      style={{
-                        width: "100%",
-                        borderCollapse: "collapse",
-                        fontFamily: "Arial, sans-serif",
-                        tableLayout: "fixed",
-                      }}
-                    >
-                      <tbody>
-                        {/* First row: Applicant Instructions + Course Applied For */}
-                        <tr>
-                          <td
-                            colSpan={24}
-                            rowSpan={3}
+              {/* RIGHT - Document Metadata Table */}
+              <td colSpan={15} style={{ padding: 0 }}>
+                <table style={{
+                  width: "100%",
+                  borderCollapse: "collapse",
+                  fontFamily: "Arial, sans-serif",
+                  textAlign: "Left",
+                  fontSize: "11px"
+                }}>
+                  <tbody>
+                    {[
+                      "Document No.",
+                      "Revision No.",
+                      "Process Type:",
+                      "Effective Date:",
+                    ].map((label, index) => (
+                      <tr key={index}>
+                        <td style={{ border: "2px solid black", padding: "4px", fontWeight: "bold" }}>{label}</td>
+                        <td style={{ border: "2px solid black", padding: "4px" }}>
+                          <input
+                            type="text"
                             style={{
-                              border: "2px solid black",
-                              borderRight: "2px solid black",
-                              textAlign: "justify",
-                              padding: "8px",
-                              fontWeight: "bold",
-                              fontSize: "10px",
-                              verticalAlign: "top",
-                            }}
-                          >
-                            TO THE APPLICANT<br />
-                            Read carefully the ECAT Guidelines and Requirements before accomplishing this form.
-                            <br />
-                            Please write LEGIBLY and CORRECTLY in PRINT LETTERS without erasures.
-                            <br />
-                            ONLY APPLICATION FORMS ACCOMPLISHED CORRECTLY AND COMPLETELY WILL BE PROCESSED.
-                          </td>
-                          <td colSpan={1}></td>
-                          <td
-                            colSpan={15}
-                            style={{
-                              border: "2px solid black",
-                              borderRight: "2px solid black",
+                              width: "100%",
+                              border: "none",
+                              outline: "none",
+                              fontSize: "12px",
                               textAlign: "left",
-                              padding: "8px",
-                              fontWeight: "bold",
-                              fontSize: "10px",
-                              verticalAlign: "top",
+                              background: "none",
                             }}
-                          >
-                            COURSE APPLIED FOR (Preferred Course):
-                          </td>
-                        </tr>
-                        <tr>
-                          <td colSpan={1}></td>
-                          <td
-                            colSpan={15}
-                            style={{
-                              border: "2px solid black",
-                              borderRight: "2px solid black",
-                              textAlign: "left",
-                              padding: "8px",
-                              fontWeight: "bold",
-                              fontSize: "10px",
-                              verticalAlign: "top",
-                            }}
-                          >
-                            Course & Major: <br />
-                            {curriculumOptions.length > 0
-                              ? curriculumOptions.find(
-                                (item) =>
-                                  item?.curriculum_id?.toString() === (person?.program ?? "").toString()
-                              )?.program_description || (person?.program ?? "")
-                              : "Loading..."}
-                          </td>
-                        </tr>
+                          />
+                        </td>
+                      </tr>
+                    ))}
+
+                    {/* Page Number */}
+                    <tr>
+                      <td colSpan={2} style={{ border: "2px solid black", textAlign: "center", padding: "4px", fontWeight: "bold" }}>
+                        Page 1 of 1
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        {/* ✅ Replace invalid <tr> with valid spacer table */}
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <tbody>
+            <tr>
+              <td colSpan={40} style={{
+                height: "10px",
+                padding: 0,
+                border: "none"
+              }}></td>
+            </tr>
+          </tbody>
+        </table>
 
 
 
+        <table
 
-                      </tbody>
-                    </table>
+          style={{
+
+            borderCollapse: "collapse",
+            fontFamily: "Arial, Helvetica, sans-serif",
+            width: "8in",
+            margin: "0 auto",
+            textAlign: "center",
+            tableLayout: "fixed",
+          }}
+        >
+          <tbody>
+
+            <tr>
+              <td
+                colSpan={24}
+                rowSpan={3}
+                style={{
+                  border: "2px solid black",
+                  textAlign: "justify",
+                  padding: "8px",
+                  fontWeight: "bold",
+                  fontSize: "10px",
+                  verticalAlign: "top",
+                }}
+              >
+                <div>TO THE APPLICANT</div>
+                <div>Read carefully the ECAT Guidelines and Requirements before accomplishing this form.</div>
+                <div>Please write LEGIBLY and CORRECTLY in PRINT LETTERS without erasures.</div>
+                <div>ONLY APPLICATION FORMS ACCOMPLISHED CORRECTLY AND COMPLETELY WILL BE PROCESSED.</div>
+              </td>
+              <td colSpan={1}></td>
+              <td
+                colSpan={15}
+                style={{
+                  border: "2px solid black",
+                  textAlign: "left",
+                  padding: "8px",
+                  fontWeight: "bold",
+                  fontSize: "10px",
+                  verticalAlign: "top",
+                }}
+              >
+                COURSE APPLIED FOR (Preferred Course):
+              </td>
+            </tr>
+            <tr>
+              <td colSpan={1}></td>
+              <td
+                colSpan={15}
+                style={{
+                  border: "2px solid black",
+                  textAlign: "left",
+                  padding: "8px",
+                  fontWeight: "bold",
+                  fontSize: "10px",
+                  verticalAlign: "top",
+                }}
+              >
+                <div>Course & Major:</div>
+                <div>
+                  {curriculumOptions.length > 0
+                    ? curriculumOptions.find(
+                      (item) =>
+                        item?.curriculum_id?.toString() === (person?.program ?? "").toString()
+                    )?.program_description || (person?.program ?? "")
+                    : "Loading..."}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
 
-                  </td>
-                </tr>
+        <table
+          style={{
+            borderCollapse: "collapse",
+            fontFamily: "Arial, Helvetica, sans-serif",
+            width: "8in",
+            margin: "0 auto",
+            textAlign: "center",
+            tableLayout: "fixed",
+          }}
+        >
+          <tbody>
 
-                <br />
-                <tr>
-                  {/* Entry Status Section */}
-                  <td colSpan={20} style={{
-                    textAlign: "left",
-                    padding: "8px",
+           
+            <tr>
+              <td colSpan={40} style={{ padding: "8px" }}>
+                {/* ENTRY STATUS heading */}
+                <div
+                  style={{
                     fontWeight: "bold",
                     fontSize: "12px",
                     fontFamily: "Arial, sans-serif",
-                    verticalAlign: "top"
-                  }}>
-                    <div style={{ marginBottom: "5px" }}>ENTRY STATUS</div><br />
-                    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                      ( ) Currently Enrolled as Grade 12 Student <br />
-                      ( )  Senior High School Graduate <br />
-                      ( ) ALS Passer (equivalent to Senior High)
-                    </div>
-                  </td>
-
-                  {/* Date Section */}
-                  <td colSpan={20} style={{
+                    marginBottom: "4px",
                     textAlign: "left",
-                    padding: "8px",
-                    fontWeight: "bold",
+                  }}
+                >
+                  ENTRY STATUS
+                </div>
+
+                {/* Flex container with 3 rows (one for each entry status + right side input) */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "5px",
                     fontSize: "12px",
                     fontFamily: "Arial, sans-serif",
-                    verticalAlign: "top"
-                  }}>
-                    <br />
-                    <br />
+                  }}
+                >
+                  {/* Row 1 */}
+                  <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                    <div>( ) Currently Enrolled as Grade 12 Student</div>
                     <div>
                       Date of Graduation:
                       <input
@@ -487,15 +500,20 @@ const ECATApplicationForm = () => {
                         style={{
                           border: "none",
                           borderBottom: "1px solid black",
-                          width: "66.7%",
+                          width: "150px",
                           marginLeft: "10px",
                           fontSize: "12px",
                           fontFamily: "Arial, sans-serif",
                           background: "none",
-                          outline: "none"
+                          outline: "none",
                         }}
                       />
                     </div>
+                  </div>
+
+                  {/* Row 2 */}
+                  <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                    <div>( ) Senior High School Graduate</div>
                     <div>
                       Year Graduated:
                       <input
@@ -503,15 +521,20 @@ const ECATApplicationForm = () => {
                         style={{
                           border: "none",
                           borderBottom: "1px solid black",
-                          width: "70.6%",
+                          width: "150px",
                           marginLeft: "15px",
                           fontSize: "12px",
                           fontFamily: "Arial, sans-serif",
                           background: "none",
-                          outline: "none"
+                          outline: "none",
                         }}
                       />
                     </div>
+                  </div>
+
+                  {/* Row 3 */}
+                  <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+                    <div>( ) ALS Passer (equivalent to Senior High)</div>
                     <div>
                       ( ) Transferee from:
                       <input
@@ -519,1064 +542,1032 @@ const ECATApplicationForm = () => {
                         style={{
                           border: "none",
                           borderBottom: "1px solid black",
-                          width: "67%",
+                          width: "150px",
                           marginLeft: "10px",
                           fontSize: "12px",
                           fontFamily: "Arial, sans-serif",
                           background: "none",
-                          outline: "none"
+                          outline: "none",
                         }}
                       />
                     </div>
-                  </td>
-                </tr>
-                <br />
+                  </div>
+                </div>
+              </td>
+            </tr>
 
-                <tr>
-                  <td
-                    colSpan={40}
-                    style={{
-                      height: "0.2in",
-                      fontSize: "72.5%",
-
-                      color: "white",
-                    }}
-                  >
-                    <b>
-                      <b style={{
-                        color: "black",
-                        fontFamily: "Times new Roman",
-                        fontSize: '15px',
-                        textAlign: "center",
-                        display: "block",
-                        fontStyle: 'italic',
-                        border: "2px solid black"
-                      }}>
-                        {"\u00A0\u00A0"}PERSONAL INFORMATION (Please print your name as written in your NSO/PSA Birth Certificate)
-                      </b>
-
-                    </b>
-                  </td>
-                </tr>
-                <br />
-
-                <tr>
-                  <td colSpan={40} style={{ fontFamily: "Times New Roman", fontSize: "15px", paddingTop: "5px" }}>
-                    <span style={{ fontWeight: "bold", marginRight: "10px", marginLeft: "1px" }}>Name:</span>{" "}
-                    <span
-                      style={{
-                        display: "inline-block",
-                        borderBottom: "1px solid black",
-                        width: "88%",
-                        position: "relative",
-                        paddingBottom: "-10px", // creates space for labels
-                        marginTop: "10px"
-                      }}
-                    >
-                      <div style={{ display: "flex", justifyContent: "space-between", position: "absolute", top: "-13px", width: "100%" }}>
-                        <div style={{ width: "20%", textAlign: "center", marginTop: "-5px" }}>{person.last_name}</div>
-                        <div style={{ width: "20%", textAlign: "center", marginTop: "-5px" }}>{person.first_name}</div>
-                        <div style={{ width: "20%", textAlign: "center", marginTop: "-5px" }}>{person.middle_name}</div>
-                        <div style={{ width: "20%", textAlign: "center", marginTop: "-5px" }}>{person.extension}</div>
-                        <div style={{ width: "20%", textAlign: "center", marginTop: "-5px" }}>{person.nickname}</div>
-                      </div>
-                    </span>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td
-                    colSpan={40}
-                    style={{
-                      fontFamily: "Times New Roman",
-                      fontSize: "14px",
-                      paddingTop: "1px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        width: "87%",
-                        marginLeft: "45px",
-                      }}
-                    >
-                      <span style={{ width: "20%", textAlign: "center" }}>Last Name</span>
-                      <span style={{ width: "20%", textAlign: "center" }}>Given Name</span>
-                      <span style={{ width: "20%", textAlign: "center" }}>Middle Name</span>
-                      <span style={{ width: "20%", textAlign: "center" }}>Ext. Name</span>
-                      <span style={{ width: "20%", textAlign: "center" }}>Nickname</span>
-                    </div>
-                  </td>
-                </tr>
+          </tbody>
+        </table>
 
 
-                <br />
+        <table
 
-                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
-                  {/* Gender */}
-                  <td colSpan={13} style={{ position: "relative" }}>
-                    <b>Gender:</b>{" "}
-                    <span
-                      style={{
-                        display: "inline-block",
-                        borderBottom: "1px solid black",
-                        width: "120px",
-                        marginLeft: "10px",
-                        position: "relative",
-                        paddingTop: "18px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "2px",
-                          left: "0",
-                          width: "100%",
-                          textAlign: "center",
-                        }}
-                      >
-                        {person.gender === 0 ? "Male" : person.gender === 1 ? "Female" : ""}
-                      </div>
-                    </span>
-                  </td>
+          style={{
+
+            borderCollapse: "collapse",
+            fontFamily: "Arial, Helvetica, sans-serif",
+            width: "8in",
+            margin: "0 auto",
+            textAlign: "center",
+            tableLayout: "fixed",
+          }}
+        >
+          <tbody>
+
+            <tr>
+              <td
+                colSpan={40}
+                style={{
+                  height: "0.2in",
+                  fontSize: "72.5%",
+
+                  color: "white",
+                }}
+              >
+                <b>
+                  <b style={{
+                    color: "black",
+                    fontFamily: "Times new Roman",
+                    fontSize: '15px',
+                    textAlign: "center",
+                    display: "block",
+                    fontStyle: 'italic',
+                    border: "2px solid black"
+                  }}>
+                    {"\u00A0\u00A0"}PERSONAL INFORMATION (Please print your name as written in your NSO/PSA Birth Certificate)
+                  </b>
+
+                </b>
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                style={{ height: "5px" }} colSpan={40}>
+              </td>
+            </tr>
+
+            <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
+              <td colSpan={40} style={{ paddingTop: "5px" }}>
+                <span style={{ fontWeight: "bold", marginRight: "10px", marginLeft: "1px" }}>Name:</span>{" "}
+                <span
+                  style={{
+                    display: "inline-block",
+                    borderBottom: "1px solid black",
+                    width: "92%",
+                    verticalAlign: "bottom",
+                  }}
+                >
+                  <span style={{ display: "inline-block", width: "20%", textAlign: "center" }}>{person.last_name}</span>
+                  <span style={{ display: "inline-block", width: "20%", textAlign: "center" }}>{person.first_name}</span>
+                  <span style={{ display: "inline-block", width: "20%", textAlign: "center" }}>{person.middle_name}</span>
+                  <span style={{ display: "inline-block", width: "20%", textAlign: "center" }}>{person.extension}</span>
+                  <span style={{ display: "inline-block", width: "20%", textAlign: "center" }}>{person.nickname}</span>
+                </span>
+              </td>
+            </tr>
+
+            <tr>
+              <td colSpan={40} style={{ fontFamily: "Times New Roman", fontSize: "14px", paddingTop: "2px" }}>
+                <div style={{ width: "88%", marginLeft: "100px", display: "flex", justifyContent: "space-between" }}>
+                  <span style={{ width: "20%", textAlign: "center" }}>Last Name</span>
+                  <span style={{ width: "20%", textAlign: "center" }}>Given Name</span>
+                  <span style={{ width: "20%", textAlign: "center" }}>Middle Name</span>
+                  <span style={{ width: "20%", textAlign: "center" }}>Ext. Name</span>
+                  <span style={{ width: "20%", textAlign: "center" }}>Nickname</span>
+                </div>
+              </td>
+            </tr>
 
 
-                  {/* Civil Status */}
-                  <td colSpan={14} style={{ position: "relative" }}>
-                    <b>Civil Status:</b>{" "}
-                    <span
-                      style={{
-                        display: "inline-block",
-                        borderBottom: "1px solid black",
-                        width: "150px",
-                        marginLeft: "10px",
-                        position: "relative",
-                        paddingTop: "18px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "2px",
-                          left: "0",
-                          width: "100%",
-                          textAlign: "center",
-                        }}
-                      >
-                        {person.civilStatus}
-                      </div>
-                    </span>
-                  </td>
+            <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
+              <td colSpan={40}>
+                <b>Gender:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "160px",
+                    marginLeft: "10px",
+                    fontFamily: "Times New Roman",
+                    fontSize: "14px",
+                    textAlign: "Center"
+                  }}
+                >
+                  {person.gender === 0 ? "Male" : person.gender === 1 ? "Female" : ""}
+                </span>{" "}
+                <b>Civil Status:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "160px",
+                    marginLeft: "10px",
+                    fontFamily: "Times New Roman",
+                    fontSize: "14px",
+                    textAlign: "Center"
+                  }}
+                >
+                  {person.civilStatus}
+                </span>{" "}
+                <b>Date of Birth:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "170px",
+                    marginLeft: "10px",
+                    fontFamily: "Times New Roman",
+                    fontSize: "14px",
+                    textAlign: "Center"
+                  }}
+                >
+                  {person.birthOfDate &&
+                    new Date(person.birthOfDate).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                </span>
+              </td>
+            </tr>
 
-                  <td colSpan={13} style={{ position: "relative" }}>
-                    <b>Date of Birth:</b>{" "}
-                    <span
-                      style={{
-                        display: "inline-block",
-                        borderBottom: "1px solid black",
-                        width: "100px",
-                        marginLeft: "10px",
-                        position: "relative",
-                        paddingTop: "18px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "2px",
-                          left: "0",
-                          width: "100%",
-                          textAlign: "center",
-                        }}
-                      >
-                        {person.birthOfDate &&
-                          new Date(person.birthOfDate).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                          })}
-                      </div>
-                    </span>
-                  </td>
+            <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
+              <td colSpan={40}>
+                <b>Place of Birth:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "160px",
+                    marginLeft: "10px",
+                    fontFamily: "Times New Roman",
+                    fontSize: "14px",
+                    textAlign: "Center"
+                  }}
+                >
+                  {person.birthPlace}
+                </span>{" "}
+                <b>Nationality:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "164px",
+                    marginLeft: "10px",
+                    fontFamily: "Times New Roman",
+                    fontSize: "14px",
+                    textAlign: "Center"
+                  }}
+                >
+                  {person.citizenship}
+                </span>{" "}
+                <b>Religion:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "160px",
+                    marginLeft: "10px",
+                    fontFamily: "Times New Roman",
+                    fontSize: "14px",
+                    textAlign: "Center"
+                  }}
+                >
+                  {person.religion}
+                </span>
+              </td>
+            </tr>
 
-                </tr>
-                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
-                  {/* Place of Birth */}
-                  <td colSpan={13} style={{ position: "relative" }}>
-                    <b>Place of Birth:</b>{" "}
-                    <span
-                      style={{
-                        display: "inline-block",
-                        borderBottom: "1px solid black",
-                        width: "120px",
-                        marginLeft: "10px",
-                        position: "relative",
-                        paddingTop: "12px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "-5px",
-                          left: "0",
-                          width: "100%",
-                          textAlign: "center",
-                        }}
-                      >
-                        {person.birthPlace}
-                      </div>
-                    </span>
-                  </td>
+            <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
+              <td colSpan={40}>
+                <b>Cellphone Number:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "210px",
+                    marginLeft: "10px",
+                    fontFamily: "Times New Roman",
+                    fontSize: "14px",
+                  }}
+                >
+                  {person.cellphoneNumber}
+                </span>{" "}
+                <b>Email Address:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "294px",
+                    marginLeft: "10px",
+                    fontFamily: "Times New Roman",
+                    fontSize: "14px",
+                  }}
+                >
+                  {person.emailAddress}
+                </span>
+              </td>
+            </tr>
 
-                  {/* Nationality */}
-                  <td colSpan={14} style={{ position: "relative" }}>
-                    <b>Nationality:</b>{" "}
-                    <span
-                      style={{
-                        display: "inline-block",
-                        borderBottom: "1px solid black",
-                        width: "150px",
-                        marginLeft: "10px",
-                        position: "relative",
-                        paddingTop: "12px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "-5px",
-                          left: "0",
-                          width: "100%",
-                          textAlign: "center",
-                        }}
-                      >
-                        {person.citizenship}
-                      </div>
-                    </span>
-                  </td>
+            <tr>
+              <td colSpan={40} style={{ fontFamily: "Times New Roman", fontSize: "15px", }}>
+                <span style={{ fontWeight: "bold", marginRight: "10px", marginLeft: "-5px" }}>Permanent Address:</span>{" "}
+                <span
+                  style={{
+                    display: "inline-block",
+                    borderBottom: "1px solid black",
+                    width: "80.5%",
+                    verticalAlign: "bottom",
+                  }}
+                >
+                  <span style={{ display: "inline-block", width: "30%", textAlign: "center", fontSize: "12px" }}>
+                    {person.presentStreet}
+                  </span>
+                  <span style={{ display: "inline-block", width: "10%", textAlign: "center", fontSize: "12px" }}>
+                    {person.presentBarangay}
+                  </span>
+                  <span style={{ display: "inline-block", width: "20%", textAlign: "center", fontSize: "12px" }}>
+                    {person.presentMunicipality}
+                  </span>
+                  <span style={{ display: "inline-block", width: "30%", textAlign: "center", fontSize: "12px" }}>
+                    {person.presentProvince}
+                  </span>
+                  <span style={{ display: "inline-block", width: "10%", textAlign: "center", fontSize: "12px" }}>
+                    {person.presentZipCode}
+                  </span>
+                </span>
+              </td>
+            </tr>
 
-                  {/* Religion */}
-                  <td colSpan={13} style={{ position: "relative" }}>
-                    <b>Religion:</b>{" "}
-                    <span
-                      style={{
-                        display: "inline-block",
-                        borderBottom: "1px solid black",
-                        width: "100px",
-                        marginLeft: "10px",
-                        position: "relative",
-                        paddingTop: "12px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "-5px",
-                          left: "0",
-                          width: "100%",
-                          textAlign: "center",
-                        }}
-                      >
-                        {person.religion}
-                      </div>
-                    </span>
-                  </td>
-                </tr>
-                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
-                  {/* Cel / Tel No. */}
-                  <td colSpan={20} style={{ position: "relative" }}>
-                    <b>Cellphone Number:</b>{" "}
-                    <span
-                      style={{
-                        display: "inline-block",
-                        borderBottom: "1px solid black",
-                        width: "230px",
-                        marginLeft: "10px",
-                        position: "relative",
-                        paddingTop: "12px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "-5px",
-                          left: "0",
-                          width: "100%",
-                          textAlign: "center",
-                        }}
-                      >
-                        {person.cellphoneNumber}
-                      </div>
-                    </span>
-                  </td>
-
-                  {/* Email Address */}
-                  <td colSpan={20} style={{ position: "relative" }}>
-                    <b>Email Address:</b>{" "}
-                    <span
-                      style={{
-                        display: "inline-block",
-                        borderBottom: "1px solid black",
-                        width: "240px",
-                        marginLeft: "10px",
-                        position: "relative",
-                        paddingTop: "12px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "-5px",
-                          left: "0",
-                          width: "100%",
-                          textAlign: "center",
-                        }}
-                      >
-                        {person.emailAddress}
-                      </div>
-                    </span>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td colSpan={40} style={{ fontFamily: "Times New Roman", fontSize: "15px", paddingTop: "5px" }}>
-                    <span style={{ fontWeight: "bold", marginRight: "30px" }}>Permanent Address:</span>{" "}
-                    <span
-                      style={{
-                        display: "inline-block",
-                        borderBottom: "1px solid black",
-                        width: "75%",
-                        position: "relative",
-                        paddingBottom: "10px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          position: "absolute",
-                          top: "-5px",
-                          width: "100%",
-                        }}
-                      >
-                        <div style={{ width: "25%", fontSize: "12px", fontFamily: "Times new roman", textAlign: "center" }}>{person.presentStreet}</div>
-                        <div style={{ width: "20%", fontSize: "12px", fontFamily: "Times new roman", textAlign: "center" }}>{person.presentBarangay}</div>
-                        <div style={{ width: "20%", fontSize: "12px", fontFamily: "Times new roman", textAlign: "center" }}>{person.presentMunicipality}</div>
-                        <div style={{ width: "30%", fontSize: "12px", fontFamily: "Times new roman", textAlign: "center" }}>{person.presentProvince}</div>
-                        <div style={{ width: "20%", fontSize: "12px", fontFamily: "Times new roman", textAlign: "center" }}>{person.presentZipCode}</div>
-                      </div>
-                    </span>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td colSpan={40} style={{ fontFamily: "Times New Roman", fontSize: "14px", paddingTop: "2px" }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        width: "75%",
-                        marginLeft: "173px", // aligns labels under the span
-                      }}
-                    >
-                      <span style={{ width: "20%", textAlign: "center", fontWeight: "bold" }}>No. Street</span>
-                      <span style={{ width: "20%", textAlign: "center", fontWeight: "bold" }}>Barangay</span>
-                      <span style={{ width: "20%", textAlign: "center", fontWeight: "bold" }}>City</span>
-                      <span style={{ width: "20%", textAlign: "center", fontWeight: "bold" }}>Province</span>
-                      <span style={{ width: "20%", textAlign: "center", fontWeight: "bold" }}>Zipcode</span>
-                    </div>
-                  </td>
-                </tr>
-
-                <br />
-                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
-                  <td colSpan={40}>
-                    <b style={{ marginRight: "50px" }}>Residence:</b>{" "}
-                    <span style={{ marginRight: "20px" }}>( ) With Parents</span>
-                    <span style={{ marginRight: "20px" }}>( ) With Relatives</span>
-                    <span style={{ marginRight: "20px" }}>( ) With Guardian</span>
-                    <span>( ) Boarding</span>
-                  </td>
-                </tr>
-                <br />
-                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
-                  <td colSpan={40}>
-                    <b>Are you a member of any indigenous group?</b>{" "}
-                    {person.tribeEthnicGroup === "Others" ? (
-                      <>
-                        (✓) YES ( ) NO If YES, please specify{" "}
-                        <span
-                          style={{
-                            borderBottom: "1px solid black",
-                            display: "inline-block",
-                            width: "200px",
-                            marginLeft: "10px"
-                          }}
-                        >
-                          {person.otherEthnicGroup?.trim()}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        ( ) YES (✓) NO If YES, please specify{" "}
-                        <span
-                          style={{
-                            borderBottom: "1px solid black",
-                            display: "inline-block",
-                            width: "200px",
-                            marginLeft: "10px"
-                          }}
-                        ></span>
-                      </>
-                    )}
-                  </td>
-                </tr>
+            <tr>
+              <td colSpan={40} style={{ fontFamily: "Times New Roman", fontSize: "14px", paddingTop: "2px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    width: "92%",
+                    marginLeft: "60px", // aligns label with start of 92% span
+                  }}
+                >
+                  <span style={{ width: "30%", textAlign: "center", }}>No. Street</span>
+                  <span style={{ width: "10%", textAlign: "center", }}>Barangay</span>
+                  <span style={{ width: "20%", textAlign: "center", }}>City</span>
+                  <span style={{ width: "30%", textAlign: "center", }}>Province</span>
+                  <span style={{ width: "10%", textAlign: "center", }}>Zipcode</span>
+                </div>
+              </td>
+            </tr>
 
 
 
-                <br />
+            <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
+              <td colSpan={40}>
+                <b style={{ marginRight: "50px" }}>Residence:</b>{" "}
+                <span style={{ marginRight: "20px" }}>( ) With Parents</span>
+                <span style={{ marginRight: "20px" }}>( ) With Relatives</span>
+                <span style={{ marginRight: "20px" }}>( ) With Guardian</span>
+                <span>( ) Boarding</span>
+              </td>
+            </tr>
 
-                <tr>
-                  <td
-                    colSpan={40}
-                    style={{
-                      height: "0.2in",
-                      fontSize: "72.5%",
-
-                      color: "white",
-                    }}
-                  >
-                    <b>
-                      <b style={{
-                        color: "black",
-                        fontFamily: "Times new Roman",
-                        fontSize: '15px',
-                        textAlign: "center",
-                        display: "block",
-                        fontStyle: 'italic',
-                        border: "2px solid black"
-                      }}>
-                        {"\u00A0\u00A0"}FAMILY BACKGROUND
-                      </b>
-
-                    </b>
-                  </td>
-                </tr>
-                <br />
-                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
-                  <td colSpan={40}>
-                    <b>Father's Name:</b>
-                    <span
-                      style={{
-                        borderBottom: "1px solid black",
-                        display: "inline-block",
-                        width: "360px",
-                        marginLeft: "10px",
-                        marginRight: "15px",
-                        fontFamily: "times new roman",
-
-                        fontSize: "14px",
-
-                      }}
-                    >
-                      {`${person.father_given_name || ""} ${person.father_middle_name || ""} ${person.father_family_name || ""} ${person.father_ext || ""}`.toUpperCase()}
-
-                    </span>
-                    <span style={{ fontWeight: "normal", fontSize: "14px" }}>
-                      ({person.father_deceased === "1" ? " " : "✓"}) Living&nbsp;&nbsp;
-                      ({person.father_deceased === "1" ? "✓" : " "}) Deceased
-                    </span>
-
-
-                  </td>
-                </tr>
-
-                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
-                  <td colSpan={40}>
-                    <b>Occupation:</b>{" "}
-                    <span
-                      style={{
-                        borderBottom: "1px solid black",
-                        display: "inline-block",
-                        width: "150px",
-                        marginLeft: "10px",
-                        fontFamily: "times new roman",
-
-
-                        fontSize: "14px"
-                      }}
-                    >
-                      {person.father_occupation}
-                    </span>{" "}
-                    <b>Monthly Income:</b>{" "}
-                    <span
-                      style={{
-                        borderBottom: "1px solid black",
-                        display: "inline-block",
-                        width: "150px",
-                        marginLeft: "10px",
-                        fontFamily: "times new roman",
-
-                        fontSize: "14px"
-                      }}
-                    >
-                      {person.father_income}
-                    </span>{" "}
-                    <b>Contact No:</b>{" "}
-                    <span
-                      style={{
-                        borderBottom: "1px solid black",
-                        display: "inline-block",
-                        width: "145px",
-                        marginLeft: "10px",
-                        fontFamily: "times new roman",
-
-                        fontSize: "14px"
-                      }}
-                    >
-                      {person.father_contact}
-                    </span>
-                  </td>
-                </tr>
-
-                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
-                  <td colSpan={40}>
-                    <b>Mother's Name:</b>{" "}
-                    <span
-                      style={{
-                        borderBottom: "1px solid black",
-                        display: "inline-block",
-                        width: "350px",
-                        marginLeft: "10px",
-                        marginRight: "15px",
-                        fontFamily: "times new roman",
-                        fontSize: "14px",
-
-                      }}
-                    >
-                      {`${person.mother_given_name || ""} ${person.mother_middle_name || ""} ${person.mother_family_name || ""}`.toUpperCase()}
-
-                    </span>{" "}
-                    <span style={{ fontWeight: "normal", fontSize: "14px" }}>
-                      ({person.mother_deceased === "Yes" ? " " : "✓"}) Living&nbsp;&nbsp;
-                      ({person.mother_deceased === "Yes" ? "✓" : " "}) Deceased
-                    </span>
-
-                  </td>
-                </tr>
-
-                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
-                  <td colSpan={40}>
-                    <b>Occupation:</b>{" "}
-                    <span
-                      style={{
-                        borderBottom: "1px solid black",
-                        display: "inline-block",
-                        width: "150px",
-                        marginLeft: "10px",
-                        fontFamily: "Times New Roman",
-                        fontSize: "14px"
-                      }}
-                    >
-                      {person.mother_occupation}
-                    </span>{" "}
-                    <b>Monthly Income:</b>{" "}
-                    <span
-                      style={{
-                        borderBottom: "1px solid black",
-                        display: "inline-block",
-                        width: "150px",
-                        marginLeft: "10px",
-                        fontFamily: "Times New Roman",
-                        fontSize: "14px"
-                      }}
-                    >
-                      {person.mother_income}
-                    </span>{" "}
-                    <b>Contact No:</b>{" "}
-                    <span
-                      style={{
-                        borderBottom: "1px solid black",
-                        display: "inline-block",
-                        width: "145px",
-                        marginLeft: "10px",
-                        fontFamily: "Times New Roman",
-                        fontSize: "14px"
-                      }}
-                    >
-                      {person.mother_contact}
-                    </span>
-                  </td>
-                </tr>
-
-                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
-                  <td colSpan={40}>
-                    <b>Guardian's Name:</b>{" "}
+            <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
+              <td colSpan={40}>
+                <b>Are you a member of any indigenous group?</b>{" "}
+                {person.tribeEthnicGroup === "Others" ? (
+                  <>
+                    (✓) YES ( ) NO If YES, please specify{" "}
                     <span
                       style={{
                         borderBottom: "1px solid black",
                         display: "inline-block",
                         width: "200px",
-                        marginLeft: "10px",
-
-                        fontSize: "14px",
-                        fontFamily: "Times New Roman"
+                        marginLeft: "10px"
                       }}
                     >
-                      {`${person.guardian_given_name || ""} ${person.guardian_middle_name || ""} ${person.guardian_family_name || ""} ${person.guardian_ext || ""}`.toUpperCase()}
 
-                    </span>{" "}
-                    <b>Relationship to the Applicant:</b>{" "}
-                    <span
-                      style={{
-                        borderBottom: "1px solid black",
-                        display: "inline-block",
-                        width: "220px",
-                        marginLeft: "10px",
-
-                        fontSize: "14px",
-                        fontFamily: "Times New Roman"
-                      }}
-                    >
-                      Guardian
                     </span>
-                  </td>
-                </tr>
-
-                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
-                  <td colSpan={40}>
-                    <b>Occupation:</b>{" "}
+                  </>
+                ) : (
+                  <>
+                    ( ) YES (✓) NO If YES, please specify{" "}
                     <span
                       style={{
                         borderBottom: "1px solid black",
                         display: "inline-block",
-                        width: "150px",
-                        marginLeft: "10px",
+                        width: "200px",
+                        marginLeft: "10px"
                       }}
-                    ></span>{" "}
-                    <b>Monthly Income:</b>{" "}
-                    <span
-                      style={{
-                        borderBottom: "1px solid black",
-                        display: "inline-block",
-                        width: "150px",
-                        marginLeft: "10px",
-                      }}
-                    >
-                      0
-                    </span>{" "}
-                    <b>Contact No:</b>{" "}
-                    <span
-                      style={{
-                        borderBottom: "1px solid black",
-                        display: "inline-block",
-                        width: "145px",
-                        marginLeft: "10px",
-                      }}
-                    >
-                      {person.guardian_contact}
-                    </span>
-                  </td>
-                </tr>
+                    ></span>
+                  </>
+                )}
+              </td>
+            </tr>
 
-                <br />
+
+          </tbody>
+        </table>
+
+        {/* ✅ Replace invalid <tr> with valid spacer table */}
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <tbody>
+            <tr>
+              <td colSpan={40} style={{
+                height: "10px",
+                padding: 0,
+                border: "none"
+              }}></td>
+            </tr>
+          </tbody>
+        </table>
 
 
 
+        <table
+
+          style={{
+
+            borderCollapse: "collapse",
+            fontFamily: "Arial, Helvetica, sans-serif",
+            width: "8in",
+            margin: "0 auto",
+            textAlign: "center",
+            tableLayout: "fixed",
+          }}
+        >
+          <tbody>
 
 
+            <tr>
+              <td
+                colSpan={40}
+                style={{
+                  height: "0.2in",
+                  fontSize: "72.5%",
 
-
-
-                <tr>
-                  <td
-                    colSpan={40}
-                    style={{
-                      height: "0.2in",
-                      fontSize: "72.5%",
-
-                      color: "white",
-                    }}
-                  >
-                    <b>
-                      <b style={{
-                        color: "black",
-                        fontFamily: "Times new Roman",
-                        fontSize: '15px',
-                        textAlign: "center",
-                        display: "block",
-                        fontStyle: 'italic',
-                        border: "2px solid black"
-                      }}>
-                        {"\u00A0\u00A0"}EDUCATIONAL BACKGROUND
-                      </b>
-
-                    </b>
-                  </td>
-                </tr>
-                <br />
-                {/* Line 1 */}
-                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
-                  <td colSpan={40}>
-                    <b>Last school attended or where you are currently completing Secondary Level Education:</b>
-                  </td>
-                </tr>
-
-                {/* Line 2 */}
-                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
-                  <td colSpan={40}>
-                    <b>Name of School:</b>{" "}
-                    <span style={{ borderBottom: "1px solid black", display: "inline-block", width: "653px" }}></span>
-                  </td>
-                </tr>
-
-                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
-                  {/* Complete Address */}
-                  <td colSpan={20}>
-                    <b>Complete Address:</b>{" "}
-                    <span
-                      style={{
-                        display: "inline-block",
-                        borderBottom: "1px solid black",
-                        width: "225px",
-                        position: "relative",
-                        paddingBottom: "5px",
-                        marginLeft: "10px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "-6px",
-                          width: "100%",
-                          textAlign: "center",
-                        }}
-                      >
-                        {person.completeAddress}
-                      </div>
-                    </span>
-                  </td>
-
-                  {/* LRN */}
-                  <td colSpan={20}>
-                    <b>Learner's Reference No.:</b>{" "}
-                    <span
-                      style={{
-                        display: "inline-block",
-                        borderBottom: "1px solid black",
-                        width: "53%",
-                        position: "relative",
-                        paddingBottom: "5px",
-                        marginLeft: "10px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "-10px",
-                          width: "100%",
-                          textAlign: "center",
-                        }}
-                      >
-                        {person.lrnNumber}
-                      </div>
-                    </span>
-                  </td>
-                </tr>
-
-
-                {/* Line 4 */}
-                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
-                  <td colSpan={40}>
-                    <b>Do you have any PHYSICAL DISABILITY OR CONDITION that requires special attention or</b>
-                  </td>
-                </tr>
-
-                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
-                  <td colSpan={40}>
-                    <b>would make it difficult for you to take a regular test?</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    {[
-                      "Blindness", "Low-vision", "Leprosy Cured persons", "Hearing Impairment", "Locomotor Disability",
-                      "Dwarfism", "Intellectual Disability", "Mental Illness", "Autism Spectrum Disorder", "Cerebral Palsy",
-                      "Muscular Dystrophy", "Chronic Neurological conditions", "Specific Learning Disabilities",
-                      "Multiple Sclerosis", "Speech and Language disability", "Thalassemia", "Hemophilia",
-                      "Sickle cell disease", "Multiple Disabilities including"
-                    ].includes(person.pwdType) ? (
-                      <>
-                        ( ) NO&nbsp;&nbsp;(✓) YES (specify):{" "}
-                        <span
-                          style={{
-                            borderBottom: "1px solid black",
-                            display: "inline-block",
-                            width: "230px"
-                          }}
-                        >
-                          {person.pwdType}
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        (✓) NO&nbsp;&nbsp;( ) YES (specify):{" "}
-                        <span
-                          style={{
-                            borderBottom: "1px solid black",
-                            display: "inline-block",
-                            width: "230px"
-                          }}
-                        ></span>
-                      </>
-                    )}
-                  </td>
-                </tr>
-
-
-
-                <br />
-
-
-                <tr>
-                  <td
-                    colSpan={40}
-                    style={{
-                      height: "0.2in",
-                      fontSize: "72.5%",
-
-                      color: "white",
-                    }}
-                  >
-                    <b>
-                      <b style={{
-                        color: "black",
-                        fontFamily: "Times new Roman",
-                        fontSize: '15px',
-                        textAlign: "center",
-                        display: "block",
-                        border: "2px solid black",
-                        fontStyle: 'italic'
-                      }}>
-                        {"\u00A0\u00A0"}ATTESTATION
-                      </b>
-
-                    </b>
-                  </td>
-                </tr>
-
-                {/* ✅ New Table OUTSIDE <tbody> and <table> */}
-                <table
-                  style={{
-                    border: "2px solid black",
-                    borderCollapse: "collapse",
-                    fontFamily: "Arial, Helvetica, sans-serif",
-                    width: "8in",
-                    margin: "0 auto",
+                  color: "white",
+                }}
+              >
+                <b>
+                  <b style={{
+                    color: "black",
+                    fontFamily: "Times new Roman",
+                    fontSize: '15px',
                     textAlign: "center",
-                    tableLayout: "fixed",
-                    marginTop: "20px"
+                    display: "block",
+                    fontStyle: 'italic',
+                    border: "2px solid black"
+                  }}>
+                    {"\u00A0\u00A0"}FAMILY BACKGROUND
+                  </b>
+
+                </b>
+              </td>
+            </tr>
+
+            <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
+              <td colSpan={40}>
+                <b>Father's Name:</b>
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "360px",
+                    marginLeft: "10px",
+                    marginRight: "15px",
+                    fontFamily: "times new roman",
+
+                    fontSize: "14px",
+
                   }}
                 >
-                  <tbody>
-                    <tr>
-                      <td colSpan={40} style={{
-                        fontSize: "12px",
-                        textAlign: "justify",
-                        color: "black",
-                        fontFamily: "arial",
-                        padding: "8px",
-                        lineHeight: "1.5",
-                      }}>
-                        <strong>
-                          I certify that the information given above is true, complete, and accurate to the best of my knowledge and belief.
-                          <br />
-                          I promise to abide by the rules and regulations of Eulogio "Amang" Rodriguez Institute of Science and Technology
-                          regarding the ECAT and my possible admission.
-                          <br /><br />
-                          I am aware that any false or misleading information and/or statement may result in the refusal or disqualification
-                          of my admission to the Institution.
-                        </strong>
-                      </td>
-                    </tr>
-                    <tr>
-                      <td colSpan={20} style={{
-                        textAlign: "center",
-                        fontSize: "12px",
-                        fontFamily: "Arial, sans-serif",
-                        fontWeight: "bold",
-                      }}>
-                        <div style={{
-                          display: "inline-block",
-                          borderBottom: "1px solid black",
-                          width: "350px",
-                          marginTop: "-4px",
-                          textAlign: "center",
-                          fontSize: "14px",
-                          fontFamily: "Times New Roman",
-                        }}>
-                          {`${person.first_name || ""} ${person.middle_name || ""} ${person.last_name || ""} ${person.extension || ""}`.toUpperCase()}
-                        </div>
-                        <br />
-                        <span>Applicant</span><br />
-                        <span>(signature over printed name)</span>
-                      </td>
-                      <td colSpan={20} style={{
-                        textAlign: "center",
-                        padding: "8px",
-                        fontWeight: "bold",
-                        fontSize: "12px",
-                        fontFamily: "Arial, sans-serif",
-                      }}>
-                        <input
-                          type="text"
-                          value={"_________________________________"}
-                          style={{
-                            color: "black",
-                            textAlign: "center",
-                            fontWeight: "bold",
-                            fontFamily: 'Arial, sans-serif',
-                            fontSize: '12px',
-                            textDecoration: "underline",
-                            width: "98%",
-                            border: "none",
-                            outline: "none",
-                            background: "none"
-                          }}
-                          readOnly
-                        />
-                        <br />
-                        Date
-                        <input
-                          type="text"
-                          style={{
-                            marginTop: "5px",
-                            width: "100%",
-                            border: "none",
-                            outline: "none",
-                            fontSize: "12px",
-                            fontFamily: "Arial, sans-serif",
-                          }}
-                        />
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                  {`${person.father_given_name || ""} ${person.father_middle_name || ""} ${person.father_family_name || ""} ${person.father_ext || ""}`.toUpperCase()}
 
-                <br />
+                </span>
+                <span style={{ fontWeight: "normal", fontSize: "14px" }}>
+                  ({person.father_deceased === "1" ? " " : "✓"}) Living&nbsp;&nbsp;
+                  ({person.father_deceased === "1" ? "✓" : " "}) Deceased
+                </span>
 
 
-                <tr>
-                  <td colSpan={40} style={{ padding: 0, border: "none" }}>
-                    <table
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                style={{ height: "10px" }} colSpan={40}>
+              </td>
+            </tr>
+
+
+
+            <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
+              <td colSpan={40}>
+                <b>Occupation:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "150px",
+                    marginLeft: "10px",
+                    fontFamily: "times new roman",
+
+
+                    fontSize: "14px"
+                  }}
+                >
+                  {person.father_occupation}
+                </span>{" "}
+                <b>Monthly Income:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "150px",
+                    marginLeft: "10px",
+                    fontFamily: "times new roman",
+
+                    fontSize: "14px"
+                  }}
+                >
+                  {person.father_income}
+                </span>{" "}
+                <b>Contact No:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "145px",
+                    marginLeft: "10px",
+                    fontFamily: "times new roman",
+
+                    fontSize: "14px"
+                  }}
+                >
+                  {person.father_contact}
+                </span>
+              </td>
+            </tr>
+
+            <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
+              <td colSpan={40}>
+                <b>Mother's Name:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "350px",
+                    marginLeft: "10px",
+                    marginRight: "15px",
+                    fontFamily: "times new roman",
+                    fontSize: "14px",
+
+                  }}
+                >
+                  {`${person.mother_given_name || ""} ${person.mother_middle_name || ""} ${person.mother_family_name || ""}`.toUpperCase()}
+
+                </span>{" "}
+                <span style={{ fontWeight: "normal", fontSize: "14px" }}>
+                  ({person.mother_deceased === "Yes" ? " " : "✓"}) Living&nbsp;&nbsp;
+                  ({person.mother_deceased === "Yes" ? "✓" : " "}) Deceased
+                </span>
+
+              </td>
+            </tr>
+
+            <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
+              <td colSpan={40}>
+                <b>Occupation:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "150px",
+                    marginLeft: "10px",
+                    fontFamily: "Times New Roman",
+                    fontSize: "14px"
+                  }}
+                >
+                  {person.mother_occupation}
+                </span>{" "}
+                <b>Monthly Income:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "150px",
+                    marginLeft: "10px",
+                    fontFamily: "Times New Roman",
+                    fontSize: "14px"
+                  }}
+                >
+                  {person.mother_income}
+                </span>{" "}
+                <b>Contact No:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "145px",
+                    marginLeft: "10px",
+                    fontFamily: "Times New Roman",
+                    fontSize: "14px"
+                  }}
+                >
+                  {person.mother_contact}
+                </span>
+              </td>
+            </tr>
+
+            <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
+              <td colSpan={40}>
+                <b>Guardian's Name:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "200px",
+                    marginLeft: "10px",
+
+                    fontSize: "14px",
+                    fontFamily: "Times New Roman"
+                  }}
+                >
+                  {`${person.guardian_given_name || ""} ${person.guardian_middle_name || ""} ${person.guardian_family_name || ""} ${person.guardian_ext || ""}`.toUpperCase()}
+
+                </span>{" "}
+                <b>Relationship to the Applicant:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "220px",
+                    marginLeft: "10px",
+
+                    fontSize: "14px",
+                    fontFamily: "Times New Roman"
+                  }}
+                >
+                  Guardian
+                </span>
+              </td>
+            </tr>
+
+            <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
+              <td colSpan={40}>
+                <b>Occupation:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "150px",
+                    marginLeft: "10px",
+                  }}
+                ></span>{" "}
+                <b>Monthly Income:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "150px",
+                    marginLeft: "10px",
+                  }}
+                >
+                  0
+                </span>{" "}
+                <b>Contact No:</b>{" "}
+                <span
+                  style={{
+                    borderBottom: "1px solid black",
+                    display: "inline-block",
+                    width: "145px",
+                    marginLeft: "10px",
+                  }}
+                >
+                  {person.guardian_contact}
+                </span>
+              </td>
+            </tr>
+
+
+
+
+          </tbody>
+        </table>
+
+        {/* ✅ Replace invalid <tr> with valid spacer table */}
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <tbody>
+            <tr>
+              <td colSpan={40} style={{
+                height: "10px",
+                padding: 0,
+                border: "none"
+              }}></td>
+            </tr>
+          </tbody>
+        </table>
+
+
+
+
+        <table
+
+          style={{
+
+            borderCollapse: "collapse",
+            fontFamily: "Arial, Helvetica, sans-serif",
+            width: "8in",
+            margin: "0 auto",
+            textAlign: "center",
+            tableLayout: "fixed",
+          }}
+        >
+          <tbody>
+
+
+
+
+            <tr>
+              <td
+                colSpan={40}
+                style={{
+                  height: "0.2in",
+                  fontSize: "72.5%",
+
+                  color: "white",
+                }}
+              >
+                <b>
+                  <b style={{
+                    color: "black",
+                    fontFamily: "Times new Roman",
+                    fontSize: '15px',
+                    textAlign: "center",
+                    display: "block",
+                    fontStyle: 'italic',
+                    border: "2px solid black"
+                  }}>
+                    {"\u00A0\u00A0"}EDUCATIONAL BACKGROUND
+                  </b>
+
+                </b>
+              </td>
+            </tr>
+
+            <tr>
+              <td
+                style={{ height: "5px" }} colSpan={40}>
+              </td>
+            </tr>
+
+
+            {/* Line 1 */}
+            <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
+              <td colSpan={40}>
+                <b>Last school attended or where you are currently completing Secondary Level Education:</b>
+              </td>
+            </tr>
+
+            {/* Line 2 */}
+            <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
+              <td colSpan={40}>
+                <b>Name of School:</b>{" "}
+                <span style={{ borderBottom: "1px solid black", display: "inline-block", width: "653px" }}></span>
+              </td>
+            </tr>
+
+            <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
+              {/* Complete Address */}
+              <td colSpan={20}>
+                <b>Complete Address:</b>{" "}
+                <span
+                  style={{
+                    display: "inline-block",
+                    borderBottom: "1px solid black",
+                    width: "225px",
+                    position: "relative",
+                    paddingBottom: "5px",
+                    marginLeft: "10px",
+                  }}
+                >
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "-6px",
+                      width: "100%",
+                      textAlign: "center",
+                    }}
+                  >
+                    {person.completeAddress}
+                  </div>
+                </span>
+              </td>
+
+              {/* LRN */}
+              <td colSpan={20}>
+                <b>Learner's Reference No.:</b>{" "}
+                <span
+                  style={{
+                    display: "inline-block",
+                    borderBottom: "1px solid black",
+                    width: "53%",
+                    position: "relative",
+                    paddingBottom: "5px",
+                    marginLeft: "10px",
+                  }}
+                >
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "-10px",
+                      width: "100%",
+                      textAlign: "center",
+                    }}
+                  >
+                    {person.lrnNumber}
+                  </div>
+                </span>
+              </td>
+            </tr>
+
+
+            {/* Line 4 */}
+            <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
+              <td colSpan={40}>
+                <b>Do you have any PHYSICAL DISABILITY OR CONDITION that requires special attention or</b>
+              </td>
+            </tr>
+
+            <tr style={{ fontFamily: "Times New Roman", fontSize: "15px", textAlign: "left" }}>
+              <td colSpan={40}>
+                <b>would make it difficult for you to take a regular test?</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                {[
+                  "Blindness", "Low-vision", "Leprosy Cured persons", "Hearing Impairment", "Locomotor Disability",
+                  "Dwarfism", "Intellectual Disability", "Mental Illness", "Autism Spectrum Disorder", "Cerebral Palsy",
+                  "Muscular Dystrophy", "Chronic Neurological conditions", "Specific Learning Disabilities",
+                  "Multiple Sclerosis", "Speech and Language disability", "Thalassemia", "Hemophilia",
+                  "Sickle cell disease", "Multiple Disabilities including"
+                ].includes(person.pwdType) ? (
+                  <>
+                    ( ) NO&nbsp;&nbsp;(✓) YES (specify):{" "}
+                    <span
                       style={{
-                        width: "100%",
-                        borderCollapse: "collapse",
-                        fontFamily: "Arial, sans-serif",
-                        tableLayout: "fixed",
+                        borderBottom: "1px solid black",
+                        display: "inline-block",
+                        width: "230px"
                       }}
                     >
-                      <tbody>
-                        {/* Main text cell and right-side top row */}
-                        <tr>
-                          <td
-                            colSpan={30}
-                            rowSpan={3}
-                            style={{
-                              border: "2px solid black",
-                              textAlign: "left",
-                              padding: "8px",
-                              fontWeight: "bold",
-                              fontSize: "12px",
-                              verticalAlign: "top",
-                            }}
-                          >
-                            This document is a sole property of Eulogio "Amang" Rodriguez Institute of Science and Technology (EARIST, Manila).
-                            Any disclosure, unauthorized reproduction or use is strictly prohibited except with permission from EARIST Manila.
-                          </td>
-                          <td
-                            colSpan={5}
-                            style={{
-                              borderLeft: "2px solid black",
-                              borderTop: "2px solid black",
-                              padding: "8px",
-                              fontSize: "12px",
-                            }}
-                          >
-                            {/* Placeholder cell, row 1 right side */}
-                          </td>
-                          <td
-                            colSpan={5}
-                            style={{
-                              borderRight: "2px solid black",
-                              borderTop: "2px solid black",
-                              padding: "8px",
-                              fontSize: "12px",
-                            }}
-                          >
-                            {/* Placeholder cell, row 1 right side */}
-                          </td>
-                        </tr>
+                      {person.pwdType}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    (✓) NO&nbsp;&nbsp;( ) YES (specify):{" "}
+                    <span
+                      style={{
+                        borderBottom: "1px solid black",
+                        display: "inline-block",
+                        width: "230px"
+                      }}
+                    ></span>
+                  </>
+                )}
+              </td>
+            </tr>
 
-                        {/* Second row on right side */}
-                        <tr>
-                          <td
-                            colSpan={5}
-                            style={{
-                              border: "2px solid black",
-                              padding: "8px",
-                              fontSize: "12px",
-                            }}
-                          >
-                            {/* Placeholder cell, row 2 right side */}
-                          </td>
-                          <td
-                            colSpan={5}
-                            style={{
-                              border: "2px solid black",
-                              padding: "8px",
-                              fontSize: "12px",
-                            }}
-                          >
-                            {/* Placeholder cell, row 2 right side */}
-                          </td>
-                        </tr>
-
-                        {/* Third row on right side */}
-                        <tr>
-                          <td
-                            colSpan={5}
-                            style={{
-                              border: "2px solid black",
-                              padding: "8px",
-                              fontSize: "12px",
-                            }}
-                          >
-                            {/* Placeholder cell, row 3 right side */}
-                          </td>
-                          <td
-                            colSpan={5}
-                            style={{
-                              border: "2px solid black",
-                              padding: "8px",
-                              fontSize: "12px",
-                            }}
-                          >
-                            {/* Placeholder cell, row 3 right side */}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                </tr>
+          </tbody>
+        </table>
 
 
 
-              </tbody>
-            </table>
 
 
-          </form>
+        <table
+          style={{
+            border: "2px solid black",
+            borderCollapse: "collapse",
+            fontFamily: "Arial, Helvetica, sans-serif",
+            width: "8in",
+            margin: "0 auto",
+            textAlign: "center",
+            tableLayout: "fixed",
+            marginTop: "20px"
+          }}
+        >
+          <tbody>
+            <tr>
+              <td
+                colSpan={40}
+                style={{
+                  height: "0.2in",
+                  fontSize: "72.5%",
+
+                  color: "white",
+                }}
+              >
+                <b>
+                  <b style={{
+                    color: "black",
+                    fontFamily: "Times new Roman",
+                    fontSize: '15px',
+                    textAlign: "center",
+                    display: "block",
+                    border: "2px solid black",
+                    fontStyle: 'italic'
+                  }}>
+                    {"\u00A0\u00A0"}ATTESTATION
+                  </b>
+
+                </b>
+              </td>
+            </tr>
+            <tr>
+              <td colSpan={40} style={{
+                fontSize: "12px",
+                textAlign: "justify",
+                color: "black",
+                fontFamily: "arial",
+                padding: "8px",
+                lineHeight: "1.5",
+              }}>
+                <strong>
+                  I certify that the information given above is true, complete, and accurate to the best of my knowledge and belief.
+
+                  I promise to abide by the rules and regulations of Eulogio "Amang" Rodriguez Institute of Science and Technology
+                  regarding the ECAT and my possible admission.
+
+                  I am aware that any false or misleading information and/or statement may result in the refusal or disqualification
+                  of my admission to the Institution.
+                </strong>
+              </td>
+            </tr>
+            <tr>
+              <td colSpan={40}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    padding: "20px 40px 0 40px",
+                    fontFamily: "Times New Roman",
+                    fontSize: "14px",
+                  }}
+                >
+                  {/* LEFT: Applicant */}
+                  <div style={{ textAlign: "center" }}>
+                    <div
+                      style={{
+                        borderBottom: "1px solid black",
+                        width: "300px",
+                        marginBottom: "5px",
+                        paddingBottom: "3px",
+                        fontWeight: "bold",
+                        height: "20px", // gives consistent line height
+                      }}
+                    >
+                      {`${person.first_name || ""} ${person.middle_name || ""} ${person.last_name || ""} ${person.extension || ""}`.toUpperCase()}
+                    </div>
+                    <div>Applicant</div>
+                    <div style={{ fontSize: "12px" }}>(signature over printed name)</div>
+                  </div>
+
+                  {/* RIGHT: Date */}
+                  <div style={{ textAlign: "center" }}>
+                    <div
+                      style={{
+                        borderBottom: "1px solid black",
+                        width: "300px",
+                        marginBottom: "5px",
+                        paddingBottom: "3px",
+                        height: "20px",
+                      }}
+                    >
+                      &nbsp;
+                    </div>
+                    <div>Date</div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
 
 
-        </Container>
+
+        <table
+
+          style={{
+
+            borderCollapse: "collapse",
+            fontFamily: "Arial, Helvetica, sans-serif",
+            width: "8in",
+            margin: "0 auto",
+            textAlign: "center",
+            tableLayout: "fixed",
+          }}
+        >
+          <tbody>
+
+            <tr>
+              <td
+                style={{ height: "15px" }} colSpan={40}>
+              </td>
+            </tr>
+            <tr>
+              <td
+                colSpan={30}
+                rowSpan={3}
+                style={{
+                  border: "2px solid black",
+                  textAlign: "left",
+                  padding: "8px",
+                  fontWeight: "bold",
+                  fontSize: "12px",
+                  verticalAlign: "top",
+                }}
+              >
+                This document is a sole property of Eulogio "Amang" Rodriguez Institute of Science and Technology (EARIST, Manila).
+                Any disclosure, unauthorized reproduction or use is strictly prohibited except with permission from EARIST Manila.
+              </td>
+              <td
+                colSpan={5}
+                style={{
+                  borderLeft: "2px solid black",
+                  borderTop: "2px solid black",
+                  padding: "8px",
+                  fontSize: "12px",
+                }}
+              >
+                {/* Placeholder cell, row 1 right side */}
+              </td>
+              <td
+                colSpan={5}
+                style={{
+                  borderRight: "2px solid black",
+                  borderTop: "2px solid black",
+                  padding: "8px",
+                  fontSize: "12px",
+                }}
+              >
+                {/* Placeholder cell, row 1 right side */}
+              </td>
+            </tr>
+
+            {/* Second row on right side */}
+            <tr>
+              <td
+                colSpan={5}
+                style={{
+                  border: "2px solid black",
+                  padding: "8px",
+                  fontSize: "12px",
+                }}
+              >
+                {/* Placeholder cell, row 2 right side */}
+              </td>
+              <td
+                colSpan={5}
+                style={{
+                  border: "2px solid black",
+                  padding: "8px",
+                  fontSize: "12px",
+                }}
+              >
+                {/* Placeholder cell, row 2 right side */}
+              </td>
+            </tr>
+
+            {/* Third row on right side */}
+            <tr>
+              <td
+                colSpan={5}
+                style={{
+                  border: "2px solid black",
+                  padding: "8px",
+                  fontSize: "12px",
+                }}
+              >
+                {/* Placeholder cell, row 3 right side */}
+              </td>
+              <td
+                colSpan={5}
+                style={{
+                  border: "2px solid black",
+                  padding: "8px",
+                  fontSize: "12px",
+                }}
+              >
+                {/* Placeholder cell, row 3 right side */}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+
+
+
+
 
 
       </div>

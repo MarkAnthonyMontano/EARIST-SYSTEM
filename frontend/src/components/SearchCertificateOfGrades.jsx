@@ -6,7 +6,7 @@ import FreeTuitionImage from "../assets/FREETUITION.png";
 import EaristLogo from "../assets/EaristLogo.png";
 import '../styles/Print.css'
 
-const CourseTagging = () => {
+const SearchCertificateOfGrades = () => {
 
   const getPersonIdFromToken = () => {
     const token = localStorage.getItem("token");
@@ -19,7 +19,7 @@ const CourseTagging = () => {
 
   const [data, setData] = useState([]);
   const personIDFromToken = getPersonIdFromToken();
-  const filteredData = data.filter((item) => String(item.person_id) === String(personIDFromToken));
+
   const [profilePicture, setProfilePicture] = useState(null);
   const [personID, setPersonID] = useState('');
 
@@ -39,29 +39,6 @@ const CourseTagging = () => {
     fetchPersonData();
   }, [personID]);
   const [studentNumber, setStudentNumber] = useState("");
-  useEffect(() => {
-    const fetchStudentData = async () => {
-      if (!studentNumber) return;
-      try {
-        const response = await axios.get(`http://localhost:5000/api/student/${studentNumber}`);
-        setData(response.data);
-      } catch (err) {
-        console.error("Error fetching student data:", err);
-      }
-    };
-
-    fetchStudentData();
-  }, [studentNumber]);
-
-
-  // For all data
-  useEffect(() => {
-    fetch("http://localhost:5000/person_data/")
-      .then(res => res.json())
-      .then(data => setFilteredData(data))
-      .catch(err => console.error(err));
-  }, []);
-
 
   const fetchProfilePicture = async (person_id) => {
     try {
@@ -141,7 +118,7 @@ const CourseTagging = () => {
 
   const [subjectCounts, setSubjectCounts] = useState({});
   const [year_Level_Description, setYearLevelDescription] = useState(null);
-  
+
   useEffect(() => {
     if (selectedSection) {
       fetchSubjectCounts(selectedSection);
@@ -374,7 +351,7 @@ const CourseTagging = () => {
             }
 
             .student-table {
-              margin-top: -30px !important;
+              margin-top: -10px !important;
             }
           </style>
         </head>
@@ -408,11 +385,14 @@ const CourseTagging = () => {
             <Box p={4} display="grid" className="Box" gridTemplateColumns="1fr 1fr" gap={4}>
               {/* Available Courses */}
               <Box component={Paper} p={2}>
-                {/* Search Student */}
+                <Container>
+                  <h1 style={{ fontSize: "40px", fontWeight: "bold", textAlign: "center", color: "maroon", }}>Search Student:</h1>
+
+                </Container>
                 <Box>
-                  <h1 style={{ textAlign: "Center", color: "red" }}>Search Student:</h1>
+                  <label className="w-40 font-medium">Search Student Number:</label>
                   <TextField
-                    label="Student Number"
+                    label="Enter Student Number"
                     style={{ width: "675px" }}
                     margin="normal"
                     value={studentNumber}
@@ -484,7 +464,7 @@ const CourseTagging = () => {
               <table
                 className="student-table"
                 style={{
-                  border: "1px solid black",
+
                   borderCollapse: "collapse",
                   fontFamily: "Arial, Helvetica, sans-serif",
                   width: "8in",
@@ -545,12 +525,16 @@ const CourseTagging = () => {
                             {/* Center Column - School Information */}
                             <td style={{ width: "60%", textAlign: "center", lineHeight: "1" }}>
                               <div>Republic of the Philippines</div>
-                              <b>Eulogio "Amang" Rodriguez</b><br />
-                              <b>Institute of Science and Technology</b><br />
-                              Nagtahan St. Sampaloc, Manila<br />
-                              <br />
-                              <br />
-                              <b style={{ fontSize: "15px", letterSpacing: '2px' }}>CERTIFICATE OF REGISTRATION </b>
+                              <b>Eulogio "Amang" Rodriguez</b>
+                              <div><b>Institute of Science and Technology</b></div>
+                              <div>Nagtahan St. Sampaloc, Manila</div>
+
+                              {/* Add spacing here */}
+                              <div style={{ marginTop: "30px" }}>
+                                <b style={{ fontSize: "20px", letterSpacing: '2px' }}>
+                                  CERTIFICATE OF REGISTRATION
+                                </b>
+                              </div>
                             </td>
 
                             <td
@@ -602,7 +586,7 @@ const CourseTagging = () => {
                       <b style={{ fontFamily: 'Arial, sans-serif', fontSize: '12px', color: "black", textAlign: 'start', marginLeft: "25px" }}>
                         Registration No:&nbsp;
                         <span style={{ color: "red" }}>
-                          {data[0]?.registration_no || ""}
+
                         </span>
                       </b>
                     </td>
@@ -619,11 +603,28 @@ const CourseTagging = () => {
                       }}
                     >
                       <b style={{ fontFamily: 'Arial, sans-serif', fontSize: '12px', color: "black" }}>
-                        Academic Year/Term : <span style={{ color: "red" }}>{data[0]?.academic_year_term || ""}</span>
+                        Academic Year/Term : <span style={{ color: "red" }}></span>
                       </b>
 
                     </td>
                   </tr>
+
+                </tbody>
+              </table>
+
+              <table
+
+                style={{
+                  border: "1px solid black",
+                  borderCollapse: "collapse",
+                  fontFamily: "Arial, Helvetica, sans-serif",
+                  width: "8in",
+                  margin: "0 auto", // Center the table inside the form
+                  textAlign: "center",
+                  tableLayout: "fixed",
+                }}
+              >
+                <tbody>
                   <tr>
                     <td
                       colSpan={42}
@@ -910,19 +911,19 @@ const CourseTagging = () => {
 
                   <tr>
                     <td colSpan={4} style={{ fontSize: "50%" }}>
-                      <input type="text" value={"Age:"} style={{ fontWeight: "bold", color: "black", fontFamily: 'Arial, sans-serif', fontSize: '12px', width: "98%", border: "none", outline: "none", background: "none" }} />
+                      <input readOnly type="text" value={"Age:"} style={{ fontWeight: "bold", color: "black", fontFamily: 'Arial, sans-serif', fontSize: '12px', width: "98%", border: "none", outline: "none", background: "none" }} />
                     </td>
                     <td colSpan={11} style={{ fontSize: "62.5%" }}>
                       <input type="text" value={data[0]?.age || ""} readOnly style={{ fontFamily: "Arial, sans-serif", color: "black", width: "98%", fontSize: "12px", border: "none", outline: "none", background: "none" }} />
                     </td>
                     <td colSpan={4} style={{ fontSize: "50%" }}>
-                      <input type="text" value={"Year Level:"} style={{ fontWeight: "bold", color: "black", fontFamily: 'Arial, sans-serif', fontSize: '12px', width: "98%", border: "none", outline: "none", background: "none" }} />
+                      <input readOnly type="text" value={"Year Level:"} style={{ fontWeight: "bold", color: "black", fontFamily: 'Arial, sans-serif', fontSize: '12px', width: "98%", border: "none", outline: "none", background: "none" }} />
                     </td>
                     <td colSpan={9} style={{ fontSize: "62.5%", }}>
                       <input type="text" value={year_Level_Description || ''} readOnly style={{ fontFamily: "Arial, sans-serif", color: "black", width: "98%", fontSize: "12px", border: "none", outline: "none", background: "none" }} />
                     </td>
                     <td colSpan={8} style={{ fontSize: "50%" }}>
-                      <input type="text" value={"Scholarship/Discount:"} style={{ fontWeight: "bold", color: "black", fontFamily: 'Arial, sans-serif', fontSize: '12px', width: "98%", border: "none", outline: "none", background: "none" }} />
+                      <input type="text" value={"Scholarship/Discount:"} readOnly style={{ fontWeight: "bold", color: "black", fontFamily: 'Arial, sans-serif', fontSize: '12px', width: "98%", border: "none", outline: "none", background: "none" }} />
                     </td>
                     <td colSpan={6} style={{ fontSize: "62.5%" }}>
                       <input type="text" value={data[0]?.scholarship_discount || ""} readOnly style={{ fontFamily: "Arial, sans-serif", color: "black", width: "98%", fontSize: "12px", border: "none", outline: "none", background: "none" }} />
@@ -934,6 +935,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Email Address:"}
+                        readOnly
                         style={{
                           color: "black",
                           fontWeight: "bold",
@@ -975,7 +977,7 @@ const CourseTagging = () => {
                   <tr>
 
                     <td
-                      colSpan={8}
+                      colSpan={6}
                       rowSpan={2}
                       style={{
                         color: "black",
@@ -992,7 +994,7 @@ const CourseTagging = () => {
                       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '-1px' }}>CODE</div>
                     </td>
                     <td
-                      colSpan={8}
+                      colSpan={10}
                       rowSpan={2}
                       style={{
                         color: "black",
@@ -1130,23 +1132,25 @@ const CourseTagging = () => {
                   </tr>
                   {enrolled.map((item, index) => (
                     <tr key={index}>
-                      <td colSpan={8} style={{ border: "1px solid black" }}>
+                      <td colSpan={6} style={{ border: "1px solid black" }}>
                         <input
                           type="text"
                           value={item.course_code || ""}
+                          readOnly
                           style={{
                             width: "98%",
                             border: "none",
-                              textAlign: "center",
+                            textAlign: "center",
                             background: "none",
                             fontSize: "12px",
                           }}
                         />
                       </td>
-                      <td colSpan={8} style={{ border: "1px solid black" }}>
+                      <td colSpan={10} style={{ border: "1px solid black" }}>
                         <input
                           type="text"
                           value={item.course_description || ""}
+                          readOnly
                           style={{
                             width: "98%",
                             border: "none",
@@ -1160,6 +1164,7 @@ const CourseTagging = () => {
                         <input
                           type="text"
                           value={item.course_unit ?? ""}
+                          readOnly
                           style={{
                             width: "98%",
                             border: "none",
@@ -1173,6 +1178,7 @@ const CourseTagging = () => {
                         <input
                           type="text"
                           value={item.lab_unit ?? ""}
+                          readOnly
                           style={{
                             width: "98%",
                             border: "none",
@@ -1219,6 +1225,7 @@ const CourseTagging = () => {
                         <input
                           type="text"
                           value={item.description || ""}
+                          readOnly
                           style={{
                             width: "98%",
                             border: "none",
@@ -1232,6 +1239,7 @@ const CourseTagging = () => {
                         <input
                           type="text"
                           value={`${item.day_description} ${item.school_time_start}-${item.school_time_end}`}
+                          readOnly
                           style={{
                             width: "98%",
                             border: "none",
@@ -1245,6 +1253,7 @@ const CourseTagging = () => {
                         <input
                           type="text"
                           value={`Prof. ${item.lname}`}
+                          readOnly
                           style={{
                             width: "98%",
                             border: "none",
@@ -1294,6 +1303,7 @@ const CourseTagging = () => {
                         textAlign: "center",
                       }}
                     >
+
                       {totalCourseUnits}
                     </td>
                     <td
@@ -1383,6 +1393,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"A S S E S S E D  F E E S"}
+                        readOnly
                         style={{
                           color: "black",
                           fontWeight: "bold",
@@ -1417,6 +1428,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Tuition (21 unit(s)) "}
+                        readOnly
                         style={{
                           color: "black",
                           width: "98%",
@@ -1438,7 +1450,7 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={filteredData[0]?.tuition || ''}
+                        readOnly
                         style={{
                           textAlign: "center",
                           fontFamily: 'Arial, sans-serif',
@@ -1462,6 +1474,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"RULES OF REFUND"}
+                        readOnly
                         style={{
                           textAlign: "center",
                           color: "black",
@@ -1490,6 +1503,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Athletic Fee"}
+                        readOnly
                         style={{
                           color: "black",
                           width: "98%",
@@ -1511,7 +1525,7 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={filteredData[0]?.athletic_fee || ''}
+                        readOnly
                         style={{
                           textAlign: "center",
                           fontFamily: 'Arial, sans-serif',
@@ -1534,6 +1548,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"1. Full refund of tuition fee - Before the start of classes."}
+                        readOnly
                         style={{
                           textAlign: "left",
                           color: "black",
@@ -1562,6 +1577,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Cultural Fee"}
+                        readOnly
                         style={{
                           color: "black",
                           width: "98%",
@@ -1586,7 +1602,7 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={filteredData[0]?.cultural_fee || ''}
+                        readOnly
                         style={{
                           textAlign: "center",
                           fontFamily: 'Arial, sans-serif',
@@ -1612,6 +1628,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"2. 80% refund of tuition fee - within 1 week from the start of classes."}
+                        readOnly
                         style={{
                           textAlign: "left",
                           color: "black",
@@ -1640,6 +1657,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Developmental Fee"}
+                        readOnly
                         style={{
                           color: "black",
                           width: "98%",
@@ -1664,7 +1682,7 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={filteredData[0]?.development_fee || ''}
+                        readOnly
                         style={{
                           textAlign: "center",
                           fontFamily: 'Arial, sans-serif',
@@ -1690,6 +1708,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"3. 50% refund - within 2 weeks from the start of classes."}
+                        readOnly
                         style={{
                           textAlign: "left",
                           color: "black",
@@ -1718,6 +1737,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Guidance Fee"}
+                        readOnly
                         style={{
                           color: "black",
                           width: "98%",
@@ -1742,7 +1762,7 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={filteredData[0]?.guidance_fee || ''}
+                        readOnly
                         style={{
                           textAlign: "center",
                           fontFamily: 'Arial, sans-serif',
@@ -1768,6 +1788,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"4. No refund - after the 2nd week of classes."}
+                        readOnly
                         style={{
                           textAlign: "left",
                           color: "black",
@@ -1796,6 +1817,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Library Fee"}
+                        readOnly
                         style={{
                           color: "black",
                           width: "98%",
@@ -1820,7 +1842,7 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={filteredData[0]?.library_fee || ''}
+                        readOnly
                         style={{
                           textAlign: "center",
                           color: "black",
@@ -1848,6 +1870,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Medical and Dental Fee"}
+                        readOnly
                         style={{
                           color: "black",
                           width: "98%",
@@ -1872,7 +1895,7 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={filteredData[0]?.medical_dental_fee || ''}
+                        readOnly
                         style={{
                           textAlign: "center",
                           color: "black",
@@ -1898,6 +1921,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"PLEDGE UPON ADMISSION"}
+                        readOnly
                         style={{
                           fontWeight: "bold",
                           textAlign: "center",
@@ -1924,6 +1948,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Registration Fee"}
+                        readOnly
                         style={{
                           color: "black",
                           width: "98%",
@@ -1948,7 +1973,7 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={filteredData[0]?.registration_fee || ''}
+                        readOnly
                         style={{
                           textAlign: "center",
                           color: "black",
@@ -1989,6 +2014,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Computer Fee"}
+                        readOnly
                         style={{
                           color: "black",
                           width: "98%",
@@ -2013,7 +2039,7 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={filteredData[0]?.computer_fee || ''}
+                        readOnly
                         style={{
                           textAlign: "center",
                           color: "black",
@@ -2054,7 +2080,7 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={""}
+                        readOnly
                         style={{
 
                           color: "black",
@@ -2077,7 +2103,7 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={""}
+                        readOnly
                         style={{
 
                           color: "black",
@@ -2100,7 +2126,8 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={""}
+                        readOnly
+
                         style={{
                           textAlign: "left",
                           color: "black",
@@ -2136,6 +2163,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Total Assessment : "}
+                        readOnly
                         style={{
                           color: "black",
                           width: "98%",
@@ -2160,7 +2188,7 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={filteredData[0]?.total_assessment || ''}
+                        readOnly
                         style={{
                           textAlign: "center",
                           color: "black",
@@ -2200,6 +2228,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Less Financial Aid : "}
+                        readOnly
                         style={{
                           color: "black",
                           width: "98%",
@@ -2224,7 +2253,7 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={filteredData[0]?.less_financial_aid || ''}
+                        readOnly
                         style={{
                           textAlign: "center",
                           color: "black",
@@ -2264,6 +2293,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Net Assessed : "}
+                        readOnly
                         style={{
                           color: "black",
                           width: "98%",
@@ -2288,7 +2318,8 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={filteredData[0]?.net_assessed || ''}
+                        readOnly
+
                         style={{
                           textAlign: "center",
                           color: "black",
@@ -2311,6 +2342,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"_________________________________"}
+                        readOnly
                         style={{
                           color: "black",
                           textAlign: "center",
@@ -2349,6 +2381,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Credit Memo : "}
+                        readOnly
                         style={{
                           color: "black",
                           width: "98%",
@@ -2373,7 +2406,7 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={filteredData[0]?.credit_memo || ''}
+                        readOnly
                         style={{
                           textAlign: "center",
                           color: "black",
@@ -2398,6 +2431,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Student's Signature"}
+                        readOnly
                         style={{
                           color: "black",
                           textAlign: "center",
@@ -2435,6 +2469,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Total Discount : "}
+                        readOnly
                         style={{
                           color: "black",
                           width: "98%",
@@ -2459,7 +2494,7 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={filteredData[0]?.total_discount || ''}
+                        readOnly
                         style={{
                           textAlign: "center",
                           color: "black",
@@ -2498,6 +2533,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Total Payment : "}
+                        readOnly
                         style={{
                           color: "black",
                           width: "98%",
@@ -2522,7 +2558,8 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={filteredData[0]?.total_payment || ''}
+                        readOnly
+
                         style={{
                           textAlign: "center",
                           color: "black",
@@ -2561,6 +2598,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Outstanding Balance : "}
+                        readOnly
                         style={{
                           color: "black",
                           width: "98%",
@@ -2585,7 +2623,7 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={filteredData[0]?.outstanding_balance || ''}
+                        readOnly
                         style={{
                           textAlign: "center",
                           color: "black",
@@ -2615,6 +2653,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"A S S E S S E D  F E E S"}
+                        readOnly
                         style={{
                           color: "black",
                           fontWeight: "bold",
@@ -2643,6 +2682,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"APPROVED BY : "}
+                        readOnly
                         style={{
                           color: "black",
                           textAlign: "left",
@@ -2672,6 +2712,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"1st Payment/Due"}
+                        readOnly
                         style={{
                           color: "black",
                           textAlign: "center",
@@ -2697,6 +2738,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"2nd Payment/Due"}
+                        readOnly
                         style={{
                           color: "black",
                           textAlign: "center",
@@ -2722,6 +2764,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"3rd Payment/Due"}
+                        readOnly
                         style={{
                           color: "black",
                           textAlign: "center",
@@ -2747,6 +2790,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"_________________________________"}
+                        readOnly
                         style={{
                           color: "black",
                           textAlign: "center",
@@ -2776,7 +2820,7 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={filteredData[0]?.first_payment_due || ''}
+                        readOnly
                         style={{
                           color: "black",
                           fontWeight: "bold",
@@ -2799,7 +2843,7 @@ const CourseTagging = () => {
                     >
                       <input
                         type="text"
-                        value={filteredData[0]?.second_payment_due || ''}
+                        readOnly
                         style={{
                           color: "black",
                           textAlign: "center",
@@ -2821,8 +2865,8 @@ const CourseTagging = () => {
                       }}
                     >
                       <input
-                        type="text"
-                        value={filteredData[0]?.third_payment_due || ''}
+                        type="text" readOnly
+
                         style={{
                           color: "black",
                           textAlign: "center",
@@ -2846,6 +2890,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Registrar"}
+                        readOnly
                         style={{
                           color: "black",
                           textAlign: "center",
@@ -2862,7 +2907,7 @@ const CourseTagging = () => {
                     </td>
 
                   </tr>
-                  <br />
+
                   <tr>
                     <td
                       colSpan={12}
@@ -2876,6 +2921,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Payment/Validation Date : "}
+                        readOnly
                         style={{
                           color: "black",
                           textAlign: "center",
@@ -2902,6 +2948,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={shortDate}
+                        readOnly
                         style={{
                           color: "black",
                           textAlign: "center",
@@ -2928,6 +2975,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"Official Receipt :"}
+                        readOnly
                         style={{
                           color: "black",
                           textAlign: "center",
@@ -2954,6 +3002,7 @@ const CourseTagging = () => {
                       <input
                         type="text"
                         value={"_______Scholar_______"}
+                        readOnly
                         style={{
                           color: "black",
                           textAlign: "center",
@@ -2973,9 +3022,8 @@ const CourseTagging = () => {
                   </tr>
 
 
-                  <br />
-                  <form>
 
+                  <tr>
                     <td style={{ width: "50%", textAlign: "center" }}>
                       <img
                         src={FreeTuitionImage}
@@ -2989,7 +3037,7 @@ const CourseTagging = () => {
                       />
                     </td>
 
-                  </form>
+                  </tr>
 
                   <tr>
                     <td
@@ -3035,9 +3083,7 @@ const CourseTagging = () => {
                       </b>
                     </td>
                   </tr>
-
                 </tbody>
-
               </table>
             </div>
           </div>
@@ -3048,4 +3094,4 @@ const CourseTagging = () => {
   );
 };
 
-export default CourseTagging;
+export default SearchCertificateOfGrades;

@@ -92,10 +92,26 @@ const AdmissionServices = () => {
         }
     };
 
+  // 🔒 Disable right-click
+document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+// 🔒 Block DevTools shortcuts silently
+document.addEventListener('keydown', (e) => {
+  const isBlockedKey =
+    e.key === 'F12' ||
+    e.key === 'F11' ||
+    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+    (e.ctrlKey && e.key === 'U');
+
+  if (isBlockedKey) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+});
 
 
     return (
-        <Box sx={{ height: 'calc(100vh - 120px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
+        <Box sx={{ height: 'calc(95vh - 80px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
             <Container>
                 <h1 style={{ fontSize: "40px", fontWeight: "bold", textAlign: "Left", color: "maroon", marginTop: "25px" }}> ADMISSION SERVICES</h1>
                 <hr style={{ border: "1px solid #ccc", width: "37%" }} />
@@ -241,9 +257,9 @@ const AdmissionServices = () => {
                             </Container>
 
 
+                            {/* PERSONAL DATA FORM - Description Table */}
                             <table
                                 style={{
-
                                     borderCollapse: "collapse",
                                     fontFamily: "Arial, Helvetica, sans-serif",
                                     width: "8in",
@@ -253,289 +269,286 @@ const AdmissionServices = () => {
                                 }}
                             >
                                 <tbody>
-
-                                    {/* Title: PERSONAL DATA FORM */}
                                     <tr>
-                                        <td colSpan="2" style={{ textAlign: "justify", fontSize: "11px" }}>
+                                        <td colSpan="2" style={{ textAlign: 'justify', fontSize: '12px' }}>
                                             This Client Satisfaction Measurement (CSM) tracks the customer experience of government offices.
                                             Your feedback on your recently concluded transaction will help this office provide a better service.
                                             Personal information shared will be kept confidential and you always have the option to not answer this form.
                                         </td>
                                     </tr>
-                                    <br />
+                                </tbody>
+                            </table>
 
-                                    <table
-                                        style={{
-                                            borderCollapse: "collapse",
-                                            fontFamily: "Arial, Helvetica, sans-serif",
-                                            width: "8in",
-                                            margin: "0 auto",
-                                            textAlign: "left",
-                                            tableLayout: "fixed",
-                                            fontSize: "12px",
-                                        }}
-                                    >
-                                        <tbody>
-                                            <tr>
-                                                <td style={{ fontSize: "12px" }}>
-                                                    Client Type:
-                                                    <label style={{ marginLeft: "20px", marginRight: "10px" }}>
-                                                        <input type="checkbox" name="clientType" /> Citizens
-                                                    </label>
-                                                    <label style={{ marginRight: "10px" }}>
-                                                        <input type="checkbox" name="clientType" /> Business
-                                                    </label>
-                                                    <label>
-                                                        <input type="checkbox" name="clientType" /> Government (Employee or Another Agency)
-                                                    </label>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <br />
-                                    <table
-                                        style={{
-                                            borderCollapse: "collapse",
-                                            fontFamily: "Arial, Helvetica, sans-serif",
-                                            width: "8in",
-                                            margin: "0 auto",
-                                            textAlign: "left",
-                                            tableLayout: "fixed",
-                                            fontSize: "12px",
-                                        }}
-                                    >
-                                        <tbody>
-                                            <tr>
-                                                <td colSpan="2">
-                                                    <label style={{ marginRight: "10px" }}>Date:</label>
-                                                    <input
-                                                        type="text"
-                                                        name="date"
-                                                        style={{
-                                                            border: "none",
-                                                            borderBottom: "1px solid black",
-                                                            outline: "none",
-                                                            width: "150px",
-                                                            marginRight: "10px"
-                                                        }}
-                                                    />
+                            {/* Client Type Table */}
+                            <table
+                                style={{
+                                    borderCollapse: "collapse",
+                                    fontFamily: "Arial, Helvetica, sans-serif",
+                                    width: "8in",
+                                    margin: "20px auto 0 auto",
+                                    textAlign: "left",
+                                    tableLayout: "fixed",
+                                    fontSize: "12px",
+                                }}
+                            >
+                                <tbody>
+                                    <tr>
+                                        <td style={{ fontSize: "12px" }}>
+                                            Client Type:
+                                            <label style={{ marginLeft: "20px", marginRight: "10px" }}>
+                                                <input type="checkbox" name="clientType" /> Citizens
+                                            </label>
+                                            <label style={{ marginRight: "10px" }}>
+                                                <input type="checkbox" name="clientType" /> Business
+                                            </label>
+                                            <label>
+                                                <input type="checkbox" name="clientType" /> Government (Employee or Another Agency)
+                                            </label>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-                                                    <label style={{ marginRight: "10px" }}>Sex:</label>
-                                                    <label style={{ marginRight: "10px" }}>
-                                                        <input type="checkbox" name="sex" value="Male" /> Male
-                                                    </label>
-                                                    <label style={{ marginRight: "20px" }}>
-                                                        <input type="checkbox" name="sex" value="Female" /> Female
-                                                    </label>
+                            {/* Date, Sex, Age, Region Table */}
+                            <table
+                                style={{
+                                    borderCollapse: "collapse",
+                                    fontFamily: "Arial, Helvetica, sans-serif",
+                                    width: "8in",
+                                    margin: "20px auto 0 auto",
+                                    textAlign: "left",
+                                    tableLayout: "fixed",
+                                    fontSize: "12px",
+                                    marginTop: "8px"
+                                }}
+                            >
+                                <tbody>
+                                    <tr>
+                                        <td colSpan="2">
+                                            <label style={{ marginRight: "10px" }}>Date:</label>
+                                            <input
+                                                type="text"
+                                                name="date"
+                                                style={{
+                                                    border: "none",
+                                                    borderBottom: "1px solid black",
+                                                    outline: "none",
+                                                    width: "150px",
+                                                    marginRight: "10px"
+                                                }}
+                                            />
 
-                                                    <label style={{ marginRight: "10px" }}>Age:</label>
-                                                    <input
-                                                        type="text"
-                                                        name="age"
-                                                        style={{
-                                                            border: "none",
-                                                            borderBottom: "1px solid black",
-                                                            outline: "none",
-                                                            width: "60px",
-                                                            marginRight: "20px"
-                                                        }}
-                                                    />
+                                            <label style={{ marginRight: "10px" }}>Sex:</label>
+                                            <label style={{ marginRight: "10px" }}>
+                                                <input type="checkbox" name="sex" value="Male" /> Male
+                                            </label>
+                                            <label style={{ marginRight: "20px" }}>
+                                                <input type="checkbox" name="sex" value="Female" /> Female
+                                            </label>
 
-                                                    <label style={{ marginRight: "10px" }}>Region of Residence:</label>
-                                                    <input
-                                                        type="text"
-                                                        name="region"
-                                                        style={{
-                                                            border: "none",
-                                                            borderBottom: "1px solid black",
-                                                            outline: "none",
-                                                            width: "157px"
-                                                        }}
-                                                    />
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <br />
-                                    <table
-                                        style={{
-                                            borderCollapse: "collapse",
-                                            fontFamily: "Arial, Helvetica, sans-serif",
-                                            width: "8in",
-                                            margin: "0 auto",
-                                            textAlign: "left",
-                                            tableLayout: "fixed",
-                                        }}
-                                    >
-                                        <tbody>
-                                            <tr>
-                                                <td style={{ fontSize: "12px", fontFamily: "Arial", marginRight: "10px", }}>
-                                                    Service Availed:
-                                                    <label style={{ fontSize: "12px", marginLeft: "10px" }}>
-                                                        <input type="checkbox" name="admission" /> Admission
-                                                    </label>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                            <label style={{ marginRight: "10px" }}>Age:</label>
+                                            <input
+                                                type="text"
+                                                name="age"
+                                                style={{
+                                                    border: "none",
+                                                    borderBottom: "1px solid black",
+                                                    outline: "none",
+                                                    width: "60px",
+                                                    marginRight: "20px"
+                                                }}
+                                            />
 
-                                    <table
-                                        style={{
-                                            borderCollapse: "collapse",
-                                            fontFamily: "Arial, Helvetica, sans-serif",
-                                            width: "8in",
-                                            margin: "0 auto",
-                                            textAlign: "left",
-                                            tableLayout: "fixed",
-                                        }}
-                                    >
-                                        <tbody>
-                                            <tr>
-                                                <td colSpan="2" style={{ textAlign: "center" }}>
+                                            <label style={{ marginRight: "10px" }}>Region of Residence:</label>
+                                            <input
+                                                type="text"
+                                                name="region"
+                                                style={{
+                                                    border: "none",
+                                                    borderBottom: "1px solid black",
+                                                    outline: "none",
+                                                    width: "159px"
+                                                }}
+                                            />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-                                                    <span style={{ fontWeight: "bold", fontSize: "12px", marginRight: "10px", }}>Others:</span>
-                                                    <span
-                                                        style={{
-                                                            display: "inline-block",
+                            {/* Service Availed Table */}
+                            <table
+                                style={{
+                                    borderCollapse: "collapse",
+                                    fontFamily: "Arial, Helvetica, sans-serif",
+                                    width: "8in",
+                                    margin: "20px auto 0 auto",
+                                    textAlign: "left",
+                                    tableLayout: "fixed",
+                                    marginTop: "8px"
+                                }}
+                            >
+                                <tbody>
+                                    <tr>
+                                        <td style={{ fontSize: "12px", fontFamily: "Arial", marginRight: "10px" }}>
+                                            Service Availed:
+                                            <label style={{ fontSize: "12px", marginLeft: "10px" }}>
+                                                <input type="checkbox" name="admission" /> Admission
+                                            </label>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-                                                            borderBottom: "1px solid black",
-                                                            width: "40%",
-                                                            height: "20px",
-                                                            verticalAlign: "bottom",
-                                                            marginTop: "5px"
-                                                        }}
-                                                    >
+                            {/* Others Table */}
+                            <table
+                                style={{
+                                    borderCollapse: "collapse",
+                                    fontFamily: "Arial, Helvetica, sans-serif",
+                                    width: "8in",
+                                    margin: "20px auto",
+                                    textAlign: "left",
+                                    tableLayout: "fixed",
+                                    marginTop: "2px"
+                                }}
+                            >
+                                <tbody>
+                                    <tr>
+                                        <td colSpan="2" style={{ textAlign: "center" }}>
+                                            <span style={{ fontWeight: "bold", fontSize: "12px", marginRight: "10px" }}>Others:</span>
+                                            <span
+                                                style={{
+                                                    display: "inline-block",
+                                                    borderBottom: "1px solid black",
+                                                    width: "40%",
+                                                    height: "20px",
+                                                    verticalAlign: "bottom",
+                                                    marginTop: "5px"
+                                                }}
+                                            ></span>
+                                            <span
+                                                style={{
+                                                    display: "inline-block",
+                                                    marginLeft: "5px",
+                                                    borderBottom: "1px solid black",
+                                                    width: "98.8%",
+                                                    height: "20px",
+                                                    verticalAlign: "bottom",
+                                                    marginTop: "5px"
+                                                }}
+                                            ></span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
-                                                    </span>
 
-                                                    <span
-                                                        style={{
-                                                            display: "inline-block",
-                                                            marginLeft: "5px",
-                                                            borderBottom: "1px solid black",
-                                                            width: "100%",
-                                                            height: "20px",
-                                                            verticalAlign: "bottom",
-                                                            marginTop: "5px"
-                                                        }}
-                                                    >
+                            <br />
 
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                            <table
+                                style={{
+                                    borderCollapse: "collapse",
+                                    fontFamily: "Arial, Helvetica, sans-serif",
+                                    width: "8in",
+                                    margin: "0 auto",
+                                    textAlign: "left",
+                                    tableLayout: "fixed",
+                                    marginTop: "-25px"
+                                }}
+                            >
+                                <tbody>
+                                    {/* INSTRUCTIONS */}
+                                    <tr>
+                                        <td colSpan={2} style={{ textAlign: 'justify', fontSize: '12px' }}>
+                                            <strong>INSTRUCTIONS:</strong> Check mark (✓) your answer to the Citizen's Charter (CC) questions. The Citizen's Charter is an official document that reflects the service of a government agency/office including its requirements, fees, and processing times among others.
+                                        </td>
+                                    </tr>
 
+                                    {/* CC1 QUESTION */}
+                                    <tr>
+                                        <td colSpan={2} style={{ marginTop: "10px", fontWeight: 'bold', fontSize: '12px', textAlign: 'justify' }}>
+                                            CC1 - Which of the following best describes your awareness of a CC?
+                                        </td>
+                                    </tr>
 
-                                    <br />
+                                    {/* CC1 OPTIONS */}
+                                    {[
+                                        "1. I know what a CC is and I saw this office's CC.",
+                                        "2. I know what a CC is but I did NOT see this office's CC.",
+                                        "3. I learned of the CC only when I saw this office's CC.",
+                                        "4. I do not know what a CC is and I did not see one in this office. (Answer 'N/A' on CC2 and CC3)"
+                                    ].map((text, index) => (
+                                        <tr key={`cc1-${index}`}>
+                                            <td colSpan={2}>
+                                                <label style={{ display: 'flex', alignItems: 'center', marginLeft: "20px", fontSize: "12px" }}>
+                                                    <input type="checkbox" name="cc1" style={{ marginRight: '8px' }} />
+                                                    {text}
+                                                </label>
+                                            </td>
+                                        </tr>
+                                    ))}
 
-                                    <table
-                                        style={{
-                                            borderCollapse: "collapse",
-                                            fontFamily: "Arial, Helvetica, sans-serif",
-                                            width: "8in",
-                                            margin: "0 auto",
-                                            textAlign: "left",
-                                            tableLayout: "fixed",
-                                        }}
-                                    >
-                                        <tbody>
-                                            {/* INSTRUCTIONS */}
-                                            <tr>
-                                                <td colSpan={2} style={{ textAlign: 'justify', fontSize: '12px' }}>
-                                                    <strong>INSTRUCTIONS:</strong> Check mark (✓) your answer to the Citizen's Charter (CC) questions. The Citizen's Charter is an official document that reflects the service of a government agency/office including its requirements, fees, and processing times among others.
-                                                </td>
-                                            </tr>
+                                    {/* CC2 QUESTION */}
+                                    <tr>
+                                        <td colSpan={2} style={{ fontWeight: 'bold', fontSize: '12px', textAlign: 'justify' }}>
+                                            CC2 - If aware of CC (answered 1-3 in CC1), would you say that the CC of this office was...?
+                                        </td>
+                                    </tr>
 
-                                            {/* CC1 QUESTION */}
-                                            <tr>
-                                                <td colSpan={2} style={{ marginTop: "10px", fontWeight: 'bold', fontSize: '12px', textAlign: 'justify' }}>
-                                                    CC1 - Which of the following best describes your awareness of a CC?
-                                                </td>
-                                            </tr>
-
-                                            {/* CC1 OPTIONS */}
-                                            {[
-                                                "1. I know what a CC is and I saw this office's CC.",
-                                                "2. I know what a CC is but I did NOT see this office's CC.",
-                                                "3. I learned of the CC only when I saw this office's CC.",
-                                                "4. I do not know what a CC is and I did not see one in this office. (Answer 'N/A' on CC2 and CC3)"
-                                            ].map((text, index) => (
-                                                <tr key={`cc1-${index}`}>
-                                                    <td colSpan={2}>
+                                    {/* CC2 OPTIONS */}
+                                    {[
+                                        ["1. Easy to see", "4. Not visible at all"],
+                                        ["2. Somewhat easy to see", "5. N/A"],
+                                        ["3. Difficult to see", ""]
+                                    ].map((row, i) => (
+                                        <tr key={`cc2-${i}`}>
+                                            {row.map((text, j) => (
+                                                <td key={j} style={{ width: '50%' }}>
+                                                    {text && (
                                                         <label style={{ display: 'flex', alignItems: 'center', marginLeft: "20px", fontSize: "12px" }}>
-                                                            <input type="checkbox" name="cc1" style={{ marginRight: '8px' }} />
+                                                            <input type="checkbox" name="cc2" style={{ marginRight: '8px' }} />
                                                             {text}
                                                         </label>
-                                                    </td>
-                                                </tr>
-                                            ))}
-
-                                            {/* CC2 QUESTION */}
-                                            <tr>
-                                                <td colSpan={2} style={{ fontWeight: 'bold', fontSize: '12px', textAlign: 'justify' }}>
-                                                    CC2 - If aware of CC (answered 1-3 in CC1), would you say that the CC of this office was...?
+                                                    )}
                                                 </td>
-                                            </tr>
-
-                                            {/* CC2 OPTIONS */}
-                                            {[
-                                                ["1. Easy to see", "4. Not visible at all"],
-                                                ["2. Somewhat easy to see", "5. N/A"],
-                                                ["3. Difficult to see", ""]
-                                            ].map((row, i) => (
-                                                <tr key={`cc2-${i}`}>
-                                                    {row.map((text, j) => (
-                                                        <td key={j} style={{ width: '50%' }}>
-                                                            {text && (
-                                                                <label style={{ display: 'flex', alignItems: 'center', marginLeft: "20px", fontSize: "12px" }}>
-                                                                    <input type="checkbox" name="cc2" style={{ marginRight: '8px' }} />
-                                                                    {text}
-                                                                </label>
-                                                            )}
-                                                        </td>
-                                                    ))}
-                                                </tr>
                                             ))}
+                                        </tr>
+                                    ))}
 
-                                            {/* CC3 QUESTION */}
-                                            <tr>
-                                                <td colSpan={2} style={{ fontWeight: 'bold', fontSize: '12px', textAlign: 'justify' }}>
-                                                    CC3 - If aware of CC (answered codes 1-3 in CC1), how much did the CC help you in your transaction?
+                                    {/* CC3 QUESTION */}
+                                    <tr>
+                                        <td colSpan={2} style={{ fontWeight: 'bold', fontSize: '12px', textAlign: 'justify' }}>
+                                            CC3 - If aware of CC (answered codes 1-3 in CC1), how much did the CC help you in your transaction?
+                                        </td>
+                                    </tr>
+
+                                    {/* CC3 OPTIONS */}
+                                    {[
+                                        ["1. Helped very much", "3. Did not help"],
+                                        ["2. Somewhat helped", "4. N/A"]
+                                    ].map((row, i) => (
+                                        <tr key={`cc3-${i}`}>
+                                            {row.map((text, j) => (
+                                                <td key={j} style={{ width: '50%' }}>
+                                                    <label style={{ display: 'flex', alignItems: 'center', marginLeft: "20px", fontSize: "12px" }}>
+                                                        <input type="checkbox" name="cc3" style={{ marginRight: '8px' }} />
+                                                        {text}
+                                                    </label>
+
                                                 </td>
-                                            </tr>
-
-                                            {/* CC3 OPTIONS */}
-                                            {[
-                                                ["1. Helped very much", "3. Did not help"],
-                                                ["2. Somewhat helped", "4. N/A"]
-                                            ].map((row, i) => (
-                                                <tr key={`cc3-${i}`}>
-                                                    {row.map((text, j) => (
-                                                        <td key={j} style={{ width: '50%' }}>
-                                                            <label style={{ display: 'flex', alignItems: 'center', marginLeft: "20px", fontSize: "12px" }}>
-                                                                <input type="checkbox" name="cc3" style={{ marginRight: '8px' }} />
-                                                                {text}
-                                                            </label>
-
-                                                        </td>
-
-                                                    ))}
-
-                                                </tr>
-
-
 
                                             ))}
 
-                                        </tbody>
-                                    </table>
-                                    <br />
+                                        </tr>
 
 
+
+                                    ))}
 
                                 </tbody>
                             </table>
+                            <br />
+
+
 
                             <table
                                 style={{
@@ -1441,7 +1454,7 @@ const AdmissionServices = () => {
 
 
                                     <tr>
-                                        <td colSpan={40} style={{ textAlign: "left", fontFamily: "Times New Roman", fontSize: "12px", paddingTop: "5px" }}>
+                                        <td colSpan={40} style={{ textAlign: "left", fontFamily: "Times New Roman", fontSize: "12px", paddingTop: "15px" }}>
                                             <span style={{ fontWeight: "bold", marginRight: "10px" }}>Email Address: (optional)</span>{" "}
 
                                             <span style={{ marginTop: "15px", display: "inline-block", borderBottom: "1px solid black", width: "50%", paddingLeft: "10px" }}>

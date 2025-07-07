@@ -190,25 +190,26 @@ const OfficeOfTheRegistrar = () => {
   }
 
 
- // 🔒 Disable right-click, F12, F11, Ctrl+Shift+I, etc.
-  document.addEventListener('contextmenu', (e) => e.preventDefault());
-  document.addEventListener('keydown', (e) => {
-    if (
-      e.key === 'F12' || // DevTools
-      e.key === 'F11' || // Fullscreen toggle
-      (e.ctrlKey && e.shiftKey && e.key === 'I') || // Ctrl+Shift+I
-      (e.ctrlKey && e.shiftKey && e.key === 'J') || // Ctrl+Shift+J
-      (e.ctrlKey && e.key === 'U') // View Source
-    ) {
-      e.preventDefault();
-      alert('Action not allowed.');
-    }
-  });
+// 🔒 Disable right-click
+document.addEventListener('contextmenu', (e) => e.preventDefault());
 
+// 🔒 Block DevTools shortcuts silently
+document.addEventListener('keydown', (e) => {
+  const isBlockedKey =
+    e.key === 'F12' ||
+    e.key === 'F11' ||
+    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+    (e.ctrlKey && e.key === 'U');
+
+  if (isBlockedKey) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+});
 
 
   return (
-    <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
+    <Box sx={{ height: 'calc(95vh - 80px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
       <Container>
         <h1 style={{ fontSize: "40px", fontWeight: "bold", textAlign: "Left", color: "maroon", marginTop: "25px" }}> OFFICE OF THE REGISTRAR</h1>
         <hr style={{ border: "1px solid #ccc", width: "45%" }} />

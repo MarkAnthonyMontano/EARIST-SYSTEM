@@ -2250,7 +2250,7 @@ app.get("/departments", async (req, res) => {
   }
 });
 
-// ðŸ“Œ Count how many students enrolled per subject for a selected section (UPDATED!)
+// Count how many students enrolled per subject for a selected section (UPDATED!)
 app.get("/subject-enrollment-count", async (req, res) => {
   const { sectionId } = req.query; // department_section_id
 

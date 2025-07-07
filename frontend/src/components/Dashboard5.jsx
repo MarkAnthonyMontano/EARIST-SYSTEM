@@ -107,21 +107,24 @@ const Dashboard5 = () => {
     return isValid;
   };
 
-  
-  // 🔒 Disable right-click, F12, F11, Ctrl+Shift+I, etc.
+
+  // 🔒 Disable right-click
   document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+  // 🔒 Block DevTools shortcuts silently
   document.addEventListener('keydown', (e) => {
-    if (
-      e.key === 'F12' || // DevTools
-      e.key === 'F11' || // Fullscreen toggle
-      (e.ctrlKey && e.shiftKey && e.key === 'I') || // Ctrl+Shift+I
-      (e.ctrlKey && e.shiftKey && e.key === 'J') || // Ctrl+Shift+J
-      (e.ctrlKey && e.key === 'U') // View Source
-    ) {
+    const isBlockedKey =
+      e.key === 'F12' ||
+      e.key === 'F11' ||
+      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+      (e.ctrlKey && e.key === 'U');
+
+    if (isBlockedKey) {
       e.preventDefault();
-      alert('Action not allowed.');
+      e.stopPropagation();
     }
   });
+
 
 
 
@@ -313,7 +316,7 @@ const Dashboard5 = () => {
             <Typography style={{ fontSize: "12px", fontFamily: "Arial", textAlign: "Left" }}>
               I certify that the information given above are true, complete, and accurate to the best of my knowledge and belief. I promise to abide by the rules and regulations of Eulogio "Amang" Rodriguez Institute of Science and Technology regarding the ECAT and my possible admission. I am aware that any false or misleading information and/or statement may result in the refusal or disqualification of my admission to the institution.
             </Typography>
-       
+
             <FormControl required error={!!errors.termsOfAgreement} component="fieldset" sx={{ mb: 2 }}>
               <FormControlLabel
                 control={
