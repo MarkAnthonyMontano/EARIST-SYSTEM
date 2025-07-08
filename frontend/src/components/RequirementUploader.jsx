@@ -124,7 +124,8 @@ const [userID, setUserID] = useState("");
     }
   };
 
-   // 🔒 Disable right-click
+  
+  // 🔒 Disable right-click
   document.addEventListener('contextmenu', (e) => e.preventDefault());
 
   // 🔒 Block DevTools shortcuts silently

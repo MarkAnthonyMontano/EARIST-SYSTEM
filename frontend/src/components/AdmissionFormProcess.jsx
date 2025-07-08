@@ -85,22 +85,22 @@ const AdmissionFormProcess = () => {
     }
   };
 
-// 🔒 Disable right-click
-document.addEventListener('contextmenu', (e) => e.preventDefault());
+  // 🔒 Disable right-click
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-// 🔒 Block DevTools shortcuts silently
-document.addEventListener('keydown', (e) => {
-  const isBlockedKey =
-    e.key === 'F12' ||
-    e.key === 'F11' ||
-    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-    (e.ctrlKey && e.key === 'U');
+  // 🔒 Block DevTools shortcuts silently
+  document.addEventListener('keydown', (e) => {
+    const isBlockedKey =
+      e.key === 'F12' ||
+      e.key === 'F11' ||
+      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+      (e.ctrlKey && e.key === 'U');
 
-  if (isBlockedKey) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-});
+    if (isBlockedKey) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
 
 
 
@@ -185,7 +185,7 @@ document.addEventListener('keydown', (e) => {
                   <div style={{ marginLeft: "-155px", fontFamily: "Arial", letterSpacing: '2px' }}><b>INSTITUTE OF SCIENCE AND TECHNOLOGY</b></div>
                   <div style={{ marginLeft: "-155px", fontFamily: "Arial", fontSize: "12px" }}>Nagtahan, Sampaloc, Manila 1008</div>
                   <div style={{ marginLeft: "-155px", fontFamily: "Arial", letterSpacing: '1px', }}><b>OFFICE OF THE ADMISSION SERVICES</b></div>
-               
+
                   <br />
 
                   <div style={{
@@ -419,7 +419,7 @@ document.addEventListener('keydown', (e) => {
                 </td>
 
               </tr>
-       
+
               <tr>
                 <td colSpan={15} style={{ border: "1px solid black", textAlign: "left", padding: "8px", fontSize: "12px" }}>
                   <b> Guidance Office</b> (as per Schedule)
@@ -682,7 +682,7 @@ document.addEventListener('keydown', (e) => {
                   <div style={{ marginLeft: "-155px", fontFamily: "Arial", fontSize: "12px" }}>Nagtahan, Sampaloc, Manila 1008</div>
                   <div style={{ marginLeft: "-155px", fontFamily: "Arial", letterSpacing: '1px', }}><b>OFFICE OF THE ADMISSION SERVICES</b></div>
                   <br />
-           
+
                   <div style={{
                     fontSize: "21px",
                     fontFamily: "Arial",
@@ -914,7 +914,7 @@ document.addEventListener('keydown', (e) => {
                 </td>
 
               </tr>
-            
+
 
               <tr>
                 <td colSpan={15} style={{ border: "1px solid black", textAlign: "left", padding: "8px", fontSize: "12px" }}>
