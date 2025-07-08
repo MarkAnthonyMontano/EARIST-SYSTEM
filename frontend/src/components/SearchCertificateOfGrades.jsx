@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { Box, Button, Paper, TextField, Container } from "@mui/material";
+import { Box, Button, Paper, TextField, Container, Typography } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
 import FreeTuitionImage from "../assets/FREETUITION.png";
 import EaristLogo from "../assets/EaristLogo.png";
@@ -29,7 +29,7 @@ const SearchCertificateOfGrades = () => {
     const fetchPersonData = async () => {
       if (!personID) return;
       try {
-        const response = await axios.get(`http://localhost:5000/person_data/${personID}`);
+        const res = await axios.get(`http://localhost:5000/api/person/${id}`);
         setData(response.data);
       } catch (err) {
         console.error("Failed to fetch person data:", err);
@@ -38,6 +38,8 @@ const SearchCertificateOfGrades = () => {
 
     fetchPersonData();
   }, [personID]);
+
+
   const [studentNumber, setStudentNumber] = useState("");
 
   const fetchProfilePicture = async (person_id) => {
@@ -118,6 +120,7 @@ const SearchCertificateOfGrades = () => {
 
   const [subjectCounts, setSubjectCounts] = useState({});
   const [year_Level_Description, setYearLevelDescription] = useState(null);
+  const [major, setMajor] = useState(null);
 
   useEffect(() => {
     if (selectedSection) {
@@ -218,6 +221,7 @@ const SearchCertificateOfGrades = () => {
         person_id,
         studentNumber: studentNum,
         activeCurriculum: active_curriculum,
+        major: major,
         yearLevel,
         yearLevelDescription: yearLevelDescription,
         yearDesc: yearDesc,
@@ -238,6 +242,7 @@ const SearchCertificateOfGrades = () => {
       localStorage.setItem("person_id", person_id);
       localStorage.setItem("studentNumber", studentNum);
       localStorage.setItem("activeCurriculum", active_curriculum);
+      localStorage.setItem("major", major);
       localStorage.setItem("yearLevel", yearLevel);
       localStorage.setItem("departmentName", dprtmnt_name);
       localStorage.setItem("courseCode", course_code);
@@ -255,6 +260,7 @@ const SearchCertificateOfGrades = () => {
       setUserMiddleName(middle_name);
       setUserLastName(last_name);
       setCurr(active_curriculum);
+      setMajor(major);
       setCourseCode(dprtmnt_name);
       setCourseCode(course_code);
       setCourseDescription(course_desc);
@@ -275,8 +281,10 @@ const SearchCertificateOfGrades = () => {
       setGender(fullData.gender || null);
       setAge(fullData.age || null);
       console.log(age)
+      console.log(major)
       setEmail(fullData.email || null);
-      setProgram(fullData.program || null);
+      setProgram(active_curriculum); 
+
       alert("Student found and data loaded!");
 
     } catch (error) {
@@ -284,6 +292,8 @@ const SearchCertificateOfGrades = () => {
       alert(error.response?.data?.message || "Student not found");
     }
   };
+
+
 
 
   // Fetch all departments when component mounts
@@ -300,9 +310,6 @@ const SearchCertificateOfGrades = () => {
     fetchDepartments();
   }, []);
 
-  const handleSelect = (departmentId) => {
-    setSelectedDepartment(departmentId);
-  };
 
   const divToPrintRef = useRef();
 
@@ -351,7 +358,7 @@ const SearchCertificateOfGrades = () => {
             }
 
             .student-table {
-              margin-top: -10px !important;
+              margin-top: 5px !important;
             }
           </style>
         </head>
@@ -373,6 +380,32 @@ const SearchCertificateOfGrades = () => {
   const totalCombined = totalCourseUnits + totalLabUnits;
 
 
+  const [curriculumOptions, setCurriculumOptions] = useState([]);
+
+  useEffect(() => {
+  const fetchCurriculums = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/applied_program");
+      setCurriculumOptions(response.data);
+    } catch (error) {
+      console.error("Error fetching curriculum options:", error);
+    }
+  };
+
+  fetchCurriculums();
+}, []);
+
+
+  console.log("person.program:", data.program);
+  console.log("curriculumOptions:", curriculumOptions);
+
+  {
+    curriculumOptions.find(
+      (item) =>
+        item?.curriculum_id?.toString() === (data?.program ?? "").toString()
+    )?.program_description || (data?.program ?? "")
+
+  }
 
 
 
@@ -382,64 +415,78 @@ const SearchCertificateOfGrades = () => {
       <Container className="mt-8">
         <div className="flex-container">
           <div className="section">
-            <Box p={4} display="grid" className="Box" gridTemplateColumns="1fr 1fr" gap={4}>
-              {/* Available Courses */}
-              <Box component={Paper} p={2}>
-                <Container>
-                  <h1 style={{ fontSize: "40px", fontWeight: "bold", textAlign: "center", color: "maroon", }}>Search Student:</h1>
 
-                </Container>
-                <Box>
-                  <label className="w-40 font-medium">Search Student Number:</label>
-                  <TextField
-                    label="Enter Student Number"
-                    style={{ width: "675px" }}
-                    margin="normal"
-                    value={studentNumber}
-                    onChange={(e) => setStudentNumber(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        handleSearchStudent();
-                      }
-                    }}
-                  />
-
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    fullWidth
-                    onClick={handleSearchStudent}
-                  >
-                    Search
-                  </Button>
-                </Box>
-                <button
-                  onClick={printDiv}
-                  style={{
-                    marginBottom: "1rem",
-                    padding: "10px 20px",
-                    border: "2px solid black",
-                    backgroundColor: "#f0f0f0",
-                    color: "black",
-                    borderRadius: "5px",
-                    marginTop: "20px",
-                    cursor: "pointer",
-                    fontSize: "16px",
-                    fontWeight: "bold",
-                    transition: "background-color 0.3s, transform 0.2s",
-                  }}
-                  onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
-                  onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
-                  onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
-                  onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
-                >
-                  Print Table
-                </button>
+            <Container
+              maxWidth="75%"
+              sx={{
+                backgroundColor: "#6D2323",
+                border: "2px solid black",
+                maxHeight: "500px",
+                overflowY: "auto",
+                color: "white",
+                borderRadius: 2,
+                boxShadow: 3,
+                padding: "4px",
+              }}
+            >
+              <Box sx={{ width: "75%" }}>
+                <Typography style={{ fontSize: "20px", padding: "10px", fontFamily: "Arial Black" }}>Search Certificate of Registration</Typography>
               </Box>
+            </Container>
+            <Container maxWidth="75%" sx={{ backgroundColor: "white", border: "2px solid black", padding: 4, borderRadius: 2, boxShadow: 3 }}>
+
+              <Box>
+                <label className="w-40 font-medium">Search Student Number:</label>
+                <br />
+                <TextField
+                  label="Enter Student Number"
+                  style={{ width: "675px" }}
+                  margin="normal"
+                  value={studentNumber}
+                  onChange={(e) => setStudentNumber(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleSearchStudent();
+                    }
+                  }}
+                />
+
+                <Button
+                  variant="contained"
+                  color="primary"
+                  style={{ width: "675px" }}
+                  fullWidth
+                  onClick={handleSearchStudent}
+                >
+                  Search
+                </Button>
+              </Box>
+              <button
+                onClick={printDiv}
+                style={{
+                  marginBottom: "1rem",
+                  padding: "10px 20px",
+                  border: "2px solid black",
+                  backgroundColor: "#f0f0f0",
+                  color: "black",
+                  borderRadius: "5px",
+                  marginTop: "20px",
+                  cursor: "pointer",
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  transition: "background-color 0.3s, transform 0.2s",
+                }}
+                onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
+                onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
+                onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
+                onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
+              >
+                Print Table
+              </button>
+            </Container>
 
 
 
-            </Box>
           </div>
           <Box p={4} display="grid" gridTemplateColumns="1fr 1fr" gap={4}></Box>
           <div ref={divToPrintRef}>
@@ -519,7 +566,7 @@ const SearchCertificateOfGrades = () => {
 
 
                             <td style={{ width: "20%", textAlign: "center" }}>
-                              <img src={EaristLogo} alt="Earist Logo" style={{ marginLeft: "35px", width: "120px", height: "120px" }} />
+                              <img src={EaristLogo} alt="Earist Logo" style={{ marginLeft: "25px", width: "140px", height: "140px" }} />
                             </td>
 
                             {/* Center Column - School Information */}
@@ -615,7 +662,9 @@ const SearchCertificateOfGrades = () => {
               <table
 
                 style={{
-                  border: "1px solid black",
+                  borderLeft: "1px solid black",
+                  borderTop: "1px solid black",
+                  borderRight: "1px solid black",
                   borderCollapse: "collapse",
                   fontFamily: "Arial, Helvetica, sans-serif",
                   width: "8in",
@@ -778,10 +827,16 @@ const SearchCertificateOfGrades = () => {
                     </td>
 
                     {/* Program Value */}
-                    <td colSpan={16} style={{ fontSize: "62.5%" }}>
+                    <td colSpan={23} style={{ fontSize: "62.5%" }}>
                       <input
                         type="text"
-                        value={data[0]?.program || ""}
+                        value={
+                          curriculumOptions.find(
+                            (item) =>
+                              item?.curriculum_id?.toString() === (program ?? "").toString()
+                          )?.program_description || program || ""
+                        }
+
                         readOnly
                         style={{
                           fontFamily: "Arial, sans-serif",
@@ -794,6 +849,7 @@ const SearchCertificateOfGrades = () => {
                         }}
                       />
                     </td>
+
                   </tr>
 
                   <tr>
@@ -820,7 +876,13 @@ const SearchCertificateOfGrades = () => {
                     <td colSpan={11} style={{ fontSize: "62.5%" }}>
                       <input
                         type="text"
-                        value={data[0]?.gender || ""}
+                        value={
+                          data[0]?.gender === 0
+                            ? "Male"
+                            : data[0]?.gender === 1
+                              ? "Female"
+                              : ""
+                        }
                         readOnly
                         style={{
                           fontFamily: "Arial, sans-serif",
@@ -833,6 +895,7 @@ const SearchCertificateOfGrades = () => {
                         }}
                       />
                     </td>
+
 
                     {/* Major Label */}
                     <td colSpan={4} style={{ fontSize: "62.5%" }}>
@@ -852,12 +915,11 @@ const SearchCertificateOfGrades = () => {
                         }}
                       />
                     </td>
-
                     {/* Major Value */}
                     <td colSpan={9} style={{ fontSize: "62.5%" }}>
                       <input
                         type="text"
-                        value={data[0]?.major || ""}
+                        value={major || ""}
                         readOnly
                         style={{
                           fontFamily: "Arial, sans-serif",
@@ -870,6 +932,7 @@ const SearchCertificateOfGrades = () => {
                         }}
                       />
                     </td>
+
 
                     {/* Curriculum Label */}
                     <td colSpan={5} style={{ fontSize: "62.5%" }}>
@@ -926,7 +989,7 @@ const SearchCertificateOfGrades = () => {
                       <input type="text" value={"Scholarship/Discount:"} readOnly style={{ fontWeight: "bold", color: "black", fontFamily: 'Arial, sans-serif', fontSize: '12px', width: "98%", border: "none", outline: "none", background: "none" }} />
                     </td>
                     <td colSpan={6} style={{ fontSize: "62.5%" }}>
-                      <input type="text" value={data[0]?.scholarship_discount || ""} readOnly style={{ fontFamily: "Arial, sans-serif", color: "black", width: "98%", fontSize: "12px", border: "none", outline: "none", background: "none" }} />
+                      <input type="text" readOnly style={{ fontFamily: "Arial, sans-serif", color: "black", width: "98%", fontSize: "12px", border: "none", outline: "none", background: "none" }} />
                     </td>
                   </tr>
 
@@ -1245,7 +1308,7 @@ const SearchCertificateOfGrades = () => {
                             border: "none",
                             background: "none",
                             textAlign: "center",
-                            fontSize: "12px",
+                            fontSize: "8px",
                           }}
                         />
                       </td>
@@ -1259,7 +1322,7 @@ const SearchCertificateOfGrades = () => {
                             border: "none",
                             background: "none",
                             textAlign: "center",
-                            fontSize: "12px",
+                            fontSize: "8px",
                           }}
                         />
                       </td>
@@ -2588,11 +2651,11 @@ const SearchCertificateOfGrades = () => {
 
                     </td>
                     <td
-                      colSpan={13}
+                      colSpan={18}
                       style={{
 
                         fontSize: "62.5%",
-
+                        borderRight: "1px solid black",
                       }}
                     >
                       <input
@@ -2612,31 +2675,31 @@ const SearchCertificateOfGrades = () => {
                       />
                     </td>
                     <td
-                      colSpan={5}
+                      colSpan={7}
                       style={{
 
                         fontSize: "62.5%",
-                        marginRight: "20px",
 
-                        borderRight: "1px solid black",
+
                       }}
                     >
                       <input
                         type="text"
+                        value={"APPROVED BY : "}
                         readOnly
                         style={{
-                          textAlign: "center",
                           color: "black",
-                          width: "98%",
-                          fontFamily: 'Arial, sans-serif',
-                          fontSize: '12px',
+                          textAlign: "left",
+                          marginLeft: "20px",
                           fontWeight: "bold",
+                          width: "98%",
                           border: "none",
                           outline: "none",
                           background: "none"
                         }}
                       />
                     </td>
+
                   </tr>
                   <tr>
                     <td
@@ -2670,31 +2733,6 @@ const SearchCertificateOfGrades = () => {
                     </td>
 
 
-                    <td
-                      colSpan={7}
-                      style={{
-
-                        fontSize: "62.5%",
-
-
-                      }}
-                    >
-                      <input
-                        type="text"
-                        value={"APPROVED BY : "}
-                        readOnly
-                        style={{
-                          color: "black",
-                          textAlign: "left",
-                          marginLeft: "20px",
-                          fontWeight: "bold",
-                          width: "98%",
-                          border: "none",
-                          outline: "none",
-                          background: "none"
-                        }}
-                      />
-                    </td>
 
 
                   </tr>
@@ -2927,6 +2965,8 @@ const SearchCertificateOfGrades = () => {
                           textAlign: "center",
                           width: "98%",
                           fontWeight: "bold",
+                          textDecorationThickness: "2px", // <-- Thicker underline
+
                           fontFamily: 'Arial, sans-serif',
                           fontSize: '12px',
                           border: "none",
@@ -2955,6 +2995,7 @@ const SearchCertificateOfGrades = () => {
                           width: "100%", // ensures full-width underline
                           border: "none",
                           outline: "none",
+
                           fontWeight: "bold",
                           background: "none",
                           borderBottom: "1px solid black", // thicker, longer underline
@@ -2966,10 +3007,7 @@ const SearchCertificateOfGrades = () => {
                     <td
                       colSpan={9}
                       style={{
-
                         fontSize: "62.5%",
-
-
                       }}
                     >
                       <input
@@ -2985,63 +3023,73 @@ const SearchCertificateOfGrades = () => {
                           fontFamily: 'Arial, sans-serif',
                           fontSize: '12px',
                           outline: "none",
-                          background: "none"
+                          background: "none",
                         }}
                       />
                     </td>
                     <td
                       colSpan={10}
                       style={{
-
-
-                        textDecoration: "Underline",
-                        fontWeight: "bold",
+                        fontSize: "62.5%",
+                        textAlign: "center",
+                        fontWeight: "Bold"
                       }}
                     >
-
                       <input
                         type="text"
-                        value={"_______Scholar_______"}
+                        value={"Scholar"}
                         readOnly
                         style={{
                           color: "black",
                           textAlign: "center",
-                          textDecoration: "Underline",
-
-                          width: "98%",
+                          width: "95%",
                           fontWeight: "bold",
-                          fontFamily: 'Arial, sans-serif',
-                          fontSize: '12px',
+                          fontFamily: "Arial, sans-serif",
+                          fontSize: "12px",
                           border: "none",
                           outline: "none",
-                          background: "none"
+                          background: "none",
+                          borderBottom: "1px solid black", // underlines the field like a line
                         }}
                       />
-
                     </td>
                   </tr>
 
+                </tbody>
+              </table>
 
 
+              <table
+                style={{
+                  borderCollapse: "collapse",
+                  fontFamily: "Arial, Helvetica, sans-serif",
+                  width: "8in",
+                  margin: "0 auto", // Center the table inside the form
+                  textAlign: "center",
+                  tableLayout: "fixed",
+                  borderLeft: "1px solid black",
+                  borderBottom: "1px solid black",
+                  borderRight: "1px solid black",
+                }}
+              >
+                <tbody>
                   <tr>
                     <td style={{ width: "50%", textAlign: "center" }}>
                       <img
                         src={FreeTuitionImage}
                         alt="EARIST MIS FEE"
                         style={{
-
-                          marginLeft: "100px",
-                          width: "200x",
-                          height: "150px"
+                          marginLeft: "75px",
+                          width: "200px", // Corrected unit
+                          height: "150px",
                         }}
                       />
                     </td>
-
                   </tr>
 
                   <tr>
                     <td
-                      colSpan={41}
+                      colSpan={40}
                       style={{
                         height: "0.25in",
                         fontSize: "15px",
@@ -3085,6 +3133,8 @@ const SearchCertificateOfGrades = () => {
                   </tr>
                 </tbody>
               </table>
+
+
             </div>
           </div>
 

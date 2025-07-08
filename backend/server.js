@@ -37,7 +37,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage });
+const upload = multer({ storage: multer.memoryStorage() });
 
 //MYSQL CONNECTION FOR ADMISSION
 const db = mysql.createPool({
@@ -187,26 +187,60 @@ app.post("/transfer", async (req, res) => {
   }
 });
 
-// upload requirements
-app.post("/upload", upload.single("file"), async (req, res) => {
-  const { requirements_id, person_id } = req.body;
+// Upload requirement file with custom filename - Applicant
+// 📌 Converts full requirement description to short label
+const getShortLabel = (desc) => {
+  const lower = desc.toLowerCase();
+  if (lower.includes("form 138")) return "Form138";
+  if (lower.includes("good moral")) return "GoodMoralCharacter";
+  if (lower.includes("birth certificate")) return "BirthCertificate";
+  if (lower.includes("form 137")) return "Form137";
+  return "Unknown";
+};
 
-  if (!req.file) {
-    return res.status(400).json({ message: "No file uploaded" });
+// ✅ UPLOAD
+app.post("/upload", upload.single("file"), async (req, res) => {
+  const { requirements_id } = req.body;
+  const person_id = req.headers["x-person-id"]; // ✅ Trust header, not body
+
+  if (!req.file || !person_id || !requirements_id) {
+    return res.status(400).json({ message: "Missing file, person_id, or requirements_id" });
   }
 
-  const filePath = `/uploads/${req.file.filename}`;
-  const sql = `INSERT INTO requirement_uploads (requirements_id, person_id, file_path) VALUES (?, ?, ?)`;
-
   try {
-    const [result] = await db.query(sql, [requirements_id, person_id, filePath]);
-    res.status(201).json({ message: "Upload successful", insertId: result.insertId });
+    const [rows] = await db.query("SELECT description FROM requirements_table WHERE id = ?", [requirements_id]);
+    if (!rows.length) return res.status(404).json({ message: "Requirement not found" });
+
+    const fullDescription = rows[0].description;
+    const shortLabel = getShortLabel(fullDescription);
+    const year = new Date().getFullYear();
+    const ext = path.extname(req.file.originalname).toLowerCase();
+    const filename = `${person_id}_${shortLabel}_${year}${ext}`;
+    const finalPath = path.join(__dirname, "uploads", filename);
+
+    await fs.promises.writeFile(finalPath, req.file.buffer);
+
+    const filePath = `/uploads/${filename}`;
+    await db.query(
+      "INSERT INTO requirement_uploads (requirements_id, person_id, file_path) VALUES (?, ?, ?)",
+      [requirements_id, person_id, filePath]
+    );
+
+    res.status(201).json({ message: "Upload successful", filename });
   } catch (err) {
-    res.status(500).json({ message: "Database error", error: err });
+    console.error("Upload error:", err);
+    res.status(500).json({ message: "Upload failed", error: err.message });
   }
 });
 
+// ✅ FETCH FILES (for current user only)
 app.get("/uploads", async (req, res) => {
+  const person_id = req.headers["x-person-id"];
+
+  if (!person_id) {
+    return res.status(401).json({ message: "Unauthorized: Missing person ID" });
+  }
+
   const query = `
     SELECT 
       ru.upload_id, 
@@ -215,70 +249,53 @@ app.get("/uploads", async (req, res) => {
       ru.created_at
     FROM requirement_uploads ru
     JOIN requirements_table r ON ru.requirements_id = r.id
+    WHERE ru.person_id = ?
   `;
 
   try {
-    const [results] = await db.query(query);
+    const [results] = await db.query(query, [person_id]);
     res.status(200).json(results);
   } catch (err) {
     res.status(500).json({ message: "Internal Server Error", error: err });
   }
 });
 
-// GET THE APPLICANT REQUIREMENTS (UPDATED!)
-app.get("/applicant-requirements", async (req, res) => {
-  try {
-    const sql = `
-      SELECT ar.id, ar.created_at, r.requirements_description AS title 
-      FROM applicant_requirements ar
-      JOIN requirements r ON ar.student_requirement_id = r.requirements_id
-    `;
-
-    const [result] = await db.query(sql);
-    res.status(200).send(result);
-  } catch (error) {
-    console.error("Database Error:", error);
-    res.status(500).json({ error: "Error fetching requirements" });
-  }
-});
-
-// DELETE APPLICANT REQUIREMENTS (UPDATED!)
-app.delete("/applicant-requirements/:id", async (req, res) => {
+// ✅ DELETE (only own files)
+app.delete("/uploads/:id", async (req, res) => {
+  const person_id = req.headers["x-person-id"];
   const { id } = req.params;
 
+  if (!person_id) {
+    return res.status(401).json({ message: "Unauthorized: Missing person ID" });
+  }
+
   try {
-    const [results] = await db.query("SELECT file_path FROM applicant_requirements WHERE id = ?", [id]);
+    const [results] = await db.query(
+      "SELECT file_path FROM requirement_uploads WHERE upload_id = ? AND person_id = ?",
+      [id, person_id]
+    );
 
-    if (results.length > 0 && results[0].file_path) {
-      const filePath = path.join(__dirname, "uploads", results[0].file_path);
-
-      fs.unlink(filePath, (err) => {
-        if (err) console.error("Error deleting file:", err);
-      });
+    if (!results.length) {
+      return res.status(403).json({ error: "Unauthorized or file not found" });
     }
 
-    const [deleteResult] = await db.query("DELETE FROM applicant_requirements WHERE id = ?", [id]);
+    const filePath = path.join(__dirname, results[0].file_path);
 
-    if (deleteResult.affectedRows === 0) {
-      return res.status(404).json({ error: "Requirement not found" });
-    }
+    fs.unlink(filePath, (err) => {
+      if (err) console.error("File delete error:", err);
+    });
+
+    await db.query("DELETE FROM requirement_uploads WHERE upload_id = ?", [id]);
 
     res.json({ message: "Requirement deleted successfully" });
   } catch (err) {
-    console.error("Database error:", err);
+    console.error("Delete error:", err);
     res.status(500).json({ error: "Failed to delete requirement" });
   }
 });
 
 // -------------------------------------------- GET APPLICANT ADMISSION DATA ------------------------------------------------//
-app.get("/person_table/:applicant_id", async (req, res) => {
-  try {
-    const [results] = await db.query("SELECT * FROM person_table WHERE person_id = ?");
-    res.status(200).send(results);
-  } catch (error) {
-    res.status(500).send({ message: "Error fetching Personal Information", error });
-  }
-});
+
 
 /*---------------------------  ENROLLMENT -----------------------*/
 
@@ -1617,7 +1634,7 @@ app.get("/day_list", async (req, res) => {
   }
 });
 
-// REQUIREMENTS PANEL (UPDATED!)
+// REQUIREMENTS PANEL (UPDATED!) ADMIN
 app.post("/requirements", async (req, res) => {
   const { requirements_description } = req.body;
 
@@ -2116,6 +2133,7 @@ app.post("/student-tagging", async (req, res) => {
         person_id: student.person_id,
         studentNumber: student.student_number,
         activeCurriculum: student.active_curriculum,
+        major: student.major,
         yearLevel: student.year_level_id,
         yearLevelDescription: student.year_level_description,
         courseCode: student.program_code,
@@ -2129,7 +2147,6 @@ app.post("/student-tagging", async (req, res) => {
         gender: student.gender,
         email: student.emailAddress,
         program: student.program,
-        major: student.major,
         profile_img: student.profile_img,
         extension: student.extension,
       },
@@ -2142,6 +2159,7 @@ app.post("/student-tagging", async (req, res) => {
       studentNumber: student.student_number,
       person_id: student.person_id,
       activeCurriculum: student.active_curriculum,
+      major: student.major,
       yearLevel: student.year_level_id,
       yearLevelDescription: student.year_level_description,
       courseCode: student.program_code,
@@ -2155,7 +2173,6 @@ app.post("/student-tagging", async (req, res) => {
       gender: student.gender,
       email: student.emailAddress,
       program: student.program,
-      major: student.major,
       profile_img: student.profile_img,
       extension: student.extension,
     });
@@ -2166,6 +2183,7 @@ app.post("/student-tagging", async (req, res) => {
       studentNumber: student.student_number,
       person_id: student.person_id,
       activeCurriculum: student.active_curriculum,
+      major: student.major,
       yearLevel: student.year_level_id,
       yearLevelDescription: student.year_level_description,
       courseCode: student.program_code,
@@ -2179,7 +2197,6 @@ app.post("/student-tagging", async (req, res) => {
       gender: student.gender,
       email: student.emailAddress,
       program: student.program,
-      major: student.major,
       profile_img: student.profile_img,
       extension: student.extension,
     });
@@ -2415,32 +2432,27 @@ app.delete("/upload/:id", async (req, res) => {
   }
 });
 
-// UPOAD PROFILE IMAGE (CHECK) (UPDATED!)
 app.post("/api/upload-profile-picture", upload.single("profile_picture"), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).send("No file uploaded");
-  }
-
   const { person_id } = req.body;
-  if (!person_id) {
-    return res.status(400).send("Missing person_id");
+  if (!person_id || !req.file) {
+    return res.status(400).send("Missing person_id or file.");
   }
 
-  const oldPath = req.file.path;
   const ext = path.extname(req.file.originalname).toLowerCase();
-  const newFilename = `${person_id}_profile_picture${ext}`;
-  const newPath = path.join(uploadPath, newFilename);
+  const year = new Date().getFullYear();
+  const filename = `${person_id}_1by1_${year}${ext}`;
+  const finalPath = path.join(__dirname, "uploads", filename);
 
   try {
-    // Rename the uploaded file
-    await fs.promises.rename(oldPath, newPath);
+    await fs.promises.writeFile(finalPath, req.file.buffer);
 
-    const sql = "UPDATE person_table SET profile_img = ? WHERE person_id = ?";
-    await db3.query(sql, [newFilename, person_id]);
-    res.send("Profile picture uploaded successfully");
+    // Save filename to DB
+    await db3.query("UPDATE person_table SET profile_img = ? WHERE person_id = ?", [filename, person_id]);
+
+    res.status(200).json({ message: "Uploaded successfully", filename });
   } catch (err) {
-    console.error("Error processing file:", err);
-    return res.status(500).send("Error processing profile picture");
+    console.error("Upload error:", err);
+    res.status(500).send("Failed to upload image.");
   }
 });
 
@@ -2581,12 +2593,14 @@ app.post("/api/person/:id/upload-profile", upload.single("profile_img"), async (
 app.get("/api/applied_program", async (req, res) => {
   try {
     const [rows] = await db3.execute(`
-      SELECT ct.curriculum_id, pt.program_description
-      FROM curriculum_table as ct
-      INNER JOIN program_table as pt
-      ON pt.program_id = ct.program_id
+  SELECT 
+    ct.curriculum_id, 
+    pt.program_description,
+    pt.major
+  FROM curriculum_table AS ct
+  INNER JOIN program_table AS pt ON pt.program_id = ct.program_id
+`);
 
-    `);
 
     if (rows.length === 0) {
       return res.status(404).json({ error: "No curriculum data found" });
@@ -2607,7 +2621,7 @@ app.put("/api/person/:id", async (req, res) => {
     profile_img, campus, academicProgram, classifiedAs, program, program2, program3, yearLevel,
     last_name, first_name, middle_name, extension, nickname, height, weight, lrnNumber, nolrnNumber, gender, pwdMember, pwdType, pwdId,
     birthOfDate, age, birthPlace, languageDialectSpoken, citizenship, religion, civilStatus, tribeEthnicGroup,
-    cellphoneNumber, emailAddress, 
+    cellphoneNumber, emailAddress,
     presentStreet, presentBarangay, presentZipCode, presentRegion, presentProvince, presentMunicipality, presentDswdHouseholdNumber, sameAsPresentAddress,
     permanentStreet, permanentBarangay, permanentZipCode, permanentRegion, permanentProvince, permanentMunicipality, permanentDswdHouseholdNumber,
     solo_parent, father_deceased, father_family_name, father_given_name, father_middle_name, father_ext, father_nickname, father_education, father_education_level,
@@ -2649,7 +2663,7 @@ app.put("/api/person/:id", async (req, res) => {
       WHERE person_id=?`, [
       profile_img, campus, academicProgram, classifiedAs, program, program2, program3, yearLevel,
       last_name, first_name, middle_name, extension, nickname, height, weight, lrnNumber, nolrnNumber, gender, pwdMember, pwdType, pwdId,
-      birthOfDate, age, birthPlace, languageDialectSpoken, citizenship, religion, civilStatus, tribeEthnicGroup, 
+      birthOfDate, age, birthPlace, languageDialectSpoken, citizenship, religion, civilStatus, tribeEthnicGroup,
       cellphoneNumber, emailAddress,
       presentStreet, presentBarangay, presentZipCode, presentRegion, presentProvince, presentMunicipality, presentDswdHouseholdNumber, sameAsPresentAddress,
       permanentStreet, permanentBarangay, permanentZipCode, permanentRegion, permanentProvince, permanentMunicipality, permanentDswdHouseholdNumber,
@@ -2796,6 +2810,7 @@ app.get("/api/person/:id", async (req, res) => {
         st.student_number,
         ct.curriculum_id,
         pt.program_description AS program
+        pt.major AS major
       FROM person_table AS p
       LEFT JOIN student_numbering_table AS st ON st.person_id = p.person_id
       LEFT JOIN curriculum_table AS ct ON ct.curriculum_id = p.program

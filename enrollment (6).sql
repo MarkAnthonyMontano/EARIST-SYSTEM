@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 07, 2025 at 11:31 AM
+-- Generation Time: Jul 08, 2025 at 12:13 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -168,14 +168,13 @@ CREATE TABLE `curriculum_table` (
 --
 
 INSERT INTO `curriculum_table` (`curriculum_id`, `year_id`, `program_id`, `lock_status`) VALUES
-(1, 1, 14, 0),
+(1, 1, 4, 0),
 (2, 2, 11, 0),
 (3, 3, 7, 0),
 (4, 4, 10, 0),
 (5, 9, 9, 0),
 (6, 10, 8, 0),
-(7, 2, 6, 0),
-(8, 9, 3, 0);
+(7, 2, 6, 0);
 
 -- --------------------------------------------------------
 
@@ -387,9 +386,7 @@ INSERT INTO `enrolled_subject` (`id`, `student_number`, `curriculum_id`, `course
 (72, 224091140, 1, 9, 3, 0, 0, 0, 0, 8, 0),
 (73, 224091140, 1, 11, 3, 0, 0, 0, 0, 8, 0),
 (74, 224091140, 1, 2, 3, 0, 0, 0, 0, 8, 0),
-(75, 224091140, 1, 3, 3, 0, 0, 0, 0, 8, 0),
 (76, 224091140, 1, 4, 3, 0, 0, 0, 0, 8, 0),
-(77, 224091140, 1, 4, 3, 0, 0, 0, 0, 8, 0),
 (78, 224091140, 1, 3, 3, 0, 0, 0, 0, 8, 0);
 
 -- --------------------------------------------------------
@@ -482,7 +479,7 @@ INSERT INTO `person_status_table` (`id`, `person_id`, `exam_status`, `requiremen
 
 CREATE TABLE `person_table` (
   `person_id` int(11) NOT NULL,
-  `profile_img` varchar(150) NOT NULL,
+  `profile_img` varchar(255) DEFAULT NULL,
   `campus` int(11) DEFAULT NULL,
   `academicProgram` varchar(100) DEFAULT NULL,
   `classifiedAs` varchar(50) DEFAULT NULL,
@@ -490,15 +487,17 @@ CREATE TABLE `person_table` (
   `program2` varchar(100) DEFAULT NULL,
   `program3` varchar(100) DEFAULT NULL,
   `yearLevel` varchar(30) DEFAULT NULL,
+  `last_name` varchar(100) DEFAULT NULL,
   `first_name` varchar(100) DEFAULT NULL,
   `middle_name` varchar(100) DEFAULT NULL,
-  `last_name` varchar(100) DEFAULT NULL,
   `extension` varchar(10) DEFAULT NULL,
   `nickname` varchar(50) DEFAULT NULL,
   `height` varchar(10) DEFAULT NULL,
   `weight` varchar(10) DEFAULT NULL,
   `lrnNumber` varchar(20) DEFAULT NULL,
-  `gender` varchar(11) DEFAULT NULL,
+  `nolrnNumber` int(5) DEFAULT NULL,
+  `gender` int(11) DEFAULT NULL,
+  `pwdMember` int(5) DEFAULT NULL,
   `pwdType` varchar(50) DEFAULT NULL,
   `pwdId` varchar(50) DEFAULT NULL,
   `birthOfDate` varchar(50) DEFAULT NULL,
@@ -509,11 +508,8 @@ CREATE TABLE `person_table` (
   `religion` varchar(50) DEFAULT NULL,
   `civilStatus` varchar(50) DEFAULT NULL,
   `tribeEthnicGroup` varchar(50) DEFAULT NULL,
-  `otherEthnicGroup` varchar(50) NOT NULL,
   `cellphoneNumber` varchar(20) DEFAULT NULL,
   `emailAddress` varchar(100) DEFAULT NULL,
-  `telephoneNumber` varchar(20) DEFAULT NULL,
-  `facebookAccount` varchar(255) DEFAULT NULL,
   `presentStreet` varchar(255) DEFAULT NULL,
   `presentBarangay` varchar(100) DEFAULT NULL,
   `presentZipCode` varchar(10) DEFAULT NULL,
@@ -521,6 +517,7 @@ CREATE TABLE `person_table` (
   `presentProvince` varchar(100) DEFAULT NULL,
   `presentMunicipality` varchar(100) DEFAULT NULL,
   `presentDswdHouseholdNumber` varchar(50) DEFAULT NULL,
+  `sameAsPresentAddress` int(5) DEFAULT NULL,
   `permanentStreet` varchar(255) DEFAULT NULL,
   `permanentBarangay` varchar(100) DEFAULT NULL,
   `permanentZipCode` varchar(10) DEFAULT NULL,
@@ -528,13 +525,14 @@ CREATE TABLE `person_table` (
   `permanentProvince` varchar(75) DEFAULT NULL,
   `permanentMunicipality` varchar(75) DEFAULT NULL,
   `permanentDswdHouseholdNumber` varchar(50) DEFAULT NULL,
-  `solo_parent` varchar(5) DEFAULT NULL,
-  `father_deceased` varchar(5) DEFAULT NULL,
+  `solo_parent` int(5) DEFAULT NULL,
+  `father_deceased` int(5) DEFAULT NULL,
   `father_family_name` varchar(100) DEFAULT NULL,
   `father_given_name` varchar(100) DEFAULT NULL,
   `father_middle_name` varchar(100) DEFAULT NULL,
   `father_ext` varchar(10) DEFAULT NULL,
   `father_nickname` varchar(50) DEFAULT NULL,
+  `father_education` int(5) NOT NULL,
   `father_education_level` varchar(100) DEFAULT NULL,
   `father_last_school` varchar(100) DEFAULT NULL,
   `father_course` varchar(100) DEFAULT NULL,
@@ -545,11 +543,13 @@ CREATE TABLE `person_table` (
   `father_employer` varchar(100) DEFAULT NULL,
   `father_income` varchar(20) DEFAULT NULL,
   `father_email` varchar(100) DEFAULT NULL,
-  `mother_deceased` varchar(5) DEFAULT NULL,
+  `mother_deceased` int(5) DEFAULT NULL,
   `mother_family_name` varchar(100) DEFAULT NULL,
   `mother_given_name` varchar(100) DEFAULT NULL,
   `mother_middle_name` varchar(100) DEFAULT NULL,
+  `mother_ext` varchar(10) DEFAULT NULL,
   `mother_nickname` varchar(50) DEFAULT NULL,
+  `mother_education` int(5) NOT NULL,
   `mother_education_level` varchar(100) DEFAULT NULL,
   `mother_last_school` varchar(100) DEFAULT NULL,
   `mother_course` varchar(100) DEFAULT NULL,
@@ -577,6 +577,13 @@ CREATE TABLE `person_table` (
   `honor` varchar(100) DEFAULT NULL,
   `generalAverage` decimal(5,2) DEFAULT NULL,
   `yearGraduated` int(11) DEFAULT NULL,
+  `schoolLevel1` varchar(50) DEFAULT NULL,
+  `schoolLastAttended1` varchar(100) DEFAULT NULL,
+  `schoolAddress1` varchar(255) DEFAULT NULL,
+  `courseProgram1` varchar(100) DEFAULT NULL,
+  `honor1` varchar(100) DEFAULT NULL,
+  `generalAverage1` decimal(5,2) DEFAULT NULL,
+  `yearGraduated1` int(11) DEFAULT NULL,
   `strand` varchar(100) DEFAULT NULL,
   `cough` int(11) DEFAULT NULL,
   `colds` int(11) DEFAULT NULL,
@@ -616,32 +623,15 @@ CREATE TABLE `person_table` (
   `symptomsToday` int(11) DEFAULT NULL,
   `remarks` varchar(255) DEFAULT NULL,
   `termsOfAgreement` int(10) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=COMPRESSED;
 
 --
 -- Dumping data for table `person_table`
 --
 
-INSERT INTO `person_table` (`person_id`, `profile_img`, `campus`, `academicProgram`, `classifiedAs`, `program`, `program2`, `program3`, `yearLevel`, `first_name`, `middle_name`, `last_name`, `extension`, `nickname`, `height`, `weight`, `lrnNumber`, `gender`, `pwdType`, `pwdId`, `birthOfDate`, `age`, `birthPlace`, `languageDialectSpoken`, `citizenship`, `religion`, `civilStatus`, `tribeEthnicGroup`, `otherEthnicGroup`, `cellphoneNumber`, `emailAddress`, `telephoneNumber`, `facebookAccount`, `presentStreet`, `presentBarangay`, `presentZipCode`, `presentRegion`, `presentProvince`, `presentMunicipality`, `presentDswdHouseholdNumber`, `permanentStreet`, `permanentBarangay`, `permanentZipCode`, `permanentRegion`, `permanentProvince`, `permanentMunicipality`, `permanentDswdHouseholdNumber`, `solo_parent`, `father_deceased`, `father_family_name`, `father_given_name`, `father_middle_name`, `father_ext`, `father_nickname`, `father_education_level`, `father_last_school`, `father_course`, `father_year_graduated`, `father_school_address`, `father_contact`, `father_occupation`, `father_employer`, `father_income`, `father_email`, `mother_deceased`, `mother_family_name`, `mother_given_name`, `mother_middle_name`, `mother_nickname`, `mother_education_level`, `mother_last_school`, `mother_course`, `mother_year_graduated`, `mother_school_address`, `mother_contact`, `mother_occupation`, `mother_employer`, `mother_income`, `mother_email`, `guardian`, `guardian_family_name`, `guardian_given_name`, `guardian_middle_name`, `guardian_ext`, `guardian_nickname`, `guardian_address`, `guardian_contact`, `guardian_email`, `annual_income`, `schoolLevel`, `schoolLastAttended`, `schoolAddress`, `courseProgram`, `honor`, `generalAverage`, `yearGraduated`, `strand`, `cough`, `colds`, `fever`, `asthma`, `faintingSpells`, `heartDisease`, `tuberculosis`, `frequentHeadaches`, `hernia`, `chronicCough`, `headNeckInjury`, `hiv`, `highBloodPressure`, `diabetesMellitus`, `allergies`, `cancer`, `smokingCigarette`, `alcoholDrinking`, `hospitalized`, `hospitalizationDetails`, `medications`, `hadCovid`, `covidDate`, `vaccine1Brand`, `vaccine1Date`, `vaccine2Brand`, `vaccine2Date`, `booster1Brand`, `booster1Date`, `booster2Brand`, `booster2Date`, `chestXray`, `cbc`, `urinalysis`, `otherworkups`, `symptomsToday`, `remarks`, `termsOfAgreement`) VALUES
-(1, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'James', 'Mendoza', 'Fernandez', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(2, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'John', 'Bord', 'Doe', NULL, NULL, NULL, NULL, NULL, 'Male', NULL, NULL, NULL, 21, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, 'johnDoe@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(3, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Ayan', 'Gan', 'Mandogra', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(4, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Sheila', 'Gonsales', 'Rodriguez', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(5, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Aira', 'Lorainne', 'Torres', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(6, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Nick', 'Sazon', 'Nick', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(7, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Genny', 'Didal', 'Ciruela', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(8, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Lloyd Cedrick', 'Pacheco', 'Dela Cruz', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(9, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Elhize', 'Elineth', 'Arcano', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(10, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'James', 'Reid', 'Madrid', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, 'jamesmadrid@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(11, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Arden', 'Bandoja', 'Mecasio', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, 'mecasio.a@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(12, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Raymar', 'Bernado', 'Cabusay', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, 'cabusay.r@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(13, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Romello', 'Bernado', 'Atentar', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, 'atentar.r@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(14, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Ashley', 'Nicole', 'Teologo', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, 'teologo.a.n@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(15, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Sheryl', 'Mae', 'Ibanez', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, 'ibanez.s.m@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(16, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Harold', 'Bernado', 'Gele', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, 'gele.h@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(17, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Olin', 'Bernado', 'Marquez', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, 'marquez.o@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(18, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Pido', 'Bernado', 'Rolando', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, 'pido.r.b@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(19, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Jierald', 'Bernado', 'Santos', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, 'santos.j@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `person_table` (`person_id`, `profile_img`, `campus`, `academicProgram`, `classifiedAs`, `program`, `program2`, `program3`, `yearLevel`, `last_name`, `first_name`, `middle_name`, `extension`, `nickname`, `height`, `weight`, `lrnNumber`, `nolrnNumber`, `gender`, `pwdMember`, `pwdType`, `pwdId`, `birthOfDate`, `age`, `birthPlace`, `languageDialectSpoken`, `citizenship`, `religion`, `civilStatus`, `tribeEthnicGroup`, `cellphoneNumber`, `emailAddress`, `presentStreet`, `presentBarangay`, `presentZipCode`, `presentRegion`, `presentProvince`, `presentMunicipality`, `presentDswdHouseholdNumber`, `sameAsPresentAddress`, `permanentStreet`, `permanentBarangay`, `permanentZipCode`, `permanentRegion`, `permanentProvince`, `permanentMunicipality`, `permanentDswdHouseholdNumber`, `solo_parent`, `father_deceased`, `father_family_name`, `father_given_name`, `father_middle_name`, `father_ext`, `father_nickname`, `father_education`, `father_education_level`, `father_last_school`, `father_course`, `father_year_graduated`, `father_school_address`, `father_contact`, `father_occupation`, `father_employer`, `father_income`, `father_email`, `mother_deceased`, `mother_family_name`, `mother_given_name`, `mother_middle_name`, `mother_ext`, `mother_nickname`, `mother_education`, `mother_education_level`, `mother_last_school`, `mother_course`, `mother_year_graduated`, `mother_school_address`, `mother_contact`, `mother_occupation`, `mother_employer`, `mother_income`, `mother_email`, `guardian`, `guardian_family_name`, `guardian_given_name`, `guardian_middle_name`, `guardian_ext`, `guardian_nickname`, `guardian_address`, `guardian_contact`, `guardian_email`, `annual_income`, `schoolLevel`, `schoolLastAttended`, `schoolAddress`, `courseProgram`, `honor`, `generalAverage`, `yearGraduated`, `schoolLevel1`, `schoolLastAttended1`, `schoolAddress1`, `courseProgram1`, `honor1`, `generalAverage1`, `yearGraduated1`, `strand`, `cough`, `colds`, `fever`, `asthma`, `faintingSpells`, `heartDisease`, `tuberculosis`, `frequentHeadaches`, `hernia`, `chronicCough`, `headNeckInjury`, `hiv`, `highBloodPressure`, `diabetesMellitus`, `allergies`, `cancer`, `smokingCigarette`, `alcoholDrinking`, `hospitalized`, `hospitalizationDetails`, `medications`, `hadCovid`, `covidDate`, `vaccine1Brand`, `vaccine1Date`, `vaccine2Brand`, `vaccine2Date`, `booster1Brand`, `booster1Date`, `booster2Brand`, `booster2Date`, `chestXray`, `cbc`, `urinalysis`, `otherworkups`, `symptomsToday`, `remarks`, `termsOfAgreement`) VALUES
+(1, '1_1by1_2025.jpg', 0, 'Undergraduate', 'Freshman (First Year)', NULL, '6', '6', 'First Year', 'Does', 'Johncena15', 'MichaelHello', 'V', 'Johnny', '5\'11', '65kg', '1234567890', 0, 0, 0, '', '', '2003-06-20', 21, 'Manila, Philippines', 'Tagalog, English', 'FILIPINO', 'Born Again', 'Single', 'Agta', '09171234567999999', 'johndoe@email.com', '19 G Dona Yayang Street ', 'Libis', '1000', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'Quezon City', 'DSWD123456', 0, '19 G Dona Yayang Street ', 'Libis', '1000', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'Quezon City', 'DSWD123456', 0, 0, 'Doe Sr.', 'Jonathan', 'Smiths', 'III', 'Jon', 0, '', '', '', '', '', '09181234567', 'Engineer', 'ABC Corp', '50000', 'jon.doe@abc.com', 0, 'Jane', 'Mary', 'Anne', '', 'Janey', 0, '', '', '', '', '', '09221234567', 'Accountant', 'XYZ Corp', '45000', 'jane.doe@xyz.com', 'StepFather', 'Parker', 'Ben', 'Jose', 'IV', 'Benny', '789 Recto Av', '09192233445', '', '80,000 and below', 'Senior High School', 'CGEAHS', 'Pasig City', 'STEM', 'With Honors', 92.50, 2022, 'Senior High School', 'CGEAHS', 'Rizal High School', 'Rizal High School', '', 100.00, 0, 'Information and Communications Technology (ICT)', 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Wala ngani', 'Vitamins C', 1, '2022-02-11', 'Pfizer', '2022-03-14', 'Pfizer', '2022-04-13', 'Moderna', '2022-07-14', 'Pfizer', '2023-01-14', 'Normal', 'Normal', 'Normal', 'Normal', 1, 'Fit to enroll', 1),
+(3, '3_1by1_2025.jpg', 1, 'Techvoc', 'Freshman (First Year)', '7', '4', '3', 'First Year', 'Montano', 'Mark Anthony', 'p.', '', 'MARK', '5\'11', '65', '123456789012', NULL, 0, NULL, '', '', '2003-06-26', 21, 'Manila, Philippines', 'Tagalog, English', 'ALGERIAN', 'Iglesia Ni Cristo', 'Single', 'Cebuano', '09953242510', 'montano.ma.bsinfotech@gmail.com', '19 G Dona yayang Street Libis', 'Pag-asa', '4100', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'City Of Mandaluyong', 'DSWD123456', NULL, '19 G Dona yayang Street Libis', 'Malipayon', '4100', 'Region X (Northern Mindanao)', 'Bukidnon', 'Pangantucan', 'DSWD123456', 0, 0, '', '', '', '', '', 0, '', '', '', '', '', '', '', '', '', '', 0, '', '', '', '', '', 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0.00, 0, '', '', '', '', '', 0.00, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0, '', '', '', '', '', '', '', '', '', '', '', '', '', 0, '', 0);
 
 -- --------------------------------------------------------
 
@@ -717,56 +707,72 @@ INSERT INTO `prof_table` (`prof_id`, `person_id`, `profile_image`, `fname`, `mna
 CREATE TABLE `program_table` (
   `program_id` int(11) NOT NULL,
   `program_description` varchar(255) DEFAULT NULL,
-  `program_code` varchar(100) DEFAULT NULL
+  `program_code` varchar(100) DEFAULT NULL,
+  `major` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `program_table`
 --
 
-INSERT INTO `program_table` (`program_id`, `program_description`, `program_code`) VALUES
-(1, 'Bachelor of Science in Architecture', 'BS ARCHI.'),
-(2, 'Bachelor of Science in Interior Design', 'BSID'),
-(3, 'Bachelor in Fine Arts Major in Painting', 'BFA-PAINT'),
-(4, 'Bachelor in Fine Arts Major in Visual Communication', 'BFA-VISCOM'),
-(5, 'Bachelor of Science in Applied Physics with Computer Science Emphasis', 'BSAP'),
-(6, 'Bachelor of Science in Psychology', 'BSPSYCH'),
-(7, 'Bachelor of Science in Mathematics', 'BSMATH'),
-(8, 'Bachelor of Science in Business Administration Major in Marketing Management', 'BSBA-MM'),
-(9, 'Bachelor of Science in Business Administration Major in HR Development Management', 'BSBA-HRDM'),
-(10, 'Bachelor of Science in Entrepreneurship', 'BSEM'),
-(11, 'Bachelor of Science in Office Administration', 'BSOA'),
-(12, 'Bachelor of Science in Criminology', 'BSCRIM'),
-(13, 'Bachelor of Science in Computer Science', 'BSCS'),
-(14, 'Bachelor of Science in Information Technology', 'BS INFOTECH'),
-(15, 'Bachelor in Secondary Education Major in Science', 'BSE-SCI'),
-(16, 'Bachelor in Secondary Education Major in Mathematics', 'BSE-MATH'),
-(17, 'Bachelor in Secondary Education Major in Filipino', 'BSE-FIL'),
-(18, 'Bachelor in Special Needs Education', 'BSNEd'),
-(19, 'Bachelor in Technology and Livelihood Education Major in Home Economics', 'BTLE-HE'),
-(20, 'Bachelor in Technology and Livelihood Education Major in Industrial Arts', 'BTLE-IA'),
-(21, 'Professional Education Subjects (TCP)', 'TCP'),
-(22, 'Bachelor in Public Administration', 'BPA'),
-(23, 'Bachelor of Science in Chemical Engineering', 'BSCHE'),
-(24, 'Bachelor of Science in Civil Engineering', 'BSCE'),
-(25, 'Bachelor of Science in Electrical Engineering', 'BSEE'),
-(26, 'Bachelor of Science in Electronics and Communication Engineering', 'BSECE'),
-(27, 'Bachelor of Science in Mechanical Engineering', 'BSME'),
-(28, 'Bachelor of Science in Computer Engineering', 'BSCOE'),
-(29, 'Bachelor of Science in Tourism Management', 'BST'),
-(30, 'Bachelor of Science in Hospitality Management', 'BSHM'),
-(31, 'Bachelor of Science in Industrial Technology Major in Automotive Technology', 'BSIT-AUTO'),
-(32, 'Bachelor of Science in Industrial Technology Major in Electrical Technology', 'BSIT-ELEC'),
-(33, 'Bachelor of Science in Industrial Technology Major in Electronics Technology', 'BSIT-ET'),
-(34, 'Bachelor of Science in Industrial Technology Major in Food Technology', 'BSIT-FOOD'),
-(35, 'Bachelor of Science in Industrial Technology Major in Fashion and Apparel Technology', 'BSIT-FASHION'),
-(36, 'Bachelor of Science in Industrial Technology Major in Industrial Chemistry', 'BSIT-CHEM'),
-(37, 'Bachelor of Science in Industrial Technology Major in Drafting Technology', 'BSIT-DRAFT'),
-(38, 'Bachelor of Science in Industrial Technology Major in Machine Shop Technology', 'BSIT-MECH'),
-(39, 'Bachelor of Science in Industrial Technology Major in Refrigeration and Air Conditioning', 'BSIT-RAC'),
-(40, 'Bachelor of Science Major in Chemical Engineering', 'BSCE'),
-(41, 'Bachelor of Science Major in Fine Arts', 'BSFA'),
-(42, 'Bachelor of Science in Fine Arts Major in External Design', 'BSFAMED');
+INSERT INTO `program_table` (`program_id`, `program_description`, `program_code`, `major`) VALUES
+(1, 'Bachelor of Science in Architecture', 'BS ARCHI.', NULL),
+(2, 'Bachelor of Science in Interior Design', 'BSID', NULL),
+(3, 'Bachelor in Fine Arts Major in Painting', 'BFA-PAINT', 'Painting'),
+(4, 'Bachelor in Fine Arts Major in Visual Communication', 'BFA-VISCOM', 'Visual Communication'),
+(5, 'Bachelor of Science in Applied Physics with Computer Science Emphasis', 'BSAP', NULL),
+(6, 'Bachelor of Science in Psychology', 'BSPSYCH', NULL),
+(7, 'Bachelor of Science in Mathematics', 'BSMATH', NULL),
+(8, 'Bachelor of Science in Business Administration Major in Marketing Management', 'BSBA-MM', 'Marketing Management'),
+(9, 'Bachelor of Science in Business Administration Major in HR Development Management', 'BSBA-HRDM', 'Human Resource Development Management '),
+(10, 'Bachelor of Science in Entrepreneurship', 'BSEM', NULL),
+(11, 'Bachelor of Science in Office Administration', 'BSOA', NULL),
+(12, 'Bachelor of Science in Criminology', 'BSCRIM', NULL),
+(13, 'Bachelor of Science in Computer Science', 'BSCS', NULL),
+(14, 'Bachelor of Science in Information Technology', 'BS INFOTECH', NULL),
+(15, 'Bachelor in Secondary Education Major in Science', 'BSE-SCI', 'Science'),
+(16, 'Bachelor in Secondary Education Major in Mathematics', 'BSE-MATH', 'Mathematics'),
+(17, 'Bachelor in Secondary Education Major in Filipino', 'BSE-FIL', 'Filipino'),
+(18, 'Bachelor in Special Needs Education', 'BSNEd', NULL),
+(19, 'Bachelor in Technology and Livelihood Education Major in Home Economics', 'BTLE-HE', 'Home Economics'),
+(20, 'Bachelor in Technology and Livelihood Education Major in Industrial Arts', 'BTLE-IA', 'Industrial Arts'),
+(21, 'Professional Education Subjects (TCP)', 'TCP', NULL),
+(22, 'Bachelor in Public Administration', 'BPA', NULL),
+(23, 'Bachelor of Science in Chemical Engineering', 'BSCHE', NULL),
+(24, 'Bachelor of Science in Civil Engineering', 'BSCE', NULL),
+(25, 'Bachelor of Science in Electrical Engineering', 'BSEE', NULL),
+(26, 'Bachelor of Science in Electronics and Communication Engineering', 'BSECE', NULL),
+(27, 'Bachelor of Science in Mechanical Engineering', 'BSME', NULL),
+(28, 'Bachelor of Science in Computer Engineering', 'BSCOE', NULL),
+(29, 'Bachelor of Science in Tourism Management', 'BST', NULL),
+(30, 'Bachelor of Science in Hospitality Management', 'BSHM', NULL),
+(31, 'Bachelor of Science in Industrial Technology Major in Automotive Technology', 'BSIT-AUTO', 'Automotive Technology'),
+(32, 'Bachelor of Science in Industrial Technology Major in Electrical Technology', 'BSIT-ELEC', 'Electrical Technology'),
+(33, 'Bachelor of Science in Industrial Technology Major in Electronics Technology', 'BSIT-ET', 'Electronics Technology'),
+(34, 'Bachelor of Science in Industrial Technology Major in Food Technology', 'BSIT-FOOD', 'Food Technology\n'),
+(35, 'Bachelor of Science in Industrial Technology Major in Fashion and Apparel Technology', 'BSIT-FASHION', 'Fashion and Apparel Technology'),
+(36, 'Bachelor of Science in Industrial Technology Major in Industrial Chemistry', 'BSIT-CHEM', 'Industrial Chemistry'),
+(37, 'Bachelor of Science in Industrial Technology Major in Drafting Technology', 'BSIT-DRAFT', 'Drafting Technology'),
+(38, 'Bachelor of Science in Industrial Technology Major in Machine Shop Technology', 'BSIT-MECH', 'Machine Shop Technology\n'),
+(39, 'Bachelor of Science in Industrial Technology Major in Refrigeration and Air Conditioning', 'BSIT-RAC', 'Refrigeration and Air Conditioning'),
+(40, 'Bachelor of Science Major in Chemical Engineering', 'BSCE', NULL),
+(41, 'Bachelor of Science Major in Fine Arts', 'BSFA', NULL),
+(42, 'Bachelor of Science in Fine Arts Major in External Design', 'BSFAMED', NULL),
+(43, 'Doctor of Philosophy', NULL, 'Industrial Psychology'),
+(44, 'Doctor of Education', NULL, 'Educational Management'),
+(45, 'Doctor in Business Administration', NULL, NULL),
+(46, 'Doctor in Public Administration', NULL, NULL),
+(47, 'Master of Science in Mathematics', NULL, NULL),
+(48, 'Master of Arts in Industrial Psychology', NULL, NULL),
+(49, 'Master in Business Administration', NULL, NULL),
+(50, 'Master in Public Administration', NULL, NULL),
+(51, 'Master of Arts in Industrial Education', NULL, 'Hotel Management'),
+(52, 'Master of Arts in Education', NULL, 'Administration and Supervision'),
+(53, 'Master of Arts in Education', NULL, 'Guidance and Counseling'),
+(54, 'Master of Arts in Education', NULL, 'Special Education'),
+(55, 'Master of Arts in Teaching', NULL, 'Electronics Technology'),
+(56, 'Master of Arts in Teaching', NULL, 'Mathematics'),
+(57, 'Master of Arts in Teaching', NULL, 'Science');
 
 -- --------------------------------------------------------
 
@@ -886,7 +892,7 @@ INSERT INTO `requirements_table` (`id`, `description`) VALUES
 (1, 'Original and Photocopy of high school report card (form 138) duly signed by the school Principal and/or Registrar'),
 (2, 'Original and Photocopy of Certificate of Good Moral Character'),
 (3, 'Original and Photocopy of NSO Birth Certificate'),
-(5, 'Certification from School Principal and/or Registrar with School\'s dry seal that no copy of applicant\'s form 137 has been sent to other College or University');
+(4, 'Certification from School Principal and/or Registrar with School\'s dry seal that no copy of applicant\'s form 137 has been sent to other College or University');
 
 -- --------------------------------------------------------
 
@@ -1119,7 +1125,7 @@ CREATE TABLE `student_numbering_table` (
 --
 
 INSERT INTO `student_numbering_table` (`student_number`, `person_id`) VALUES
-(224091140, 2);
+(224091140, 1);
 
 -- --------------------------------------------------------
 
@@ -1535,7 +1541,7 @@ ALTER TABLE `person_status_table`
 -- AUTO_INCREMENT for table `person_table`
 --
 ALTER TABLE `person_table`
-  MODIFY `person_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `person_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `prof_table`
@@ -1547,7 +1553,7 @@ ALTER TABLE `prof_table`
 -- AUTO_INCREMENT for table `program_table`
 --
 ALTER TABLE `program_table`
-  MODIFY `program_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
+  MODIFY `program_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- AUTO_INCREMENT for table `program_tagging_table`

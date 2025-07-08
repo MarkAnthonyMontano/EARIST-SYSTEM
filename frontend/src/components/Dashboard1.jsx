@@ -223,25 +223,30 @@ const Dashboard1 = () => {
     }
 
     const formData = new FormData();
-    formData.append("profile_img", selectedFile);
+    formData.append("profile_picture", selectedFile);
+    formData.append("person_id", userID);
 
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/person/${userID}/upload-profile`,
+        `http://localhost:5000/api/upload-profile-picture`,
         formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
+          headers: { "Content-Type": "multipart/form-data" },
         }
       );
 
-      const fileName = response.data.profile_img;
+      const fileName = response.data.filename || response.data.profile_img;
 
-      // Immediately update the image shown in the box
+      // ✅ Set image AND trigger auto-save
+      const updatedPerson = {
+        ...person,
+        profile_img: fileName,
+      };
+
+      setPerson(updatedPerson);
+      await handleUpdate(updatedPerson); // ✅ this pushes the profile_img change into DB
+
       setUploadedImage(`http://localhost:5000/uploads/${fileName}`);
-      setPerson((prev) => ({ ...prev, profile_img: fileName }));
-
       alert("Upload successful!");
       handleClose();
     } catch (error) {
@@ -250,14 +255,8 @@ const Dashboard1 = () => {
     }
   };
 
-
   const [isLrnNA, setIsLrnNA] = useState(false);
-  const [isChecked, setIsChecked] = useState(false);
-
-  const handleCheckboxChange = (event) => {
-    setIsChecked(event.target.checked);
-  };
-
+ 
   const handlePwdCheck = (event) => {
     const checked = event.target.checked;
 
@@ -278,7 +277,7 @@ const Dashboard1 = () => {
 
     setPerson((prev) => ({
       ...prev,
-      lrnNumber: checked ? "nolrnNumber" : "" // Store "nolrnNumber" as marker
+      lrnNumber: checked ? "No LRN Number" : "" // Store "nolrnNumber" as marker
     }));
   };
 
@@ -418,7 +417,6 @@ const Dashboard1 = () => {
     fetchCurriculums();
   }, []);
 
-  const [sameAsPresent, setSameAsPresent] = useState(false);
 
   const [errors, setErrors] = useState({});
 
@@ -477,23 +475,23 @@ const Dashboard1 = () => {
     setErrors(newErrors);
     return isValid;
   };
-  
-// 🔒 Disable right-click
-document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-// 🔒 Block DevTools shortcuts silently
-document.addEventListener('keydown', (e) => {
-  const isBlockedKey =
-    e.key === 'F12' ||
-    e.key === 'F11' ||
-    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-    (e.ctrlKey && e.key === 'U');
+  // 🔒 Disable right-click
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-  if (isBlockedKey) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-});
+  // 🔒 Block DevTools shortcuts silently
+  document.addEventListener('keydown', (e) => {
+    const isBlockedKey =
+      e.key === 'F12' ||
+      e.key === 'F11' ||
+      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+      (e.ctrlKey && e.key === 'U');
+
+    if (isBlockedKey) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
 
   // dot not alter
   return (
@@ -849,7 +847,7 @@ document.addEventListener('keydown', (e) => {
               >
                 {person.profile_img && person.profile_img !== "" ? (
                   <img
-                    src={`http://localhost:5000/uploads/${person.profile_img}`}
+                    src={`http://localhost:5000/uploads/${person.profile_img}?t=${Date.now()}`}
                     alt="Profile"
                     style={{
                       width: "100%",
@@ -857,6 +855,7 @@ document.addEventListener('keydown', (e) => {
                       objectFit: "cover",
                     }}
                   />
+
                 ) : (
                   <>
                     <Typography fontSize={12} color={errors.profile_img ? "error" : "textSecondary"}>
@@ -1065,12 +1064,12 @@ document.addEventListener('keydown', (e) => {
               <TextField
                 id="lrnNumber"
                 name="lrnNumber"
-                required={person.lrnNumber !== "nolrnNumber"}
+                required={person.lrnNumber !== "No LRN Number"}
                 label="Enter your LRN Number"
-                value={person.lrnNumber === "nolrnNumber" ? "" : person.lrnNumber || ""}
+                value={person.lrnNumber === "No LRN Number" ? "" : person.lrnNumber || ""}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                disabled={person.lrnNumber === "nolrnNumber"}
+                disabled={person.lrnNumber === "No LRN Number"}
                 size="small"
                 sx={{ width: 220 }}
                 InputProps={{ sx: { height: 40 } }}
@@ -1084,12 +1083,12 @@ document.addEventListener('keydown', (e) => {
                 control={
                   <Checkbox
                     name="lrn_na"
-                    checked={person.lrnNumber === "nolrnNumber"}
+                    checked={person.lrnNumber === "No LRN Number"}
                     onChange={(e) => {
                       const checked = e.target.checked;
                       const updatedPerson = {
                         ...person,
-                        lrnNumber: checked ? "nolrnNumber" : "",
+                        lrnNumber: checked ? "No LRN Number" : "",
                       };
 
                       setPerson(updatedPerson);

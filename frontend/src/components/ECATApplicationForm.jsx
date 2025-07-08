@@ -1273,14 +1273,14 @@ document.addEventListener('keydown', (e) => {
                     borderBottom: "1px solid black",
                     width: "53%",
                     position: "relative",
-                    paddingBottom: "5px",
+                    paddingBottom: "10px",
                     marginLeft: "10px",
                   }}
                 >
                   <div
                     style={{
                       position: "absolute",
-                      top: "-10px",
+                      marginTop: "-8px",
                       width: "100%",
                       textAlign: "center",
                     }}

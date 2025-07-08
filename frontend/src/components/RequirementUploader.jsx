@@ -29,66 +29,117 @@ function RequirementUploader() {
   const [selectedRequirement, setSelectedRequirement] = useState('');
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [personId] = useState(1); // Replace with actual user ID
 
+const [userID, setUserID] = useState("");
+  const [user, setUser] = useState("");
+  const [userRole, setUserRole] = useState("");
+
+  // ✅ On mount: get localStorage credentials
   useEffect(() => {
-    fetchRequirements();
-    fetchUploads();
+    const storedUser = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
+    const storedID = localStorage.getItem("person_id");
+
+    if (storedUser && storedRole && storedID) {
+      setUser(storedUser);
+      setUserRole(storedRole);
+      setUserID(storedID);
+
+      if (storedRole !== "applicant") {
+        window.location.href = "/login";
+      } else {
+        fetchRequirements();
+        fetchUploads(storedID);
+      }
+    } else {
+      window.location.href = "/login";
+    }
   }, []);
 
   const fetchRequirements = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/requirements');
+      const res = await axios.get("http://localhost:5000/requirements");
       setRequirements(res.data);
     } catch (err) {
-      console.error('Error fetching requirements:', err);
+      console.error("Error fetching requirements:", err);
     }
   };
 
-  const fetchUploads = async () => {
+  // ✅ Fix: Use x-person-id header instead of query param
+  const fetchUploads = async (personId) => {
     try {
-      const res = await axios.get('http://localhost:5000/uploads');
+      const res = await axios.get("http://localhost:5000/uploads", {
+        headers: {
+          "x-person-id": personId
+        }
+      });
       setUploads(res.data);
     } catch (err) {
-      console.error('Error fetching uploads:', err);
+      console.error("Error fetching uploads:", err);
     }
   };
 
   const handleUpload = async () => {
     if (!selectedRequirement || !file) {
-      return alert('Please select a requirement and upload a file.');
+      return alert("Please select a requirement and upload a file.");
     }
 
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('requirements_id', selectedRequirement);
-    formData.append('person_id', personId);
+    formData.append("file", file);
+    formData.append("requirements_id", selectedRequirement);
 
     try {
       setLoading(true);
-      await axios.post('http://localhost:5000/upload', formData);
-      setSelectedRequirement('');
+      await axios.post("http://localhost:5000/upload", formData, {
+        headers: {
+          "x-person-id": userID,
+          "Content-Type": "multipart/form-data"
+        }
+      });
+      setSelectedRequirement("");
       setFile(null);
-      await fetchUploads();
+      await fetchUploads(userID);
     } catch (err) {
-      console.error('Upload failed:', err);
-      alert('Failed to upload. Please try again.');
+      console.error("Upload failed:", err);
+      alert("Failed to upload. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  // ✅ Fix: use header to authorize delete
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this upload?')) {
+    if (window.confirm("Are you sure you want to delete this upload?")) {
       try {
-        await axios.delete(`http://localhost:5000/uploads/${id}`);
-        fetchUploads();
+        await axios.delete(`http://localhost:5000/uploads/${id}`, {
+          headers: {
+            "x-person-id": userID
+          }
+        });
+        await fetchUploads(userID);
       } catch (err) {
-        console.error('Delete failed:', err);
-        alert('Failed to delete. Please try again.');
+        console.error("Delete failed:", err);
+        alert("Failed to delete. Please try again.");
       }
     }
   };
+
+   // 🔒 Disable right-click
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+  // 🔒 Block DevTools shortcuts silently
+  document.addEventListener('keydown', (e) => {
+    const isBlockedKey =
+      e.key === 'F12' ||
+      e.key === 'F11' ||
+      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+      (e.ctrlKey && e.key === 'U');
+
+    if (isBlockedKey) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
 
   return (
     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
