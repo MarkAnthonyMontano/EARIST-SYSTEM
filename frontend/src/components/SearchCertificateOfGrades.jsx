@@ -8,6 +8,7 @@ import '../styles/Print.css'
 
 const SearchCertificateOfGrades = () => {
 
+
   const getPersonIdFromToken = () => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -24,20 +25,15 @@ const SearchCertificateOfGrades = () => {
   const [personID, setPersonID] = useState('');
 
 
-  // For specific person
-  useEffect(() => {
-    const fetchPersonData = async () => {
-      if (!personID) return;
-      try {
-        const res = await axios.get(`http://localhost:5000/api/person/${id}`);
-        setData(response.data);
-      } catch (err) {
-        console.error("Failed to fetch person data:", err);
-      }
-    };
-
-    fetchPersonData();
-  }, [personID]);
+  const fetchPersonData = async (personID) => {
+    if (!personID) return;
+    try {
+      const res = await axios.get(`http://localhost:5000/api/person/${personID}`);
+      setData(res.data);
+    } catch (err) {
+      console.error("Failed to fetch person data:", err);
+    }
+  };
 
 
   const [studentNumber, setStudentNumber] = useState("");
@@ -282,8 +278,9 @@ const SearchCertificateOfGrades = () => {
       setAge(fullData.age || null);
       console.log(age)
       console.log(major)
+      console.log("person.program:", data[0]?.program);
       setEmail(fullData.email || null);
-      setProgram(active_curriculum); 
+      setProgram(active_curriculum);
 
       alert("Student found and data loaded!");
 
@@ -383,17 +380,17 @@ const SearchCertificateOfGrades = () => {
   const [curriculumOptions, setCurriculumOptions] = useState([]);
 
   useEffect(() => {
-  const fetchCurriculums = async () => {
-    try {
-      const response = await axios.get("http://localhost:5000/api/applied_program");
-      setCurriculumOptions(response.data);
-    } catch (error) {
-      console.error("Error fetching curriculum options:", error);
-    }
-  };
+    const fetchCurriculums = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/applied_program");
+        setCurriculumOptions(response.data);
+      } catch (error) {
+        console.error("Error fetching curriculum options:", error);
+      }
+    };
 
-  fetchCurriculums();
-}, []);
+    fetchCurriculums();
+  }, []);
 
 
   console.log("person.program:", data.program);
@@ -408,23 +405,96 @@ const SearchCertificateOfGrades = () => {
   }
 
 
-  
-  // 🔒 Disable right-click
-  document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-  // 🔒 Block DevTools shortcuts silently
-  document.addEventListener('keydown', (e) => {
-    const isBlockedKey =
-      e.key === 'F12' ||
-      e.key === 'F11' ||
-      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-      (e.ctrlKey && e.key === 'U');
-
-    if (isBlockedKey) {
-      e.preventDefault();
-      e.stopPropagation();
+  const getCollegeByProgram = (programName) => {
+    for (const [college, program_description] of Object.entries(collegeProgramMap)) {
+      if (program_description.includes(programName)) {
+        return college;
+      }
     }
-  });
+    return "";
+  };
+
+  // Put this mapping outside your component
+  const collegeProgramMap = {
+    "College of Architecture and Fine Arts": [
+      "Bachelor of Science in Architecture",
+      "Bachelor of Science in Interior Design",
+      "Bachelor in Fine Arts Major in Painting",
+      "Bachelor in Fine Arts Major in Visual Communication",
+      "Bachelor of Science Major in Fine Arts",
+      "Bachelor of Science in Fine Arts Major in External Design"
+    ],
+    "College of Arts and Sciences": [
+      "Bachelor of Science in Applied Physics with Computer Science Emphasis",
+      "Bachelor of Science in Psychology",
+      "Bachelor of Science in Mathematics"
+    ],
+    "College of Business and Public Administration": [
+      "Bachelor of Science in Business Administration Major in Marketing Management",
+      "Bachelor of Science in Business Administration Major in HR Development Management",
+      "Bachelor of Science in Entrepreneurship",
+      "Bachelor of Science in Office Administration"
+    ],
+    "College of Criminal Justice Education": [
+      "Bachelor in Public Administration",
+      "Bachelor of Science in Criminology"
+    ],
+    "College of Computing Studies": [
+      "Bachelor of Science in Computer Science",
+      "Bachelor of Science in Information Technology"
+    ],
+    "College of Education": [
+      "Bachelor in Secondary Education Major in Science",
+      "Bachelor in Secondary Education Major in Mathematics",
+      "Bachelor in Secondary Education Major in Filipino",
+      "Bachelor in Special Needs Education",
+      "Bachelor in Technology and Livelihood Education Major in Home Economics",
+      "Bachelor in Technology and Livelihood Education Major in Industrial Arts",
+      "Professional Education Subjects (TCP)"
+    ],
+    "College of Engineering": [
+      "Bachelor of Science in Chemical Engineering",
+      "Bachelor of Science in Civil Engineering",
+      "Bachelor of Science in Electrical Engineering",
+      "Bachelor of Science in Electronics and Communication Engineering",
+      "Bachelor of Science in Mechanical Engineering",
+      "Bachelor of Science in Computer Engineering"
+    ],
+    "College of Hospitality and Tourism Management": [
+      "Bachelor of Science in Tourism Management",
+      "Bachelor of Science in Hospitality Management"
+    ],
+    "College of Industrial Technology": [
+      "Bachelor of Science in Industrial Technology Major in Automotive Technology",
+      "Bachelor of Science in Industrial Technology Major in Electrical Technology",
+      "Bachelor of Science in Industrial Technology Major in Electronics Technology",
+      "Bachelor of Science in Industrial Technology Major in Food Technology",
+      "Bachelor of Science in Industrial Technology Major in Fashion and Apparel Technology",
+      "Bachelor of Science in Industrial Technology Major in Industrial Chemistry",
+      "Bachelor of Science in Industrial Technology Major in Drafting Technology",
+      "Bachelor of Science in Industrial Technology Major in Machine Shop Technology",
+      "Bachelor of Science in Industrial Technology Major in Refrigeration and Air Conditioning"
+    ],
+    "Graduate School Doctoral Program": [
+      "Doctor of Philosophy Industrial Psychology",
+      "Doctor of Education Educational Management",
+      "Doctor in Business Administration",
+      "Doctor in Public Administration"
+    ],
+    "Graduate School Master Program": [
+      "Master of Science in Mathematics",
+      "Master of Arts in Industrial Psychology",
+      "Master in Business Administration",
+      "Master in Public Administration",
+      "Master of Arts in Industrial Education Hotel Management",
+      "Master of Arts in Education Administration and Supervision",
+      "Master of Arts in Education Guidance and Counseling",
+      "Master of Arts in Education Special Education",
+      "Master of Arts in Teaching Electronics Technology",
+      "Master of Arts in Teaching Mathematics",
+      "Master of Arts in Teaching Science"
+    ]
+  };
 
 
   return (
@@ -435,30 +505,32 @@ const SearchCertificateOfGrades = () => {
           <div className="section">
 
             <Container
-              maxWidth="75%"
+
               sx={{
+                width: "75%",
                 backgroundColor: "#6D2323",
                 border: "2px solid black",
                 maxHeight: "500px",
                 overflowY: "auto",
                 color: "white",
+                marginLeft: "40px",
                 borderRadius: 2,
                 boxShadow: 3,
                 padding: "4px",
               }}
             >
-              <Box sx={{ width: "75%" }}>
-                <Typography style={{ fontSize: "20px", padding: "10px", fontFamily: "Arial Black" }}>Search Certificate of Registration</Typography>
+              <Box sx={{ width: "%" }}>
+                <Typography style={{ fontSize: "30px", padding: "10px", fontFamily: "Arial Black", textAlign: "center" }}>Search Certificate of Registration</Typography>
               </Box>
             </Container>
-            <Container maxWidth="75%" sx={{ backgroundColor: "white", border: "2px solid black", padding: 4, borderRadius: 2, boxShadow: 3 }}>
+            <Container sx={{ marginLeft: "40px",  width: "75%", backgroundColor: "white", border: "2px solid black", padding: 4, borderRadius: 2, boxShadow: 3 }}>
 
               <Box>
-                <label className="w-40 font-medium">Search Student Number:</label>
+                <label className="w-40 font-medium">Student Number:</label>
                 <br />
                 <TextField
                   label="Enter Student Number"
-                  style={{ width: "675px" }}
+                  style={{ width: "810px" }}
                   margin="normal"
                   value={studentNumber}
                   onChange={(e) => setStudentNumber(e.target.value)}
@@ -472,12 +544,13 @@ const SearchCertificateOfGrades = () => {
                 <Button
                   variant="contained"
                   color="primary"
-                  style={{ width: "675px" }}
+                  style={{ width: "810px", backgroundColor: "#maroon" }}
                   fullWidth
                   onClick={handleSearchStudent}
                 >
                   Search
                 </Button>
+
               </Box>
               <button
                 onClick={printDiv}
@@ -501,13 +574,7 @@ const SearchCertificateOfGrades = () => {
               >
                 Print Table
               </button>
-            </Container>
-
-
-
-          </div>
-          <Box p={4} display="grid" gridTemplateColumns="1fr 1fr" gap={4}></Box>
-          <div ref={divToPrintRef}>
+                <div ref={divToPrintRef}>
             <div>
               <style>
                 {`
@@ -584,7 +651,7 @@ const SearchCertificateOfGrades = () => {
 
 
                             <td style={{ width: "20%", textAlign: "center" }}>
-                              <img src={EaristLogo} alt="Earist Logo" style={{ marginLeft: "25px", width: "140px", height: "140px" }} />
+                              <img src={EaristLogo} alt="Earist Logo" style={{ marginLeft: "10px", width: "140px", height: "140px" }} />
                             </td>
 
                             {/* Center Column - School Information */}
@@ -616,12 +683,13 @@ const SearchCertificateOfGrades = () => {
                                 style={{
                                   width: "4.08cm",
                                   height: "4.08cm",
-                                  marginRight: "1px",
+                                  marginRight: "30px",
                                   display: "flex",
                                   justifyContent: "center",
                                   alignItems: "center",
                                   position: "relative",
                                   border: "1px solid #ccc",
+
                                 }}
                               >
                                 {profilePicture ? (
@@ -768,10 +836,18 @@ const SearchCertificateOfGrades = () => {
                         }}
                       />
                     </td>
+
+                    {/* College Display */}
                     <td colSpan={16} style={{ fontSize: "62.5%" }}>
                       <input
                         type="text"
-                        value={data[0]?.college || ""}
+                        value={
+                          getCollegeByProgram(
+                            curriculumOptions.find(
+                              (item) => item?.curriculum_id?.toString() === (program ?? "").toString()
+                            )?.program_description || ""
+                          )
+                        }
                         readOnly
                         style={{
                           fontFamily: "Arial, sans-serif",
@@ -784,7 +860,6 @@ const SearchCertificateOfGrades = () => {
                         }}
                       />
                     </td>
-
                   </tr>
 
                   <tr>
@@ -844,15 +919,18 @@ const SearchCertificateOfGrades = () => {
                       />
                     </td>
 
-                    {/* Program Value */}
                     <td colSpan={23} style={{ fontSize: "62.5%" }}>
                       <input
                         type="text"
                         value={
-                          curriculumOptions.find(
-                            (item) =>
-                              item?.curriculum_id?.toString() === (program ?? "").toString()
-                          )?.program_description || program || ""
+                          (() => {
+                            const match = curriculumOptions.find(
+                              (item) =>
+                                item?.curriculum_id?.toString() ===
+                                (data[0]?.program ?? "").toString()
+                            );
+                            return match ? match.program_description : (data[0]?.program ?? "");
+                          })()
                         }
 
                         readOnly
@@ -867,6 +945,7 @@ const SearchCertificateOfGrades = () => {
                         }}
                       />
                     </td>
+
 
                   </tr>
 
@@ -3156,6 +3235,13 @@ const SearchCertificateOfGrades = () => {
             </div>
           </div>
 
+            </Container>
+
+
+
+          </div>
+         
+        
         </div>
       </Container>
     </Box>

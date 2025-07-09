@@ -14,8 +14,13 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
     }
 
     try {
-      const decoded = JSON.parse(atob(token.split('.')[1]));
-      if (allowedRoles.length === 0 || allowedRoles.includes(decoded.role)) {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const userRole = payload.role;
+
+      console.log('User Role:', userRole); // ✅ for debugging
+      console.log('Allowed Roles:', allowedRoles);
+
+      if (allowedRoles.length === 0 || allowedRoles.includes(userRole)) {
         setIsAuthorized(true);
       } else {
         setIsAuthorized('unauthorized');
@@ -26,15 +31,13 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
     }
   }, [allowedRoles]);
 
-  if (isAuthorized === null) return null; // optional: add a loading spinner
+  if (isAuthorized === null) return <div>Loading...</div>;
 
-  if (isAuthorized === true) {
-    return children;
-  } else if (isAuthorized === 'unauthorized') {
-    return <Navigate to="/unauthorized" />;
-  } else {
-    return <Navigate to="/" />;
-  }
+  if (isAuthorized === true) return children;
+
+  if (isAuthorized === 'unauthorized') return <Navigate to="/unauthorized" />;
+
+  return <Navigate to="/" />;
 };
 
 export default ProtectedRoute;

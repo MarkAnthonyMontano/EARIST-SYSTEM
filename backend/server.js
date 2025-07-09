@@ -39,6 +39,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+
 //MYSQL CONNECTION FOR ADMISSION
 const db = mysql.createPool({
   host: "localhost",

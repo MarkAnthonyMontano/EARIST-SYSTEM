@@ -134,9 +134,8 @@ function App() {
               <Route path="/semester_panel" element={<ProtectedRoute><SemesterPanel /></ProtectedRoute>} />
               <Route path="/school_year_panel" element={<ProtectedRoute><SchoolYearPanel /></ProtectedRoute>} />
               <Route path="/school_year_activator_panel" element={<ProtectedRoute><SchoolYearActivatorPanel /></ProtectedRoute>} />
-          
+
               <Route path="/requirements_form" element={<ProtectedRoute><RequirementsForm /></ProtectedRoute>} />
-              <Route path="/requirements_uploader" element={<ProtectedRoute allowedRoles={['applicant']}><RequirementUploader /></ProtectedRoute>} />
               <Route path="/admission_dashboard" element={<ProtectedRoute><AdmissionDashboardPanel /></ProtectedRoute>} />
               <Route path="/department_dashboard" element={<ProtectedRoute><DepartmentManagement /></ProtectedRoute>} />
               <Route path="/system_dashboard" element={<ProtectedRoute><SystemDashboardPanel /></ProtectedRoute>} />
@@ -150,7 +149,7 @@ function App() {
               <Route path="/search_cor" element={<ProtectedRoute><SearchStudentCOR /></ProtectedRoute>} />
               <Route path="/select_college" element={<ProtectedRoute><ScheduleFilterer /></ProtectedRoute>} />
 
-           
+
               <Route path="/grading_sheet" element={<ProtectedRoute><GradingSheet /></ProtectedRoute>} />
               <Route path="/faculty_workload" element={<ProtectedRoute><FacultyWorkload /></ProtectedRoute>} />
               <Route path="/faculty_masterlist" element={<ProtectedRoute><FacultyMasterList /></ProtectedRoute>} />
@@ -160,11 +159,12 @@ function App() {
               <Route path="/student_dashboard" element={<ProtectedRoute allowedRoles={'student'}><StudentDashboard /></ProtectedRoute>} />
               <Route path="/unauthorized" element={<Unauthorized />} />
 
-              <Route path="/dashboard1" element={<ProtectedRoute allowedRoles={['applicant']}><Dashboard1 /></ProtectedRoute>} />
-              <Route path="/dashboard2" element={<ProtectedRoute allowedRoles={['applicant']}><Dashboard2 /></ProtectedRoute>} />
-              <Route path="/dashboard3" element={<ProtectedRoute allowedRoles={['applicant']}><Dashboard3 /></ProtectedRoute>} />
-              <Route path="/dashboard4" element={<ProtectedRoute allowedRoles={['applicant']}><Dashboard4 /></ProtectedRoute>} />
-              <Route path="/dashboard5" element={<ProtectedRoute allowedRoles={['applicant']}><Dashboard5 /></ProtectedRoute>} />
+              <Route path="/dashboard1" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><Dashboard1 /></ProtectedRoute>} />
+              <Route path="/dashboard2" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><Dashboard2 /></ProtectedRoute>} />
+              <Route path="/dashboard3" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><Dashboard3 /></ProtectedRoute>} />
+              <Route path="/dashboard4" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><Dashboard4 /></ProtectedRoute>} />
+              <Route path="/dashboard5" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><Dashboard5 /></ProtectedRoute>} />
+              <Route path="/requirements_uploader" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><RequirementUploader /></ProtectedRoute>} />
 
               <Route path="/personal_data_form" element={<ProtectedRoute><PersonalDataForm /></ProtectedRoute>} />
               <Route path="/ecat_application_form" element={<ProtectedRoute><ECATApplicationForm /></ProtectedRoute>} />

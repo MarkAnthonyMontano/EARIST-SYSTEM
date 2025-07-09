@@ -272,6 +272,8 @@ const styles = {
       borderRadius: "5px",
       cursor: "pointer",
     },
+
+    
     taggedProgramsContainer: {
       overflowY: "auto",
       maxHeight: "500px", // Increased height for more space

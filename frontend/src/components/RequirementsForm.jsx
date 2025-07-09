@@ -68,10 +68,12 @@ const RequirementsForm = () => {
             />
             <button
               type="submit"
-              className="w-full py-3 bg-red-600 text-white rounded-lg shadow-md hover:bg-red-700 transition duration-300"
+              className="w-full py-3 text-white rounded-lg shadow-md hover:bg-red-700 transition duration-300"
+              style={{ backgroundColor: '#800000' }}
             >
               Save Requirement
             </button>
+
           </form>
         </div>
 

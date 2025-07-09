@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 08, 2025 at 12:13 PM
+-- Generation Time: Jul 09, 2025 at 07:52 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -40,9 +40,9 @@ CREATE TABLE `active_school_year_table` (
 --
 
 INSERT INTO `active_school_year_table` (`id`, `year_id`, `semester_id`, `astatus`, `active`) VALUES
-(1, 4, 1, 0, 0),
+(1, 4, 1, 1, 0),
 (2, 9, 2, 0, 0),
-(3, 9, 1, 1, 0),
+(3, 9, 1, 0, 0),
 (4, 10, 2, 0, 1),
 (6, 4, 2, 0, 0),
 (8, 12, 2, 0, 0),
@@ -168,13 +168,63 @@ CREATE TABLE `curriculum_table` (
 --
 
 INSERT INTO `curriculum_table` (`curriculum_id`, `year_id`, `program_id`, `lock_status`) VALUES
-(1, 1, 4, 0),
-(2, 2, 11, 0),
-(3, 3, 7, 0),
-(4, 4, 10, 0),
-(5, 9, 9, 0),
-(6, 10, 8, 0),
-(7, 2, 6, 0);
+(1, 1, 29, 0),
+(2, 2, 0, 0),
+(3, 3, 3, 0),
+(4, 4, 4, 0),
+(5, 5, 5, 0),
+(6, 6, 6, 0),
+(7, 7, 7, 0),
+(8, 8, 8, 0),
+(9, 9, 9, 0),
+(10, 10, 10, 0),
+(11, 11, 11, 0),
+(12, 12, 12, 0),
+(13, 13, 13, 0),
+(14, 14, 14, 0),
+(15, 15, 15, 0),
+(16, 16, 16, 0),
+(17, 17, 17, 0),
+(18, 18, 18, 0),
+(19, 19, 19, 0),
+(20, 20, 20, 0),
+(21, 21, 21, 0),
+(22, 22, 22, 0),
+(23, 23, 23, 0),
+(24, 24, 24, 0),
+(25, 25, 25, 0),
+(26, 26, 26, 0),
+(27, 27, 27, 0),
+(28, 28, 28, 0),
+(29, 29, 29, 0),
+(30, 30, 30, 0),
+(31, 31, 31, 0),
+(32, 32, 32, 0),
+(33, 33, 33, 0),
+(34, 34, 34, 0),
+(35, 35, 35, 0),
+(36, 36, 36, 0),
+(37, 37, 37, 0),
+(38, 38, 38, 0),
+(39, 39, 39, 0),
+(40, 40, 40, 0),
+(41, 41, 41, 0),
+(42, 42, 42, 0),
+(43, 43, 43, 0),
+(44, 44, 44, 0),
+(45, 45, 45, 0),
+(46, 46, 46, 0),
+(47, 47, 47, 0),
+(48, 48, 48, 0),
+(49, 49, 49, 0),
+(50, 50, 50, 0),
+(51, 51, 51, 0),
+(52, 52, 52, 0),
+(53, 53, 53, 0),
+(54, 54, 54, 0),
+(55, 55, 55, 0),
+(56, 56, 56, 0),
+(57, 57, 57, 0);
 
 -- --------------------------------------------------------
 
@@ -337,8 +387,8 @@ INSERT INTO `dprtmnt_table` (`dprtmnt_id`, `dprtmnt_name`, `dprtmnt_code`) VALUE
 (7, 'College of Engineering', 'CEN'),
 (8, 'College of Hospitality and Tourism Management', 'CHTM'),
 (9, 'College of Industrial Technology', 'CIT'),
-(10, 'sadasda', '1232asd'),
-(11, 'CADAS', 'ASDA');
+(10, 'Graduate School Doctoral Program', 'GSDP'),
+(11, 'Graduate School Master Program', 'GSMP');
 
 -- --------------------------------------------------------
 
@@ -387,7 +437,18 @@ INSERT INTO `enrolled_subject` (`id`, `student_number`, `curriculum_id`, `course
 (73, 224091140, 1, 11, 3, 0, 0, 0, 0, 8, 0),
 (74, 224091140, 1, 2, 3, 0, 0, 0, 0, 8, 0),
 (76, 224091140, 1, 4, 3, 0, 0, 0, 0, 8, 0),
-(78, 224091140, 1, 3, 3, 0, 0, 0, 0, 8, 0);
+(78, 224091140, 1, 3, 3, 0, 0, 0, 0, 8, 0),
+(79, 224091140, 1, 1, 1, 0, 0, 0, 0, 2, 0),
+(80, 224091140, 1, 8, 1, 0, 0, 0, 0, 2, 0),
+(81, 224091140, 1, 9, 1, 0, 0, 0, 0, 2, 0),
+(82, 224091140, 1, 11, 1, 0, 0, 0, 0, 2, 0),
+(83, 224091140, 1, 10, 1, 0, 0, 0, 0, 2, 0),
+(84, 224091140, 1, 2, 1, 0, 0, 0, 0, 2, 0),
+(85, 224091140, 1, 3, 1, 0, 0, 0, 0, 2, 0),
+(86, 224091140, 1, 4, 1, 0, 0, 0, 0, 2, 0),
+(87, 224091140, 1, 5, 1, 0, 0, 0, 0, 2, 0),
+(88, 224091140, 1, 7, 1, 0, 0, 0, 0, 2, 0),
+(89, 224091140, 1, 6, 1, 0, 0, 0, 0, 2, 0);
 
 -- --------------------------------------------------------
 
@@ -758,21 +819,21 @@ INSERT INTO `program_table` (`program_id`, `program_description`, `program_code`
 (40, 'Bachelor of Science Major in Chemical Engineering', 'BSCE', NULL),
 (41, 'Bachelor of Science Major in Fine Arts', 'BSFA', NULL),
 (42, 'Bachelor of Science in Fine Arts Major in External Design', 'BSFAMED', NULL),
-(43, 'Doctor of Philosophy', NULL, 'Industrial Psychology'),
-(44, 'Doctor of Education', NULL, 'Educational Management'),
+(43, 'Doctor of Philosophy Industrial Psychology', NULL, 'Industrial Psychology'),
+(44, 'Doctor of Education Educational Management', NULL, 'Educational Management'),
 (45, 'Doctor in Business Administration', NULL, NULL),
 (46, 'Doctor in Public Administration', NULL, NULL),
 (47, 'Master of Science in Mathematics', NULL, NULL),
 (48, 'Master of Arts in Industrial Psychology', NULL, NULL),
 (49, 'Master in Business Administration', NULL, NULL),
 (50, 'Master in Public Administration', NULL, NULL),
-(51, 'Master of Arts in Industrial Education', NULL, 'Hotel Management'),
-(52, 'Master of Arts in Education', NULL, 'Administration and Supervision'),
-(53, 'Master of Arts in Education', NULL, 'Guidance and Counseling'),
-(54, 'Master of Arts in Education', NULL, 'Special Education'),
-(55, 'Master of Arts in Teaching', NULL, 'Electronics Technology'),
-(56, 'Master of Arts in Teaching', NULL, 'Mathematics'),
-(57, 'Master of Arts in Teaching', NULL, 'Science');
+(51, 'Master of Arts in Industrial Education Hotel Management', NULL, 'Hotel Management'),
+(52, 'Master of Arts in Education Administration and Supervision', NULL, 'Administration and Supervision'),
+(53, 'Master of Arts in Education Guidance and Counseling', NULL, 'Guidance and Counseling'),
+(54, 'Master of Arts in Education Special Education', NULL, 'Special Education'),
+(55, 'Master of Arts in Teaching Electronics Technology', NULL, 'Electronics Technology'),
+(56, 'Master of Arts in Teaching Mathematics', NULL, 'Mathematics'),
+(57, 'Master of Arts in Teaching Science', NULL, 'Science');
 
 -- --------------------------------------------------------
 
@@ -1125,7 +1186,8 @@ CREATE TABLE `student_numbering_table` (
 --
 
 INSERT INTO `student_numbering_table` (`student_number`, `person_id`) VALUES
-(224091140, 1);
+(224091140, 1),
+(224091141, 3);
 
 -- --------------------------------------------------------
 
@@ -1200,7 +1262,7 @@ CREATE TABLE `user_accounts` (
 --
 
 INSERT INTO `user_accounts` (`id`, `person_id`, `role`, `email`, `password`) VALUES
-(1, 1, 'registrar', 'Ardenmecasio21@gmail.com', '$2b$10$PqmUKA45xobzdMZHx8U2/Of/YSRAgop.8FwuMCOtixY3bQNxMAGaO'),
+(1, 20, 'registrar', 'Ardenmecasio21@gmail.com', '$2b$10$PqmUKA45xobzdMZHx8U2/Of/YSRAgop.8FwuMCOtixY3bQNxMAGaO'),
 (2, 4, 'student', 'ardenhello@gmail.com', '$2b$10$dxs3rjyLGQtPIeDpyeAUTOsViqjJWC6ZYb1uhlWSZLePjvPOj/qZ.');
 
 -- --------------------------------------------------------
@@ -1481,7 +1543,7 @@ ALTER TABLE `course_table`
 -- AUTO_INCREMENT for table `curriculum_table`
 --
 ALTER TABLE `curriculum_table`
-  MODIFY `curriculum_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `curriculum_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- AUTO_INCREMENT for table `dprtmnt_curriculum_table`
@@ -1511,13 +1573,13 @@ ALTER TABLE `dprtmnt_section_table`
 -- AUTO_INCREMENT for table `dprtmnt_table`
 --
 ALTER TABLE `dprtmnt_table`
-  MODIFY `dprtmnt_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `dprtmnt_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `enrolled_subject`
 --
 ALTER TABLE `enrolled_subject`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=79;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
 
 --
 -- AUTO_INCREMENT for table `period_status`

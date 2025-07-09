@@ -26,26 +26,26 @@ const Dashboard2 = () => {
   });
 
 
-  // dot not alter
-  useEffect(() => {
-    const storedUser = localStorage.getItem("email");
-    const storedRole = localStorage.getItem("role");
-    const storedID = localStorage.getItem("person_id");
+  // do not alter
+useEffect(() => {
+  const storedUser = localStorage.getItem("email");
+  const storedRole = localStorage.getItem("role");
+  const storedID = localStorage.getItem("person_id");
 
-    if (storedUser && storedRole && storedID) {
-      setUser(storedUser);
-      setUserRole(storedRole);
-      setUserID(storedID);
+  if (storedUser && storedRole && storedID) {
+    setUser(storedUser);
+    setUserRole(storedRole);
+    setUserID(storedID);
 
-      if (storedRole !== "applicant") {
-        window.location.href = "/login";
-      } else {
-        fetchPersonData(storedID);
-      }
+    if (storedRole === "applicant" || storedRole === "registrar") {
+      fetchPersonData(storedID);
     } else {
       window.location.href = "/login";
     }
-  }, []);
+  } else {
+    window.location.href = "/login";
+  }
+}, []);
 
 
   const steps = [
@@ -435,7 +435,7 @@ document.addEventListener('keydown', (e) => {
           </Container>
 
 
-          <Container maxWidth="100%" sx={{ backgroundColor: "white", border: "2px solid black", padding: 4, borderRadius: 2, boxShadow: 3 }}>
+          <Container maxWidth="100%" sx={{ backgroundColor: "#f1f1f1", border: "2px solid black", padding: 4, borderRadius: 2, boxShadow: 3 }}>
             <Typography style={{ fontSize: "20px", color: "#6D2323", fontWeight: "bold" }}>Family Background:</Typography>
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <br />

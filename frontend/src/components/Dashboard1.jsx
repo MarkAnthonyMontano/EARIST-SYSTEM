@@ -73,7 +73,7 @@ const Dashboard1 = () => {
   });
   const [groupedPrograms, setGroupedPrograms] = useState({});
 
-  // dot not alter
+  // do not alter
   useEffect(() => {
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
@@ -84,15 +84,16 @@ const Dashboard1 = () => {
       setUserRole(storedRole);
       setUserID(storedID);
 
-      if (storedRole !== "applicant") {
-        window.location.href = "/login";
-      } else {
+      if (storedRole === "applicant" || storedRole === "registrar") {
         fetchPersonData(storedID);
+      } else {
+        window.location.href = "/login";
       }
     } else {
       window.location.href = "/login";
     }
   }, []);
+
 
   const steps = [
     { label: "Personal Information", icon: <PersonIcon />, path: "/dashboard1", onChange: () => handleChange({ label: "Personal Information", path: "/dashboard1" }) },
@@ -256,7 +257,7 @@ const Dashboard1 = () => {
   };
 
   const [isLrnNA, setIsLrnNA] = useState(false);
- 
+
   const handlePwdCheck = (event) => {
     const checked = event.target.checked;
 
@@ -653,7 +654,7 @@ const Dashboard1 = () => {
             </Box>
           </Container>
 
-          <Container maxWidth="100%" sx={{ backgroundColor: "white", border: "2px solid black", padding: 4, borderRadius: 2, boxShadow: 3 }}>
+          <Container maxWidth="100%" sx={{ backgroundColor: "#f1f1f1", border: "2px solid black", padding: 4, borderRadius: 2, boxShadow: 3 }}>
             <Typography style={{ fontSize: "20px", color: "#6D2323", fontWeight: "bold" }}>Personal Information:</Typography>
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <br />

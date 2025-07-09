@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import {
   Box,
@@ -30,150 +30,144 @@ function RequirementUploader() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
 
-const [userID, setUserID] = useState("");
-  const [user, setUser] = useState("");
-  const [userRole, setUserRole] = useState("");
+  const [userID, setUserID] = useState('');
+  const [user, setUser] = useState('');
+  const [userRole, setUserRole] = useState('');
 
-  // ✅ On mount: get localStorage credentials
+  const fileInputRef = useRef(null); // ✅ add ref for file input
+
   useEffect(() => {
-    const storedUser = localStorage.getItem("email");
-    const storedRole = localStorage.getItem("role");
-    const storedID = localStorage.getItem("person_id");
+    const storedUser = localStorage.getItem('email');
+    const storedRole = localStorage.getItem('role');
+    const storedID = localStorage.getItem('person_id');
 
     if (storedUser && storedRole && storedID) {
       setUser(storedUser);
       setUserRole(storedRole);
       setUserID(storedID);
 
-      if (storedRole !== "applicant") {
-        window.location.href = "/login";
-      } else {
+      if (storedRole === 'applicant' || storedRole === 'registrar') {
         fetchRequirements();
         fetchUploads(storedID);
+      } else {
+        window.location.href = '/login';
       }
     } else {
-      window.location.href = "/login";
+      window.location.href = '/login';
     }
   }, []);
 
   const fetchRequirements = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/requirements");
+      const res = await axios.get('http://localhost:5000/requirements');
       setRequirements(res.data);
     } catch (err) {
-      console.error("Error fetching requirements:", err);
+      console.error('Error fetching requirements:', err);
     }
   };
 
-  // ✅ Fix: Use x-person-id header instead of query param
   const fetchUploads = async (personId) => {
     try {
-      const res = await axios.get("http://localhost:5000/uploads", {
+      const res = await axios.get('http://localhost:5000/uploads', {
         headers: {
-          "x-person-id": personId
+          'x-person-id': personId
         }
       });
       setUploads(res.data);
     } catch (err) {
-      console.error("Error fetching uploads:", err);
+      console.error('Error fetching uploads:', err);
     }
   };
 
   const handleUpload = async () => {
     if (!selectedRequirement || !file) {
-      return alert("Please select a requirement and upload a file.");
+      return alert('Please select a requirement and upload a file.');
     }
 
     const formData = new FormData();
-    formData.append("file", file);
-    formData.append("requirements_id", selectedRequirement);
+    formData.append('file', file);
+    formData.append('requirements_id', selectedRequirement);
 
     try {
       setLoading(true);
-      await axios.post("http://localhost:5000/upload", formData, {
+      await axios.post('http://localhost:5000/upload', formData, {
         headers: {
-          "x-person-id": userID,
-          "Content-Type": "multipart/form-data"
+          'x-person-id': userID,
+          'Content-Type': 'multipart/form-data'
         }
       });
-      setSelectedRequirement("");
+
+      setSelectedRequirement('');
       setFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''; // ✅ Clear file input
+      }
+
       await fetchUploads(userID);
     } catch (err) {
-      console.error("Upload failed:", err);
-      alert("Failed to upload. Please try again.");
+      console.error('Upload failed:', err);
+      alert('Failed to upload. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Fix: use header to authorize delete
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this upload?")) {
+    if (window.confirm('Are you sure you want to delete this upload?')) {
       try {
         await axios.delete(`http://localhost:5000/uploads/${id}`, {
           headers: {
-            "x-person-id": userID
+            'x-person-id': userID
           }
         });
         await fetchUploads(userID);
       } catch (err) {
-        console.error("Delete failed:", err);
-        alert("Failed to delete. Please try again.");
+        console.error('Delete failed:', err);
+        alert('Failed to delete. Please try again.');
       }
     }
   };
 
-  
-  // 🔒 Disable right-click
-  document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-  // 🔒 Block DevTools shortcuts silently
-  document.addEventListener('keydown', (e) => {
-    const isBlockedKey =
-      e.key === 'F12' ||
-      e.key === 'F11' ||
-      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-      (e.ctrlKey && e.key === 'U');
-
-    if (isBlockedKey) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  });
-
   return (
-    <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
-      <Container maxWidth="md" sx={{ mt: 5, }}>
+    <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
+      <Container maxWidth="md" sx={{ mt: 5 }}>
         <Container>
-          <h1 style={{ fontSize: "40px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>UPLOAD REQUIREMENT DOCUMENT</h1>
-          <div style={{ textAlign: "center" }}>Complete the applicant form to secure your place for the upcoming academic year at EARIST.</div>
+          <h1 style={{ fontSize: '40px', fontWeight: 'bold', textAlign: 'center', color: 'maroon', marginTop: '25px' }}>
+            UPLOAD REQUIREMENT DOCUMENT
+          </h1>
+          <div style={{ textAlign: 'center' }}>
+            Complete the applicant form to secure your place for the upcoming academic year at EARIST.
+          </div>
         </Container>
         <br />
         <Container
           maxWidth="100%"
           sx={{
-            backgroundColor: "#6D2323",
-            border: "2px solid black",
-            maxHeight: "500px",
-            overflowY: "auto",
-            color: "white",
+            backgroundColor: '#6D2323',
+            border: '2px solid black',
+            maxHeight: '500px',
+            overflowY: 'auto',
+            color: 'white',
             borderRadius: 2,
             boxShadow: 3,
-            padding: "4px",
+            padding: '4px'
           }}
         >
-          <Box sx={{ width: "100%" }}>
-            <Typography style={{ fontSize: "20px", padding: "10px", fontFamily: "Arial Black" }}>Step 6: Upload Documents</Typography>
+          <Box sx={{ width: '100%' }}>
+            <Typography style={{ fontSize: '20px', padding: '10px', fontFamily: 'Arial Black' }}>
+              Step 6: Upload Documents
+            </Typography>
           </Box>
         </Container>
-        <Paper elevation={3} sx={{ p: 4, borderRadius: 3, border: "1px solid black" }}>
-          <Typography style={{ fontSize: "20px", color: "#6D2323", fontWeight: "bold" }}>Select Documents:</Typography>
-          <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+
+        <Paper elevation={3} sx={{ p: 4, borderRadius: 3, border: '1px solid black', backgroundColor: '#f1f1f1' }}>
+          <Typography style={{ fontSize: '20px', color: '#6D2323', fontWeight: 'bold' }}>Select Documents:</Typography>
+          <hr style={{ border: '1px solid #ccc', width: '100%' }} />
 
           <Box display="flex" flexDirection="column" gap={3} mt={2}>
-            {/* Select Requirement (default size) */}
-            <label style={{ marginTop: "-5px", marginBottom: "-20px" }} className="w-40 font-medium">Requirement:</label>
+            <label style={{ marginTop: '-5px', marginBottom: '-20px' }} className="w-40 font-medium">
+              Requirement:
+            </label>
             <FormControl fullWidth>
               <InputLabel id="requirement-label">Select Requirement</InputLabel>
               <Select
@@ -192,15 +186,17 @@ const [userID, setUserID] = useState("");
                 ))}
               </Select>
             </FormControl>
-            <label style={{ marginTop: "-5px", marginBottom: "-20px" }} className="w-40 font-medium">Upload File:</label>
-            {/* File Upload (TextField with default size) */}
+
+            <label style={{ marginTop: '-5px', marginBottom: '-20px' }} className="w-40 font-medium">
+              Upload Documents:
+            </label>
             <TextField
               type="file"
               onChange={(e) => setFile(e.target.files[0])}
+              inputRef={fileInputRef} // ✅ Ref to reset input
               inputProps={{ accept: '.png,.jpg,.jpeg,.pdf' }}
               fullWidth
             />
-
 
             <Button
               onClick={handleUpload}
@@ -258,9 +254,7 @@ const [userID, setUserID] = useState("");
                         View
                       </a>
                     </TableCell>
-                    <TableCell>
-                      {upload.created_at ? new Date(upload.created_at).toLocaleString() : 'N/A'}
-                    </TableCell>
+                    <TableCell>{upload.created_at ? new Date(upload.created_at).toLocaleString() : 'N/A'}</TableCell>
                     <TableCell>
                       <IconButton color="error" onClick={() => handleDelete(upload.upload_id)}>
                         <DeleteIcon sx={{ color: 'maroon' }} />
