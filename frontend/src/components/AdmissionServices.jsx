@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Box, Container } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
 import EaristLogo from "../assets/EaristLogo.png";
@@ -19,6 +19,32 @@ const AdmissionServices = () => {
         }
         return null;
     };
+
+    const [userID, setUserID] = useState("");
+      const [user, setUser] = useState("");
+      const [userRole, setUserRole] = useState("");
+      
+        // do not alter
+        useEffect(() => {
+          const storedUser = localStorage.getItem("email");
+          const storedRole = localStorage.getItem("role");
+          const storedID = localStorage.getItem("person_id");
+      
+          if (storedUser && storedRole && storedID) {
+            setUser(storedUser);
+            setUserRole(storedRole);
+            setUserID(storedID);
+      
+            if (storedRole === "applicant" || storedRole === "registrar") {
+             
+            } else {
+              window.location.href = "/login";
+            }
+          } else {
+            window.location.href = "/login";
+          }
+        }, []);
+    
 
 
     const divToPrintRef = useRef();

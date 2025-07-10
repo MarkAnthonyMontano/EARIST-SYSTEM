@@ -1,8 +1,7 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import axios from "axios";
 import { Box, Container, } from "@mui/material";
 import EaristLogo from "../assets/EaristLogo.png";
-
 
 const PersonalDataForm = () => {
   const [userID, setUserID] = useState("");
@@ -68,26 +67,28 @@ const PersonalDataForm = () => {
     }
   };
 
-  // ✅ Run only once on component mount
-  useEffect(() => {
-    const storedUser = localStorage.getItem("email");
-    const storedRole = localStorage.getItem("role");
-    const storedID = localStorage.getItem("person_id");
 
-    if (storedUser && storedRole && storedID) {
-      setUser(storedUser);
-      setUserRole(storedRole);
-      setUserID(storedID);
-
-      if (storedRole !== "applicant") {
-        window.location.href = "/login";
+    // do not alter
+    useEffect(() => {
+      const storedUser = localStorage.getItem("email");
+      const storedRole = localStorage.getItem("role");
+      const storedID = localStorage.getItem("person_id");
+  
+      if (storedUser && storedRole && storedID) {
+        setUser(storedUser);
+        setUserRole(storedRole);
+        setUserID(storedID);
+  
+        if (storedRole === "applicant" || storedRole === "registrar") {
+         
+        } else {
+          window.location.href = "/login";
+        }
       } else {
-        fetchPersonData(storedID); // ✅ THIS fetches specific user data
+        window.location.href = "/login";
       }
-    } else {
-      window.location.href = "/login";
-    }
-  }, []);
+    }, []);
+
 
   const [shortDate, setShortDate] = useState("");
   const [longDate, setLongDate] = useState("");

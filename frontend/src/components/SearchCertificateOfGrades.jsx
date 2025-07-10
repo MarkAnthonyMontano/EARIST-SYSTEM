@@ -507,7 +507,7 @@ const SearchCertificateOfGrades = () => {
             <Container
 
               sx={{
-                width: "75%",
+                width: "100%",
                 backgroundColor: "#6D2323",
                 border: "2px solid black",
                 maxHeight: "500px",
@@ -523,7 +523,7 @@ const SearchCertificateOfGrades = () => {
                 <Typography style={{ fontSize: "30px", padding: "10px", fontFamily: "Arial Black", textAlign: "center" }}>Search Certificate of Registration</Typography>
               </Box>
             </Container>
-            <Container sx={{ marginLeft: "40px",  width: "75%", backgroundColor: "white", border: "2px solid black", padding: 4, borderRadius: 2, boxShadow: 3 }}>
+            <Container sx={{ marginLeft: "40px",  width: "100%", backgroundColor: "white", border: "2px solid black", padding: 4, borderRadius: 2, boxShadow: 3 }}>
 
               <Box>
                 <label className="w-40 font-medium">Student Number:</label>

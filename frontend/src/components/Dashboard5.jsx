@@ -132,57 +132,53 @@ useEffect(() => {
   // dot not alter
   return (
     <Box sx={{ height: 'calc(100vh - 140px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
-      <br />
-
-
 
       <Container maxWidth="lg">
         <Box sx={{ display: "flex", width: "100%" }}>
           {/* Left: Instructions (75%) */}
           <Box sx={{ width: "75%", padding: "10px" }}>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 2,
-                padding: "16px",
-                borderRadius: "10px",
-                backgroundColor: "#fffaf5",
-                border: "1px solid #6D2323",
-                boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
-                mt: 2,
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "#6D2323",
-                  borderRadius: "8px",
-                  width: "36px",
-                  height: "36px",
-                  minWidth: "36px",
-                }}
-              >
-                <ErrorIcon sx={{ color: "white", fontSize: "20px" }} />
-              </Box>
-
-              <Typography
-                sx={{
-                  fontSize: "14px",
-                  fontFamily: "Arial",
-                  color: "#3e3e3e",
-                  lineHeight: 1.6,
-                }}
-              >
-                <strong>1.</strong> Kindly type <strong>'NA'</strong> in boxes where there are no possible answers to the information being requested.
-                <br />
-                <strong>2.</strong> To use the letter <strong>'Ñ'</strong>, press <kbd>ALT</kbd> + <kbd>165</kbd>; for <strong>'ñ'</strong>, press <kbd>ALT</kbd> + <kbd>164</kbd>.
-              </Typography>
-            </Box>
-
-          </Box>
+                     <Box
+                       sx={{
+                         display: "flex",
+                         alignItems: "flex-start",
+                         gap: 2,
+                         padding: "16px",
+                         borderRadius: "10px",
+                         backgroundColor: "#fffaf5",
+                         border: "1px solid #6D2323",
+                         boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
+                         mt: 2,
+                       }}
+                     >
+                       <Box
+                         sx={{
+                           display: "flex",
+                           alignItems: "center",
+                           justifyContent: "center",
+                           backgroundColor: "#6D2323",
+                           borderRadius: "8px",
+                           width: "50px",
+                           height: "50px",
+                           minWidth: "36px",
+                         }}
+                       >
+                         <ErrorIcon sx={{ color: "white", fontSize: "36px" }} />
+                       </Box>
+         
+                       <Typography
+                         sx={{
+                           fontSize: "14px",
+                           fontFamily: "Arial",
+                           color: "#3e3e3e",
+                           lineHeight: 1.6,
+                         }}
+                       >
+                         <strong>1.</strong> Kindly type <strong>'NA'</strong> in boxes where there are no possible answers to the information being requested.
+                         <br />
+                         <strong>2.</strong> To use the letter <strong>'Ñ'</strong>, press <kbd>ALT</kbd> + <kbd>165</kbd>; for <strong>'ñ'</strong>, press <kbd>ALT</kbd> + <kbd>164</kbd>.
+                       </Typography>
+                     </Box>
+                   </Box>
 
           <Box sx={{ width: "25%", padding: "10px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
 

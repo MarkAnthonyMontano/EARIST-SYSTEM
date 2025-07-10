@@ -33,7 +33,6 @@ import SystemDashboardPanel from './pages/SystemDashboard';
 import DepartmentManagement from './pages/DepartmentDashboard';
 import StudentNumbering from './components/StudentNumbering';
 import CourseTagging from './components/CourseTagging';
-import UserRegistrationForm from './components/UserRegistrationForm';
 import ChangeGradingPeriod from './components/ChangeYearGradPer';
 import AccountDashboard from './pages/AccountDashboard';
 import ScheduleChecker from './components/ScheduleChecker';
@@ -54,6 +53,8 @@ import FacultyStudentClassList from './components/FacultyStudentClassList';
 import FacultySchedule from './components/FacultySchedule';
 import StudentDashboard from './pages/StudentDashboard';
 
+
+import ExaminationProfile from './components/ExaminationProfile';
 import Dashboard1 from './components/Dashboard1';
 import Dashboard2 from './components/Dashboard2';
 import Dashboard3 from './components/Dashboard3';
@@ -142,13 +143,12 @@ function App() {
               <Route path="/account_dashboard" element={<ProtectedRoute><AccountDashboard /></ProtectedRoute>} />
               <Route path="/student_numbering" element={<ProtectedRoute><StudentNumbering /></ProtectedRoute>} />
               <Route path="/course_tagging" element={<ProtectedRoute><CourseTagging /></ProtectedRoute>} />
-              <Route path="/user_register" element={<ProtectedRoute><UserRegistrationForm /></ProtectedRoute>} />
               <Route path="/schedule_checker/:dprtmnt_id" element={<ProtectedRoute><ScheduleChecker /></ProtectedRoute>} />
               <Route path="/change_grade_period" element={<ProtectedRoute><ChangeGradingPeriod /></ProtectedRoute>} />
               <Route path="/department_room" element={<ProtectedRoute><DepartmentRoom /></ProtectedRoute>} />
               <Route path="/search_cor" element={<ProtectedRoute><SearchStudentCOR /></ProtectedRoute>} />
               <Route path="/select_college" element={<ProtectedRoute><ScheduleFilterer /></ProtectedRoute>} />
-
+              <Route path="/examination_profile" element={<ProtectedRoute><ExaminationProfile /></ProtectedRoute>} />
 
               <Route path="/grading_sheet" element={<ProtectedRoute><GradingSheet /></ProtectedRoute>} />
               <Route path="/faculty_workload" element={<ProtectedRoute><FacultyWorkload /></ProtectedRoute>} />
@@ -166,11 +166,11 @@ function App() {
               <Route path="/dashboard5" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><Dashboard5 /></ProtectedRoute>} />
               <Route path="/requirements_uploader" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><RequirementUploader /></ProtectedRoute>} />
 
-              <Route path="/personal_data_form" element={<ProtectedRoute><PersonalDataForm /></ProtectedRoute>} />
-              <Route path="/ecat_application_form" element={<ProtectedRoute><ECATApplicationForm /></ProtectedRoute>} />
-              <Route path="/admission_form_process" element={<ProtectedRoute><AdmissionFormProcess /></ProtectedRoute>} />
-              <Route path="/admission_services" element={<ProtectedRoute><AdmissionServices /></ProtectedRoute>} />
-              <Route path="/office_of_the_registrar" element={<ProtectedRoute><OfficeOfTheRegistrar /></ProtectedRoute>} />
+              <Route path="/personal_data_form" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><PersonalDataForm /></ProtectedRoute>} />
+              <Route path="/ecat_application_form" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><ECATApplicationForm /></ProtectedRoute>} />
+              <Route path="/admission_form_process" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><AdmissionFormProcess /></ProtectedRoute>} />
+              <Route path="/admission_services" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><AdmissionServices /></ProtectedRoute>} />
+              <Route path="/office_of_the_registrar" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><OfficeOfTheRegistrar /></ProtectedRoute>} />
 
               <Route path="/add_exam_schedule" element={<ProtectedRoute><ExamScheduler /></ProtectedRoute>} />
               <Route path="/assigning_schedule" element={<ProtectedRoute><ExamScheduler2 /></ProtectedRoute>} />

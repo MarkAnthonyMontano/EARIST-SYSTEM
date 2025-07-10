@@ -40,6 +40,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: multer.memoryStorage() });
 
 
+
+
 //MYSQL CONNECTION FOR ADMISSION
 const db = mysql.createPool({
   host: "localhost",
@@ -296,6 +298,215 @@ app.delete("/uploads/:id", async (req, res) => {
 });
 
 // -------------------------------------------- GET APPLICANT ADMISSION DATA ------------------------------------------------//
+
+// GET person details by person_id
+app.get("/api/person/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [rows] = await db.execute("SELECT * FROM person_table WHERE person_id = ?", [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Person not found" });
+    }
+
+    res.json(rows[0]);
+  } catch (error) {
+    console.error("Error fetching person:", error);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+// POST: Upload and replace profile picture
+app.post("/api/person/:id/upload-profile", upload.single("profile_img"), async (req, res) => {
+  const { id } = req.params;
+  const filePath = req.file ? req.file.filename : null;
+
+  if (!filePath) return res.status(400).json({ error: "No file uploaded" });
+
+  try {
+    // 1. Get current profile_picture filename
+    const [rows] = await db.query("SELECT profile_img FROM person_table WHERE person_id = ?", [id]);
+    const currentProfile = rows[0]?.profile_img;
+
+    // 2. Delete old file if exists
+    if (currentProfile) {
+      const oldFilePath = path.join(__dirname, "uploads", currentProfile);
+      if (fs.existsSync(oldFilePath)) {
+        fs.unlinkSync(oldFilePath); // Delete old image
+      }
+    }
+
+    // 3. Update new image filename to DB
+    await db.query("UPDATE person_table SET profile_img = ? WHERE person_id = ?", [filePath, id]);
+
+    res.json({ message: "Profile image updated", profile_img: filePath });
+  } catch (err) {
+    console.error("Upload error:", err);
+    res.status(500).json({ error: "Database error during upload" });
+  }
+});
+
+// Program choices 1-3
+app.get("/api/applied_program", async (req, res) => {
+  try {
+    const [rows] = await db3.execute(`
+  SELECT 
+    ct.curriculum_id, 
+    pt.program_description,
+    pt.major
+  FROM curriculum_table AS ct
+  INNER JOIN program_table AS pt ON pt.program_id = ct.program_id
+`);
+
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "No curriculum data found" });
+    }
+
+    res.json(rows); // [{ curriculum_id: "BSIT" }, { curriculum_id: "BSCS" }, ...]
+  } catch (error) {
+    console.error("Error fetching curriculum data:", error);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+
+// PUT update person details by person_id
+app.put("/api/person/:id", async (req, res) => {
+  const { id } = req.params;
+  const {
+    profile_img, campus, academicProgram, classifiedAs, program, program2, program3, yearLevel,
+    last_name, first_name, middle_name, extension, nickname, height, weight, lrnNumber, nolrnNumber, gender, pwdMember, pwdType, pwdId,
+    birthOfDate, age, birthPlace, languageDialectSpoken, citizenship, religion, civilStatus, tribeEthnicGroup,
+    cellphoneNumber, emailAddress,
+    presentStreet, presentBarangay, presentZipCode, presentRegion, presentProvince, presentMunicipality, presentDswdHouseholdNumber, sameAsPresentAddress,
+    permanentStreet, permanentBarangay, permanentZipCode, permanentRegion, permanentProvince, permanentMunicipality, permanentDswdHouseholdNumber,
+    solo_parent, father_deceased, father_family_name, father_given_name, father_middle_name, father_ext, father_nickname, father_education, father_education_level,
+    father_last_school, father_course, father_year_graduated, father_school_address, father_contact, father_occupation, father_employer,
+    father_income, father_email, mother_deceased, mother_family_name, mother_given_name, mother_middle_name, mother_ext, mother_nickname,
+    mother_education, mother_education_level, mother_last_school, mother_course, mother_year_graduated, mother_school_address, mother_contact,
+    mother_occupation, mother_employer, mother_income, mother_email, guardian, guardian_family_name, guardian_given_name,
+    guardian_middle_name, guardian_ext, guardian_nickname, guardian_address, guardian_contact, guardian_email, annual_income,
+    schoolLevel, schoolLastAttended, schoolAddress, courseProgram, honor, generalAverage, yearGraduated,
+    schoolLevel1, schoolLastAttended1, schoolAddress1, courseProgram1, honor1, generalAverage1, yearGraduated1, strand,
+    cough, colds, fever, asthma, faintingSpells, heartDisease, tuberculosis, frequentHeadaches, hernia, chronicCough,
+    headNeckInjury, hiv, highBloodPressure, diabetesMellitus, allergies, cancer, smokingCigarette, alcoholDrinking,
+    hospitalized, hospitalizationDetails, medications, hadCovid, covidDate, vaccine1Brand, vaccine1Date,
+    vaccine2Brand, vaccine2Date, booster1Brand, booster1Date, booster2Brand, booster2Date,
+    chestXray, cbc, urinalysis, otherworkups, symptomsToday, remarks, termsOfAgreement
+  } = req.body;
+
+  try {
+    const [result] = await db.execute(`UPDATE person_table SET
+      profile_img=?, campus=?, academicProgram=?, classifiedAs=?, program=?, program2=?, program3=?, yearLevel=?,
+      last_name=?, first_name=?, middle_name=?, extension=?, nickname=?, height=?, weight=?, lrnNumber=?, nolrnNumber=?, gender=?, pwdMember=?, pwdType=?, pwdId=?,
+      birthOfDate=?, age=?, birthPlace=?, languageDialectSpoken=?, citizenship=?, religion=?, civilStatus=?, tribeEthnicGroup=?, 
+      cellphoneNumber=?, emailAddress=?,
+      presentStreet=?, presentBarangay=?, presentZipCode=?, presentRegion=?, presentProvince=?, presentMunicipality=?, presentDswdHouseholdNumber=?, 	sameAsPresentAddress=?,
+      permanentStreet=?, permanentBarangay=?, permanentZipCode=?, permanentRegion=?, permanentProvince=?, permanentMunicipality=?, permanentDswdHouseholdNumber=?,
+      solo_parent=?, father_deceased=?, father_family_name=?, father_given_name=?, father_middle_name=?, father_ext=?, father_nickname=?, father_education=?, father_education_level=?,
+      father_last_school=?, father_course=?, father_year_graduated=?, father_school_address=?, father_contact=?, father_occupation=?, father_employer=?,
+      father_income=?, father_email=?, mother_deceased=?, mother_family_name=?, mother_given_name=?, mother_middle_name=?,mother_ext=?, mother_nickname=?,
+      mother_education=?, mother_education_level=?, mother_last_school=?, mother_course=?, mother_year_graduated=?, mother_school_address=?, mother_contact=?,
+      mother_occupation=?, mother_employer=?, mother_income=?, mother_email=?, guardian=?, guardian_family_name=?, guardian_given_name=?,
+      guardian_middle_name=?, guardian_ext=?, guardian_nickname=?, guardian_address=?, guardian_contact=?, guardian_email=?, annual_income=?,
+      schoolLevel=?, schoolLastAttended=?, schoolAddress=?, courseProgram=?, honor=?, generalAverage=?, yearGraduated=?,
+      schoolLevel1=?, schoolLastAttended1=?, schoolAddress1=?, courseProgram1=?, honor1=?, generalAverage1=?, yearGraduated1=?, strand=?,
+      cough=?, colds=?, fever=?, asthma=?, faintingSpells=?, heartDisease=?, tuberculosis=?, frequentHeadaches=?, hernia=?, chronicCough=?,
+      headNeckInjury=?, hiv=?, highBloodPressure=?, diabetesMellitus=?, allergies=?, cancer=?, smokingCigarette=?, alcoholDrinking=?,
+      hospitalized=?, hospitalizationDetails=?, medications=?, hadCovid=?, covidDate=?, vaccine1Brand=?, vaccine1Date=?,
+      vaccine2Brand=?, vaccine2Date=?, booster1Brand=?, booster1Date=?, booster2Brand=?, booster2Date=?,
+      chestXray=?, cbc=?, urinalysis=?, otherworkups=?, symptomsToday=?, remarks=?, termsOfAgreement=?
+      WHERE person_id=?`, [
+      profile_img, campus, academicProgram, classifiedAs, program, program2, program3, yearLevel,
+      last_name, first_name, middle_name, extension, nickname, height, weight, lrnNumber, nolrnNumber, gender, pwdMember, pwdType, pwdId,
+      birthOfDate, age, birthPlace, languageDialectSpoken, citizenship, religion, civilStatus, tribeEthnicGroup,
+      cellphoneNumber, emailAddress,
+      presentStreet, presentBarangay, presentZipCode, presentRegion, presentProvince, presentMunicipality, presentDswdHouseholdNumber, sameAsPresentAddress,
+      permanentStreet, permanentBarangay, permanentZipCode, permanentRegion, permanentProvince, permanentMunicipality, permanentDswdHouseholdNumber,
+      solo_parent, father_deceased, father_family_name, father_given_name, father_middle_name, father_ext, father_nickname, father_education, father_education_level,
+      father_last_school, father_course, father_year_graduated, father_school_address, father_contact, father_occupation, father_employer,
+      father_income, father_email, mother_deceased, mother_family_name, mother_given_name, mother_middle_name, mother_ext, mother_nickname,
+      mother_education, mother_education_level, mother_last_school, mother_course, mother_year_graduated, mother_school_address, mother_contact,
+      mother_occupation, mother_employer, mother_income, mother_email, guardian, guardian_family_name, guardian_given_name,
+      guardian_middle_name, guardian_ext, guardian_nickname, guardian_address, guardian_contact, guardian_email, annual_income,
+      schoolLevel, schoolLastAttended, schoolAddress, courseProgram, honor, generalAverage, yearGraduated,
+      schoolLevel1, schoolLastAttended1, schoolAddress1, courseProgram1, honor1, generalAverage1, yearGraduated1, strand,
+      cough, colds, fever, asthma, faintingSpells, heartDisease, tuberculosis, frequentHeadaches, hernia, chronicCough,
+      headNeckInjury, hiv, highBloodPressure, diabetesMellitus, allergies, cancer, smokingCigarette, alcoholDrinking,
+      hospitalized, hospitalizationDetails, medications, hadCovid, covidDate, vaccine1Brand, vaccine1Date,
+      vaccine2Brand, vaccine2Date, booster1Brand, booster1Date, booster2Brand, booster2Date,
+      chestXray, cbc, urinalysis, otherworkups, symptomsToday, remarks, termsOfAgreement, id
+    ]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "No record updated" });
+    }
+    res.json({ message: "Person updated successfully" });
+  } catch (error) {
+    console.error("Error updating person:", error);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+// REQUIREMENTS PANEL (UPDATED!) ADMIN
+app.post("/requirements", async (req, res) => {
+  const { requirements_description } = req.body;
+
+  // Validate the input
+  if (!requirements_description) {
+    return res.status(400).json({ error: "Description required" });
+  }
+
+  const query = "INSERT INTO requirements_table (description) VALUES (?)";
+
+  try {
+    // Execute the query using promise-based `execute` method
+    const [result] = await db.execute(query, [requirements_description]);
+
+    // Respond with the inserted ID
+    res.status(201).json({ requirements_id: result.insertId });
+  } catch (err) {
+    console.error("Insert error:", err);
+    return res.status(500).json({ error: "Failed to save requirement" });
+  }
+});
+
+// GET THE REQUIREMENTS (UPDATED!)
+app.get("/requirements", async (req, res) => {
+  const query = "SELECT * FROM requirements_table";
+
+  try {
+    // Execute the query using promise-based `execute` method
+    const [results] = await db.execute(query);
+
+    // Send the results in the response
+    res.json(results);
+  } catch (err) {
+    console.error("Fetch error:", err);
+    return res.status(500).json({ error: "Failed to fetch requirements" });
+  }
+});
+
+// DELETE (REQUIREMNET PANEL)
+app.delete("/requirements_table/:id", async (req, res) => {
+  const { id } = req.params;
+  const query = "DELETE FROM requirements_table WHERE id = ?";
+
+  try {
+    const [result] = await db.execute(query, [id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Requirement not found" });
+    }
+
+    res.status(200).json({ message: "Requirement deleted successfully" });
+  } catch (err) {
+    console.error("Delete error:", err);
+    res.status(500).json({ error: "Failed to delete requirement" });
+  }
+});
 
 
 /*---------------------------  ENROLLMENT -----------------------*/
@@ -1331,34 +1542,49 @@ app.get("/department_section", async (req, res) => {
 });
 
 // PROFESSOR REGISTRATION (UPDATED!)
-
-// Updated route to handle multipart/form-data (with file)
 app.post("/register_prof", upload.single("profileImage"), async (req, res) => {
   const { fname, mname, lname, email, password } = req.body;
-  const profileImage = req.file ? req.file.filename : null;
 
-  if (!fname || !lname || !email || !password || !profileImage) {
+  if (!fname || !lname || !email || !password || !req.file) {
     return res.status(400).json({ error: "All fields including profile image are required" });
   }
 
   try {
     const hashedProfPassword = await bcrypt.hash(password, 10);
 
-    const queryForProf = `
+    // ✅ Step 1: insert without image first to get prof_id
+    const insertQuery = `
       INSERT INTO prof_table (fname, mname, lname, email, password, status) 
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
-    const [result] = await db3.query(queryForProf, [fname, mname, lname, email, hashedProfPassword, 0, profileImage]);
+    const [result] = await db3.query(insertQuery, [fname, mname, lname, email, hashedProfPassword, 0]);
+    const profId = result.insertId;
+
+    // ✅ Step 2: create filename and save file
+    const year = new Date().getFullYear();
+    const ext = path.extname(req.file.originalname).toLowerCase();
+    const filename = `${profId}_ProfessorProfile_${year}${ext}`;
+    const finalPath = path.join(__dirname, "uploads", filename);
+
+    await fs.promises.writeFile(finalPath, req.file.buffer);
+
+    // ✅ Step 3: update row with filename
+    const updateQuery = `
+      UPDATE prof_table SET profile_image = ? WHERE prof_id = ?
+    `;
+    await db3.query(updateQuery, [filename, profId]);
 
     res.status(201).json({
       message: "Professor registered successfully",
-      professorId: result.insertId,
+      professorId: profId,
+      filename
     });
   } catch (err) {
     console.error("Error registering professor:", err);
     res.status(500).json({ error: "Internal Server Error", details: err.message });
   }
 });
+
 
 // GET ENROLLED STUDENTS (UPDATED!)
 app.get("/get_enrolled_students/:subject_id/:department_section_id/:active_school_year_id", async (req, res) => {
@@ -1635,64 +1861,6 @@ app.get("/day_list", async (req, res) => {
   }
 });
 
-// REQUIREMENTS PANEL (UPDATED!) ADMIN
-app.post("/requirements", async (req, res) => {
-  const { requirements_description } = req.body;
-
-  // Validate the input
-  if (!requirements_description) {
-    return res.status(400).json({ error: "Description required" });
-  }
-
-  const query = "INSERT INTO requirements_table (description) VALUES (?)";
-
-  try {
-    // Execute the query using promise-based `execute` method
-    const [result] = await db.execute(query, [requirements_description]);
-
-    // Respond with the inserted ID
-    res.status(201).json({ requirements_id: result.insertId });
-  } catch (err) {
-    console.error("Insert error:", err);
-    return res.status(500).json({ error: "Failed to save requirement" });
-  }
-});
-
-// GET THE REQUIREMENTS (UPDATED!)
-app.get("/requirements", async (req, res) => {
-  const query = "SELECT * FROM requirements_table";
-
-  try {
-    // Execute the query using promise-based `execute` method
-    const [results] = await db.execute(query);
-
-    // Send the results in the response
-    res.json(results);
-  } catch (err) {
-    console.error("Fetch error:", err);
-    return res.status(500).json({ error: "Failed to fetch requirements" });
-  }
-});
-
-// DELETE (REQUIREMNET PANEL)
-app.delete("/requirements_table/:id", async (req, res) => {
-  const { id } = req.params;
-  const query = "DELETE FROM requirements_table WHERE id = ?";
-
-  try {
-    const [result] = await db.execute(query, [id]);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Requirement not found" });
-    }
-
-    res.status(200).json({ message: "Requirement deleted successfully" });
-  } catch (err) {
-    console.error("Delete error:", err);
-    res.status(500).json({ error: "Failed to delete requirement" });
-  }
-});
-
 //SCHEDULE CHECKER
 app.post("/api/check-subject", async (req, res) => {
   const { section_id, school_year_id, prof_id, subject_id } = req.body;
@@ -1858,6 +2026,15 @@ app.post("/api/assign-student-number", async (req, res) => {
     // Update person_status_table
     await connection.query("UPDATE person_status_table SET student_registration_status = 1 WHERE person_id = ?", [person_id]);
 
+    const [activeSchoolYearRows] = await connection.query("SELECT * FROM active_school_year_table WHERE astatus = 1");
+    if (activeSchoolYearRows.length === 0) {
+      await connection.rollback();
+      return res.status(400).send("No active school year found");
+    }
+
+    const activeSchoolYear = activeSchoolYearRows[0];
+
+    await connection.query("INSERT INTO student_status_table (student_number, active_curriculum, enrolled_status, year_level_id, active_school_year_id, control_status) VALUES (?, ?, ?, ?, ?, ?)", [student_number, 1, 1, 1, activeSchoolYear.id, 0]);
     await connection.commit();
     res.json({ student_number });
   } catch (err) {
@@ -1868,6 +2045,7 @@ app.post("/api/assign-student-number", async (req, res) => {
     connection.release(); // Release the connection back to the pool
   }
 });
+
 
 // Corrected route with parameter (UPDATED!)
 app.get("/courses/:currId", async (req, res) => {
@@ -2537,159 +2715,6 @@ app.get("/student-data/:studentNumber", async (req, res) => {
   } catch (err) {
     console.error("Failed to fetch student data:", err);
     res.status(500).json({ message: "Database error" });
-  }
-});
-
-// CODE NI CED AT NI MARK
-
-// GET person details by person_id
-app.get("/api/person/:id", async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const [rows] = await db.execute("SELECT * FROM person_table WHERE person_id = ?", [id]);
-
-    if (rows.length === 0) {
-      return res.status(404).json({ error: "Person not found" });
-    }
-
-    res.json(rows[0]);
-  } catch (error) {
-    console.error("Error fetching person:", error);
-    res.status(500).json({ error: "Database error" });
-  }
-});
-
-// POST: Upload and replace profile picture
-app.post("/api/person/:id/upload-profile", upload.single("profile_img"), async (req, res) => {
-  const { id } = req.params;
-  const filePath = req.file ? req.file.filename : null;
-
-  if (!filePath) return res.status(400).json({ error: "No file uploaded" });
-
-  try {
-    // 1. Get current profile_picture filename
-    const [rows] = await db.query("SELECT profile_img FROM person_table WHERE person_id = ?", [id]);
-    const currentProfile = rows[0]?.profile_img;
-
-    // 2. Delete old file if exists
-    if (currentProfile) {
-      const oldFilePath = path.join(__dirname, "uploads", currentProfile);
-      if (fs.existsSync(oldFilePath)) {
-        fs.unlinkSync(oldFilePath); // Delete old image
-      }
-    }
-
-    // 3. Update new image filename to DB
-    await db.query("UPDATE person_table SET profile_img = ? WHERE person_id = ?", [filePath, id]);
-
-    res.json({ message: "Profile image updated", profile_img: filePath });
-  } catch (err) {
-    console.error("Upload error:", err);
-    res.status(500).json({ error: "Database error during upload" });
-  }
-});
-
-// Program choices 1-3
-app.get("/api/applied_program", async (req, res) => {
-  try {
-    const [rows] = await db3.execute(`
-  SELECT 
-    ct.curriculum_id, 
-    pt.program_description,
-    pt.major
-  FROM curriculum_table AS ct
-  INNER JOIN program_table AS pt ON pt.program_id = ct.program_id
-`);
-
-
-    if (rows.length === 0) {
-      return res.status(404).json({ error: "No curriculum data found" });
-    }
-
-    res.json(rows); // [{ curriculum_id: "BSIT" }, { curriculum_id: "BSCS" }, ...]
-  } catch (error) {
-    console.error("Error fetching curriculum data:", error);
-    res.status(500).json({ error: "Database error" });
-  }
-});
-
-
-// PUT update person details by person_id
-app.put("/api/person/:id", async (req, res) => {
-  const { id } = req.params;
-  const {
-    profile_img, campus, academicProgram, classifiedAs, program, program2, program3, yearLevel,
-    last_name, first_name, middle_name, extension, nickname, height, weight, lrnNumber, nolrnNumber, gender, pwdMember, pwdType, pwdId,
-    birthOfDate, age, birthPlace, languageDialectSpoken, citizenship, religion, civilStatus, tribeEthnicGroup,
-    cellphoneNumber, emailAddress,
-    presentStreet, presentBarangay, presentZipCode, presentRegion, presentProvince, presentMunicipality, presentDswdHouseholdNumber, sameAsPresentAddress,
-    permanentStreet, permanentBarangay, permanentZipCode, permanentRegion, permanentProvince, permanentMunicipality, permanentDswdHouseholdNumber,
-    solo_parent, father_deceased, father_family_name, father_given_name, father_middle_name, father_ext, father_nickname, father_education, father_education_level,
-    father_last_school, father_course, father_year_graduated, father_school_address, father_contact, father_occupation, father_employer,
-    father_income, father_email, mother_deceased, mother_family_name, mother_given_name, mother_middle_name, mother_ext, mother_nickname,
-    mother_education, mother_education_level, mother_last_school, mother_course, mother_year_graduated, mother_school_address, mother_contact,
-    mother_occupation, mother_employer, mother_income, mother_email, guardian, guardian_family_name, guardian_given_name,
-    guardian_middle_name, guardian_ext, guardian_nickname, guardian_address, guardian_contact, guardian_email, annual_income,
-    schoolLevel, schoolLastAttended, schoolAddress, courseProgram, honor, generalAverage, yearGraduated,
-    schoolLevel1, schoolLastAttended1, schoolAddress1, courseProgram1, honor1, generalAverage1, yearGraduated1, strand,
-    cough, colds, fever, asthma, faintingSpells, heartDisease, tuberculosis, frequentHeadaches, hernia, chronicCough,
-    headNeckInjury, hiv, highBloodPressure, diabetesMellitus, allergies, cancer, smokingCigarette, alcoholDrinking,
-    hospitalized, hospitalizationDetails, medications, hadCovid, covidDate, vaccine1Brand, vaccine1Date,
-    vaccine2Brand, vaccine2Date, booster1Brand, booster1Date, booster2Brand, booster2Date,
-    chestXray, cbc, urinalysis, otherworkups, symptomsToday, remarks, termsOfAgreement
-  } = req.body;
-
-  try {
-    const [result] = await db.execute(`UPDATE person_table SET
-      profile_img=?, campus=?, academicProgram=?, classifiedAs=?, program=?, program2=?, program3=?, yearLevel=?,
-      last_name=?, first_name=?, middle_name=?, extension=?, nickname=?, height=?, weight=?, lrnNumber=?, nolrnNumber=?, gender=?, pwdMember=?, pwdType=?, pwdId=?,
-      birthOfDate=?, age=?, birthPlace=?, languageDialectSpoken=?, citizenship=?, religion=?, civilStatus=?, tribeEthnicGroup=?, 
-      cellphoneNumber=?, emailAddress=?,
-      presentStreet=?, presentBarangay=?, presentZipCode=?, presentRegion=?, presentProvince=?, presentMunicipality=?, presentDswdHouseholdNumber=?, 	sameAsPresentAddress=?,
-      permanentStreet=?, permanentBarangay=?, permanentZipCode=?, permanentRegion=?, permanentProvince=?, permanentMunicipality=?, permanentDswdHouseholdNumber=?,
-      solo_parent=?, father_deceased=?, father_family_name=?, father_given_name=?, father_middle_name=?, father_ext=?, father_nickname=?, father_education=?, father_education_level=?,
-      father_last_school=?, father_course=?, father_year_graduated=?, father_school_address=?, father_contact=?, father_occupation=?, father_employer=?,
-      father_income=?, father_email=?, mother_deceased=?, mother_family_name=?, mother_given_name=?, mother_middle_name=?,mother_ext=?, mother_nickname=?,
-      mother_education=?, mother_education_level=?, mother_last_school=?, mother_course=?, mother_year_graduated=?, mother_school_address=?, mother_contact=?,
-      mother_occupation=?, mother_employer=?, mother_income=?, mother_email=?, guardian=?, guardian_family_name=?, guardian_given_name=?,
-      guardian_middle_name=?, guardian_ext=?, guardian_nickname=?, guardian_address=?, guardian_contact=?, guardian_email=?, annual_income=?,
-      schoolLevel=?, schoolLastAttended=?, schoolAddress=?, courseProgram=?, honor=?, generalAverage=?, yearGraduated=?,
-      schoolLevel1=?, schoolLastAttended1=?, schoolAddress1=?, courseProgram1=?, honor1=?, generalAverage1=?, yearGraduated1=?, strand=?,
-      cough=?, colds=?, fever=?, asthma=?, faintingSpells=?, heartDisease=?, tuberculosis=?, frequentHeadaches=?, hernia=?, chronicCough=?,
-      headNeckInjury=?, hiv=?, highBloodPressure=?, diabetesMellitus=?, allergies=?, cancer=?, smokingCigarette=?, alcoholDrinking=?,
-      hospitalized=?, hospitalizationDetails=?, medications=?, hadCovid=?, covidDate=?, vaccine1Brand=?, vaccine1Date=?,
-      vaccine2Brand=?, vaccine2Date=?, booster1Brand=?, booster1Date=?, booster2Brand=?, booster2Date=?,
-      chestXray=?, cbc=?, urinalysis=?, otherworkups=?, symptomsToday=?, remarks=?, termsOfAgreement=?
-      WHERE person_id=?`, [
-      profile_img, campus, academicProgram, classifiedAs, program, program2, program3, yearLevel,
-      last_name, first_name, middle_name, extension, nickname, height, weight, lrnNumber, nolrnNumber, gender, pwdMember, pwdType, pwdId,
-      birthOfDate, age, birthPlace, languageDialectSpoken, citizenship, religion, civilStatus, tribeEthnicGroup,
-      cellphoneNumber, emailAddress,
-      presentStreet, presentBarangay, presentZipCode, presentRegion, presentProvince, presentMunicipality, presentDswdHouseholdNumber, sameAsPresentAddress,
-      permanentStreet, permanentBarangay, permanentZipCode, permanentRegion, permanentProvince, permanentMunicipality, permanentDswdHouseholdNumber,
-      solo_parent, father_deceased, father_family_name, father_given_name, father_middle_name, father_ext, father_nickname, father_education, father_education_level,
-      father_last_school, father_course, father_year_graduated, father_school_address, father_contact, father_occupation, father_employer,
-      father_income, father_email, mother_deceased, mother_family_name, mother_given_name, mother_middle_name, mother_ext, mother_nickname,
-      mother_education, mother_education_level, mother_last_school, mother_course, mother_year_graduated, mother_school_address, mother_contact,
-      mother_occupation, mother_employer, mother_income, mother_email, guardian, guardian_family_name, guardian_given_name,
-      guardian_middle_name, guardian_ext, guardian_nickname, guardian_address, guardian_contact, guardian_email, annual_income,
-      schoolLevel, schoolLastAttended, schoolAddress, courseProgram, honor, generalAverage, yearGraduated,
-      schoolLevel1, schoolLastAttended1, schoolAddress1, courseProgram1, honor1, generalAverage1, yearGraduated1, strand,
-      cough, colds, fever, asthma, faintingSpells, heartDisease, tuberculosis, frequentHeadaches, hernia, chronicCough,
-      headNeckInjury, hiv, highBloodPressure, diabetesMellitus, allergies, cancer, smokingCigarette, alcoholDrinking,
-      hospitalized, hospitalizationDetails, medications, hadCovid, covidDate, vaccine1Brand, vaccine1Date,
-      vaccine2Brand, vaccine2Date, booster1Brand, booster1Date, booster2Brand, booster2Date,
-      chestXray, cbc, urinalysis, otherworkups, symptomsToday, remarks, termsOfAgreement, id
-    ]);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "No record updated" });
-    }
-    res.json({ message: "Person updated successfully" });
-  } catch (error) {
-    console.error("Error updating person:", error);
-    res.status(500).json({ error: "Database error" });
   }
 });
 

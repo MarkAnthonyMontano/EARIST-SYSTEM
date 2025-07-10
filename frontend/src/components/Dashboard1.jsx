@@ -523,12 +523,12 @@ const Dashboard1 = () => {
                   justifyContent: "center",
                   backgroundColor: "#6D2323",
                   borderRadius: "8px",
-                  width: "36px",
-                  height: "36px",
+                  width: "50px",
+                  height: "50px",
                   minWidth: "36px",
                 }}
               >
-                <ErrorIcon sx={{ color: "white", fontSize: "20px" }} />
+                <ErrorIcon sx={{ color: "white", fontSize: "36px" }} />
               </Box>
 
               <Typography

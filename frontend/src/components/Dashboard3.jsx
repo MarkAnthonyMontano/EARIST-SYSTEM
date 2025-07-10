@@ -173,10 +173,7 @@ document.addEventListener('keydown', (e) => {
 
   return (
     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
-      <br />
-
-
-
+     
       <Container>
         <Box sx={{ display: "flex", width: "100%" }}>
           {/* Left: Instructions (75%) */}
@@ -201,12 +198,12 @@ document.addEventListener('keydown', (e) => {
                   justifyContent: "center",
                   backgroundColor: "#6D2323",
                   borderRadius: "8px",
-                  width: "36px",
-                  height: "36px",
+                  width: "50px",
+                  height: "50px",
                   minWidth: "36px",
                 }}
               >
-                <ErrorIcon sx={{ color: "white", fontSize: "20px" }} />
+                <ErrorIcon sx={{ color: "white", fontSize: "36px" }} />
               </Box>
 
               <Typography
@@ -222,7 +219,6 @@ document.addEventListener('keydown', (e) => {
                 <strong>2.</strong> To use the letter <strong>'Ñ'</strong>, press <kbd>ALT</kbd> + <kbd>165</kbd>; for <strong>'ñ'</strong>, press <kbd>ALT</kbd> + <kbd>164</kbd>.
               </Typography>
             </Box>
-
           </Box>
 
           {/* Right: Links (25%) */}
