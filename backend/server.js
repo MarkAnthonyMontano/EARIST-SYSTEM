@@ -204,7 +204,7 @@ const getShortLabel = (desc) => {
 // ✅ UPLOAD
 app.post("/upload", upload.single("file"), async (req, res) => {
   const { requirements_id } = req.body;
-  const person_id = req.headers["x-person-id"]; // ✅ Trust header, not body
+  const person_id = req.headers["x-person-id"];
 
   if (!req.file || !person_id || !requirements_id) {
     return res.status(400).json({ message: "Missing file, person_id, or requirements_id" });
@@ -221,6 +221,25 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     const filename = `${person_id}_${shortLabel}_${year}${ext}`;
     const finalPath = path.join(__dirname, "uploads", filename);
 
+    // ✅ Find existing uploads for this person_id + shortLabel + year (any extension)
+    const [existingFiles] = await db.query(
+      `SELECT upload_id, file_path FROM requirement_uploads 
+       WHERE person_id = ? AND requirements_id = ? AND file_path LIKE ?`,
+      [person_id, requirements_id, `%${person_id}_${shortLabel}_${year}%`]
+    );
+
+    // ✅ Remove existing files from disk and DB
+    for (const file of existingFiles) {
+      const fullFilePath = path.join(__dirname, file.file_path);
+      try {
+        await fs.promises.unlink(fullFilePath);
+      } catch (err) {
+        console.warn("File delete warning:", err.message);
+      }
+      await db.query("DELETE FROM requirement_uploads WHERE upload_id = ?", [file.upload_id]);
+    }
+
+    // ✅ Save new file
     await fs.promises.writeFile(finalPath, req.file.buffer);
 
     const filePath = `/uploads/${filename}`;
@@ -317,60 +336,6 @@ app.get("/api/person/:id", async (req, res) => {
   }
 });
 
-// POST: Upload and replace profile picture
-app.post("/api/person/:id/upload-profile", upload.single("profile_img"), async (req, res) => {
-  const { id } = req.params;
-  const filePath = req.file ? req.file.filename : null;
-
-  if (!filePath) return res.status(400).json({ error: "No file uploaded" });
-
-  try {
-    // 1. Get current profile_picture filename
-    const [rows] = await db.query("SELECT profile_img FROM person_table WHERE person_id = ?", [id]);
-    const currentProfile = rows[0]?.profile_img;
-
-    // 2. Delete old file if exists
-    if (currentProfile) {
-      const oldFilePath = path.join(__dirname, "uploads", currentProfile);
-      if (fs.existsSync(oldFilePath)) {
-        fs.unlinkSync(oldFilePath); // Delete old image
-      }
-    }
-
-    // 3. Update new image filename to DB
-    await db.query("UPDATE person_table SET profile_img = ? WHERE person_id = ?", [filePath, id]);
-
-    res.json({ message: "Profile image updated", profile_img: filePath });
-  } catch (err) {
-    console.error("Upload error:", err);
-    res.status(500).json({ error: "Database error during upload" });
-  }
-});
-
-// Program choices 1-3
-app.get("/api/applied_program", async (req, res) => {
-  try {
-    const [rows] = await db3.execute(`
-  SELECT 
-    ct.curriculum_id, 
-    pt.program_description,
-    pt.major
-  FROM curriculum_table AS ct
-  INNER JOIN program_table AS pt ON pt.program_id = ct.program_id
-`);
-
-
-    if (rows.length === 0) {
-      return res.status(404).json({ error: "No curriculum data found" });
-    }
-
-    res.json(rows); // [{ curriculum_id: "BSIT" }, { curriculum_id: "BSCS" }, ...]
-  } catch (error) {
-    console.error("Error fetching curriculum data:", error);
-    res.status(500).json({ error: "Database error" });
-  }
-});
-
 
 // PUT update person details by person_id
 app.put("/api/person/:id", async (req, res) => {
@@ -446,6 +411,61 @@ app.put("/api/person/:id", async (req, res) => {
     res.json({ message: "Person updated successfully" });
   } catch (error) {
     console.error("Error updating person:", error);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+
+// POST: Upload and replace profile picture
+app.post("/api/person/:id/upload-profile", upload.single("profile_img"), async (req, res) => {
+  const { id } = req.params;
+  const filePath = req.file ? req.file.filename : null;
+
+  if (!filePath) return res.status(400).json({ error: "No file uploaded" });
+
+  try {
+    // 1. Get current profile_picture filename
+    const [rows] = await db.query("SELECT profile_img FROM person_table WHERE person_id = ?", [id]);
+    const currentProfile = rows[0]?.profile_img;
+
+    // 2. Delete old file if exists
+    if (currentProfile) {
+      const oldFilePath = path.join(__dirname, "uploads", currentProfile);
+      if (fs.existsSync(oldFilePath)) {
+        fs.unlinkSync(oldFilePath); // Delete old image
+      }
+    }
+
+    // 3. Update new image filename to DB
+    await db.query("UPDATE person_table SET profile_img = ? WHERE person_id = ?", [filePath, id]);
+
+    res.json({ message: "Profile image updated", profile_img: filePath });
+  } catch (err) {
+    console.error("Upload error:", err);
+    res.status(500).json({ error: "Database error during upload" });
+  }
+});
+
+// Program choices 1-3
+app.get("/api/applied_program", async (req, res) => {
+  try {
+    const [rows] = await db3.execute(`
+  SELECT 
+    ct.curriculum_id, 
+    pt.program_description,
+    pt.major
+  FROM curriculum_table AS ct
+  INNER JOIN program_table AS pt ON pt.program_id = ct.program_id
+`);
+
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "No curriculum data found" });
+    }
+
+    res.json(rows); // [{ curriculum_id: "BSIT" }, { curriculum_id: "BSCS" }, ...]
+  } catch (error) {
+    console.error("Error fetching curriculum data:", error);
     res.status(500).json({ error: "Database error" });
   }
 });
@@ -1552,7 +1572,7 @@ app.post("/register_prof", upload.single("profileImage"), async (req, res) => {
   try {
     const hashedProfPassword = await bcrypt.hash(password, 10);
 
-    // ✅ Step 1: insert without image first to get prof_id
+    // ✅ Step 1: insert professor to get prof_id
     const insertQuery = `
       INSERT INTO prof_table (fname, mname, lname, email, password, status) 
       VALUES (?, ?, ?, ?, ?, ?)
@@ -1560,19 +1580,35 @@ app.post("/register_prof", upload.single("profileImage"), async (req, res) => {
     const [result] = await db3.query(insertQuery, [fname, mname, lname, email, hashedProfPassword, 0]);
     const profId = result.insertId;
 
-    // ✅ Step 2: create filename and save file
     const year = new Date().getFullYear();
     const ext = path.extname(req.file.originalname).toLowerCase();
     const filename = `${profId}_ProfessorProfile_${year}${ext}`;
     const finalPath = path.join(__dirname, "uploads", filename);
 
+    // ✅ Step 2: remove existing files for this profId + same year + ProfessorProfile.* (any extension)
+    const uploadsDir = path.join(__dirname, "uploads");
+    const filesInDir = await fs.promises.readdir(uploadsDir);
+
+    const matchingFiles = filesInDir.filter(f =>
+      f.startsWith(`${profId}_ProfessorProfile_${year}`)
+    );
+
+    for (const oldFile of matchingFiles) {
+      try {
+        await fs.promises.unlink(path.join(uploadsDir, oldFile));
+      } catch (err) {
+        console.warn("Could not delete old profile image:", err.message);
+      }
+    }
+
+    // ✅ Step 3: save new profile image
     await fs.promises.writeFile(finalPath, req.file.buffer);
 
-    // ✅ Step 3: update row with filename
-    const updateQuery = `
-      UPDATE prof_table SET profile_image = ? WHERE prof_id = ?
-    `;
-    await db3.query(updateQuery, [filename, profId]);
+    // ✅ Step 4: update DB with filename
+    await db3.query(
+      "UPDATE prof_table SET profile_image = ? WHERE prof_id = ?",
+      [filename, profId]
+    );
 
     res.status(201).json({
       message: "Professor registered successfully",
