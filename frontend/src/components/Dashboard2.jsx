@@ -13,6 +13,7 @@ import ErrorIcon from '@mui/icons-material/Error';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard2 = () => {
+  const person_id = localStorage.getItem("person_id");
   const navigate = useNavigate();
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
@@ -25,27 +26,35 @@ const Dashboard2 = () => {
     guardian_middle_name: "", guardian_ext: "", guardian_nickname: "", guardian_address: "", guardian_contact: "", guardian_email: "", annual_income: "",
   });
 
+  useEffect(() => {
+  const id = localStorage.getItem("person_id");
+  if (id) {
+    fetchPersonData(id);
+  }
+}, []);
+
+
 
   // do not alter
-useEffect(() => {
-  const storedUser = localStorage.getItem("email");
-  const storedRole = localStorage.getItem("role");
-  const storedID = localStorage.getItem("person_id");
+  useEffect(() => {
+    const storedUser = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
+    const storedID = localStorage.getItem("person_id");
 
-  if (storedUser && storedRole && storedID) {
-    setUser(storedUser);
-    setUserRole(storedRole);
-    setUserID(storedID);
+    if (storedUser && storedRole && storedID) {
+      setUser(storedUser);
+      setUserRole(storedRole);
+      setUserID(storedID);
 
-    if (storedRole === "applicant" || storedRole === "registrar") {
-      fetchPersonData(storedID);
+      if (storedRole === "applicant" || storedRole === "registrar") {
+        fetchPersonData(storedID);
+      } else {
+        window.location.href = "/login";
+      }
     } else {
       window.location.href = "/login";
     }
-  } else {
-    window.location.href = "/login";
-  }
-}, []);
+  }, []);
 
 
   const steps = [
@@ -58,7 +67,6 @@ useEffect(() => {
 
 
   const [activeStep, setActiveStep] = useState(1);
-  const [clickedSteps, setClickedSteps] = useState(Array(steps.length).fill(false));
 
   const fetchPersonData = async (id) => {
     try {
@@ -144,43 +152,7 @@ useEffect(() => {
 
   const [isFatherDeceased, setIsFatherDeceased] = useState(false);
   const [isMotherDeceased, setIsMotherDeceased] = useState(false);
-  const [isSoloParent, setIsSoloParent] = useState(false);
-  const [parentType, setParentType] = useState("");
-
-  // When Solo Parent checkbox is toggled
-  const handleSoloParentChange = (e) => {
-    const checked = e.target.checked;
-
-    setPerson((prev) => ({
-      ...prev,
-      solo_parent: checked,
-      parent_type: checked ? prev.parent_type : "", // Reset if unchecked
-    }));
-
-    // Also update local state if needed
-    setIsSoloParent(checked);
-  };
-
-
-  const handleParentTypeChange = (event) => {
-    const selected = event.target.value;
-
-    setPerson((prev) => ({
-      ...prev,
-      parent_type: selected,
-    }));
-
-    setParentType(selected);
-
-    if (selected === "Mother") {
-      setIsFatherDeceased(true);
-      setIsMotherDeceased(false);
-    } else if (selected === "Father") {
-      setIsMotherDeceased(true);
-      setIsFatherDeceased(false);
-    }
-  };
-
+ 
   useEffect(() => {
     setIsFatherDeceased(person.father_deceased === 1);
   }, [person.father_deceased]);
@@ -212,62 +184,86 @@ useEffect(() => {
 
   const [errors, setErrors] = useState({});
 
-  const isFormValid = () => {
-    const requiredFields = [
-      // Father
+ const isFormValid = () => {
+  const requiredFields = [];
+
+  // If father is NOT deceased, require father fields:
+  if (person.father_deceased !== 1) {
+    requiredFields.push(
       "father_family_name", "father_given_name", "father_middle_name", "father_nickname",
-      "father_contact", "father_occupation", "father_employer", "father_income",
-      "father_education_level", "father_last_school", "father_course", "father_year_graduated", "father_school_address",
+      "father_contact", "father_occupation", "father_employer", "father_income", "father_email"
+    );
 
-      // Mother
+    // but only require education details if father_education !== 1
+    if (person.father_education !== 1) {
+      requiredFields.push(
+        "father_education_level", "father_last_school", "father_course", "father_year_graduated", "father_school_address"
+      );
+    }
+  }
+
+  // If mother is NOT deceased, require mother fields:
+  if (person.mother_deceased !== 1) {
+    requiredFields.push(
       "mother_family_name", "mother_given_name", "mother_middle_name", "mother_nickname",
-      "mother_contact", "mother_occupation", "mother_employer", "mother_income",
-      "mother_education_level", "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address",
+      "mother_contact", "mother_occupation", "mother_employer", "mother_income", "mother_email"
+    );
 
-      // Guardian
-      "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
-      "guardian_nickname", "guardian_address", "guardian_contact",
+    // only require education details if mother_education !== 1
+    if (person.mother_education !== 1) {
+      requiredFields.push(
+        "mother_education_level", "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address"
+      );
+    }
+  }
 
-      // Family income
-      "annual_income"
-    ];
+  // Guardian fields always required:
+  requiredFields.push(
+    "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
+    "guardian_nickname", "guardian_address", "guardian_contact"
+  );
 
-    let newErrors = {};
-    let isValid = true;
+  // Annual income always required:
+  requiredFields.push("annual_income");
 
-    requiredFields.forEach((field) => {
-      const value = person[field];
-      const stringValue = value?.toString().trim();
+  let newErrors = {};
+  let isValid = true;
 
-      if (!stringValue) {
-        newErrors[field] = true;
-        isValid = false;
-      }
-    });
+  requiredFields.forEach((field) => {
+    const value = person[field];
+    const stringValue = value?.toString().trim();
 
-    setErrors(newErrors);
-    return isValid;
-  };
+    if (!stringValue) {
+      newErrors[field] = true;
+      isValid = false;
+    }
+  });
+
+  setErrors(newErrors);
+  return isValid;
+};
+
+
 
   const [soloParentChoice, setSoloParentChoice] = useState("");
 
-  
- // 🔒 Disable right-click
-document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-// 🔒 Block DevTools shortcuts silently
-document.addEventListener('keydown', (e) => {
-  const isBlockedKey =
-    e.key === 'F12' ||
-    e.key === 'F11' ||
-    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-    (e.ctrlKey && e.key === 'U');
+  // 🔒 Disable right-click
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-  if (isBlockedKey) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-});
+  // 🔒 Block DevTools shortcuts silently
+  document.addEventListener('keydown', (e) => {
+    const isBlockedKey =
+      e.key === 'F12' ||
+      e.key === 'F11' ||
+      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+      (e.ctrlKey && e.key === 'U');
+
+    if (isBlockedKey) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
 
 
 
@@ -279,49 +275,49 @@ document.addEventListener('keydown', (e) => {
 
         <Box sx={{ display: "flex", width: "100%" }}>
           {/* Left: Instructions (75%) */}
-         <Box sx={{ width: "75%", padding: "10px" }}>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "flex-start",
-                        gap: 2,
-                        padding: "16px",
-                        borderRadius: "10px",
-                        backgroundColor: "#fffaf5",
-                        border: "1px solid #6D2323",
-                        boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
-                        mt: 2,
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          backgroundColor: "#6D2323",
-                          borderRadius: "8px",
-                          width: "50px",
-                          height: "50px",
-                          minWidth: "36px",
-                        }}
-                      >
-                        <ErrorIcon sx={{ color: "white", fontSize: "36px" }} />
-                      </Box>
-        
-                      <Typography
-                        sx={{
-                          fontSize: "14px",
-                          fontFamily: "Arial",
-                          color: "#3e3e3e",
-                          lineHeight: 1.6,
-                        }}
-                      >
-                        <strong>1.</strong> Kindly type <strong>'NA'</strong> in boxes where there are no possible answers to the information being requested.
-                        <br />
-                        <strong>2.</strong> To use the letter <strong>'Ñ'</strong>, press <kbd>ALT</kbd> + <kbd>165</kbd>; for <strong>'ñ'</strong>, press <kbd>ALT</kbd> + <kbd>164</kbd>.
-                      </Typography>
-                    </Box>
-                  </Box>
+          <Box sx={{ width: "75%", padding: "10px" }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 2,
+                padding: "16px",
+                borderRadius: "10px",
+                backgroundColor: "#fffaf5",
+                border: "1px solid #6D2323",
+                boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
+                mt: 2,
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#6D2323",
+                  borderRadius: "8px",
+                  width: "50px",
+                  height: "50px",
+                  minWidth: "36px",
+                }}
+              >
+                <ErrorIcon sx={{ color: "white", fontSize: "36px" }} />
+              </Box>
+
+              <Typography
+                sx={{
+                  fontSize: "14px",
+                  fontFamily: "Arial",
+                  color: "#3e3e3e",
+                  lineHeight: 1.6,
+                }}
+              >
+                <strong>1.</strong> Kindly type <strong>'NA'</strong> in boxes where there are no possible answers to the information being requested.
+                <br />
+                <strong>2.</strong> To use the letter <strong>'Ñ'</strong>, press <kbd>ALT</kbd> + <kbd>165</kbd>; for <strong>'ñ'</strong>, press <kbd>ALT</kbd> + <kbd>164</kbd>.
+              </Typography>
+            </Box>
+          </Box>
 
           {/* Right: Links (25%) */}
           <Box sx={{ width: "25%", padding: "10px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
@@ -1343,7 +1339,7 @@ document.addEventListener('keydown', (e) => {
                   value={person.guardian_email}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                 
+
                 />
               </Box>
             </Box>

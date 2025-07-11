@@ -71,6 +71,12 @@ import LoginEnrollment from './components/LoginEnrollment';
 import ExamScheduler from './components/ExamScheduler';
 import ExamScheduler2 from './components/ExamScheduler2';
 
+import ClassList from './components/ClassList';
+import ClassRoster from './components/ClassRoster';
+import StudentList from './components/StudentList';
+
+
+
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -171,6 +177,13 @@ function App() {
               <Route path="/admission_form_process" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><AdmissionFormProcess /></ProtectedRoute>} />
               <Route path="/admission_services" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><AdmissionServices /></ProtectedRoute>} />
               <Route path="/office_of_the_registrar" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><OfficeOfTheRegistrar /></ProtectedRoute>} />
+
+
+              <Route path="/class_roster" element={<ProtectedRoute allowedRoles={'registrar'}><ClassRoster /></ProtectedRoute>} />
+              <Route path="/class_roster/class_list/ccs/:curriculum_id" element={<ProtectedRoute allowedRoles={'registrar'}><ClassList /></ProtectedRoute>} />
+              <Route path="/class_list/ccs/:curriculum_id/:dstID" element={<ProtectedRoute allowedRoles={'registrar'}><StudentList /></ProtectedRoute>} />
+
+
 
               <Route path="/add_exam_schedule" element={<ProtectedRoute><ExamScheduler /></ProtectedRoute>} />
               <Route path="/assigning_schedule" element={<ProtectedRoute><ExamScheduler2 /></ProtectedRoute>} />

@@ -20,6 +20,14 @@ import barangays from "../data/barangay.json";
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard1 = () => {
+  const person_id = localStorage.getItem("person_id");
+
+  useEffect(() => {
+  if (person_id) {
+    fetchPersonData(person_id);
+  }
+}, []);
+
   const navigate = useNavigate();
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
@@ -71,7 +79,6 @@ const Dashboard1 = () => {
     permanentMunicipality: "",
     permanentDswdHouseholdNumber: "",
   });
-  const [groupedPrograms, setGroupedPrograms] = useState({});
 
   // do not alter
   useEffect(() => {
@@ -568,10 +575,14 @@ const Dashboard1 = () => {
           </Box>
         </Box>
 
+        <br />
+     
+
         <Container>
           <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>APPLICANT FORM</h1>
           <div style={{ textAlign: "center" }}>Complete the applicant form to secure your place for the upcoming academic year at EARIST.</div>
         </Container>
+
         <br />
 
         <Box sx={{ display: "flex", justifyContent: "center", width: "100%", px: 4 }}>

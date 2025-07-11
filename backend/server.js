@@ -416,37 +416,105 @@ app.put("/api/person/:id", async (req, res) => {
 });
 
 
-// POST: Upload and replace profile picture
-app.post("/api/person/:id/upload-profile", upload.single("profile_img"), async (req, res) => {
-  const { id } = req.params;
-  const filePath = req.file ? req.file.filename : null;
-
-  if (!filePath) return res.status(400).json({ error: "No file uploaded" });
-
+// ✅ 1. Create new empty person (generate person_id)
+app.post("/api/person", async (req, res) => {
   try {
-    // 1. Get current profile_picture filename
-    const [rows] = await db.query("SELECT profile_img FROM person_table WHERE person_id = ?", [id]);
-    const currentProfile = rows[0]?.profile_img;
+    const [result] = await db.execute(
+      `INSERT INTO person_table (
+        profile_img, campus, academicProgram, classifiedAs, program, program2, program3, yearLevel,
+        last_name, first_name, middle_name, extension, nickname, height, weight, lrnNumber, nolrnNumber, gender, pwdMember, pwdType, pwdId,
+        birthOfDate, age, birthPlace, languageDialectSpoken, citizenship, religion, civilStatus, tribeEthnicGroup,
+        cellphoneNumber, emailAddress,
+        presentStreet, presentBarangay, presentZipCode, presentRegion, presentProvince, presentMunicipality, presentDswdHouseholdNumber, sameAsPresentAddress,
+        permanentStreet, permanentBarangay, permanentZipCode, permanentRegion, permanentProvince, permanentMunicipality, permanentDswdHouseholdNumber,
+        solo_parent, father_deceased, father_family_name, father_given_name, father_middle_name, father_ext, father_nickname, father_education, father_education_level,
+        father_last_school, father_course, father_year_graduated, father_school_address, father_contact, father_occupation, father_employer,
+        father_income, father_email, mother_deceased, mother_family_name, mother_given_name, mother_middle_name, mother_ext, mother_nickname,
+        mother_education, mother_education_level, mother_last_school, mother_course, mother_year_graduated, mother_school_address, mother_contact,
+        mother_occupation, mother_employer, mother_income, mother_email, guardian, guardian_family_name, guardian_given_name,
+        guardian_middle_name, guardian_ext, guardian_nickname, guardian_address, guardian_contact, guardian_email, annual_income,
+        schoolLevel, schoolLastAttended, schoolAddress, courseProgram, honor, generalAverage, yearGraduated,
+        schoolLevel1, schoolLastAttended1, schoolAddress1, courseProgram1, honor1, generalAverage1, yearGraduated1, strand,
+        cough, colds, fever, asthma, faintingSpells, heartDisease, tuberculosis, frequentHeadaches, hernia, chronicCough,
+        headNeckInjury, hiv, highBloodPressure, diabetesMellitus, allergies, cancer, smokingCigarette, alcoholDrinking,
+        hospitalized, hospitalizationDetails, medications, hadCovid, covidDate, vaccine1Brand, vaccine1Date,
+        vaccine2Brand, vaccine2Date, booster1Brand, booster1Date, booster2Brand, booster2Date,
+        chestXray, cbc, urinalysis, otherworkups, symptomsToday, remarks, termsOfAgreement
+      ) VALUES (${Array(144).fill("?").join(", ")})
+    `,
+      Array(144).fill("") // insert 144 empty fields
+    );
 
-    // 2. Delete old file if exists
-    if (currentProfile) {
-      const oldFilePath = path.join(__dirname, "uploads", currentProfile);
-      if (fs.existsSync(oldFilePath)) {
-        fs.unlinkSync(oldFilePath); // Delete old image
-      }
-    }
-
-    // 3. Update new image filename to DB
-    await db.query("UPDATE person_table SET profile_img = ? WHERE person_id = ?", [filePath, id]);
-
-    res.json({ message: "Profile image updated", profile_img: filePath });
-  } catch (err) {
-    console.error("Upload error:", err);
-    res.status(500).json({ error: "Database error during upload" });
+    res.status(201).json({ message: "Person created successfully", person_id: result.insertId });
+  } catch (error) {
+    console.error("Error creating person:", error);
+    res.status(500).json({ error: "Database error", details: error.message });
   }
 });
 
-// Program choices 1-3
+// ✅ 2. Get person details by person_id
+app.get("/api/person/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await db.execute("SELECT * FROM person_table WHERE person_id=?", [id]);
+
+    if (!rows.length) return res.status(404).json({ error: "Person not found" });
+    res.json(rows[0]);
+  } catch (error) {
+    console.error("Error fetching person:", error);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+// ✅ 3. Flexible update person by person_id
+app.put("/api/person/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const fields = req.body; // object { field: value }
+
+    if (!Object.keys(fields).length)
+      return res.status(400).json({ error: "No fields to update" });
+
+    const sql = `
+      UPDATE person_table
+      SET ${Object.keys(fields).map((key) => `${key}=?`).join(", ")}
+      WHERE person_id=?
+    `;
+    await db.execute(sql, [...Object.values(fields), id]);
+
+    res.json({ message: "Person updated successfully" });
+  } catch (error) {
+    console.error("Error updating person:", error);
+    res.status(500).json({ error: "Database error", details: error.message });
+  }
+});
+
+// ✅ 4. Upload & update profile_img
+app.post("/api/person/:id/upload-profile", upload.single("profile_img"), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const filePath = req.file?.filename;
+
+    if (!filePath) return res.status(400).json({ error: "No file uploaded" });
+
+    // Remove old image if exists
+    const [rows] = await db.execute("SELECT profile_img FROM person_table WHERE person_id=?", [id]);
+    const oldImg = rows[0]?.profile_img;
+
+    if (oldImg) {
+      const oldPath = path.join(__dirname, "uploads", oldImg);
+      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+    }
+
+    await db.execute("UPDATE person_table SET profile_img=? WHERE person_id=?", [filePath, id]);
+    res.json({ message: "Profile image updated", profile_img: filePath });
+  } catch (error) {
+    console.error("Upload error:", error);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+// ✅ 5. Get applied programs list (sample, adjust db name/table)
 app.get("/api/applied_program", async (req, res) => {
   try {
     const [rows] = await db3.execute(`
@@ -2891,6 +2959,77 @@ app.get("/api/person/:id", async (req, res) => {
   }
 });
 
+app.get('/class_roster/ccs/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const query = `
+      SELECT 
+        dct.dprtmnt_id, dt.dprtmnt_name, dt.dprtmnt_code, 
+        pt.program_id, pt.program_description, pt.program_code, 
+        ct.curriculum_id
+      FROM dprtmnt_curriculum_table as dct 
+      INNER JOIN dprtmnt_table as dt ON dct.dprtmnt_id = dt.dprtmnt_id
+      INNER JOIN curriculum_table as ct ON dct.curriculum_id = ct.curriculum_id 
+      INNER JOIN program_table as pt ON ct.program_id = pt.program_id 
+      -- LEFT JOIN year_table as yt ON ct.year_id = yt.year_id -- optional
+      WHERE dct.dprtmnt_id = ?;
+    `;
+
+    const [programRows] = await db3.execute(query, [id]);
+
+    if (programRows.length === 0) {
+      return res.json([]); // empty array instead of error
+    }
+
+    res.json(programRows);
+  } catch (err) {
+    console.error("Error fetching data:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+app.get('/class_roster/:cID', async (req, res) => {
+  const {cID} = req.params;
+  try{
+    const query = `
+      SELECT ct.curriculum_id, st.description, dst.id from dprtmnt_section_table AS dst 
+        INNER JOIN curriculum_table AS ct ON dst.curriculum_id = ct.curriculum_id 
+        INNER JOIN section_table AS st ON dst.section_id = st.id 
+      WHERE ct.curriculum_id = ?;
+    `
+
+    const [sectionList] = await db3.execute(query, [cID]);
+
+    res.json(sectionList);
+  } catch(err){
+    console.error("Error fetching data:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+//student list base dun curriculum id tsaka sa section id
+app.get('/class_roster/:cID/:dstID', async (req, res) => {
+  const {cID, dstID} = req.params;
+  try{
+    const query = `
+      SELECT ct.curriculum_id, es.student_number, pt.last_name, pt.first_name, pt.middle_name from curriculum_table AS ct 
+        INNER JOIN enrolled_subject AS es ON ct.curriculum_id = es.curriculum_id 
+        INNER JOIN student_numbering_table AS snt ON es.student_number = snt.student_number 
+        INNER JOIN dprtmnt_section_table AS dst ON es.department_section_id = dst.id 
+        INNER JOIN person_table AS pt ON snt.person_id = pt.person_id 
+      WHERE ct.curriculum_id = ? AND dst.id = ?
+    `
+
+    const [studentList] = await db3.execute(query, [cID, dstID]);
+
+    res.json(studentList);
+  } catch(err){
+    console.error("Error fetching data:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+})
 
 
 app.listen(5000, () => {

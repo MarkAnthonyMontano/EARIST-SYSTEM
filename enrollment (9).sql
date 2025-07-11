@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 09, 2025 at 07:52 PM
+-- Generation Time: Jul 11, 2025 at 06:53 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -168,8 +168,8 @@ CREATE TABLE `curriculum_table` (
 --
 
 INSERT INTO `curriculum_table` (`curriculum_id`, `year_id`, `program_id`, `lock_status`) VALUES
-(1, 1, 29, 0),
-(2, 2, 0, 0),
+(1, 1, 1, 0),
+(2, 2, 2, 0),
 (3, 3, 3, 0),
 (4, 4, 4, 0),
 (5, 5, 5, 0),
@@ -243,12 +243,62 @@ CREATE TABLE `dprtmnt_curriculum_table` (
 --
 
 INSERT INTO `dprtmnt_curriculum_table` (`dprtmnt_curriculum_id`, `dprtmnt_id`, `curriculum_id`) VALUES
-(1, 5, 1),
-(2, 5, 2),
-(3, 5, 3),
-(4, 5, 4),
-(5, 5, 5),
-(6, 5, 6);
+(1, 1, 1),
+(2, 1, 2),
+(3, 1, 3),
+(4, 1, 4),
+(5, 1, 41),
+(6, 1, 42),
+(7, 2, 5),
+(8, 2, 6),
+(9, 2, 7),
+(10, 3, 8),
+(11, 3, 9),
+(12, 3, 10),
+(13, 3, 11),
+(14, 4, 22),
+(15, 4, 12),
+(16, 5, 13),
+(17, 5, 14),
+(18, 6, 15),
+(19, 6, 16),
+(20, 6, 17),
+(21, 6, 18),
+(22, 6, 19),
+(23, 6, 20),
+(24, 6, 21),
+(25, 7, 23),
+(26, 7, 24),
+(27, 7, 25),
+(28, 7, 26),
+(29, 7, 27),
+(30, 7, 28),
+(31, 8, 29),
+(32, 8, 30),
+(33, 9, 31),
+(34, 9, 32),
+(35, 9, 33),
+(36, 9, 34),
+(37, 9, 35),
+(38, 9, 36),
+(39, 9, 37),
+(40, 9, 38),
+(41, 9, 39),
+(42, 10, 43),
+(43, 10, 44),
+(44, 10, 45),
+(45, 10, 46),
+(46, 11, 47),
+(47, 11, 48),
+(48, 11, 49),
+(49, 11, 50),
+(50, 11, 51),
+(51, 11, 52),
+(52, 11, 53),
+(53, 11, 54),
+(54, 11, 55),
+(55, 11, 56),
+(56, 11, 57);
 
 -- --------------------------------------------------------
 
@@ -350,16 +400,134 @@ INSERT INTO `dprtmnt_section_table` (`id`, `curriculum_id`, `section_id`, `dssta
 (2, 1, 2, 0),
 (3, 1, 3, 0),
 (4, 1, 4, 0),
-(5, 1, 6, 0),
-(6, 1, 7, 0),
-(7, 1, 8, 0),
-(8, 1, 9, 0),
-(9, 1, 10, 0),
-(10, 1, 11, 0),
-(11, 1, 12, 0),
-(12, 7, 6, 0),
-(13, 2, 4, 0),
-(14, 1, 1, 0);
+(5, 1, 5, 0),
+(6, 1, 6, 0),
+(7, 1, 7, 0),
+(8, 1, 8, 0),
+(9, 1, 9, 0),
+(10, 1, 10, 0),
+(11, 1, 11, 0),
+(12, 1, 12, 0),
+(13, 2, 13, 0),
+(14, 2, 14, 0),
+(15, 2, 15, 0),
+(16, 2, 16, 0),
+(17, 2, 17, 0),
+(18, 2, 18, 0),
+(19, 2, 19, 0),
+(20, 2, 20, 0),
+(21, 2, 21, 0),
+(22, 2, 22, 0),
+(23, 2, 23, 0),
+(24, 2, 24, 0),
+(25, 3, 25, 0),
+(26, 3, 26, 0),
+(27, 3, 27, 0),
+(28, 3, 28, 0),
+(29, 3, 29, 0),
+(30, 3, 30, 0),
+(31, 3, 31, 0),
+(32, 3, 32, 0),
+(33, 3, 33, 0),
+(34, 3, 34, 0),
+(35, 3, 35, 0),
+(36, 3, 36, 0),
+(37, 4, 37, 0),
+(38, 4, 38, 0),
+(39, 4, 39, 0),
+(40, 4, 40, 0),
+(41, 4, 41, 0),
+(42, 4, 42, 0),
+(43, 4, 43, 0),
+(44, 4, 44, 0),
+(45, 4, 45, 0),
+(46, 4, 46, 0),
+(47, 4, 47, 0),
+(48, 4, 48, 0),
+(49, 5, 49, 0),
+(50, 5, 50, 0),
+(51, 5, 51, 0),
+(52, 5, 52, 0),
+(53, 5, 53, 0),
+(54, 5, 54, 0),
+(55, 5, 55, 0),
+(56, 5, 56, 0),
+(57, 5, 57, 0),
+(58, 5, 58, 0),
+(59, 5, 59, 0),
+(60, 5, 60, 0),
+(61, 6, 61, 0),
+(62, 6, 62, 0),
+(63, 6, 63, 0),
+(64, 6, 64, 0),
+(65, 6, 65, 0),
+(66, 6, 66, 0),
+(67, 6, 67, 0),
+(68, 6, 68, 0),
+(69, 6, 69, 0),
+(70, 6, 70, 0),
+(71, 6, 71, 0),
+(72, 6, 72, 0),
+(73, 7, 73, 0),
+(74, 7, 74, 0),
+(75, 7, 75, 0),
+(76, 7, 76, 0),
+(77, 7, 77, 0),
+(78, 7, 78, 0),
+(79, 7, 79, 0),
+(80, 7, 80, 0),
+(81, 7, 81, 0),
+(82, 7, 82, 0),
+(83, 7, 83, 0),
+(84, 7, 84, 0),
+(85, 8, 85, 0),
+(86, 8, 86, 0),
+(87, 8, 87, 0),
+(88, 8, 88, 0),
+(89, 8, 89, 0),
+(90, 8, 90, 0),
+(91, 8, 91, 0),
+(92, 8, 92, 0),
+(93, 8, 93, 0),
+(94, 8, 94, 0),
+(95, 8, 95, 0),
+(96, 8, 96, 0),
+(97, 9, 97, 0),
+(98, 9, 98, 0),
+(99, 9, 99, 0),
+(100, 9, 100, 0),
+(101, 9, 101, 0),
+(102, 9, 102, 0),
+(103, 9, 103, 0),
+(104, 9, 104, 0),
+(105, 9, 105, 0),
+(106, 9, 106, 0),
+(107, 9, 107, 0),
+(108, 9, 108, 0),
+(109, 10, 109, 0),
+(110, 10, 110, 0),
+(111, 10, 111, 0),
+(112, 10, 112, 0),
+(113, 10, 113, 0),
+(114, 10, 114, 0),
+(115, 10, 115, 0),
+(116, 10, 116, 0),
+(117, 10, 117, 0),
+(118, 10, 118, 0),
+(119, 10, 119, 0),
+(120, 10, 120, 0),
+(121, 11, 121, 0),
+(122, 11, 122, 0),
+(123, 11, 123, 0),
+(124, 11, 124, 0),
+(125, 11, 125, 0),
+(126, 11, 126, 0),
+(127, 11, 127, 0),
+(128, 11, 128, 0),
+(129, 11, 129, 0),
+(130, 11, 130, 0),
+(131, 11, 131, 0),
+(132, 11, 132, 0);
 
 -- --------------------------------------------------------
 
@@ -754,10 +922,7 @@ INSERT INTO `prof_table` (`prof_id`, `person_id`, `profile_image`, `fname`, `mna
 (34, NULL, '', 'Charlene', '', 'Ronda', 'charlene.ronda@earist.edu.ph', 'RONDA', 0, 'faculty'),
 (35, NULL, '', 'Maria Jasmine', '', 'Macasil', 'jasmine.macasil@earist.edu.ph', 'MACASIL', 0, 'faculty'),
 (36, NULL, '', 'Jefferson', '', 'Costales', 'jefferson.costales@earist.edu.ph', 'COSTALES', 0, 'faculty'),
-(37, NULL, '', 'Arjo', '', 'Ladia', 'arjo.ladia@earist.edu.ph', 'LADIA', 0, 'faculty'),
-(38, NULL, '', 'Arden', 'Bandoja', 'Mecasio', 'mecasio.a.bsinfotech@gmail.com', '$2b$10$HDvYDcPjc/1ig8JUuhx2lOB5leRv8dQG7LHO80lFGfRZMLtq9dWGO', 0, 'faculty'),
-(39, NULL, '', 'Arden', 'Bandoja', 'Mecasio', 'ardengreat@gmail.com', '$2b$10$nHOkhd698/eXi85aPi0Fr.tOzzUMu2v1ygXeV8gGklbtxDswV3cTC', 0, 'faculty'),
-(40, 40, '1747334186445-178655052.jpg', 'Freddie', 'Bandoja', 'LLove', 'FreddieLlove@gmail.com', '$2b$10$AxO64DiHq.EB9yNAqq9qROkcmVCvn8/.QDvMA8baOUM9aDIXw9SlO', 0, 'faculty');
+(37, NULL, '', 'Arjo', '', 'Ladia', 'arjo.ladia@earist.edu.ph', 'LADIA', 0, 'faculty');
 
 -- --------------------------------------------------------
 
@@ -1090,9 +1255,7 @@ INSERT INTO `section_table` (`id`, `description`) VALUES
 (9, '3C'),
 (10, '4A'),
 (11, '4B'),
-(12, '4C'),
-(14, '94'),
-(15, '5A');
+(12, '4C');
 
 -- --------------------------------------------------------
 
@@ -1211,7 +1374,7 @@ CREATE TABLE `student_status_table` (
 
 INSERT INTO `student_status_table` (`id`, `student_number`, `active_curriculum`, `enrolled_status`, `year_level_id`, `active_school_year_id`, `control_status`) VALUES
 (1, 224095240, 1, '1', 1, 4, 1),
-(2, 224091140, 1, '1', 1, 4, 0);
+(2, 224091141, 1, '1', 1, 4, 0);
 
 -- --------------------------------------------------------
 
@@ -1311,7 +1474,6 @@ INSERT INTO `year_table` (`year_id`, `year_description`, `status`) VALUES
 (9, '2025', 0),
 (10, '2026', 0),
 (11, '2027', 0),
-(12, '20028', 0),
 (13, '2029', 0);
 
 --
@@ -1543,13 +1705,13 @@ ALTER TABLE `course_table`
 -- AUTO_INCREMENT for table `curriculum_table`
 --
 ALTER TABLE `curriculum_table`
-  MODIFY `curriculum_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+  MODIFY `curriculum_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
 
 --
 -- AUTO_INCREMENT for table `dprtmnt_curriculum_table`
 --
 ALTER TABLE `dprtmnt_curriculum_table`
-  MODIFY `dprtmnt_curriculum_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `dprtmnt_curriculum_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- AUTO_INCREMENT for table `dprtmnt_profs_table`
@@ -1567,7 +1729,7 @@ ALTER TABLE `dprtmnt_room_table`
 -- AUTO_INCREMENT for table `dprtmnt_section_table`
 --
 ALTER TABLE `dprtmnt_section_table`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=133;
 
 --
 -- AUTO_INCREMENT for table `dprtmnt_table`
@@ -1609,7 +1771,7 @@ ALTER TABLE `person_table`
 -- AUTO_INCREMENT for table `prof_table`
 --
 ALTER TABLE `prof_table`
-  MODIFY `prof_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `prof_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
 
 --
 -- AUTO_INCREMENT for table `program_table`

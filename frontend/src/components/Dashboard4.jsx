@@ -13,6 +13,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard4 = () => {
+  const person_id = localStorage.getItem("person_id");
   const navigate = useNavigate();
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
@@ -26,25 +27,25 @@ const Dashboard4 = () => {
   });
 
   // do not alter
-useEffect(() => {
-  const storedUser = localStorage.getItem("email");
-  const storedRole = localStorage.getItem("role");
-  const storedID = localStorage.getItem("person_id");
+  useEffect(() => {
+    const storedUser = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
+    const storedID = localStorage.getItem("person_id");
 
-  if (storedUser && storedRole && storedID) {
-    setUser(storedUser);
-    setUserRole(storedRole);
-    setUserID(storedID);
+    if (storedUser && storedRole && storedID) {
+      setUser(storedUser);
+      setUserRole(storedRole);
+      setUserID(storedID);
 
-    if (storedRole === "applicant" || storedRole === "registrar") {
-      fetchPersonData(storedID);
+      if (storedRole === "applicant" || storedRole === "registrar") {
+        fetchPersonData(storedID);
+      } else {
+        window.location.href = "/login";
+      }
     } else {
       window.location.href = "/login";
     }
-  } else {
-    window.location.href = "/login";
-  }
-}, []);
+  }, []);
 
 
   // Do not alter
@@ -98,10 +99,6 @@ useEffect(() => {
 
 
   const [activeStep, setActiveStep] = useState(3);
-  const [clickedSteps, setClickedSteps] = useState(Array(steps.length).fill(false));
-  const [errors, setErrors] = useState({});
-
-
 
   const inputStyle = {
     width: "100%",
@@ -113,23 +110,23 @@ useEffect(() => {
     color: "black",
   };
 
-  
+
   // 🔒 Disable right-click
-document.addEventListener('contextmenu', (e) => e.preventDefault());
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-// 🔒 Block DevTools shortcuts silently
-document.addEventListener('keydown', (e) => {
-  const isBlockedKey =
-    e.key === 'F12' ||
-    e.key === 'F11' ||
-    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-    (e.ctrlKey && e.key === 'U');
+  // 🔒 Block DevTools shortcuts silently
+  document.addEventListener('keydown', (e) => {
+    const isBlockedKey =
+      e.key === 'F12' ||
+      e.key === 'F11' ||
+      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+      (e.ctrlKey && e.key === 'U');
 
-  if (isBlockedKey) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-});
+    if (isBlockedKey) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
 
 
   // dot not alter
@@ -140,48 +137,48 @@ document.addEventListener('keydown', (e) => {
         <Box sx={{ display: "flex", width: "100%" }}>
           {/* Left: Instructions (75%) */}
           <Box sx={{ width: "75%", padding: "10px" }}>
-                     <Box
-                       sx={{
-                         display: "flex",
-                         alignItems: "flex-start",
-                         gap: 2,
-                         padding: "16px",
-                         borderRadius: "10px",
-                         backgroundColor: "#fffaf5",
-                         border: "1px solid #6D2323",
-                         boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
-                         mt: 2,
-                       }}
-                     >
-                       <Box
-                         sx={{
-                           display: "flex",
-                           alignItems: "center",
-                           justifyContent: "center",
-                           backgroundColor: "#6D2323",
-                           borderRadius: "8px",
-                           width: "50px",
-                           height: "50px",
-                           minWidth: "36px",
-                         }}
-                       >
-                         <ErrorIcon sx={{ color: "white", fontSize: "36px" }} />
-                       </Box>
-         
-                       <Typography
-                         sx={{
-                           fontSize: "14px",
-                           fontFamily: "Arial",
-                           color: "#3e3e3e",
-                           lineHeight: 1.6,
-                         }}
-                       >
-                         <strong>1.</strong> Kindly type <strong>'NA'</strong> in boxes where there are no possible answers to the information being requested.
-                         <br />
-                         <strong>2.</strong> To use the letter <strong>'Ñ'</strong>, press <kbd>ALT</kbd> + <kbd>165</kbd>; for <strong>'ñ'</strong>, press <kbd>ALT</kbd> + <kbd>164</kbd>.
-                       </Typography>
-                     </Box>
-                   </Box>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 2,
+                padding: "16px",
+                borderRadius: "10px",
+                backgroundColor: "#fffaf5",
+                border: "1px solid #6D2323",
+                boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
+                mt: 2,
+              }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor: "#6D2323",
+                  borderRadius: "8px",
+                  width: "50px",
+                  height: "50px",
+                  minWidth: "36px",
+                }}
+              >
+                <ErrorIcon sx={{ color: "white", fontSize: "36px" }} />
+              </Box>
+
+              <Typography
+                sx={{
+                  fontSize: "14px",
+                  fontFamily: "Arial",
+                  color: "#3e3e3e",
+                  lineHeight: 1.6,
+                }}
+              >
+                <strong>1.</strong> Kindly type <strong>'NA'</strong> in boxes where there are no possible answers to the information being requested.
+                <br />
+                <strong>2.</strong> To use the letter <strong>'Ñ'</strong>, press <kbd>ALT</kbd> + <kbd>165</kbd>; for <strong>'ñ'</strong>, press <kbd>ALT</kbd> + <kbd>164</kbd>.
+              </Typography>
+            </Box>
+          </Box>
           {/* Right: Links (25%) */}
           <Box sx={{ width: "25%", padding: "10px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
 
@@ -420,7 +417,7 @@ document.addEventListener('keydown', (e) => {
                                 </div>
                               </div>
 
-                            
+
                             </div>
                           </td>
                         </React.Fragment>
@@ -480,7 +477,7 @@ document.addEventListener('keydown', (e) => {
                       label="No"
                     />
 
-                
+
                   </Box>
                 </Box>
               </Box>
@@ -609,7 +606,7 @@ document.addEventListener('keydown', (e) => {
                           />
                           <span style={{ fontSize: "15px", fontFamily: "Arial" }}>NO</span>
 
-                       
+
                         </Box>
                       </Box>
 
@@ -981,8 +978,8 @@ document.addEventListener('keydown', (e) => {
                 variant="contained"
                 onClick={(e) => {
                   handleUpdate();
+                  navigate("/dashboard5");
 
-               
                 }}
                 endIcon={
                   <ArrowForwardIcon
