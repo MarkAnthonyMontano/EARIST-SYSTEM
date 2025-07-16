@@ -53,7 +53,6 @@ import FacultyStudentClassList from './components/FacultyStudentClassList';
 import FacultySchedule from './components/FacultySchedule';
 import StudentDashboard from './pages/StudentDashboard';
 
-
 import ExaminationProfile from './components/ExaminationProfile';
 import Dashboard1 from './components/Dashboard1';
 import Dashboard2 from './components/Dashboard2';
@@ -73,7 +72,8 @@ import ExamScheduler2 from './components/ExamScheduler2';
 
 import ClassList from './components/ClassList';
 import ClassRoster from './components/ClassRoster';
-import StudentList from './components/StudentList';
+import StudentList from './components/StudentListPerCourse';
+import ProfessorListPerSection from './components/ProfessorListPerClass';
 
 
 
@@ -179,10 +179,10 @@ function App() {
               <Route path="/office_of_the_registrar" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><OfficeOfTheRegistrar /></ProtectedRoute>} />
 
 
-              <Route path="/class_roster" element={<ProtectedRoute allowedRoles={'registrar'}><ClassRoster /></ProtectedRoute>} />
-              <Route path="/class_roster/class_list/ccs/:curriculum_id" element={<ProtectedRoute allowedRoles={'registrar'}><ClassList /></ProtectedRoute>} />
-              <Route path="/class_list/ccs/:curriculum_id/:dstID" element={<ProtectedRoute allowedRoles={'registrar'}><StudentList /></ProtectedRoute>} />
-
+              <Route path="/class_roster" element={<ProtectedRoute ><ClassRoster /></ProtectedRoute>} />
+              <Route path="/class_roster/class_list/ccs/:curriculum_id" element={<ProtectedRoute ><ClassList /></ProtectedRoute>} />
+              <Route path="/class_list/ccs/:curriculum_id/:dstID" element={<ProtectedRoute><ProfessorListPerSection /></ProtectedRoute>} />
+              <Route path="/class_list/css/:curriculum_id/:dstID/:courseID/:professorID" element={<ProtectedRoute><StudentList /></ProtectedRoute>} />
 
 
               <Route path="/add_exam_schedule" element={<ProtectedRoute><ExamScheduler /></ProtectedRoute>} />

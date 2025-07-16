@@ -13,7 +13,6 @@ import ErrorIcon from '@mui/icons-material/Error';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard2 = () => {
-  const person_id = localStorage.getItem("person_id");
   const navigate = useNavigate();
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
@@ -25,14 +24,6 @@ const Dashboard2 = () => {
     mother_year_graduated: "", mother_school_address: "", mother_contact: "", mother_occupation: "", mother_employer: "", mother_income: "", mother_email: "", guardian: "", guardian_family_name: "", guardian_given_name: "",
     guardian_middle_name: "", guardian_ext: "", guardian_nickname: "", guardian_address: "", guardian_contact: "", guardian_email: "", annual_income: "",
   });
-
-  useEffect(() => {
-  const id = localStorage.getItem("person_id");
-  if (id) {
-    fetchPersonData(id);
-  }
-}, []);
-
 
 
   // do not alter
@@ -246,24 +237,6 @@ const Dashboard2 = () => {
 
 
   const [soloParentChoice, setSoloParentChoice] = useState("");
-
-
-  // 🔒 Disable right-click
-  document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-  // 🔒 Block DevTools shortcuts silently
-  document.addEventListener('keydown', (e) => {
-    const isBlockedKey =
-      e.key === 'F12' ||
-      e.key === 'F11' ||
-      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-      (e.ctrlKey && e.key === 'U');
-
-    if (isBlockedKey) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  });
 
 
 

@@ -618,15 +618,15 @@ const ExaminationProfile = () => {
                                                                 </td>
 
                                                                 {/* Center Column - School Information */}
-                                                                <td style={{ width: "60%", textAlign: "center", lineHeight: "1" }}>
+                                                                <td style={{ width: "60%", textAlign: "center", lineHeight: "1", }}>
                                                                     <div>Republic of the Philippines</div>
-                                                                    <b style={{ letterSpacing: '1.5px' }}>Eulogio "Amang" Rodriguez</b>
-                                                                    <div style={{ letterSpacing: '1.5px' }}><b>Institute of Science and Technology</b></div>
+                                                                    <b style={{ letterSpacing: '1px', fontSize: "20px"  }}>Eulogio "Amang" Rodriguez</b>
+                                                                    <div style={{ letterSpacing: '1px', fontSize: "20px"  }}><b>Institute of Science and Technology</b></div>
                                                                     <div>Nagtahan St. Sampaloc, Manila</div>
 
                                                                     {/* Add spacing here */}
                                                                     <div style={{ marginTop: "30px" }}>
-                                                                        <b style={{ fontSize: "20px", letterSpacing: '1px' }}>
+                                                                        <b style={{ fontSize: "24px", letterSpacing: '1px', fontWeight: "bold" }}>
                                                                             EXAMINATION PERMIT
                                                                         </b>
                                                                     </div>
@@ -798,7 +798,7 @@ const ExaminationProfile = () => {
                                     </table>
 
 
-                                    <div style={{ height: "40px" }}></div>
+                                    <div style={{ height: "70px" }}></div>
 
                                       <table
                                         className="student-table"

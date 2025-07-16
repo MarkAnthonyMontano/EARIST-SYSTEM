@@ -14,7 +14,6 @@ import { useNavigate } from 'react-router-dom';
 
 
 const Dashboard3 = () => {
-    const person_id = localStorage.getItem("person_id");
   const navigate = useNavigate();
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");

@@ -13,17 +13,18 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard4 = () => {
-  const person_id = localStorage.getItem("person_id");
   const navigate = useNavigate();
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
   const [person, setPerson] = useState({
-    cough: "", colds: "", fever: "", asthma: "", fainting: "",
-    heartDisease: "", tuberculosis: "", frequentHeadaches: "", hernia: "", chronicCough: "", headNeckInjury: "", hiv: "", highBloodPressure: "", diabetesMellitus: "", allergies: "",
-    cancer: "", smoking: "", alcoholDrinking: "", hospitalized: "", hospitalizationDetails: "", medications: "", hadCovid: "", covidDate: "", vaccine1Brand: "", vaccine1Date: "",
-    vaccine2Brand: "", vaccine2Date: "", booster1Brand: "", booster1Date: "", booster2Brand: "", booster2Date: "", chestXray: "", cbc: "", urinalysis: "", otherworkups: "",
-    symptomsToday: "", remarks: "",
+    cough: "", colds: "", fever: "", asthma: "", fainting: "", heartDisease: "", tuberculosis: "",
+    frequentHeadaches: "", hernia: "", chronicCough: "", headNeckInjury: "", hiv: "", highBloodPressure: "",
+    diabetesMellitus: "", allergies: "", cancer: "", smoking: "", alcoholDrinking: "", hospitalized: "",
+    hospitalizationDetails: "", medications: "", hadCovid: "", covidDate: "",
+    vaccine1Brand: "", vaccine1Date: "", vaccine2Brand: "", vaccine2Date: "",
+    booster1Brand: "", booster1Date: "", booster2Brand: "", booster2Date: "",
+    chestXray: "", cbc: "", urinalysis: "", otherworkups: "", symptomsToday: "", remarks: ""
   });
 
   // do not alter
@@ -50,11 +51,12 @@ const Dashboard4 = () => {
 
   // Do not alter
   const fetchPersonData = async (id) => {
-    try {
-      const res = await axios.get(`http://localhost:5000/api/person/${id}`);
-      setPerson(res.data);
-    } catch (error) { }
-  };
+  try {
+    const res = await axios.get(`http://localhost:5000/api/person/${id}`);
+    setPerson(res.data);
+  } catch (error) { }
+};
+
 
   // Do not alter
   const handleUpdate = async (updatedPerson) => {

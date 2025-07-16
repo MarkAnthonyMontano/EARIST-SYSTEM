@@ -15,19 +15,9 @@ import regions from "../data/region.json";
 import provinces from "../data/province.json";
 import cities from "../data/city.json";
 import barangays from "../data/barangay.json";
-
-
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard1 = () => {
-  const person_id = localStorage.getItem("person_id");
-
-  useEffect(() => {
-  if (person_id) {
-    fetchPersonData(person_id);
-  }
-}, []);
-
   const navigate = useNavigate();
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
@@ -276,18 +266,7 @@ const Dashboard1 = () => {
     }));
   };
 
-  const [lrnNAFlag, setLrnNAFlag] = useState("0");
 
-  const handleLrnCheck = (event) => {
-    const checked = event.target.checked;
-    setIsLrnNA(checked);
-    setLrnNAFlag(checked ? "1" : "0");
-
-    setPerson((prev) => ({
-      ...prev,
-      lrnNumber: checked ? "No LRN Number" : "" // Store "nolrnNumber" as marker
-    }));
-  };
 
   // ✅ ADDRESS STATE
   const [regionList, setRegionList] = useState([]);
@@ -484,22 +463,7 @@ const Dashboard1 = () => {
     return isValid;
   };
 
-  // 🔒 Disable right-click
-  document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-  // 🔒 Block DevTools shortcuts silently
-  document.addEventListener('keydown', (e) => {
-    const isBlockedKey =
-      e.key === 'F12' ||
-      e.key === 'F11' ||
-      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-      (e.ctrlKey && e.key === 'U');
-
-    if (isBlockedKey) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  });
 
   // dot not alter
   return (
@@ -575,8 +539,7 @@ const Dashboard1 = () => {
           </Box>
         </Box>
 
-        <br />
-     
+
 
         <Container>
           <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>APPLICANT FORM</h1>
@@ -678,14 +641,14 @@ const Dashboard1 = () => {
                   labelId="campus-label"
                   id="campus-select"
                   name="campus"
-                  value={person.campus !== undefined && person.campus !== null ? String(person.campus) : ""}
+                  value={person.campus == null ? "" : String(person.campus)}
                   label="Campus (Manila/Cavite)"
                   onChange={(e) => {
-                    // convert back to number before saving in state
+                    const val = e.target.value;
                     handleChange({
                       target: {
                         name: "campus",
-                        value: parseInt(e.target.value),
+                        value: val === "" ? null : parseInt(val, 10),
                       },
                     });
                   }}
@@ -700,6 +663,7 @@ const Dashboard1 = () => {
                 )}
               </FormControl>
             </div>
+
 
 
             <div className="flex items-center mb-4 gap-4">
@@ -1123,12 +1087,13 @@ const Dashboard1 = () => {
                 label="Gender"
                 name="gender"
                 required
-                value={person.gender !== undefined && person.gender !== null ? String(person.gender) : ""}
+                value={person.gender == null ? "" : String(person.gender)}
                 onChange={(e) => {
+                  const val = e.target.value;
                   handleChange({
                     target: {
                       name: "gender",
-                      value: parseInt(e.target.value),
+                      value: val === "" ? null : parseInt(val, 10),
                     },
                   });
                 }}
@@ -1143,13 +1108,12 @@ const Dashboard1 = () => {
                 <MenuItem value="1">FEMALE</MenuItem>
               </TextField>
 
-
-              {/* Gender Error */}
               {errors.gender && (
                 <Typography color="error" variant="caption" ml={1}>
                   This field is required.
                 </Typography>
               )}
+
 
               {/* PWD Checkbox */}
               <FormControlLabel
@@ -2170,15 +2134,16 @@ const Dashboard1 = () => {
                     <Box sx={{ ml: 2, fontSize: "15px" }}>
                       - Size: 2" x 2"
                       <br />
-                      - Color: Must be in color
+                      - Color: Your photo must be in colored.
                       <br />
-                      - Background: White
+                      - Background: White.
                       <br />
-                      - Face: Centered, direct camera
+                      - Head size and position: Look directly into the camera
+                      at a straight angle, face centered.
                       <br />
                       - File types: JPEG, JPG, PNG
                       <br />
-                      - Attire:
+                      - Attire must be formal.
                       <br />
                       - Required File Size: 2mb
 

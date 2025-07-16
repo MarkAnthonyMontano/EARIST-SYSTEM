@@ -13,14 +13,6 @@ import ErrorIcon from '@mui/icons-material/Error';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard5 = () => {
-   const person_id = localStorage.getItem("person_id");
-  
-    useEffect(() => {
-    if (person_id) {
-      fetchPersonData(person_id);
-    }
-  }, []);
-  
   const navigate = useNavigate();
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
@@ -51,19 +43,6 @@ const Dashboard5 = () => {
       window.location.href = "/login";
     }
   }, []);
-
-  const createNewApplicant = async () => {
-    try {
-      const res = await axios.post("http://localhost:5000/api/person");
-      const newPersonId = res.data.person_id;
-      localStorage.setItem("person_id", newPersonId);
-      navigate("/dashboard1"); // start with personal info
-    } catch (err) {
-      console.error(err);
-      alert("Failed to create applicant");
-    }
-  };
-
 
   const steps = [
     { label: "Personal Information", icon: <PersonIcon />, path: "/dashboard1", onChange: () => handleChange({ label: "Personal Information", path: "/dashboard1" }) },
@@ -220,12 +199,7 @@ const Dashboard5 = () => {
             </Link>
           </Box>
         </Box>
-           {userRole === "registrar" && (
-                  <Button variant="contained" color="primary" onClick={createNewApplicant}>
-                    + Add New Applicant
-                  </Button>
-                )}
-        
+  
         <Container>
           <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>
             APPLICANT FORM

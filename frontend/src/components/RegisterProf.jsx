@@ -6,15 +6,14 @@ import {
   Container,
   Typography,
   Box,
-  CircularProgress
+  Paper,
+  InputAdornment,
+  IconButton,
+  Divider
 } from "@mui/material";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import InputAdornment from "@mui/material/InputAdornment";
-import IconButton from "@mui/material/IconButton";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-
-
 
 const RegisterProf = () => {
   const [profForm, setProfForm] = useState({
@@ -26,6 +25,7 @@ const RegisterProf = () => {
   });
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -64,7 +64,6 @@ const RegisterProf = () => {
 
       alert(response.data.message);
 
-      // Optional reset
       setProfForm({
         fname: '',
         mname: '',
@@ -82,210 +81,168 @@ const RegisterProf = () => {
     }
   };
 
-  const [showPassword, setShowPassword] = useState(false);
-
-
   return (
-    <Box
-      sx={{
-        height: "calc(100vh - 150px)",
-        overflowY: "auto",
-        paddingRight: 1,
-        backgroundColor: "transparent"
-      }}
-    >
-      <Container>
-        <h1
-          style={{
-            fontSize: "50px",
-            fontWeight: "bold",
-            textAlign: "center",
-            color: "maroon",
-            marginTop: "25px",
-          }}
-        >
+        <Box sx={{ height: "calc(100vh - 100px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
+    
+    <Box sx={{ py: 4, backgroundColor: "#f8f9fa", minHeight: "100vh" }}>
+      <Container maxWidth="md">
+        <Typography variant="h4" align="center" fontWeight="bold" color="maroon" gutterBottom>
           PROFESSOR REGISTRATION
-        </h1>
-        <div
-          style={{
-            textAlign: "center",
-            marginTop: "10px",
-            fontSize: "18px",
-          }}
-        >
+        </Typography>
+        <Typography variant="body1" align="center" sx={{ mb: 3 }}>
           Welcome to the EARIST Professor Registration Portal. Please complete all required fields
-          accurately to ensure your teaching profile is created successfully. Make sure to upload
-          any necessary supporting documents, such as your credentials and valid identification.
-          Thank you for your dedication and commitment to our students.
-        </div>
-      </Container>
+          accurately to create your teaching profile. Make sure to upload your profile picture and credentials.
+        </Typography>
 
-      <br />
-
-      <Container
-        sx={{
-          width: "60%",
-          backgroundColor: "#6D2323",
-          border: "2px solid black",
-          maxHeight: "500px",
-          overflowY: "auto",
-          color: "white",
-          borderRadius: 2,
-          boxShadow: 3,
-          padding: "4px",
-        }}
-      >
-        <Box sx={{ width: "100%" }}>
-          <Typography
-            style={{
-              fontSize: "20px",
-              padding: "10px",
-              fontFamily: "Arial Black",
-            }}
-          >
-            College Department Professor's
-          </Typography>
-        </Box>
-      </Container>
-
-      <Container
-        sx={{
-          width: "60%",
-          backgroundColor: "#f1f1f1",
-          border: "2px solid black",
-          padding: 3,
-          borderRadius: 2,
-          boxShadow: 3,
-        }}
-      >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-          <label className="w-40 font-medium">Employee ID:</label>
-          <TextField
-            label="Enter your Employee ID"
-            fullWidth
-            margin="normal"
-            name="fname"
-          />
-        </Box>
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-          <label className="w-40 font-medium" style={{ minWidth: "100px" }}>
-            First Name:
-          </label>
-          <TextField
-            label="Enter your First Name"
-            name="fname"
-            value={profForm.fname}
-            onChange={handleChanges}
-            fullWidth
-          />
-        </Box>
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-          <label className="w-40 font-medium" style={{ minWidth: "100px" }}>
-            Middle Name:
-          </label>
-          <TextField
-            label="Enter your Middle Name"
-            name="mname"
-            value={profForm.mname}
-            onChange={handleChanges}
-            fullWidth
-          />
-        </Box>
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-          <label className="w-40 font-medium" style={{ minWidth: "100px" }}>
-            Last Name:
-          </label>
-          <TextField
-            label="Enter your Last Name"
-            name="lname"
-            value={profForm.lname}
-            onChange={handleChanges}
-            fullWidth
-          />
-        </Box>
-
-
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-          <label className="w-40 font-medium">Email Address:</label>
-          <TextField
-            label="Enter your Email Address"
-            fullWidth
-            margin="normal"
-            name="email"
-            type="email"
-            value={profForm.email}
-            onChange={handleChanges}
-          />
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-          <label className="w-40 font-medium">Password:</label>
-          <TextField
-            label="Enter your Password"
-            type={showPassword ? "text" : "password"}
-            name="password"
-            value={profForm.password}
-            onChange={handleChanges}
-            fullWidth
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Box>
-
-        <label
-          style={{ marginTop: "20px", marginBottom: "5px", display: "block" }}
-          className="w-40 font-medium"
-        >
-          Upload Profile Picture:
-        </label>
-        <TextField
-          type="file"
-          onChange={(e) => setFile(e.target.files[0])}
-          inputRef={fileInputRef}
-          inputProps={{ accept: ".png,.jpg,.jpeg,.pdf" }}
-          fullWidth
-        />
-
-        {/* Single Register Button (with spinner & icon) */}
-        <Button
-          variant="contained"
-          startIcon={
-            loading ? (
-              <CircularProgress size={20} color="inherit" />
-            ) : (
-              <CloudUploadIcon />
-            )
-          }
-          disabled={loading}
+        <Paper
           sx={{
             backgroundColor: "#6D2323",
-            "&:hover": { backgroundColor: "#5a1f1f" },
             color: "white",
-            fontWeight: "bold",
-            textTransform: "none",
-            py: 1,
-            mt: 3,
+            p: 2,
+         
+            border: "2px solid black",
+            borderRadius: 2,
+            boxShadow: 3,
           }}
-          fullWidth
-          onClick={handleRegister}
         >
-          {loading ? "Registering..." : "Register"}
-        </Button>
+          <Typography sx={{ fontSize: "20px", fontFamily: "Arial Black" }}>
+            College Department Professor's
+          </Typography>
+        </Paper>
+
+        <Paper
+          sx={{
+            p: 3,
+            border: "2px solid black",
+            borderRadius: 2,
+            boxShadow: 3,
+            backgroundColor: "#f1f1f1"
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+            <Typography sx={{ minWidth: "120px", fontWeight: "500" }}>Employee ID:</Typography>
+            <TextField
+              label="Enter your Employee ID"
+              name="employeeId"
+              fullWidth
+            />
+          </Box>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+            <Typography sx={{ minWidth: "120px", fontWeight: "500" }}>First Name:</Typography>
+            <TextField
+              label="Enter your First Name"
+              name="fname"
+              value={profForm.fname}
+              onChange={handleChanges}
+              fullWidth
+            />
+          </Box>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+            <Typography sx={{ minWidth: "120px", fontWeight: "500" }}>Middle Name:</Typography>
+            <TextField
+              label="Enter your Middle Name"
+              name="mname"
+              value={profForm.mname}
+              onChange={handleChanges}
+              fullWidth
+            />
+          </Box>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+            <Typography sx={{ minWidth: "120px", fontWeight: "500" }}>Last Name:</Typography>
+            <TextField
+              label="Enter your Last Name"
+              name="lname"
+              value={profForm.lname}
+              onChange={handleChanges}
+              fullWidth
+            />
+          </Box>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+            <Typography sx={{ minWidth: "120px", fontWeight: "500" }}>Email:</Typography>
+            <TextField
+              label="Enter your Email Address"
+              name="email"
+              type="email"
+              value={profForm.email}
+              onChange={handleChanges}
+              fullWidth
+            />
+          </Box>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+            <Typography sx={{ minWidth: "120px", fontWeight: "500" }}>Password:</Typography>
+            <TextField
+              label="Enter your Password"
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={profForm.password}
+              onChange={handleChanges}
+              fullWidth
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Box>
+
+          <Divider sx={{ my: 2 }} />
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+            <Button
+              variant="contained"
+              component="label"
+              startIcon={<CloudUploadIcon />}
+              sx={{
+                backgroundColor: "#6D2323",
+                "&:hover": { backgroundColor: "#5a1f1f" },
+                textTransform: "none",
+              }}
+            >
+              Upload Profile Picture
+              <input
+                type="file"
+                hidden
+                ref={fileInputRef}
+                accept=".png,.jpg,.jpeg,.pdf"
+                onChange={(e) => setFile(e.target.files[0])}
+              />
+            </Button>
+            <Typography variant="body2" sx={{ wordBreak: "break-all" }}>
+              {file ? file.name : "No file selected"}
+            </Typography>
+          </Box>
+
+          <Button
+            fullWidth
+            variant="contained"
+           
+            disabled={loading}
+            onClick={handleRegister}
+            sx={{
+              backgroundColor: "#6D2323",
+              "&:hover": { backgroundColor: "#5a1f1f" },
+              textTransform: "none",
+              py: 1.5,
+              fontWeight: "bold",
+            }}
+          >
+            {loading ? "Registering..." : "Register"}
+          </Button>
+        </Paper>
       </Container>
+    </Box>
     </Box>
   );
 };

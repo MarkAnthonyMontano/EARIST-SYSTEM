@@ -415,43 +415,6 @@ app.put("/api/person/:id", async (req, res) => {
   }
 });
 
-
-// ✅ 1. Create new empty person (generate person_id)
-app.post("/api/person", async (req, res) => {
-  try {
-    const [result] = await db.execute(
-      `INSERT INTO person_table (
-        profile_img, campus, academicProgram, classifiedAs, program, program2, program3, yearLevel,
-        last_name, first_name, middle_name, extension, nickname, height, weight, lrnNumber, nolrnNumber, gender, pwdMember, pwdType, pwdId,
-        birthOfDate, age, birthPlace, languageDialectSpoken, citizenship, religion, civilStatus, tribeEthnicGroup,
-        cellphoneNumber, emailAddress,
-        presentStreet, presentBarangay, presentZipCode, presentRegion, presentProvince, presentMunicipality, presentDswdHouseholdNumber, sameAsPresentAddress,
-        permanentStreet, permanentBarangay, permanentZipCode, permanentRegion, permanentProvince, permanentMunicipality, permanentDswdHouseholdNumber,
-        solo_parent, father_deceased, father_family_name, father_given_name, father_middle_name, father_ext, father_nickname, father_education, father_education_level,
-        father_last_school, father_course, father_year_graduated, father_school_address, father_contact, father_occupation, father_employer,
-        father_income, father_email, mother_deceased, mother_family_name, mother_given_name, mother_middle_name, mother_ext, mother_nickname,
-        mother_education, mother_education_level, mother_last_school, mother_course, mother_year_graduated, mother_school_address, mother_contact,
-        mother_occupation, mother_employer, mother_income, mother_email, guardian, guardian_family_name, guardian_given_name,
-        guardian_middle_name, guardian_ext, guardian_nickname, guardian_address, guardian_contact, guardian_email, annual_income,
-        schoolLevel, schoolLastAttended, schoolAddress, courseProgram, honor, generalAverage, yearGraduated,
-        schoolLevel1, schoolLastAttended1, schoolAddress1, courseProgram1, honor1, generalAverage1, yearGraduated1, strand,
-        cough, colds, fever, asthma, faintingSpells, heartDisease, tuberculosis, frequentHeadaches, hernia, chronicCough,
-        headNeckInjury, hiv, highBloodPressure, diabetesMellitus, allergies, cancer, smokingCigarette, alcoholDrinking,
-        hospitalized, hospitalizationDetails, medications, hadCovid, covidDate, vaccine1Brand, vaccine1Date,
-        vaccine2Brand, vaccine2Date, booster1Brand, booster1Date, booster2Brand, booster2Date,
-        chestXray, cbc, urinalysis, otherworkups, symptomsToday, remarks, termsOfAgreement
-      ) VALUES (${Array(144).fill("?").join(", ")})
-    `,
-      Array(144).fill("") // insert 144 empty fields
-    );
-
-    res.status(201).json({ message: "Person created successfully", person_id: result.insertId });
-  } catch (error) {
-    console.error("Error creating person:", error);
-    res.status(500).json({ error: "Database error", details: error.message });
-  }
-});
-
 // ✅ 2. Get person details by person_id
 app.get("/api/person/:id", async (req, res) => {
   try {
@@ -2959,37 +2922,37 @@ app.get("/api/person/:id", async (req, res) => {
   }
 });
 
+
+
+// Program Display
 app.get('/class_roster/ccs/:id', async (req, res) => {
-  const { id } = req.params;
+  const {id} = req.params;
 
   try {
     const query = `
-      SELECT 
-        dct.dprtmnt_id, dt.dprtmnt_name, dt.dprtmnt_code, 
-        pt.program_id, pt.program_description, pt.program_code, 
-        ct.curriculum_id
-      FROM dprtmnt_curriculum_table as dct 
-      INNER JOIN dprtmnt_table as dt ON dct.dprtmnt_id = dt.dprtmnt_id
-      INNER JOIN curriculum_table as ct ON dct.curriculum_id = ct.curriculum_id 
-      INNER JOIN program_table as pt ON ct.program_id = pt.program_id 
-      -- LEFT JOIN year_table as yt ON ct.year_id = yt.year_id -- optional
+      SELECT dct.dprtmnt_id, dt.dprtmnt_name, dt.dprtmnt_code, pt.program_id, pt.program_description, pt.program_code, ct.curriculum_id FROM dprtmnt_curriculum_table as dct 
+        INNER JOIN dprtmnt_table as dt ON dct.dprtmnt_id = dt.dprtmnt_id
+        INNER JOIN curriculum_table as ct ON dct.curriculum_id = ct.curriculum_id 
+        INNER JOIN program_table as pt ON ct.program_id = pt.program_id 
+        INNER JOIN year_table as yt ON ct.year_id = yt.year_id 
       WHERE dct.dprtmnt_id = ?;
-    `;
+    `
 
     const [programRows] = await db3.execute(query, [id]);
 
     if (programRows.length === 0) {
-      return res.json([]); // empty array instead of error
+      return res.json([]);
     }
 
     res.json(programRows);
-  } catch (err) {
+  }
+  catch(err){
     console.error("Error fetching data:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
-});
+})
 
-
+// Curriculum Section 
 app.get('/class_roster/:cID', async (req, res) => {
   const {cID} = req.params;
   try{
@@ -3009,27 +2972,105 @@ app.get('/class_roster/:cID', async (req, res) => {
   }
 });
 
-//student list base dun curriculum id tsaka sa section id
+// prof list base dun curriculum id tsaka sa section id
 app.get('/class_roster/:cID/:dstID', async (req, res) => {
   const {cID, dstID} = req.params;
   try{
     const query = `
-      SELECT ct.curriculum_id, es.student_number, pt.last_name, pt.first_name, pt.middle_name from curriculum_table AS ct 
-        INNER JOIN enrolled_subject AS es ON ct.curriculum_id = es.curriculum_id 
-        INNER JOIN student_numbering_table AS snt ON es.student_number = snt.student_number 
-        INNER JOIN dprtmnt_section_table AS dst ON es.department_section_id = dst.id 
-        INNER JOIN person_table AS pt ON snt.person_id = pt.person_id 
-      WHERE ct.curriculum_id = ? AND dst.id = ?
+    SELECT DISTINCT cst.course_id, pft.prof_id, tt.department_section_id, pft.fname, pft.lname, pft.mname, cst.course_description, cst.course_code, st.description AS section_description, pgt.program_code FROM time_table AS tt
+      INNER JOIN dprtmnt_section_table AS dst ON tt.department_section_id = dst.id
+      INNER JOIN curriculum_table AS cmt ON dst.curriculum_id = cmt.curriculum_id
+      INNER JOIN section_table AS st ON dst.section_id = st.id
+      INNER JOIN course_table AS cst ON tt.course_id = cst.course_id
+      INNER JOIN prof_table AS pft ON tt.professor_id = pft.prof_id
+      INNER JOIN program_table AS pgt ON cmt.program_id = pgt.program_id
+      INNER JOIN active_school_year_table AS asyt ON tt.school_year_id = asyt.id
+    WHERE dst.curriculum_id = ? AND tt.department_section_id = ? AND asyt.astatus = 1
     `
+    const [profList] = await db3.execute(query, [cID, dstID]);
 
-    const [studentList] = await db3.execute(query, [cID, dstID]);
-
-    res.json(studentList);
+    console.log(profList);
+    res.json(profList);
   } catch(err){
     console.error("Error fetching data:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
 })
+
+// Student Information
+app.get('/class_roster/student_info/:cID/:dstID/:courseID/:professorID', async (req, res) => {
+  const {cID, dstID, courseID, professorID} = req.params; 
+  try{
+    const query = `
+    SELECT DISTINCT
+      es.student_number, 
+      pst.first_name, pst.middle_name, pst.last_name, 
+      pgt.program_description, pgt.program_code
+    FROM enrolled_subject AS es
+      INNER JOIN time_table AS tt ON es.department_section_id = tt.department_section_id
+      INNER JOIN dprtmnt_section_table AS dst ON es.department_section_id = dst.id
+      INNER JOIN active_school_year_table AS asyt ON es.active_school_year_id = asyt.id
+      INNER JOIN student_status_table AS sst ON es.student_number = sst.student_number
+      INNER JOIN student_numbering_table AS snt ON sst.student_number = snt.student_number
+      INNER JOIN person_table AS pst ON snt.person_id = pst.person_id
+      INNER JOIN curriculum_table AS cct ON es.curriculum_id = cct.curriculum_id
+      INNER JOIN program_tagging_table AS ptt ON es.course_id = ptt.course_id
+      INNER JOIN program_table AS pgt ON cct.program_id = pgt.program_id
+    WHERE es.curriculum_id = ? AND es.department_section_id = ? AND asyt.astatus = 1 AND es.course_id = ? AND tt.professor_id = ? ORDER BY pst.last_name
+    `
+
+    const [studentList] = await db3.execute(query, [cID, dstID, courseID, professorID])
+    console.log(studentList);
+    res.json(studentList);
+
+  }catch(err){
+    console.error("Error fetching data:", err);
+    res.status(500).json({error: "Internal Server Error", err});
+  }
+})
+
+// Class Information
+app.get('/class_roster/classinfo/:cID/:dstID/:courseID/:professorID', async (req, res) => {
+  const {cID, dstID, courseID, professorID} = req.params; 
+  try{
+    const query = `
+    SELECT DISTINCT
+      st.description AS section_Description,
+      pft.fname, pft.mname, pft.lname, pft.prof_id,
+      smt.semester_description,
+      ylt.year_level_description,
+      ct.course_description, ct.course_code, ct.course_unit, ct.lab_unit, ct.course_id,
+      yt.year_description,
+      rdt.description as day,
+      tt.school_time_start,
+      tt.school_time_end
+    FROM enrolled_subject AS es
+      INNER JOIN time_table AS tt ON es.department_section_id = tt.department_section_id
+      INNER JOIN dprtmnt_section_table AS dst ON es.department_section_id = dst.id
+      INNER JOIN section_table AS st ON dst.section_id = st.id
+      INNER JOIN active_school_year_table AS asyt ON es.active_school_year_id = asyt.id
+      INNER JOIN prof_table AS pft ON tt.professor_id = pft.prof_id
+      INNER JOIN course_table AS ct ON es.course_id = ct.course_id
+      INNER JOIN curriculum_table AS cct ON es.curriculum_id = cct.curriculum_id
+      INNER JOIN program_tagging_table AS ptt ON es.course_id = ptt.course_id
+      INNER JOIN program_table AS pgt ON cct.program_id = pgt.program_id
+      INNER JOIN year_table AS yt ON cct.year_id = yt.year_id
+      INNER JOIN year_level_table AS ylt ON ptt.year_level_id = ylt.year_level_id
+      INNER JOIN semester_table AS smt ON ptt.semester_id = smt.semester_id
+      INNER JOIN room_day_table AS rdt ON tt.room_day = rdt.id
+    WHERE es.curriculum_id = ? AND es.department_section_id = ? AND asyt.astatus = 1 AND es.course_id = ? AND tt.professor_id = ?
+    `
+
+    const [class_data] = await db3.execute(query, [cID, dstID, courseID, professorID])
+    console.log(class_data);
+    res.json(class_data);
+
+  }catch(err){
+    console.error("Error fetching data:", err);
+    res.status(500).json({error: "Internal Server Error", err});
+  }
+})
+
 
 
 app.listen(5000, () => {

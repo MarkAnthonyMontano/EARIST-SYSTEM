@@ -319,9 +319,10 @@ const CourseTagging = () => {
         <Box component={Paper} p={2}>
           {/* Search Student */}
           <Box>
-            <Typography variant="h6">
+            <Typography variant="h6"> Name: &emsp;
               {first_name} {middle_name} {last_name}
               <br />
+              Department/Course: &emsp;
               {courseCode} - {courseDescription}
             </Typography>
             <TextField

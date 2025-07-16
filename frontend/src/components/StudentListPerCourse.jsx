@@ -60,7 +60,6 @@ const StudentList = () => {
   const formattedDay = dayMap[classInfo.day] || classInfo.day;
   const program_code = studentList[0]?.program_code || "";
 
-
   const divToPrintRef = useRef();
 
   const printDiv = () => {
@@ -69,71 +68,45 @@ const StudentList = () => {
       const newWin = window.open('', 'Print-Window');
       newWin.document.open();
       newWin.document.write(`
-      <html>
-        <head>
-          <title>Print</title>
-       <style>
-  @page {
-    size: Legal;
-    margin: 0;
-  }
+        <html>
+          <head>
+            <title>Print</title>
+            <style>
+              @page {
+                size: A4;
+                margin: 10mm 10mm 10mm 10mm; /* reasonable print margins */
+              }
 
-  html, body {
-    margin: 0;
-    padding: 0;
-    width: 210mm;
-    height: 297mm;
-    font-family: Arial, sans-serif;
-  }
+              html, body {
+                margin: 0;
+                padding: 0;
+                font-family: 
+                width: auto;
+                height: auto;
+                overflow: visible;
+              }
 
-  *, *::before, *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
+              button {
+                display: none;
+              }
+            </style>
+          </head>
+          <body onload="window.print(); setTimeout(() => window.close(), 100);">
+            <div class="print-container">
+              ${divToPrint.innerHTML}
+            </div>
+          </body>
+        </html>
+        `);
 
-.print-container {
-  width: 100%;
-  height: auto;
-  padding: 10px 20px;
-}
-
-  .student-table {
-    margin-top: 0 !important;
-  }
-
-  button {
-    display: none;
-  }
-
-    .student-table {
-    margin-top: -40px !important;
-  }
-
-  svg.MuiSvgIcon-root {
-  margin-top: -53px;
-    width: 70px !important;
-    height: 70px !important;
-  }
-</style>
-
-        </head>
-        <body onload="window.print(); setTimeout(() => window.close(), 100);">
-          <div class="print-container">
-            ${divToPrint.innerHTML}
-          </div>
-        </body>
-      </html>
-    `);
       newWin.document.close();
     } else {
       console.error("divToPrintRef is not set.");
     }
   };
 
-
   return (
-    <div className="mr-[1rem] mt-4" ref={divToPrintRef}>
+    <div className="mr-[1rem] mt-4">
       <style>
         {`
           @media print {
@@ -143,9 +116,30 @@ const StudentList = () => {
           }
         `}
       </style>
-      <button onClick={printDiv}>
-          Print
-      </button>
+      <button
+          onClick={printDiv}
+          style={{
+            marginBottom: "1rem",
+            padding: "10px 20px",
+            border: "2px solid black",
+            backgroundColor: "#f0f0f0",
+            color: "black",
+            borderRadius: "5px",
+            marginTop: "20px",
+            cursor: "pointer",
+            fontSize: "16px",
+            fontWeight: "bold",
+            transition: "background-color 0.3s, transform 0.2s",
+          }}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
+          onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
+          onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
+        >
+          Print Table
+        </button>
+         <div ref={divToPrintRef}>
+
       {studentList.length === 0 ? (
         <p>No students enrolled in this section and course.</p>
       ) : (
@@ -192,6 +186,7 @@ const StudentList = () => {
           </table>
         </div>
       )}
+    </div>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import {
   Box,
@@ -21,7 +21,7 @@ import {
   IconButton
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 
 function RequirementUploader() {
   const [requirements, setRequirements] = useState([]);
@@ -201,7 +201,7 @@ function RequirementUploader() {
             <Button
               onClick={handleUpload}
               variant="contained"
-              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <CloudUploadIcon />}
+              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <PhotoCameraIcon />}
               disabled={loading}
               sx={{
                 backgroundColor: '#6D2323',
@@ -221,13 +221,26 @@ function RequirementUploader() {
           Uploaded Documents
         </Typography>
 
-        <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
+        <Typography style={{ fontSize: "15px", color: "black", fontFamily: "Arial" }}>
+          PLEASE NOTE: ONLY JPG, JPEG, OR PNG WITH MAXIMUM OF FILE SIZE OF 4MB ARE ALLOWED
+        </Typography>
+
+        <TableContainer
+          component={Paper}
+          sx={{
+            borderRadius: 3,
+          
+            padding: 2,              // optional: adds space inside
+            maxWidth: '100%',       // adjust width if needed
+            margin: '0 auto'        // center if container allows
+            
+          }}
+        >
           <Table>
             <TableHead sx={{ backgroundColor: '#f1f1f1' }}>
               <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>Requirement</TableCell>
-                <TableCell>File</TableCell>
+                <TableCell>Document</TableCell>
+                <TableCell>Upload</TableCell>
                 <TableCell>Date Uploaded</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
@@ -235,14 +248,13 @@ function RequirementUploader() {
             <TableBody>
               {uploads.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} align="center" sx={{ color: '#888', fontStyle: 'italic' }}>
+                  <TableCell colSpan={4} align="center" sx={{ color: '#888', fontStyle: 'italic' }}>
                     No uploads found.
                   </TableCell>
                 </TableRow>
               ) : (
                 uploads.map((upload) => (
                   <TableRow key={upload.upload_id}>
-                    <TableCell>{upload.upload_id}</TableCell>
                     <TableCell>{upload.description}</TableCell>
                     <TableCell>
                       <a
@@ -251,13 +263,23 @@ function RequirementUploader() {
                         rel="noopener noreferrer"
                         style={{ color: '#007bff', textDecoration: 'none' }}
                       >
-                        View
+                        Preview
                       </a>
                     </TableCell>
                     <TableCell>{upload.created_at ? new Date(upload.created_at).toLocaleString() : 'N/A'}</TableCell>
                     <TableCell>
-                      <IconButton color="error" onClick={() => handleDelete(upload.upload_id)}>
-                        <DeleteIcon sx={{ color: 'maroon' }} />
+                      <IconButton
+                        onClick={() => handleDelete(upload.upload_id)}
+                        sx={{
+                          color: 'white',
+                          backgroundColor: 'maroon',
+                          borderRadius: '4px',
+                          fontSize: "15px",
+                          '&:hover': { backgroundColor: '#600000' }
+                        }}
+                      >
+                        <DeleteIcon sx={{ color: 'white' }} />
+                        DELETE
                       </IconButton>
                     </TableCell>
                   </TableRow>
@@ -266,6 +288,9 @@ function RequirementUploader() {
             </TableBody>
           </Table>
         </TableContainer>
+
+
+
       </Container>
     </Box>
   );
