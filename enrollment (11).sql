@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 11, 2025 at 06:53 PM
+-- Generation Time: Jul 16, 2025 at 01:57 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -317,7 +317,7 @@ CREATE TABLE `dprtmnt_profs_table` (
 --
 
 INSERT INTO `dprtmnt_profs_table` (`dprtmnt_profs_id`, `dprtmnt_id`, `prof_id`) VALUES
-(1, 5, 38),
+(1, 1, 38),
 (2, 5, 5),
 (3, 5, 9),
 (4, 5, 13),
@@ -408,126 +408,18 @@ INSERT INTO `dprtmnt_section_table` (`id`, `curriculum_id`, `section_id`, `dssta
 (10, 1, 10, 0),
 (11, 1, 11, 0),
 (12, 1, 12, 0),
-(13, 2, 13, 0),
-(14, 2, 14, 0),
-(15, 2, 15, 0),
-(16, 2, 16, 0),
-(17, 2, 17, 0),
-(18, 2, 18, 0),
-(19, 2, 19, 0),
-(20, 2, 20, 0),
-(21, 2, 21, 0),
-(22, 2, 22, 0),
-(23, 2, 23, 0),
-(24, 2, 24, 0),
-(25, 3, 25, 0),
-(26, 3, 26, 0),
-(27, 3, 27, 0),
-(28, 3, 28, 0),
-(29, 3, 29, 0),
-(30, 3, 30, 0),
-(31, 3, 31, 0),
-(32, 3, 32, 0),
-(33, 3, 33, 0),
-(34, 3, 34, 0),
-(35, 3, 35, 0),
-(36, 3, 36, 0),
-(37, 4, 37, 0),
-(38, 4, 38, 0),
-(39, 4, 39, 0),
-(40, 4, 40, 0),
-(41, 4, 41, 0),
-(42, 4, 42, 0),
-(43, 4, 43, 0),
-(44, 4, 44, 0),
-(45, 4, 45, 0),
-(46, 4, 46, 0),
-(47, 4, 47, 0),
-(48, 4, 48, 0),
-(49, 5, 49, 0),
-(50, 5, 50, 0),
-(51, 5, 51, 0),
-(52, 5, 52, 0),
-(53, 5, 53, 0),
-(54, 5, 54, 0),
-(55, 5, 55, 0),
-(56, 5, 56, 0),
-(57, 5, 57, 0),
-(58, 5, 58, 0),
-(59, 5, 59, 0),
-(60, 5, 60, 0),
-(61, 6, 61, 0),
-(62, 6, 62, 0),
-(63, 6, 63, 0),
-(64, 6, 64, 0),
-(65, 6, 65, 0),
-(66, 6, 66, 0),
-(67, 6, 67, 0),
-(68, 6, 68, 0),
-(69, 6, 69, 0),
-(70, 6, 70, 0),
-(71, 6, 71, 0),
-(72, 6, 72, 0),
-(73, 7, 73, 0),
-(74, 7, 74, 0),
-(75, 7, 75, 0),
-(76, 7, 76, 0),
-(77, 7, 77, 0),
-(78, 7, 78, 0),
-(79, 7, 79, 0),
-(80, 7, 80, 0),
-(81, 7, 81, 0),
-(82, 7, 82, 0),
-(83, 7, 83, 0),
-(84, 7, 84, 0),
-(85, 8, 85, 0),
-(86, 8, 86, 0),
-(87, 8, 87, 0),
-(88, 8, 88, 0),
-(89, 8, 89, 0),
-(90, 8, 90, 0),
-(91, 8, 91, 0),
-(92, 8, 92, 0),
-(93, 8, 93, 0),
-(94, 8, 94, 0),
-(95, 8, 95, 0),
-(96, 8, 96, 0),
-(97, 9, 97, 0),
-(98, 9, 98, 0),
-(99, 9, 99, 0),
-(100, 9, 100, 0),
-(101, 9, 101, 0),
-(102, 9, 102, 0),
-(103, 9, 103, 0),
-(104, 9, 104, 0),
-(105, 9, 105, 0),
-(106, 9, 106, 0),
-(107, 9, 107, 0),
-(108, 9, 108, 0),
-(109, 10, 109, 0),
-(110, 10, 110, 0),
-(111, 10, 111, 0),
-(112, 10, 112, 0),
-(113, 10, 113, 0),
-(114, 10, 114, 0),
-(115, 10, 115, 0),
-(116, 10, 116, 0),
-(117, 10, 117, 0),
-(118, 10, 118, 0),
-(119, 10, 119, 0),
-(120, 10, 120, 0),
-(121, 11, 121, 0),
-(122, 11, 122, 0),
-(123, 11, 123, 0),
-(124, 11, 124, 0),
-(125, 11, 125, 0),
-(126, 11, 126, 0),
-(127, 11, 127, 0),
-(128, 11, 128, 0),
-(129, 11, 129, 0),
-(130, 11, 130, 0),
-(131, 11, 131, 0),
-(132, 11, 132, 0);
+(13, 2, 1, 0),
+(14, 2, 2, 0),
+(15, 2, 3, 0),
+(16, 2, 4, 0),
+(17, 2, 5, 0),
+(18, 2, 6, 0),
+(19, 2, 7, 0),
+(20, 2, 8, 0),
+(21, 2, 9, 0),
+(22, 2, 10, 0),
+(23, 2, 11, 0),
+(24, 2, 12, 0);
 
 -- --------------------------------------------------------
 
@@ -616,7 +508,29 @@ INSERT INTO `enrolled_subject` (`id`, `student_number`, `curriculum_id`, `course
 (86, 224091140, 1, 4, 1, 0, 0, 0, 0, 2, 0),
 (87, 224091140, 1, 5, 1, 0, 0, 0, 0, 2, 0),
 (88, 224091140, 1, 7, 1, 0, 0, 0, 0, 2, 0),
-(89, 224091140, 1, 6, 1, 0, 0, 0, 0, 2, 0);
+(89, 224091140, 1, 6, 1, 0, 0, 0, 0, 2, 0),
+(90, 202400011, 1, 1, 1, 0, 0, 0, 0, 1, 0),
+(91, 202400011, 1, 5, 1, 0, 0, 0, 0, 1, 0),
+(92, 202400011, 1, 7, 1, 0, 0, 0, 0, 1, 0),
+(93, 202400011, 1, 8, 1, 0, 0, 0, 0, 1, 0),
+(94, 202400011, 1, 6, 1, 0, 0, 0, 0, 1, 0),
+(95, 202400011, 1, 3, 1, 0, 0, 0, 0, 1, 0),
+(96, 202400011, 1, 2, 1, 0, 0, 0, 0, 1, 0),
+(97, 202400011, 1, 9, 1, 0, 0, 0, 0, 1, 0),
+(98, 202400011, 1, 4, 1, 0, 0, 0, 0, 1, 0),
+(99, 202400011, 1, 10, 1, 0, 0, 0, 0, 1, 0),
+(100, 202400011, 1, 11, 1, 0, 0, 0, 0, 1, 0),
+(101, 202400012, 1, 1, 1, 0, 0, 0, 0, 1, 0),
+(102, 202400012, 1, 4, 1, 0, 0, 0, 0, 1, 0),
+(103, 202400012, 1, 8, 1, 0, 0, 0, 0, 1, 0),
+(104, 202400012, 1, 6, 1, 0, 0, 0, 0, 1, 0),
+(105, 202400012, 1, 7, 1, 0, 0, 0, 0, 1, 0),
+(106, 202400012, 1, 5, 1, 0, 0, 0, 0, 1, 0),
+(107, 202400012, 1, 3, 1, 0, 0, 0, 0, 1, 0),
+(108, 202400012, 1, 9, 1, 0, 0, 0, 0, 1, 0),
+(109, 202400012, 1, 2, 1, 0, 0, 0, 0, 1, 0),
+(110, 202400012, 1, 11, 1, 0, 0, 0, 0, 1, 0),
+(111, 202400012, 1, 10, 1, 0, 0, 0, 0, 1, 0);
 
 -- --------------------------------------------------------
 
@@ -680,25 +594,8 @@ CREATE TABLE `person_status_table` (
 --
 
 INSERT INTO `person_status_table` (`id`, `person_id`, `exam_status`, `requirements`, `residency`, `student_registration_status`, `exam_result`, `hs_ave`) VALUES
-(1, 1, 0, 0, 0, 0, 0, 0),
-(2, 2, 0, 0, 0, 0, 0, 0),
-(3, 4, 0, 0, 0, 0, 0, 0),
-(4, 3, 0, 0, 0, 0, 0, 0),
-(5, 5, 0, 0, 0, 0, 0, 0),
-(6, 6, 0, 0, 0, 0, 0, 0),
-(7, 7, 0, 0, 0, 0, 0, 0),
-(8, 8, 0, 0, 0, 0, 0, 0),
-(9, 9, 0, 0, 0, 0, 0, 0),
-(10, 10, 0, 0, 0, 0, 0, 0),
-(11, 11, 0, 0, 0, 0, 0, 0),
-(12, 12, 0, 0, 0, 0, 0, 0),
-(13, 13, 0, 0, 0, 0, 0, 0),
-(14, 14, 0, 0, 0, 0, 0, 0),
-(15, 15, 0, 0, 0, 0, 0, 0),
-(16, 16, 0, 0, 0, 0, 0, 0),
-(17, 17, 0, 0, 0, 0, 0, 0),
-(18, 18, 0, 0, 0, 0, 0, 0),
-(19, 19, 0, 0, 0, 0, 0, 0);
+(20, 1, 0, 0, 0, 1, 0, 0),
+(21, 3, 0, 0, 0, 1, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -922,7 +819,8 @@ INSERT INTO `prof_table` (`prof_id`, `person_id`, `profile_image`, `fname`, `mna
 (34, NULL, '', 'Charlene', '', 'Ronda', 'charlene.ronda@earist.edu.ph', 'RONDA', 0, 'faculty'),
 (35, NULL, '', 'Maria Jasmine', '', 'Macasil', 'jasmine.macasil@earist.edu.ph', 'MACASIL', 0, 'faculty'),
 (36, NULL, '', 'Jefferson', '', 'Costales', 'jefferson.costales@earist.edu.ph', 'COSTALES', 0, 'faculty'),
-(37, NULL, '', 'Arjo', '', 'Ladia', 'arjo.ladia@earist.edu.ph', 'LADIA', 0, 'faculty');
+(37, NULL, '', 'Arjo', '', 'Ladia', 'arjo.ladia@earist.edu.ph', 'LADIA', 0, 'faculty'),
+(55, NULL, '55_ProfessorProfile_2025.jpg', 'Mark Anthony', 'P.', 'Montano', 'Ardenmecasio21@gmail.com', '$2b$10$kkxP/eE6XoIrFOXLhSyWseU9j3suBafQ2FX6MH5.ffzfeGsFDOA3S', 0, 'faculty');
 
 -- --------------------------------------------------------
 
@@ -1295,8 +1193,8 @@ CREATE TABLE `student_counter` (
 --
 
 INSERT INTO `student_counter` (`id`, `que_number`) VALUES
-(1, 9),
-(2, 9);
+(1, 13),
+(2, 13);
 
 -- --------------------------------------------------------
 
@@ -1349,8 +1247,8 @@ CREATE TABLE `student_numbering_table` (
 --
 
 INSERT INTO `student_numbering_table` (`student_number`, `person_id`) VALUES
-(224091140, 1),
-(224091141, 3);
+(202400012, 3),
+(202400013, 1);
 
 -- --------------------------------------------------------
 
@@ -1373,8 +1271,8 @@ CREATE TABLE `student_status_table` (
 --
 
 INSERT INTO `student_status_table` (`id`, `student_number`, `active_curriculum`, `enrolled_status`, `year_level_id`, `active_school_year_id`, `control_status`) VALUES
-(1, 224095240, 1, '1', 1, 4, 1),
-(2, 224091141, 1, '1', 1, 4, 0);
+(5, 202400012, 1, '1', 1, 1, 0),
+(6, 202400013, 1, '1', 1, 1, 0);
 
 -- --------------------------------------------------------
 
@@ -1404,7 +1302,8 @@ INSERT INTO `time_table` (`id`, `room_day`, `school_time_start`, `school_time_en
 (10, 5, '7:00 AM', '10:00 AM', 2, 7, 40, 4, 6),
 (11, 4, '9:00 AM', '12:00 PM', 1, 5, 40, 4, 4),
 (12, 6, '10:00 AM', '1:00 PM', 1, 3, 40, 4, 4),
-(13, 1, '9:16 AM', '11:15 AM', 1, 2, 38, 3, 1);
+(13, 1, '9:16 AM', '11:15 AM', 1, 2, 38, 3, 1),
+(14, 1, '9:52 PM', '11:52 PM', 1, 1, 1, 2, 1);
 
 -- --------------------------------------------------------
 
@@ -1470,7 +1369,7 @@ INSERT INTO `year_table` (`year_id`, `year_description`, `status`) VALUES
 (1, '2021', 0),
 (2, '2022', 0),
 (3, '2023', 0),
-(4, '2024', 0),
+(4, '2024', 1),
 (9, '2025', 0),
 (10, '2026', 0),
 (11, '2027', 0),
@@ -1729,7 +1628,7 @@ ALTER TABLE `dprtmnt_room_table`
 -- AUTO_INCREMENT for table `dprtmnt_section_table`
 --
 ALTER TABLE `dprtmnt_section_table`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=133;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=277;
 
 --
 -- AUTO_INCREMENT for table `dprtmnt_table`
@@ -1741,7 +1640,7 @@ ALTER TABLE `dprtmnt_table`
 -- AUTO_INCREMENT for table `enrolled_subject`
 --
 ALTER TABLE `enrolled_subject`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=112;
 
 --
 -- AUTO_INCREMENT for table `period_status`
@@ -1759,7 +1658,7 @@ ALTER TABLE `person_prof_table`
 -- AUTO_INCREMENT for table `person_status_table`
 --
 ALTER TABLE `person_status_table`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `person_table`
@@ -1771,7 +1670,7 @@ ALTER TABLE `person_table`
 -- AUTO_INCREMENT for table `prof_table`
 --
 ALTER TABLE `prof_table`
-  MODIFY `prof_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
+  MODIFY `prof_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
 
 --
 -- AUTO_INCREMENT for table `program_table`
@@ -1855,13 +1754,13 @@ ALTER TABLE `student_numbering_table`
 -- AUTO_INCREMENT for table `student_status_table`
 --
 ALTER TABLE `student_status_table`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `time_table`
 --
 ALTER TABLE `time_table`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `user_accounts`
