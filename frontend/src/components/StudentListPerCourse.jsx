@@ -104,82 +104,128 @@ const StudentList = () => {
       console.error("divToPrintRef is not set.");
     }
   };
-
-  return (
-    <div className="mr-[1rem] mt-4">
-      <style>
-        {`
-          @media print {
-            button {
-              display: none;
-            }
+return (
+  <div className="mr-[1rem] mt-4">
+    <style>
+      {`
+        @media print {
+          button {
+            display: none;
           }
-        `}
-      </style>
-      <button
-          onClick={printDiv}
-          style={{
-            marginBottom: "1rem",
-            padding: "10px 20px",
-            border: "2px solid black",
-            backgroundColor: "#f0f0f0",
-            color: "black",
-            borderRadius: "5px",
-            marginTop: "20px",
-            cursor: "pointer",
-            fontSize: "16px",
-            fontWeight: "bold",
-            transition: "background-color 0.3s, transform 0.2s",
-          }}
-          onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
-          onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
-          onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
-          onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
-        >
-          Print Table
-        </button>
-         <div ref={divToPrintRef}>
-
+        }
+      `}
+    </style>
+    <button
+      onClick={printDiv}
+      style={{
+        marginBottom: "1rem",
+        padding: "10px 20px",
+        border: "2px solid black",
+        backgroundColor: "#f0f0f0",
+        color: "black",
+        borderRadius: "5px",
+        marginTop: "20px",
+        cursor: "pointer",
+        fontSize: "16px",
+        fontWeight: "bold",
+        transition: "background-color 0.3s, transform 0.2s",
+      }}
+      onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
+      onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
+      onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
+      onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
+    >
+      Print Table
+    </button>
+    <div ref={divToPrintRef}>
       {studentList.length === 0 ? (
         <p>No students enrolled in this section and course.</p>
       ) : (
-        <div className="max-w-max">
-          <div className="flex">
-            <div className="w-[30%]">Section: {program_code} - {classInfo.section_Description}</div>
-            <div className="w-[55%]">Course: {classInfo.course_description} ({classInfo.course_code})</div>
-            <div className="w-[10%]">Unit: {classInfo.course_unit}</div>
+        <div className="w-full">
+          <style>
+            {`
+              .top-row {
+                display: flex;
+              }
+              .top-box {
+                border: 0.5px solid black;
+                padding: 4px 6px;
+                font-size: 13px;
+                text-align: left;
+                white-space: nowrap;
+                flex: 1;
+              }
+              table, th, td {
+                border: 0.5px solid black;
+                border-collapse: collapse;
+              }
+              th, td {
+                padding: 4px 6px;
+                font-size: 12px;
+                text-align: left;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+              /* Make Student Name column flexible and wider on print */
+              th:nth-child(2), td:nth-child(2) {
+                width: 100%;         /* stretch to fill */
+                max-width: none;     /* remove fixed max-width */
+              }
+            `}
+          </style>
+
+          {/* First row: Section | Course | Year Level | Unit */}
+          <div className="top-row">
+            <div className="top-box">
+              Section: {program_code} - {classInfo.section_Description}
+            </div>
+            <div className="top-box">
+              Course: {classInfo.course_description} ({classInfo.course_code})
+            </div>
+            <div className="top-box">
+              Year Level: {classInfo.year_level_description}
+            </div>
+            <div className="top-box">
+              Unit: {classInfo.course_unit}
+            </div>
           </div>
-          <div className="flex">
-            <div className="w-[30%]">Time: {formattedDay}, {classInfo.school_time_start} - {classInfo.school_time_end}</div>
-            <div className="w-[35%]">Professor Name: {classInfo.fname} {classInfo.mname} {classInfo.lname}</div>
-            <div className="w-[20%]">Semester: {classInfo.semester_description}</div>
-            <div className="w-[15%]">Year Level: {classInfo.year_level_description}</div>
+
+          {/* Second row: Time | Professor | Semester | School Year */}
+          <div className="top-row">
+            <div className="top-box">
+              Time: {formattedDay}, {classInfo.school_time_start} – {classInfo.school_time_end}
+            </div>
+            <div className="top-box">
+              Professor: {classInfo.fname} {classInfo.mname} {classInfo.lname}
+            </div>
+            <div className="top-box">
+              Semester: {classInfo.semester_description}
+            </div>
+            <div className="top-box">
+              School Year: {classInfo.school_year}
+            </div>
           </div>
-          <table
-            border="1"
-            cellPadding="8"
-            cellSpacing="0"
-            className="table-auto mt-[1rem] w-full border-collapse max-w-max border border-black"
-          >
-            <thead>            
+
+          {/* Table */}
+          <table className="mt-2 w-full">
+            <thead>
               <tr className="bg-gray-100">
-                <th className="border border-black px-4 py-2">Student Number</th>
-                <th className="border border-black px-4 py-2">Student Name</th>
-                <th className="border border-black px-4 py-2">Program</th>
-                <th className="border border-black px-4 py-2">Status</th>
+                <th>Student Number</th>
+                <th>Student Name</th>
+                <th>Program</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
               {studentList.map((student, index) => (
                 <tr key={index}>
-                  <td className="border border-black px-4 py-2">{student.student_number}</td>
-                  <td className="border border-black px-4 py-2">
-                    {student.first_name} {student.middle_name} {student.last_name}
-                  </td>
-                  <td className="border border-black px-4 py-2 text-blue-500">
+                  <td>{student.student_number}</td>
+                  <td>{student.first_name} {student.middle_name} {student.last_name}</td>
+                  <td className="text-blue-500">
                     {student.program_description} ({student.program_code})
                   </td>
-                  <td className="border border-black px-4 py-2">ENROLLED</td>
+                  <td>ENROLLED</td>
                 </tr>
               ))}
             </tbody>
@@ -187,8 +233,9 @@ const StudentList = () => {
         </div>
       )}
     </div>
-    </div>
-  );
+  </div>
+);
+
 };
 
 export default StudentList;

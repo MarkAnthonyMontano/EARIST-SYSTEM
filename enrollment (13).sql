@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 16, 2025 at 01:57 PM
+-- Generation Time: Jul 16, 2025 at 07:16 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -530,7 +530,18 @@ INSERT INTO `enrolled_subject` (`id`, `student_number`, `curriculum_id`, `course
 (108, 202400012, 1, 9, 1, 0, 0, 0, 0, 1, 0),
 (109, 202400012, 1, 2, 1, 0, 0, 0, 0, 1, 0),
 (110, 202400012, 1, 11, 1, 0, 0, 0, 0, 1, 0),
-(111, 202400012, 1, 10, 1, 0, 0, 0, 0, 1, 0);
+(111, 202400012, 1, 10, 1, 0, 0, 0, 0, 1, 0),
+(112, 202400013, 1, 1, 1, 0, 0, 0, 0, 1, 0),
+(113, 202400013, 1, 5, 1, 0, 0, 0, 0, 1, 0),
+(114, 202400013, 1, 6, 1, 0, 0, 0, 0, 1, 0),
+(115, 202400013, 1, 7, 1, 0, 0, 0, 0, 1, 0),
+(116, 202400013, 1, 8, 1, 0, 0, 0, 0, 1, 0),
+(117, 202400013, 1, 9, 1, 0, 0, 0, 0, 1, 0),
+(118, 202400013, 1, 2, 1, 0, 0, 0, 0, 1, 0),
+(119, 202400013, 1, 11, 1, 0, 0, 0, 0, 1, 0),
+(120, 202400013, 1, 10, 1, 0, 0, 0, 0, 1, 0),
+(121, 202400013, 1, 3, 1, 0, 0, 0, 0, 1, 0),
+(122, 202400013, 1, 4, 1, 0, 0, 0, 0, 1, 0);
 
 -- --------------------------------------------------------
 
@@ -1640,7 +1651,7 @@ ALTER TABLE `dprtmnt_table`
 -- AUTO_INCREMENT for table `enrolled_subject`
 --
 ALTER TABLE `enrolled_subject`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=112;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=123;
 
 --
 -- AUTO_INCREMENT for table `period_status`

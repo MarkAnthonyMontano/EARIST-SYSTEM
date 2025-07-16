@@ -2926,31 +2926,34 @@ app.get("/api/person/:id", async (req, res) => {
 
 // Program Display
 app.get('/class_roster/ccs/:id', async (req, res) => {
-  const {id} = req.params;
+  const { id } = req.params;
 
   try {
     const query = `
-      SELECT dct.dprtmnt_id, dt.dprtmnt_name, dt.dprtmnt_code, pt.program_id, pt.program_description, pt.program_code, ct.curriculum_id FROM dprtmnt_curriculum_table as dct 
-        INNER JOIN dprtmnt_table as dt ON dct.dprtmnt_id = dt.dprtmnt_id
-        INNER JOIN curriculum_table as ct ON dct.curriculum_id = ct.curriculum_id 
-        INNER JOIN program_table as pt ON ct.program_id = pt.program_id 
-        INNER JOIN year_table as yt ON ct.year_id = yt.year_id 
+      SELECT 
+        dct.dprtmnt_id, dt.dprtmnt_name, dt.dprtmnt_code, 
+        pt.program_id, pt.program_description, pt.program_code, 
+        ct.curriculum_id
+      FROM dprtmnt_curriculum_table as dct 
+      INNER JOIN dprtmnt_table as dt ON dct.dprtmnt_id = dt.dprtmnt_id
+      INNER JOIN curriculum_table as ct ON dct.curriculum_id = ct.curriculum_id 
+      INNER JOIN program_table as pt ON ct.program_id = pt.program_id 
+      -- LEFT JOIN year_table as yt ON ct.year_id = yt.year_id -- optional
       WHERE dct.dprtmnt_id = ?;
-    `
+    `;
 
     const [programRows] = await db3.execute(query, [id]);
 
     if (programRows.length === 0) {
-      return res.json([]);
+      return res.json([]); // empty array instead of error
     }
 
     res.json(programRows);
-  }
-  catch(err){
+  } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
-})
+});
 
 // Curriculum Section 
 app.get('/class_roster/:cID', async (req, res) => {
