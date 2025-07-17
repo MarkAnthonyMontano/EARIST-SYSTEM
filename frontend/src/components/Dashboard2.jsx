@@ -25,7 +25,6 @@ const Dashboard2 = () => {
     guardian_middle_name: "", guardian_ext: "", guardian_nickname: "", guardian_address: "", guardian_contact: "", guardian_email: "", annual_income: "",
   });
 
-
   // do not alter
   useEffect(() => {
     const storedUser = localStorage.getItem("email");
@@ -37,7 +36,7 @@ const Dashboard2 = () => {
       setUserRole(storedRole);
       setUserID(storedID);
 
-      if (storedRole === "applicant" || storedRole === "registrar") {
+      if (storedRole === "applicant") {
         fetchPersonData(storedID);
       } else {
         window.location.href = "/login";
@@ -46,6 +45,7 @@ const Dashboard2 = () => {
       window.location.href = "/login";
     }
   }, []);
+
 
 
   const steps = [

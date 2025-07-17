@@ -7,6 +7,7 @@ import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt
 import MoodBadIcon from '@mui/icons-material/MoodBad';
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 import SentimentSatisfiedIcon from '@mui/icons-material/SentimentSatisfied';
+import { FcPrint } from "react-icons/fc";  
 
 const AdmissionServices = () => {
 
@@ -21,30 +22,30 @@ const AdmissionServices = () => {
     };
 
     const [userID, setUserID] = useState("");
-      const [user, setUser] = useState("");
-      const [userRole, setUserRole] = useState("");
-      
-        // do not alter
-        useEffect(() => {
-          const storedUser = localStorage.getItem("email");
-          const storedRole = localStorage.getItem("role");
-          const storedID = localStorage.getItem("person_id");
-      
-          if (storedUser && storedRole && storedID) {
+    const [user, setUser] = useState("");
+    const [userRole, setUserRole] = useState("");
+
+    // do not alter
+    useEffect(() => {
+        const storedUser = localStorage.getItem("email");
+        const storedRole = localStorage.getItem("role");
+        const storedID = localStorage.getItem("person_id");
+
+        if (storedUser && storedRole && storedID) {
             setUser(storedUser);
             setUserRole(storedRole);
             setUserID(storedID);
-      
-            if (storedRole === "applicant" || storedRole === "registrar") {
-             
+
+            if (storedRole === "applicant") {
+           
             } else {
-              window.location.href = "/login";
+                window.location.href = "/login";
             }
-          } else {
+        } else {
             window.location.href = "/login";
-          }
-        }, []);
-    
+        }
+    }, []);
+
 
 
     const divToPrintRef = useRef();
@@ -118,22 +119,22 @@ const AdmissionServices = () => {
         }
     };
 
-  // 🔒 Disable right-click
-document.addEventListener('contextmenu', (e) => e.preventDefault());
+    // 🔒 Disable right-click
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-// 🔒 Block DevTools shortcuts silently
-document.addEventListener('keydown', (e) => {
-  const isBlockedKey =
-    e.key === 'F12' ||
-    e.key === 'F11' ||
-    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-    (e.ctrlKey && e.key === 'U');
+    // 🔒 Block DevTools shortcuts silently
+    document.addEventListener('keydown', (e) => {
+        const isBlockedKey =
+            e.key === 'F12' ||
+            e.key === 'F11' ||
+            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+            (e.ctrlKey && e.key === 'U');
 
-  if (isBlockedKey) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-});
+        if (isBlockedKey) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    });
 
 
     return (
@@ -161,8 +162,12 @@ document.addEventListener('keydown', (e) => {
                     onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
                     onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
                 >
-                    Print Table
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <FcPrint size={20} />
+                        Print Admission Services
+                    </span>
                 </button>
+
             </Container>
 
             <Container className="mt-8">

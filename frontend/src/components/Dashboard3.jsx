@@ -38,25 +38,25 @@ const Dashboard3 = () => {
   });
 
   // do not alter
-useEffect(() => {
-  const storedUser = localStorage.getItem("email");
-  const storedRole = localStorage.getItem("role");
-  const storedID = localStorage.getItem("person_id");
+  useEffect(() => {
+    const storedUser = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
+    const storedID = localStorage.getItem("person_id");
 
-  if (storedUser && storedRole && storedID) {
-    setUser(storedUser);
-    setUserRole(storedRole);
-    setUserID(storedID);
+    if (storedUser && storedRole && storedID) {
+      setUser(storedUser);
+      setUserRole(storedRole);
+      setUserID(storedID);
 
-    if (storedRole === "applicant" || storedRole === "registrar") {
-      fetchPersonData(storedID);
+      if (storedRole === "applicant") {
+        fetchPersonData(storedID);
+      } else {
+        window.location.href = "/login";
+      }
     } else {
       window.location.href = "/login";
     }
-  } else {
-    window.location.href = "/login";
-  }
-}, []);
+  }, []);
 
 
   // Do not alter
@@ -119,7 +119,7 @@ useEffect(() => {
 
   const [activeStep, setActiveStep] = useState(2);
 
-  
+
   const [errors, setErrors] = useState({});
 
   const isFormValid = () => {
@@ -150,29 +150,29 @@ useEffect(() => {
     return isValid;
   };
 
-  
- // 🔒 Disable right-click
-document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-// 🔒 Block DevTools shortcuts silently
-document.addEventListener('keydown', (e) => {
-  const isBlockedKey =
-    e.key === 'F12' ||
-    e.key === 'F11' ||
-    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-    (e.ctrlKey && e.key === 'U');
+  // 🔒 Disable right-click
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-  if (isBlockedKey) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-});
+  // 🔒 Block DevTools shortcuts silently
+  document.addEventListener('keydown', (e) => {
+    const isBlockedKey =
+      e.key === 'F12' ||
+      e.key === 'F11' ||
+      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+      (e.ctrlKey && e.key === 'U');
+
+    if (isBlockedKey) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
 
 
 
   return (
     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
-     
+
       <Container>
         <Box sx={{ display: "flex", width: "100%" }}>
           {/* Left: Instructions (75%) */}

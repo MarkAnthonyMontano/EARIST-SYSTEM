@@ -46,7 +46,7 @@ function RequirementUploader() {
       setUserRole(storedRole);
       setUserID(storedID);
 
-      if (storedRole === 'applicant' || storedRole === 'registrar') {
+      if (storedRole === 'applicant') {
         fetchRequirements();
         fetchUploads(storedID);
       } else {

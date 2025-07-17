@@ -3,6 +3,7 @@ import { Box, Container, } from "@mui/material";
 import EaristLogo from "../assets/EaristLogo.png";
 import { jwtDecode } from "jwt-decode";
 import ForwardIcon from '@mui/icons-material/Forward';
+import { FcPrint } from "react-icons/fc";
 
 const AdmissionFormProcess = () => {
   const getPersonIdFromToken = () => {
@@ -18,27 +19,28 @@ const AdmissionFormProcess = () => {
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
-  
-    // do not alter
-    useEffect(() => {
-      const storedUser = localStorage.getItem("email");
-      const storedRole = localStorage.getItem("role");
-      const storedID = localStorage.getItem("person_id");
-  
-      if (storedUser && storedRole && storedID) {
-        setUser(storedUser);
-        setUserRole(storedRole);
-        setUserID(storedID);
-  
-        if (storedRole === "applicant" || storedRole === "registrar") {
-         
-        } else {
-          window.location.href = "/login";
-        }
+
+  // do not alter
+  useEffect(() => {
+    const storedUser = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
+    const storedID = localStorage.getItem("person_id");
+
+    if (storedUser && storedRole && storedID) {
+      setUser(storedUser);
+      setUserRole(storedRole);
+      setUserID(storedID);
+
+      if (storedRole === "applicant") {
+      
       } else {
         window.location.href = "/login";
       }
-    }, []);
+    } else {
+      window.location.href = "/login";
+    }
+  }, []);
+
 
   const divToPrintRef = useRef();
 
@@ -137,8 +139,12 @@ const AdmissionFormProcess = () => {
           onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
           onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
         >
-          Print Table
+          <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <FcPrint size={20} />
+            Print Admission Form
+          </span>
         </button>
+
       </Container>
 
 

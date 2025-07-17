@@ -27,26 +27,27 @@ const Dashboard4 = () => {
     chestXray: "", cbc: "", urinalysis: "", otherworkups: "", symptomsToday: "", remarks: ""
   });
 
-  // do not alter
-  useEffect(() => {
-    const storedUser = localStorage.getItem("email");
-    const storedRole = localStorage.getItem("role");
-    const storedID = localStorage.getItem("person_id");
-
-    if (storedUser && storedRole && storedID) {
-      setUser(storedUser);
-      setUserRole(storedRole);
-      setUserID(storedID);
-
-      if (storedRole === "applicant" || storedRole === "registrar") {
-        fetchPersonData(storedID);
-      } else {
-        window.location.href = "/login";
-      }
-    } else {
-      window.location.href = "/login";
-    }
-  }, []);
+   // do not alter
+   useEffect(() => {
+     const storedUser = localStorage.getItem("email");
+     const storedRole = localStorage.getItem("role");
+     const storedID = localStorage.getItem("person_id");
+ 
+     if (storedUser && storedRole && storedID) {
+       setUser(storedUser);
+       setUserRole(storedRole);
+       setUserID(storedID);
+ 
+       if (storedRole === "applicant") {
+         fetchPersonData(storedID);
+       } else {
+         window.location.href = "/login";
+       }
+     } else {
+       window.location.href = "/login";
+     }
+   }, []);
+ 
 
 
   // Do not alter

@@ -81,7 +81,7 @@ const Dashboard1 = () => {
       setUserRole(storedRole);
       setUserID(storedID);
 
-      if (storedRole === "applicant" || storedRole === "registrar") {
+      if (storedRole === "applicant") {
         fetchPersonData(storedID);
       } else {
         window.location.href = "/login";

@@ -4,6 +4,7 @@ import { Box, Container, Typography } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
 import EaristLogo from "../assets/EaristLogo.png";
 import '../styles/Print.css'
+import { FcPrint } from "react-icons/fc";  
 
 const ExaminationProfile = () => {
 
@@ -515,28 +516,32 @@ const ExaminationProfile = () => {
                         <Container sx={{ marginLeft: "40px", width: "100%", backgroundColor: "white", border: "2px solid black", padding: 4, borderRadius: 2, boxShadow: 3 }}>
 
 
-                            <button
-                                onClick={printDiv}
-                                style={{
-                                    marginBottom: "1rem",
-                                    padding: "10px 20px",
-                                    border: "2px solid black",
-                                    backgroundColor: "#f0f0f0",
-                                    color: "black",
-                                    borderRadius: "5px",
-                                    marginTop: "20px",
-                                    cursor: "pointer",
-                                    fontSize: "16px",
-                                    fontWeight: "bold",
-                                    transition: "background-color 0.3s, transform 0.2s",
-                                }}
-                                onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
-                                onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
-                                onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
-                                onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
-                            >
-                                Print Table
-                            </button>
+                           <button
+        onClick={printDiv}
+        style={{
+          marginBottom: "1rem",
+          padding: "10px 20px",
+          border: "2px solid black",
+          backgroundColor: "#f0f0f0",
+          color: "black",
+          borderRadius: "5px",
+          marginTop: "20px",
+          cursor: "pointer",
+          fontSize: "16px",
+          fontWeight: "bold",
+          transition: "background-color 0.3s, transform 0.2s",
+        }}
+        onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
+        onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
+        onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
+        onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
+      >
+        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <FcPrint size={20} />
+          Print Examination Permit
+        </span>
+      </button>
+
                             <div ref={divToPrintRef}>
                                 <div>
                                     <style>

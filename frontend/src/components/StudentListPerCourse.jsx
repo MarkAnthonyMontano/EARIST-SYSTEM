@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import { FcPrint } from "react-icons/fc";
 
 const StudentList = () => {
   const { curriculum_id, dstID, courseID, professorID } = useParams();
@@ -80,7 +81,8 @@ const StudentList = () => {
               html, body {
                 margin: 0;
                 padding: 0;
-                font-family: 
+                font-family: Arial, sans-serif;
+
                 width: auto;
                 height: auto;
                 overflow: visible;
@@ -104,46 +106,50 @@ const StudentList = () => {
       console.error("divToPrintRef is not set.");
     }
   };
-return (
-  <div className="mr-[1rem] mt-4">
-    <style>
-      {`
+  return (
+    <div className="mr-[1rem] mt-4">
+      <style>
+        {`
         @media print {
           button {
             display: none;
           }
         }
       `}
-    </style>
-    <button
-      onClick={printDiv}
-      style={{
-        marginBottom: "1rem",
-        padding: "10px 20px",
-        border: "2px solid black",
-        backgroundColor: "#f0f0f0",
-        color: "black",
-        borderRadius: "5px",
-        marginTop: "20px",
-        cursor: "pointer",
-        fontSize: "16px",
-        fontWeight: "bold",
-        transition: "background-color 0.3s, transform 0.2s",
-      }}
-      onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
-      onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
-      onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
-      onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
-    >
-      Print Table
-    </button>
-    <div ref={divToPrintRef}>
-      {studentList.length === 0 ? (
-        <p>No students enrolled in this section and course.</p>
-      ) : (
-        <div className="w-full">
-          <style>
-            {`
+      </style>
+      <button
+        onClick={printDiv}
+        style={{
+          marginBottom: "1rem",
+          padding: "10px 20px",
+          border: "2px solid black",
+          backgroundColor: "#f0f0f0",
+          color: "black",
+          borderRadius: "5px",
+          marginTop: "20px",
+          cursor: "pointer",
+          fontSize: "16px",
+          fontWeight: "bold",
+          transition: "background-color 0.3s, transform 0.2s",
+        }}
+        onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
+        onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
+        onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
+        onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
+      >
+        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <FcPrint size={20} />
+          Print Official Class List
+        </span>
+      </button>
+
+      <div ref={divToPrintRef}>
+        {studentList.length === 0 ? (
+          <p>No students enrolled in this section and course.</p>
+        ) : (
+          <div className="w-full">
+            <style>
+              {`
               .top-row {
                 display: flex;
               }
@@ -173,68 +179,80 @@ return (
                 max-width: none;     /* remove fixed max-width */
               }
             `}
-          </style>
+            </style>
 
-          {/* First row: Section | Course | Year Level | Unit */}
-          <div className="top-row">
-            <div className="top-box">
-              Section: {program_code} - {classInfo.section_Description}
-            </div>
-            <div className="top-box">
-              Course: {classInfo.course_description} ({classInfo.course_code})
-            </div>
-            <div className="top-box">
-              Year Level: {classInfo.year_level_description}
-            </div>
-            <div className="top-box">
-              Unit: {classInfo.course_unit}
-            </div>
-          </div>
+            {/* First row: Section | Course | Year Level | Unit */}
+            <div className="top-row">
+              <div className="top-box">
+                <span style={{ fontWeight: "bold" }}>Section: </span>
+                {program_code} - {classInfo.section_Description}
+              </div>
 
-          {/* Second row: Time | Professor | Semester | School Year */}
-          <div className="top-row">
-            <div className="top-box">
-              Time: {formattedDay}, {classInfo.school_time_start} – {classInfo.school_time_end}
-            </div>
-            <div className="top-box">
-              Professor: {classInfo.fname} {classInfo.mname} {classInfo.lname}
-            </div>
-            <div className="top-box">
-              Semester: {classInfo.semester_description}
-            </div>
-            <div className="top-box">
-              School Year: {classInfo.school_year}
-            </div>
-          </div>
+              <div className="top-box">
+                <span style={{ fontWeight: "bold" }}>Pre-req: </span>
+                {classInfo.course_description} ({classInfo.course_code})
+              </div>
 
-          {/* Table */}
-          <table className="mt-2 w-full">
-            <thead>
-              <tr className="bg-gray-100">
-                <th>Student Number</th>
-                <th>Student Name</th>
-                <th>Program</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {studentList.map((student, index) => (
-                <tr key={index}>
-                  <td>{student.student_number}</td>
-                  <td>{student.first_name} {student.middle_name} {student.last_name}</td>
-                  <td className="text-blue-500">
-                    {student.program_description} ({student.program_code})
-                  </td>
-                  <td>ENROLLED</td>
+              <div className="top-box">
+                <span style={{ fontWeight: "bold" }}>Unit: </span>
+                {classInfo.course_unit}
+              </div>
+
+            </div>
+
+            {/* Second row: Time | Professor | Semester | School Year */}
+            <div className="top-row">
+              <div className="top-box">
+                <strong>Schedule:</strong> {formattedDay}, {classInfo.school_time_start} – {classInfo.school_time_end}
+              </div>
+              <div className="top-box">
+                <strong>Professor:</strong> {classInfo.fname} {classInfo.mname} {classInfo.lname}
+              </div>
+              <div className="top-box">
+                <strong>Semester:</strong> {classInfo.semester_description}
+              </div>
+
+            </div>
+            <div style={{ height: "20px" }}></div>
+            <table className="mt-2 w-full">
+              <thead>
+                <tr
+                  style={{
+                    backgroundColor: '#800000',
+                    color: 'white',
+                    WebkitPrintColorAdjust: 'exact',
+                    printColorAdjust: 'exact'
+                  }}
+                >
+                  <th>Student Number</th>
+                  <th>Student Name</th>
+                  <th>Course</th>
+                  <th>Year Level</th>
+                  <th>Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+
+
+              <tbody>
+                {studentList.map((student, index) => (
+                  <tr key={index}>
+                    <td>{student.student_number}</td>
+                    <td>{student.first_name} {student.middle_name} {student.last_name}</td>
+                    <td className="text-blue-500">
+                      {student.program_description} ({student.program_code})
+                    </td>
+                    <td>{classInfo.year_level_description}</td>
+                    <td>ENROLLED</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
 
 };
 

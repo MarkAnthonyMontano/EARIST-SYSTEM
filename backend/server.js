@@ -17,6 +17,7 @@ app.use(express.json());
 app.use(cors());
 app.use(bodyparser.json());
 app.use(express.urlencoded({ extended: true }));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 const uploadPath = path.join(__dirname, "uploads");
 app.use("/uploads", express.static(uploadPath));
@@ -1652,6 +1653,98 @@ app.post("/register_prof", upload.single("profileImage"), async (req, res) => {
   }
 });
 
+// Fetch all professors
+app.get("/api/professors", async (req, res) => {
+  try {
+    const [rows] = await db3.query("SELECT * FROM prof_table");
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to retrieve professors", details: err.message });
+  }
+});
+
+// Update professor data
+app.put("/api/update_prof/:id", upload.single("profileImage"), async (req, res) => {
+  const { id } = req.params;
+  const { fname, mname, lname, email, password } = req.body;
+
+  try {
+    const updateFields = [];
+    const values = [];
+
+    if (fname) { updateFields.push("fname = ?"); values.push(fname); }
+    if (mname) { updateFields.push("mname = ?"); values.push(mname); }
+    if (lname) { updateFields.push("lname = ?"); values.push(lname); }
+    if (email) { updateFields.push("email = ?"); values.push(email); }
+
+    if (password) {
+      const hashed = await bcrypt.hash(password, 10);
+      updateFields.push("password = ?");
+      values.push(hashed);
+    }
+
+    if (req.file) {
+      const year = new Date().getFullYear();
+      const ext = path.extname(req.file.originalname).toLowerCase();
+      const filename = `${id}_ProfessorProfile_${year}${ext}`;
+      const finalPath = path.join(__dirname, "uploads", filename);
+
+      const files = await fs.promises.readdir(path.join(__dirname, "uploads"));
+      for (const file of files) {
+        if (file.startsWith(`${id}_ProfessorProfile_${year}`)) {
+          await fs.promises.unlink(path.join(__dirname, "uploads", file));
+        }
+      }
+
+      await fs.promises.writeFile(finalPath, req.file.buffer);
+
+      updateFields.push("profile_image = ?");
+      values.push(filename);
+    }
+
+    if (updateFields.length === 0) {
+      return res.status(400).json({ error: "No fields to update" });
+    }
+
+    const updateQuery = `
+      UPDATE prof_table 
+      SET ${updateFields.join(", ")} 
+      WHERE prof_id = ?
+    `;
+    values.push(id);
+
+    await db3.query(updateQuery, values);
+    res.json({ message: "Professor updated successfully" });
+  } catch (err) {
+    console.error("Error updating professor:", err);
+    res.status(500).json({ error: "Internal Server Error", details: err.message });
+  }
+});
+
+// Delete professor
+app.delete("/api/delete_prof/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [[prof]] = await db3.query("SELECT profile_image FROM prof_table WHERE prof_id = ?", [id]);
+
+    if (!prof) return res.status(404).json({ error: "Professor not found" });
+
+    const imagePath = path.join(__dirname, "uploads", prof.profile_image);
+    try {
+      await fs.promises.unlink(imagePath);
+    } catch (err) {
+      console.warn("Image delete failed:", err.message);
+    }
+
+    await db3.query("DELETE FROM prof_table WHERE prof_id = ?", [id]);
+
+    res.json({ message: "Professor deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting professor:", err);
+    res.status(500).json({ error: "Internal Server Error", details: err.message });
+  }
+});
 
 // GET ENROLLED STUDENTS (UPDATED!)
 app.get("/get_enrolled_students/:subject_id/:department_section_id/:active_school_year_id", async (req, res) => {

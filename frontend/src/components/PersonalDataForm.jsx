@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import axios from "axios";
 import { Box, Container, } from "@mui/material";
 import EaristLogo from "../assets/EaristLogo.png";
+import { FcPrint } from "react-icons/fc";  
 
 const PersonalDataForm = () => {
   const [userID, setUserID] = useState("");
@@ -79,8 +80,8 @@ const PersonalDataForm = () => {
         setUserRole(storedRole);
         setUserID(storedID);
   
-        if (storedRole === "applicant" || storedRole === "registrar") {
-         
+        if (storedRole === "applicant") {
+       
         } else {
           window.location.href = "/login";
         }
@@ -88,7 +89,7 @@ const PersonalDataForm = () => {
         window.location.href = "/login";
       }
     }, []);
-
+  
 
   const [shortDate, setShortDate] = useState("");
   const [longDate, setLongDate] = useState("");
@@ -253,27 +254,31 @@ const PersonalDataForm = () => {
         <h1 style={{ fontSize: "40px", fontWeight: "bold", textAlign: "Left", color: "maroon", marginTop: "25px" }}>PERSONAL DATA FORM</h1>
         <hr style={{ border: "1px solid #ccc", width: "41%" }} />
         <button
-          onClick={printDiv}
-          style={{
-            marginBottom: "1rem",
-            padding: "10px 20px",
-            border: "2px solid black",
-            backgroundColor: "#f0f0f0",
-            color: "black",
-            borderRadius: "5px",
-            marginTop: "20px",
-            cursor: "pointer",
-            fontSize: "16px",
-            fontWeight: "bold",
-            transition: "background-color 0.3s, transform 0.2s",
-          }}
-          onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
-          onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
-          onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
-          onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
-        >
-          Print Table
-        </button>
+        onClick={printDiv}
+        style={{
+          marginBottom: "1rem",
+          padding: "10px 20px",
+          border: "2px solid black",
+          backgroundColor: "#f0f0f0",
+          color: "black",
+          borderRadius: "5px",
+          marginTop: "20px",
+          cursor: "pointer",
+          fontSize: "16px",
+          fontWeight: "bold",
+          transition: "background-color 0.3s, transform 0.2s",
+        }}
+        onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
+        onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
+        onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
+        onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
+      >
+        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <FcPrint size={20} />
+          Print Personal Data Form
+        </span>
+      </button>
+
       </Container>
       <Container>
         <div ref={divToPrintRef}>

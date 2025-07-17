@@ -75,7 +75,7 @@ import ClassRoster from './components/ClassRoster';
 import StudentList from './components/StudentListPerCourse';
 import ProfessorListPerSection from './components/ProfessorListPerClass';
 
-
+import FacultyList from './components/FacultyList';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -165,19 +165,19 @@ function App() {
               <Route path="/student_dashboard" element={<ProtectedRoute allowedRoles={'student'}><StudentDashboard /></ProtectedRoute>} />
               <Route path="/unauthorized" element={<Unauthorized />} />
 
-              <Route path="/dashboard1" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><Dashboard1 /></ProtectedRoute>} />
-              <Route path="/dashboard2" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><Dashboard2 /></ProtectedRoute>} />
-              <Route path="/dashboard3" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><Dashboard3 /></ProtectedRoute>} />
-              <Route path="/dashboard4" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><Dashboard4 /></ProtectedRoute>} />
-              <Route path="/dashboard5" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><Dashboard5 /></ProtectedRoute>} />
-              <Route path="/requirements_uploader" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><RequirementUploader /></ProtectedRoute>} />
+              <Route path="/dashboard1" element={<ProtectedRoute allowedRoles={['applicant']}><Dashboard1 /></ProtectedRoute>} />
+              <Route path="/dashboard2" element={<ProtectedRoute allowedRoles={['applicant']}><Dashboard2 /></ProtectedRoute>} />
+              <Route path="/dashboard3" element={<ProtectedRoute allowedRoles={['applicant']}><Dashboard3 /></ProtectedRoute>} />
+              <Route path="/dashboard4" element={<ProtectedRoute allowedRoles={['applicant']}><Dashboard4 /></ProtectedRoute>} />
+              <Route path="/dashboard5" element={<ProtectedRoute allowedRoles={['applicant']}><Dashboard5 /></ProtectedRoute>} />
+              <Route path="/requirements_uploader" element={<ProtectedRoute allowedRoles={['applicant']}><RequirementUploader /></ProtectedRoute>} />
 
-              <Route path="/personal_data_form" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><PersonalDataForm /></ProtectedRoute>} />
-              <Route path="/ecat_application_form" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><ECATApplicationForm /></ProtectedRoute>} />
-              <Route path="/admission_form_process" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><AdmissionFormProcess /></ProtectedRoute>} />
-              <Route path="/admission_services" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><AdmissionServices /></ProtectedRoute>} />
-              <Route path="/office_of_the_registrar" element={<ProtectedRoute allowedRoles={['applicant', 'registrar']}><OfficeOfTheRegistrar /></ProtectedRoute>} />
-
+              <Route path="/personal_data_form" element={<ProtectedRoute allowedRoles={['applicant']}><PersonalDataForm /></ProtectedRoute>} />
+              <Route path="/ecat_application_form" element={<ProtectedRoute allowedRoles={['applicant']}><ECATApplicationForm /></ProtectedRoute>} />
+              <Route path="/admission_form_process" element={<ProtectedRoute allowedRoles={['applicant']}><AdmissionFormProcess /></ProtectedRoute>} />
+              <Route path="/admission_services" element={<ProtectedRoute allowedRoles={['applicant']}><AdmissionServices /></ProtectedRoute>} />
+              <Route path="/office_of_the_registrar" element={<ProtectedRoute allowedRoles={['applicant']}><OfficeOfTheRegistrar /></ProtectedRoute>} />
+              <Route path="/faculty_list" element={<ProtectedRoute ><FacultyList /></ProtectedRoute>} />
 
               <Route path="/class_roster" element={<ProtectedRoute ><ClassRoster /></ProtectedRoute>} />
               <Route path="/class_roster/class_list/ccs/:curriculum_id" element={<ProtectedRoute ><ClassList /></ProtectedRoute>} />
