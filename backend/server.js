@@ -1593,66 +1593,6 @@ app.get("/department_section", async (req, res) => {
   }
 });
 
-// PROFESSOR REGISTRATION (UPDATED!)
-app.post("/register_prof", upload.single("profileImage"), async (req, res) => {
-  const { fname, mname, lname, email, password } = req.body;
-
-  if (!fname || !lname || !email || !password || !req.file) {
-    return res.status(400).json({ error: "All fields including profile image are required" });
-  }
-
-  try {
-    const hashedProfPassword = await bcrypt.hash(password, 10);
-
-    // ✅ Step 1: insert professor to get prof_id
-    const insertQuery = `
-      INSERT INTO prof_table (fname, mname, lname, email, password, status) 
-      VALUES (?, ?, ?, ?, ?, ?)
-    `;
-    const [result] = await db3.query(insertQuery, [fname, mname, lname, email, hashedProfPassword, 0]);
-    const profId = result.insertId;
-
-    const year = new Date().getFullYear();
-    const ext = path.extname(req.file.originalname).toLowerCase();
-    const filename = `${profId}_ProfessorProfile_${year}${ext}`;
-    const finalPath = path.join(__dirname, "uploads", filename);
-
-    // ✅ Step 2: remove existing files for this profId + same year + ProfessorProfile.* (any extension)
-    const uploadsDir = path.join(__dirname, "uploads");
-    const filesInDir = await fs.promises.readdir(uploadsDir);
-
-    const matchingFiles = filesInDir.filter(f =>
-      f.startsWith(`${profId}_ProfessorProfile_${year}`)
-    );
-
-    for (const oldFile of matchingFiles) {
-      try {
-        await fs.promises.unlink(path.join(uploadsDir, oldFile));
-      } catch (err) {
-        console.warn("Could not delete old profile image:", err.message);
-      }
-    }
-
-    // ✅ Step 3: save new profile image
-    await fs.promises.writeFile(finalPath, req.file.buffer);
-
-    // ✅ Step 4: update DB with filename
-    await db3.query(
-      "UPDATE prof_table SET profile_image = ? WHERE prof_id = ?",
-      [filename, profId]
-    );
-
-    res.status(201).json({
-      message: "Professor registered successfully",
-      professorId: profId,
-      filename
-    });
-  } catch (err) {
-    console.error("Error registering professor:", err);
-    res.status(500).json({ error: "Internal Server Error", details: err.message });
-  }
-});
-
 // Fetch all professors
 app.get("/api/professors", async (req, res) => {
   try {
@@ -1663,23 +1603,55 @@ app.get("/api/professors", async (req, res) => {
   }
 });
 
-// Update professor data
+// ADD PROFESSOR ROUTE (Consistent with /api)
+app.post("/api/register_prof", upload.single("profileImage"), async (req, res) => {
+  try {
+    const { person_id, fname, mname, lname, email, password, role } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    let profileImage = null;
+    if (req.file) {
+      const year = new Date().getFullYear();
+      const ext = path.extname(req.file.originalname).toLowerCase();
+      const filename = `${person_id}_ProfessorProfile_${year}${ext}`;
+      const filePath = path.join(__dirname, "uploads", filename);
+      await fs.promises.writeFile(filePath, req.file.buffer);
+      profileImage = filename;
+    }
+
+    const sql = `INSERT INTO prof_table (person_id, fname, mname, lname, email, password, role, profile_image)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+    const values = [person_id, fname, mname, lname, email, hashedPassword, role, profileImage];
+    await db3.query(sql, values);
+
+    res.status(201).json({ message: "Professor added successfully" });
+  } catch (err) {
+    console.error("Insert error:", err);
+    res.status(500).json({ error: "Failed to add professor" });
+  }
+});
+
+
+// Update professor info
 app.put("/api/update_prof/:id", upload.single("profileImage"), async (req, res) => {
   const { id } = req.params;
-  const { fname, mname, lname, email, password } = req.body;
+  const { person_id, fname, mname, lname, email, password, role } = req.body;
 
   try {
-    const updateFields = [];
+    const updates = [];
     const values = [];
 
-    if (fname) { updateFields.push("fname = ?"); values.push(fname); }
-    if (mname) { updateFields.push("mname = ?"); values.push(mname); }
-    if (lname) { updateFields.push("lname = ?"); values.push(lname); }
-    if (email) { updateFields.push("email = ?"); values.push(email); }
+    // Add FF fields
+    if (person_id) { updates.push("person_id = ?"); values.push(person_id); }
+    if (fname) { updates.push("fname = ?"); values.push(fname); }
+    if (mname) { updates.push("mname = ?"); values.push(mname); }
+    if (lname) { updates.push("lname = ?"); values.push(lname); }
+    if (email) { updates.push("email = ?"); values.push(email); }
+    if (role) { updates.push("role = ?"); values.push(role); }
 
     if (password) {
       const hashed = await bcrypt.hash(password, 10);
-      updateFields.push("password = ?");
+      updates.push("password = ?");
       values.push(hashed);
     }
 
@@ -1687,64 +1659,57 @@ app.put("/api/update_prof/:id", upload.single("profileImage"), async (req, res) 
       const year = new Date().getFullYear();
       const ext = path.extname(req.file.originalname).toLowerCase();
       const filename = `${id}_ProfessorProfile_${year}${ext}`;
-      const finalPath = path.join(__dirname, "uploads", filename);
+      const uploadsDir = path.join(__dirname, "uploads");
 
-      const files = await fs.promises.readdir(path.join(__dirname, "uploads"));
-      for (const file of files) {
-        if (file.startsWith(`${id}_ProfessorProfile_${year}`)) {
-          await fs.promises.unlink(path.join(__dirname, "uploads", file));
-        }
+      // Remove old files matching pattern
+      const files = await fs.promises.readdir(uploadsDir);
+      const old = files.filter(f => f.startsWith(`${id}_ProfessorProfile_${year}`));
+      for (const f of old) {
+        try { await fs.promises.unlink(path.join(uploadsDir, f)); }
+        catch (err) { console.warn("Could not delete", f, err.message); }
       }
 
-      await fs.promises.writeFile(finalPath, req.file.buffer);
-
-      updateFields.push("profile_image = ?");
+      // Save new
+      await fs.promises.writeFile(path.join(uploadsDir, filename), req.file.buffer);
+      updates.push("profile_image = ?");
       values.push(filename);
     }
 
-    if (updateFields.length === 0) {
-      return res.status(400).json({ error: "No fields to update" });
-    }
+    if (!updates.length) return res.status(400).json({ error: "No fields to update" });
 
-    const updateQuery = `
-      UPDATE prof_table 
-      SET ${updateFields.join(", ")} 
-      WHERE prof_id = ?
-    `;
+    const sql = `UPDATE prof_table SET ${updates.join(", ")} WHERE prof_id = ?`;
     values.push(id);
 
-    await db3.query(updateQuery, values);
+    await db3.query(sql, values);
     res.json({ message: "Professor updated successfully" });
   } catch (err) {
-    console.error("Error updating professor:", err);
-    res.status(500).json({ error: "Internal Server Error", details: err.message });
+    console.error("Update error:", err);
+    res.status(500).json({ error: "Failed to update professor", details: err.message });
   }
 });
 
-// Delete professor
-app.delete("/api/delete_prof/:id", async (req, res) => {
+// Toggle professor status (Active/Inactive)
+app.put("/api/update_prof_status/:id", async (req, res) => {
   const { id } = req.params;
+  const { status } = req.body;
 
   try {
-    const [[prof]] = await db3.query("SELECT profile_image FROM prof_table WHERE prof_id = ?", [id]);
+    const [result] = await db3.query(
+      "UPDATE prof_table SET status = ? WHERE prof_id = ?",
+      [status, id]
+    );
 
-    if (!prof) return res.status(404).json({ error: "Professor not found" });
-
-    const imagePath = path.join(__dirname, "uploads", prof.profile_image);
-    try {
-      await fs.promises.unlink(imagePath);
-    } catch (err) {
-      console.warn("Image delete failed:", err.message);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Professor not found" });
     }
 
-    await db3.query("DELETE FROM prof_table WHERE prof_id = ?", [id]);
-
-    res.json({ message: "Professor deleted successfully" });
+    res.json({ message: "Status updated successfully" });
   } catch (err) {
-    console.error("Error deleting professor:", err);
-    res.status(500).json({ error: "Internal Server Error", details: err.message });
+    console.error("Status update error:", err);
+    res.status(500).json({ error: "Failed to update status", details: err.message });
   }
 });
+
 
 // GET ENROLLED STUDENTS (UPDATED!)
 app.get("/get_enrolled_students/:subject_id/:department_section_id/:active_school_year_id", async (req, res) => {
@@ -3050,8 +3015,8 @@ app.get('/class_roster/ccs/:id', async (req, res) => {
 
 // Curriculum Section 
 app.get('/class_roster/:cID', async (req, res) => {
-  const {cID} = req.params;
-  try{
+  const { cID } = req.params;
+  try {
     const query = `
       SELECT ct.curriculum_id, st.description, dst.id from dprtmnt_section_table AS dst 
         INNER JOIN curriculum_table AS ct ON dst.curriculum_id = ct.curriculum_id 
@@ -3062,7 +3027,7 @@ app.get('/class_roster/:cID', async (req, res) => {
     const [sectionList] = await db3.execute(query, [cID]);
 
     res.json(sectionList);
-  } catch(err){
+  } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
@@ -3070,8 +3035,8 @@ app.get('/class_roster/:cID', async (req, res) => {
 
 // prof list base dun curriculum id tsaka sa section id
 app.get('/class_roster/:cID/:dstID', async (req, res) => {
-  const {cID, dstID} = req.params;
-  try{
+  const { cID, dstID } = req.params;
+  try {
     const query = `
     SELECT DISTINCT cst.course_id, pft.prof_id, tt.department_section_id, pft.fname, pft.lname, pft.mname, cst.course_description, cst.course_code, st.description AS section_description, pgt.program_code FROM time_table AS tt
       INNER JOIN dprtmnt_section_table AS dst ON tt.department_section_id = dst.id
@@ -3087,7 +3052,7 @@ app.get('/class_roster/:cID/:dstID', async (req, res) => {
 
     console.log(profList);
     res.json(profList);
-  } catch(err){
+  } catch (err) {
     console.error("Error fetching data:", err);
     res.status(500).json({ error: "Internal Server Error" });
   }
@@ -3095,8 +3060,8 @@ app.get('/class_roster/:cID/:dstID', async (req, res) => {
 
 // Student Information
 app.get('/class_roster/student_info/:cID/:dstID/:courseID/:professorID', async (req, res) => {
-  const {cID, dstID, courseID, professorID} = req.params; 
-  try{
+  const { cID, dstID, courseID, professorID } = req.params;
+  try {
     const query = `
     SELECT DISTINCT
       es.student_number, 
@@ -3119,16 +3084,16 @@ app.get('/class_roster/student_info/:cID/:dstID/:courseID/:professorID', async (
     console.log(studentList);
     res.json(studentList);
 
-  }catch(err){
+  } catch (err) {
     console.error("Error fetching data:", err);
-    res.status(500).json({error: "Internal Server Error", err});
+    res.status(500).json({ error: "Internal Server Error", err });
   }
 })
 
 // Class Information
 app.get('/class_roster/classinfo/:cID/:dstID/:courseID/:professorID', async (req, res) => {
-  const {cID, dstID, courseID, professorID} = req.params; 
-  try{
+  const { cID, dstID, courseID, professorID } = req.params;
+  try {
     const query = `
     SELECT DISTINCT
       st.description AS section_Description,
@@ -3161,9 +3126,9 @@ app.get('/class_roster/classinfo/:cID/:dstID/:courseID/:professorID', async (req
     console.log(class_data);
     res.json(class_data);
 
-  }catch(err){
+  } catch (err) {
     console.error("Error fetching data:", err);
-    res.status(500).json({error: "Internal Server Error", err});
+    res.status(500).json({ error: "Internal Server Error", err });
   }
 })
 
