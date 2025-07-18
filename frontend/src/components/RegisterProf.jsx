@@ -14,6 +14,10 @@ import {
   TableHead,
   TableRow,
   Avatar,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { Add, Search, SortByAlpha, FileDownload } from "@mui/icons-material";
 import axios from "axios";
@@ -22,8 +26,12 @@ const RegisterProf = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortAsc, setSortAsc] = useState(true);
   const [professors, setProfessors] = useState([]);
+  const [department, setDepartment] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [editData, setEditData] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+
   const [form, setForm] = useState({
     person_id: "",
     fname: "",
@@ -32,8 +40,11 @@ const RegisterProf = () => {
     email: "",
     password: "",
     role: "faculty",
+    dprtmnt_id: "",
     profileImage: null,
   });
+
+
 
   const fetchProfessors = async () => {
     try {
@@ -49,23 +60,58 @@ const RegisterProf = () => {
     }
   };
 
+  const fetchDepartments = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/get_department");
+      setDepartment(res.data);
+      console.log(res.data);
+    } catch (err) {
+      console.error("Fetch error:", err);
+    }
+  };
+
   useEffect(() => {
     fetchProfessors();
+    fetchDepartments();
   }, []);
 
   const filteredProfessors = professors
     .filter((p) =>
-      `${p.fname} ${p.mname} ${p.lname} ${p.email}`.toLowerCase().includes(searchQuery)
+      `${p.fname || ""} ${p.mname || ""} ${p.lname || ""} ${p.email || ""}`
+        .toLowerCase()
+        .includes(searchQuery)
     )
+
     .sort((a, b) => {
       const nameA = `${a.fname} ${a.lname}`.toLowerCase();
       const nameB = `${b.fname} ${b.lname}`.toLowerCase();
       return sortAsc ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
     });
 
+  const itemsPerPage = 20;
+  const totalPages = Math.ceil(filteredProfessors.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentProfessors = filteredProfessors.slice(indexOfFirstItem, indexOfLastItem);
+
+  const maxButtonsToShow = 5;
+  let startPage = Math.max(1, currentPage - Math.floor(maxButtonsToShow / 2));
+  let endPage = Math.min(totalPages, startPage + maxButtonsToShow - 1);
+
+  // Adjust startPage if we are at the end
+  if (endPage - startPage < maxButtonsToShow - 1) {
+    startPage = Math.max(1, endPage - maxButtonsToShow + 1);
+  }
+
+  const visiblePages = [];
+  for (let i = startPage; i <= endPage; i++) {
+    visiblePages.push(i);
+  }
+
+
   const handleExportCSV = () => {
     const headers = ["Person ID", "Full Name", "Email", "Role", "Status"];
-    const rows = filteredProfessors.map((p) => [
+    const rows = currentProfessors.map((p) => [
       p.person_id,
       `${p.fname} ${p.mname || ""} ${p.lname}`,
       p.email,
@@ -74,7 +120,7 @@ const RegisterProf = () => {
     ]);
     const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
 
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.setAttribute("download", "professors.csv");
@@ -91,41 +137,41 @@ const RegisterProf = () => {
     }
   };
 
+  const handleSelect = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
   const handleSubmit = async () => {
-  const requiredFields = ["fname", "lname", "email"];
-  if (!editData) {
-    requiredFields.push("password", "profileImage", "person_id");
-  }
-
-  const missing = requiredFields.filter((key) => !form[key]);
-  if (missing.length > 0) {
-    alert(`Please fill out required fields: ${missing.join(", ")}`);
-    return;
-  }
-
-  const formData = new FormData();
-  Object.entries(form).forEach(([key, value]) => {
-    if (value) formData.append(key, value);
-  });
-
-  try {
-    if (editData) {
-      // EDIT
-      await axios.put(`http://localhost:5000/api/update_prof/${editData.prof_id}`, formData);
-    } else {
-      // ADD
-      await axios.post(`http://localhost:5000/api/register_prof`, formData);
+    const requiredFields = ["fname", "lname", "email"];
+    if (!editData) {
+      requiredFields.push("password", "profileImage", "person_id");
     }
 
-    fetchProfessors();
-    handleCloseDialog();
-  } catch (err) {
-    console.error("Submit Error:", err);
-    alert(err.response?.data?.error || "An error occurred");
-  }
-};
+    const missing = requiredFields.filter((key) => !form[key]);
+    if (missing.length > 0) {
+      alert(`Please fill out required fields: ${missing.join(", ")}`);
+      return;
+    }
 
+    const formData = new FormData();
+    Object.entries(form).forEach(([key, value]) => {
+      if (value) formData.append(key, value);
+    });
 
+    try {
+      if (editData) {
+        await axios.put(`http://localhost:5000/api/update_prof/${editData.prof_id}`, formData);
+      } else {
+        await axios.post(`http://localhost:5000/api/register_prof`, formData);
+      }
+
+      fetchProfessors();
+      handleCloseDialog();
+    } catch (err) {
+      console.error("Submit Error:", err);
+      alert(err.response?.data?.error || "An error occurred");
+    }
+  };
 
   const handleEdit = (prof) => {
     setEditData(prof);
@@ -135,9 +181,10 @@ const RegisterProf = () => {
       mname: prof.mname || "",
       lname: prof.lname,
       email: prof.email,
-      password: "", // leave blank unless changed
+      password: "",
       role: prof.role || "faculty",
-      profileImage: null, // new upload optional
+      dprtmnt_id: prof.dprtmnt_id || "",
+      profileImage: null,
     });
     setOpenDialog(true);
   };
@@ -153,6 +200,7 @@ const RegisterProf = () => {
       email: "",
       password: "",
       role: "faculty",
+      dprtmnt_id: "",
       profileImage: null,
     });
   };
@@ -173,28 +221,24 @@ const RegisterProf = () => {
     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", pr: 1 }}>
       <div style={{ height: "30px" }}></div>
       <Typography variant="h4" color="maroon" fontWeight="bold" gutterBottom>
-       Professor Account's
+        Professor Account's
       </Typography>
 
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          mb: 2,
-        }}
-      >
-        <TextField
-          variant="outlined"
-          placeholder="Search by name or email"
-          size="small"
-          style={{ width: "400px" }}
-          onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
-          InputProps={{
-            startAdornment: <Search sx={{ mr: 1 }} />,
-          }}
-        />
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", mb: 2 }}>
+        <form autoComplete="off">
+          <TextField
+            variant="outlined"
+            placeholder="Search by name or email"
+            size="small"
+            style={{ width: "400px" }}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
+            autoComplete="off"
+            InputProps={{
+              startAdornment: <Search sx={{ mr: 1 }} />,
+            }}
+          />
+        </form>
 
         <Box sx={{ display: "flex", gap: 2 }}>
           <Button
@@ -210,19 +254,15 @@ const RegisterProf = () => {
                 email: "",
                 password: "",
                 role: "faculty",
+                dprtmnt_id: "",
                 profileImage: null,
               });
               setOpenDialog(true);
             }}
-            sx={{
-              backgroundColor: "maroon",
-              color: "white",
-              textTransform: "none",
-            }}
+            sx={{ backgroundColor: "maroon", color: "white", textTransform: "none" }}
           >
             Add Professor
           </Button>
-
 
           <Button
             variant="outlined"
@@ -251,13 +291,15 @@ const RegisterProf = () => {
             <TableCell>Image</TableCell>
             <TableCell>Full Name</TableCell>
             <TableCell>Email</TableCell>
+            <TableCell>Department</TableCell>
             <TableCell>Position</TableCell>
             <TableCell>Status</TableCell>
             <TableCell>Actions</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {filteredProfessors.map((prof) => (
+
+          {currentProfessors.map((prof) => (
             <TableRow key={prof.prof_id}>
               <TableCell>{prof.person_id ?? "N/A"}</TableCell>
               <TableCell>
@@ -275,7 +317,7 @@ const RegisterProf = () => {
               </TableCell>
               <TableCell>{`${prof.fname} ${prof.mname || ""} ${prof.lname}`}</TableCell>
               <TableCell>{prof.email}</TableCell>
-
+              <TableCell>{prof.dprtmnt_name} ({prof.dprtmnt_code})</TableCell>
               <TableCell>{prof.role}</TableCell>
               <TableCell>
                 <Button
@@ -298,23 +340,19 @@ const RegisterProf = () => {
                     color: "maroon",
                     textTransform: "none",
                     fontWeight: "bold",
-                    "&:hover": {
-                      backgroundColor: "#f5f1cf", // Optional hover effect
-                    },
+                    "&:hover": { backgroundColor: "#f5f1cf" },
                   }}
                   variant="contained"
                 >
                   EDIT
                 </Button>
               </TableCell>
-
             </TableRow>
           ))}
         </TableBody>
       </Table>
 
       {/* Dialog */}
-
       <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth>
         <DialogTitle sx={{ color: "maroon" }}>
           {editData ? "Edit Professor" : "Add New Professor"}
@@ -345,6 +383,22 @@ const RegisterProf = () => {
               required
             />
           )}
+          <FormControl fullWidth>
+            <InputLabel id="department-label">Department</InputLabel>
+            <Select
+              labelId="department-label"
+              name="dprtmnt_id"
+              value={form.dprtmnt_id || ""}
+              label="Department"
+              onChange={handleSelect}
+            >
+              {department.map((dep) => (
+                <MenuItem key={dep.dprtmnt_id} value={dep.dprtmnt_id}>
+                  {dep.dprtmnt_name} ({dep.dprtmnt_code})
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <input type="file" name="profileImage" accept="image/*" onChange={handleChange} />
         </DialogContent>
         <DialogActions>
@@ -358,10 +412,57 @@ const RegisterProf = () => {
           >
             {editData ? "Update" : "Register"}
           </Button>
-
         </DialogActions>
       </Dialog>
+      <Box sx={{ display: "flex", justifyContent: "right", mt: 3, flexWrap: "wrap", gap: 1 }}>
+
+        <Button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          variant="outlined"
+          sx={{ borderColor: "maroon", color: "maroon" }}
+        >
+          Prev
+        </Button>
+
+        {visiblePages.map((num) => (
+          <Button
+            key={num}
+            onClick={() => setCurrentPage(num)}
+            variant={currentPage === num ? "contained" : "outlined"}
+            sx={{
+              backgroundColor: currentPage === num ? "maroon" : "transparent",
+              color: currentPage === num ? "white" : "maroon",
+              borderColor: "maroon",
+              minWidth: "36px",
+            }}
+          >
+            {num}
+          </Button>
+        ))}
+
+        <Button
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          variant="outlined"
+          sx={{ borderColor: "maroon", color: "maroon" }}
+        >
+          Next
+        </Button>
+
+        <Button
+          onClick={() => setCurrentPage(totalPages)}
+          disabled={currentPage === totalPages}
+          variant="outlined"
+          sx={{ borderColor: "maroon", color: "maroon" }}
+        >
+          Last
+        </Button>
+      </Box>
+
+
     </Box>
+
   );
 };
 

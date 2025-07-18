@@ -1,150 +1,125 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import {
+  Box,
+  Typography,
+  Grid,
+  Paper,
+  TextField,
+  Button,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+} from "@mui/material";
 
 const SemesterPanel = () => {
-    const [semesterDescription, setSemesterDescription] = useState("");
-    const [semesters, setSemesters] = useState([]);
+  const [semesterDescription, setSemesterDescription] = useState("");
+  const [semesters, setSemesters] = useState([]);
 
-    // Load semesters from backend
-    const fetchSemesters = async () => {
-        try {
-            const res = await axios.get("http://localhost:5000/get_semester");
-            setSemesters(res.data);
-        } catch (error) {
-            console.error("Error fetching semesters:", error);
-        }
-    };
+  // Load semesters
+  const fetchSemesters = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/get_semester");
+      setSemesters(res.data);
+    } catch (error) {
+      console.error("Error fetching semesters:", error);
+    }
+  };
 
-    useEffect(() => {
-        fetchSemesters();
-    }, []);
+  useEffect(() => {
+    fetchSemesters();
+  }, []);
 
-    // Add a new semester
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!semesterDescription.trim()) return;
+  // Add new semester
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!semesterDescription.trim()) return;
 
-        try {
-            await axios.post("http://localhost:5000/semesters", {
-                semester_description: semesterDescription,
-            });
-            setSemesterDescription("");
-            fetchSemesters();
-        } catch (error) {
-            console.error("Error saving semester:", error);
-        }
-    };
+    try {
+      await axios.post("http://localhost:5000/semesters", {
+        semester_description: semesterDescription,
+      });
+      setSemesterDescription("");
+      fetchSemesters();
+    } catch (error) {
+      console.error("Error saving semester:", error);
+    }
+  };
 
-    return (
-        <div style={styles.container}>
-            {/* Form Section */}
-            <div style={styles.formSection}>
-                <h2 style={styles.heading}>Semester Panel</h2>
-                <div style={styles.formGroup}>
-                    <label style={styles.label}>Semester Description:</label>
-                    <input
-                        type="text"
-                        value={semesterDescription}
-                        onChange={(e) => setSemesterDescription(e.target.value)}
-                        placeholder="Enter semester (e.g., First Semester)"
-                        style={styles.input}
-                    />
-                </div>
-                <button onClick={handleSubmit} style={styles.button}>Save</button>
-            </div>
+  return (
+    <Box sx={{ maxWidth: 1200, mx: "auto", mt: 5, px: 2 }}>
+      <Typography
+        variant="h4"
+        align="center"
+        fontWeight="bold"
+        sx={{ color: "#800000", mb: 2 }}
+      >
+        Semester Panel
+      </Typography>
 
-            {/* Display Section */}
-            <div style={styles.displaySection}>
-                <h2 style={styles.heading}>Saved Semesters</h2>
-                <div style={styles.scrollableTableContainer}>
-                    <table style={styles.table}>
-                        <thead>
-                            <tr>
-                                <th style={styles.tableCell}>Semester ID</th>
-                                <th style={styles.tableCell}>Semester Description</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {semesters.map((semester, index) => (
-                                <tr key={index}>
-                                    <td style={styles.tableCell}>{semester.semester_id}</td>
-                                    <td style={styles.tableCell}>{semester.semester_description}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    );
-};
+      <Grid container spacing={4}>
+        {/* Form Section */}
+        <Grid item xs={12} md={5}>
+          <Paper elevation={3} sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2, color: "#000000" }}>
+              Add Semester
+            </Typography>
+            <form onSubmit={handleSubmit}>
+              <TextField
+                fullWidth
+                label="Semester Description"
+                placeholder="e.g., First Semester"
+                value={semesterDescription}
+                onChange={(e) => setSemesterDescription(e.target.value)}
+                variant="outlined"
+                sx={{ mb: 2 }}
+              />
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{
+                  backgroundColor: "#800000",
+                  "&:hover": { backgroundColor: "#a00000" },
+                }}
+              >
+                Save
+              </Button>
+            </form>
+          </Paper>
+        </Grid>
 
-// Simplified inline styles (similar to RoomRegistration)
-const styles = {
-  container: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    maxWidth: '1000px',
-    margin: '40px auto',
-    padding: '20px',
-    backgroundColor: '#f9f9f9',
-    borderRadius: '10px',
-  },
-  formSection: {
-    width: '45%',
-    padding: '20px',
-    borderRadius: '8px',
-    backgroundColor: 'white',
-    boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-  },
-  displaySection: {
-    width: '50%',
-    padding: '20px',
-    borderRadius: '8px',
-    backgroundColor: 'white',
-    boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-  },
-  heading: {
-    fontSize: '20px',
-    marginBottom: '20px',
-    color: '#333',
-  },
-  formGroup: {
-    marginBottom: '20px',
-  },
-  label: {
-    display: 'block',
-    marginBottom: '8px',
-    fontWeight: 'bold',
-  },
-  input: {
-    width: '100%',
-    padding: '10px',
-    borderRadius: '5px',
-    border: '1px solid #ccc',
-  },
-  button: {
-    width: '100%',
-    padding: '12px',
-    backgroundColor: 'maroon',
-    color: 'white',
-    fontSize: '16px',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-  },
-  scrollableTableContainer: {
-    maxHeight: '400px',
-    overflowY: 'auto',
-  },
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-  },
-  tableCell: {
-    border: '1px solid #ddd',
-    padding: '10px',
-  },
+        {/* Display Section */}
+        <Grid item xs={12} md={7}>
+          <Paper elevation={3} sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2, color: "#000000" }}>
+              Saved Semesters
+            </Typography>
+            <Box sx={{ maxHeight: 400, overflowY: "auto" }}>
+              <Table size="small" stickyHeader>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: "bold" }}>Semester ID</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>Description</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {semesters.map((semester, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{semester.semester_id}</TableCell>
+                      <TableCell>{semester.semester_description}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Box>
+  );
 };
 
 export default SemesterPanel;

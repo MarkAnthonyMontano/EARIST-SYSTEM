@@ -87,64 +87,80 @@ const DepartmentRoom = () => {
   };
 
   // Handle unassigning a room from a department
-const handleUnassignRoom = async (dprtmnt_room_id) => {
-  try {
-    await axios.delete(`http://localhost:5000/api/unassign/${dprtmnt_room_id}`);
-    fetchRoomAssignments();  // Re-fetch assignments after unassigning
-  } catch (err) {
-    console.log('Error unassigning room:', err);
-  }
-};
+  const handleUnassignRoom = async (dprtmnt_room_id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/unassign/${dprtmnt_room_id}`);
+      fetchRoomAssignments();  // Re-fetch assignments after unassigning
+    } catch (err) {
+      console.log('Error unassigning room:', err);
+    }
+  };
 
 
   return (
-    <Container maxWidth="lg" style={{ paddingTop: '20px' }}>
-      <Typography variant="h5" gutterBottom>
-        Assign Room to Department
-      </Typography>
+        <Box sx={{ height: "calc(100vh - 100px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
+    
+    
+     <Container sx={{ maxWidth: '1200px', mx: 'auto', mt: 3, px: 2 }}>
+         <Typography
+           variant="h4"
+           fontWeight="bold"
+           color="maroon"
+           textAlign="center"
+           gutterBottom
+         >
+           Department Room
+         </Typography>
+   
+    <Box display="flex" gap={2} alignItems="flex-start" mb={4}>
+  <Box width="50%">
+    <label style={{ fontWeight: 'bold', marginBottom: 4, display: 'block' }} htmlFor="room_id">Room Available:</label>
+    <Select
+      name="room_id"
+      value={room.room_id}
+      onChange={handleChange}
+      displayEmpty
+      fullWidth
+    >
+      <MenuItem value="">Select Available Room</MenuItem>
+      {roomList
+        .filter(room => !assignedRoomIds.includes(room.room_id))
+        .map((room) => (
+          <MenuItem key={room.room_id} value={room.room_id}>
+            {room.room_description}
+          </MenuItem>
+        ))}
+    </Select>
+  </Box>
 
-      <Box display="flex" gap={2} mb={4}>
-        <Select
-          name="room_id"
-          value={room.room_id}
-          onChange={handleChange}
-          displayEmpty
-          fullWidth
-        >
-          <MenuItem value="">Select Available Room</MenuItem>
-          {roomList
-            .filter(room => !assignedRoomIds.includes(room.room_id))
-            .map((room) => (
-              <MenuItem key={room.room_id} value={room.room_id}>
-                {room.room_description}
-              </MenuItem>
-          ))}
-        </Select>
+  <Box width="50%">
+    <label style={{ fontWeight: 'bold', marginBottom: 4, display: 'block' }} htmlFor="dprtmnt_id">Choose Department:</label>
+    <Select
+      name="dprtmnt_id"
+      value={room.dprtmnt_id}
+      onChange={handleChange}
+      displayEmpty
+      fullWidth
+    >
+      <MenuItem value="">Select Department</MenuItem>
+      {departmentList.map((dept) => (
+        <MenuItem key={dept.dprtmnt_id} value={dept.dprtmnt_id}>
+          {dept.dprtmnt_name}
+        </MenuItem>
+      ))}
+    </Select>
+  </Box>
 
-        <Select
-          name="dprtmnt_id"
-          value={room.dprtmnt_id}
-          onChange={handleChange}
-          displayEmpty
-          fullWidth
-        >
-          <MenuItem value="">Select Department</MenuItem>
-          {departmentList.map((dept) => (
-            <MenuItem key={dept.dprtmnt_id} value={dept.dprtmnt_id}>
-              {dept.dprtmnt_name}
-            </MenuItem>
-          ))}
-        </Select>
-
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleAssignRoom}
-          disabled={!room.room_id || !room.dprtmnt_id}
-        >
-          Save
-        </Button>
-      </Box>
+  <Button
+    variant="contained"
+    color="primary"
+    onClick={handleAssignRoom}
+    disabled={!room.room_id || !room.dprtmnt_id}
+    sx={{ height: 56, alignSelf: 'flex-end' }} // align with select fields
+  >
+    Save
+  </Button>
+</Box>
 
       <Typography variant="h6" gutterBottom>
         Department Room Assignments
@@ -177,7 +193,7 @@ const handleUnassignRoom = async (dprtmnt_room_id) => {
                     >
                       Room {room.room_description}
                       <Button
-                        onClick={() => handleUnassignRoom(room.room_id || room.dprtmnt_room_id)}  
+                        onClick={() => handleUnassignRoom(room.room_id || room.dprtmnt_room_id)}
                         size="small"
                         sx={{
                           position: 'absolute',
@@ -213,6 +229,7 @@ const handleUnassignRoom = async (dprtmnt_room_id) => {
       </Grid>
 
     </Container>
+    </Box>
   );
 };
 

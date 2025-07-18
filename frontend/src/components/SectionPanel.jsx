@@ -44,7 +44,10 @@ const SectionPanel = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 3 }}>
+      <Typography variant="h4" color="maroon" fontWeight="bold" textAlign="center" gutterBottom>
+        Section Panel Form
+      </Typography>
       <Box display="flex" gap={3}>
         {/* Left Form Section */}
         <Paper elevation={3} sx={{ flex: 1, p: 3 }}>
@@ -102,4 +105,3 @@ const SectionPanel = () => {
 };
 
 export default SectionPanel;
-  

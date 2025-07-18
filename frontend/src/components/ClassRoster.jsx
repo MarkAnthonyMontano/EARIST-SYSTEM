@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { Box, Typography } from '@mui/material';
 
 const ClassRoster = () => {
   const [departments, setDepartments] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [selectedDept, setSelectedDept] = useState(null);
 
-  // Fetch list of departments on page load
+  // Fetch departments
   const fetchDepartments = async () => {
     try {
       const response = await axios.get('http://localhost:5000/get_department');
@@ -17,16 +18,15 @@ const ClassRoster = () => {
     }
   };
 
-  // Fetch list of programs for the selected department
+  // Fetch programs by department
   const fetchPrograms = async (deptId) => {
-    setSelectedDept(deptId); // ✅ Set selected department immediately
-
+    setSelectedDept(deptId);
     try {
       const response = await axios.get(`http://localhost:5000/class_roster/ccs/${deptId}`);
       setPrograms(response.data);
     } catch (err) {
       console.error('Error fetching programs:', err);
-      setPrograms([]); // Clear programs on error
+      setPrograms([]);
     }
   };
 
@@ -35,55 +35,62 @@ const ClassRoster = () => {
   }, []);
 
   return (
-    <div className="p-4">
-      <h1 className="text-[20px] mt-[2rem] mb-[1rem] font-bold">Class Roster</h1>
+    <Box sx={{ maxWidth: '1200px', mx: 'auto', mt: 4, px: 2 }}>
+      <Typography
+        variant="h4"
+        fontWeight="bold"
+        color="#800000"
+        textAlign="center"
+        gutterBottom
+      >
+        Class Roster
+      </Typography>
 
-      <h3 className="mb-[1rem] font-semibold">Select a Department:</h3>
+      <Typography variant="h6" fontWeight="600" gutterBottom>
+        Select a Department:
+      </Typography>
 
-      {/* Department Buttons */}
-      <div className="flex flex-wrap gap-2">
+      <Box display="flex" flexWrap="wrap" gap={2} mb={3}>
         {departments.map(dept => (
           <button
             key={dept.dprtmnt_id}
             onClick={() => fetchPrograms(dept.dprtmnt_id)}
             className={`p-2 w-[100px] border border-black rounded font-semibold 
-              ${selectedDept === dept.dprtmnt_id ? 'bg-maroon-500 text-white' : 'text-black bg-white'}`}
+              ${selectedDept === dept.dprtmnt_id ? 'bg-[#800000] text-white' : 'text-black bg-white'}`}
           >
             {dept.dprtmnt_code}
           </button>
         ))}
-      </div>
+      </Box>
 
       {/* Program Section */}
-      <div className="mt-6">
-        {/* If department is selected but no programs */}
+      <Box mt={4}>
         {selectedDept && programs.length === 0 && (
-          <div className="text-gray-600 italic">
+          <Typography color="text.secondary" fontStyle="italic">
             There are no programs in the selected department.
-          </div>
+          </Typography>
         )}
 
-        {/* If programs are available */}
         {programs.length > 0 && (
           <>
-            <div className="font-bold mb-2">
+            <Typography fontWeight="bold" mb={1}>
               {programs[0].dprtmnt_name} ({programs[0].dprtmnt_code})
-            </div>
+            </Typography>
 
             {programs.map(program => (
-              <div key={program.program_id} className="mb-1">
+              <Box key={program.program_id} mb={1}>
                 <Link
                   to={`class_list/ccs/${program.curriculum_id}`}
                   className="text-blue-600 hover:underline"
                 >
                   {program.program_description} ({program.program_code})
                 </Link>
-              </div>
+              </Box>
             ))}
           </>
         )}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };
 

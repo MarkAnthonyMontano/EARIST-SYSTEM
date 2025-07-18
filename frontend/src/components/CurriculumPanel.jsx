@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
+import { Box, Typography } from "@mui/material";
 
 const CurriculumPanel = () => {
     const [curriculum, setCurriculum] = useState({ year_id: '', program_id: '' });
@@ -64,62 +65,72 @@ const CurriculumPanel = () => {
     };
 
     return (
-        <div style={styles.container}>
-            {/* Left side: Form */}
-            <div style={styles.panel}>
-                <h2 style={styles.header}>Insert Curriculum</h2>
+        <Box sx={{ maxWidth: "1200px", mx: "auto", mt: 3, px: 2 }}>
+            <Typography
+                variant="h4"
+                fontWeight="bold"
+                color="maroon"
+                textAlign="center"
+                gutterBottom
+            >
+                Curriculum Panel
+            </Typography>
+            <div style={styles.container}>
+                {/* Left side: Form */}
+                <div style={styles.panel}>
+                    <h2 style={styles.header}>Add Curriculum</h2>
+                    <div style={styles.inputGroup}>
+                        <label style={styles.label}>Curriculum Year:</label>
+                        <select name="year_id" value={curriculum.year_id} onChange={handleChange} style={styles.select}>
+                            <option value="">Choose Year</option>
+                            {yearList.map(year => (
+                                <option key={year.year_id} value={year.year_id}>
+                                    {year.year_description}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-                <div style={styles.inputGroup}>
-                    <label style={styles.label}>Curriculum Year:</label>
-                    <select name="year_id" value={curriculum.year_id} onChange={handleChange} style={styles.select}>
-                        <option value="">Choose Year</option>
-                        {yearList.map(year => (
-                            <option key={year.year_id} value={year.year_id}>
-                                {year.year_description}
-                            </option>
-                        ))}
-                    </select>
+                    <div style={styles.inputGroup}>
+                        <label style={styles.label}>Program:</label>
+                        <select name="program_id" value={curriculum.program_id} onChange={handleChange} style={styles.select}>
+                            <option value="">Choose Program</option>
+                            {programList.map(program => (
+                                <option key={program.program_id} value={program.program_id}>
+                                    {program.program_description} | {program.program_code}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <button style={styles.button} onClick={handleAddCurriculum}>Insert</button>
+                    {successMsg && <p style={styles.success}>{successMsg}</p>}
                 </div>
 
-                <div style={styles.inputGroup}>
-                    <label style={styles.label}>Program:</label>
-                    <select name="program_id" value={curriculum.program_id} onChange={handleChange} style={styles.select}>
-                        <option value="">Choose Program</option>
-                        {programList.map(program => (
-                            <option key={program.program_id} value={program.program_id}>
-                                {program.program_description} | {program.program_code}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                <button style={styles.button} onClick={handleAddCurriculum}>Insert</button>
-                {successMsg && <p style={styles.success}>{successMsg}</p>}
-            </div>
-
-            {/* Right side: Curriculum List */}
-            <div style={styles.listPanel}>
-                <h3 style={styles.listHeader}>Curriculum List</h3>
-                <table style={styles.table}>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Year</th>
-                            <th>Program</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {curriculumList.map(item => (
-                            <tr key={item.curriculum_id}>
-                                <td>{item.curriculum_id}</td>
-                                <td>{item.year_description}</td>
-                                <td>{item.program_description} ({item.program_code})</td>
+                {/* Right side: Curriculum List */}
+                <div style={styles.listPanel}>
+                    <h3 style={styles.listHeader}>Curriculum List</h3>
+                    <table style={styles.table}>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Year</th>
+                                <th>Program</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {curriculumList.map(item => (
+                                <tr key={item.curriculum_id}>
+                                    <td>{item.curriculum_id}</td>
+                                    <td>{item.year_description}</td>
+                                    <td>{item.program_description} ({item.program_code})</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
+        </Box>
     );
 };
 

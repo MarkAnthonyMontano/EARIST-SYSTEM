@@ -1,6 +1,8 @@
 
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Box, Typography } from '@mui/material'; // ✅ Import MUI components
+
 
 const YearUpdateForm = () => {
   const [years, setYears] = useState([]);
@@ -33,8 +35,16 @@ const YearUpdateForm = () => {
   }, []);
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold text-center mb-6">Year Update Form</h2>
+  <Box sx={{ maxWidth: 1200, mx: "auto", mt: 5, px: 2 }}>
+      <Typography
+        variant="h4"
+        align="center"
+        fontWeight="bold"
+        sx={{ color: "#800000", mb: 2}}
+      >
+        Year Update Form
+      </Typography>
+
       <div className="max-w-2xl mx-auto" style={{ maxHeight: 'calc(100vh - 220px)', overflowY: 'scroll'}}>
         <table className="w-full border-collapse shadow-md">
           <thead className="bg-gray-100">
@@ -66,7 +76,7 @@ const YearUpdateForm = () => {
           </tbody>
         </table>
       </div>
-    </div>
+   </Box>
   );
 };
 

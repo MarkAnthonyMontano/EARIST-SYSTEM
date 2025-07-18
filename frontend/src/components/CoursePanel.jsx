@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
+import {
+    Typography,
+
+} from '@mui/material';
 
 const CoursePanel = () => {
     const [course, setCourse] = useState({
@@ -53,7 +57,15 @@ const CoursePanel = () => {
 
     return (
         <div style={styles.panel}>
-            <h2 style={styles.header}>Course Panel</h2>
+            <Typography
+                variant="h4"
+                fontWeight="bold"
+                color="maroon"
+                textAlign="center"
+                gutterBottom
+            >
+                Course Panel
+            </Typography>
             <div style={styles.flexContainer}>
                 {/* Form on the Left */}
                 <div style={styles.leftPane}>

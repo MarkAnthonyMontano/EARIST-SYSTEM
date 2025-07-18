@@ -42,7 +42,7 @@ const CourseTagging = () => {
     const interval = setInterval(updateDate, 1000);
     return () => clearInterval(interval);
   }, []);
-  
+
   const [courses, setCourses] = useState([]);
   const [enrolled, setEnrolled] = useState([]);
   const [studentNumber, setStudentNumber] = useState("");
@@ -79,7 +79,7 @@ const CourseTagging = () => {
 
     } catch (err) {
       console.error("Failed to fetch subject counts", err);
-      
+
     }
   };
 
@@ -131,7 +131,7 @@ const CourseTagging = () => {
         setSections(response.data);
         setLoading(false);
       }, 700); // 3 seconds delay
-      
+
     } catch (err) {
       console.error("Error fetching department sections:", err);
       setError("Failed to load department sections");
@@ -147,7 +147,7 @@ const CourseTagging = () => {
     // Find the selected section object from the array
     const selectedSectionObj = sections.find(
       (section) => section.section_id === parseInt(sectionId)
-    );    
+    );
 
     // Do something with the selected section if needed
     console.log("Selected section:", selectedSectionObj);
@@ -205,7 +205,7 @@ const CourseTagging = () => {
       // Refresh enrolled courses list
       const { data } = await axios.get(`http://localhost:5000/enrolled_courses/${userId}/${currId}`);
       setEnrolled(data);
-      
+
     } catch (err) {
       console.error("Unexpected error during enrollment:", err);
     }
@@ -215,7 +215,7 @@ const CourseTagging = () => {
     try {
       // Delete the specific course
       await axios.delete(`http://localhost:5000/courses/delete/${id}`);
-      
+
       // Refresh enrolled courses list
       const { data } = await axios.get(`http://localhost:5000/enrolled_courses/${userId}/${currId}`);
       setEnrolled(data);
@@ -249,10 +249,10 @@ const CourseTagging = () => {
 
     try {
       const response = await axios.post("http://localhost:5000/student-tagging", { studentNumber }, { headers: { "Content-Type": "application/json" } });
-    
+
       const { token, person_id, studentNumber: studentNum, activeCurriculum: active_curriculum, yearLevel, courseCode: course_code, courseDescription: course_desc, firstName: first_name,
         middleName: middle_name, lastName: last_name, } = response.data;
-        
+
       localStorage.setItem("token", token);
       localStorage.setItem("person_id", person_id);
       localStorage.setItem("studentNumber", studentNum);
@@ -277,7 +277,7 @@ const CourseTagging = () => {
       alert(error.response?.data?.message || "Student not found");
     }
   };
-  
+
   // Fetch all departments when component mounts
   useEffect(() => {
     const fetchDepartments = async () => {
@@ -297,29 +297,55 @@ const CourseTagging = () => {
   };
 
   return (
-    <Container className="mt-8">
-      <Grid container spacing={4} gap={2} justifyContent="center" textAlign="center" style={{backgroundColor: "white", padding: "1rem 0rem"}}>
+    <Container className="mt-3">
+      <Typography
+        variant="h4"
+        fontWeight="bold"
+        color="maroon"
+        textAlign="center"
+        gutterBottom
+        mb={3}
+      >
+        Select Department
+      </Typography>
+      <Grid
+        container
+        spacing={4}
+        gap={2}
+        justifyContent="center"
+        textAlign="center"
+        style={{ backgroundColor: "white", padding: "1rem 0rem" }}
+      >
         {departments.map((dept, index) => (
           <Grid key={dept.dprtmnt_id}>
             <Button
               fullWidth
               key={index}
-              variant={selectedDepartment === dept.dprtmnt_id ? "contained" : "outlined"}
-              color={selectedDepartment === dept.dprtmnt_id ? "primary" : "inherit"}
+              variant="contained"
               value={dept.dprtmnt_id}
               onClick={() => handleSelect(dept.dprtmnt_id)}
+              sx={{
+                backgroundColor:
+                  selectedDepartment === dept.dprtmnt_id ? "maroon" : "white",
+                color: selectedDepartment === dept.dprtmnt_id ? "white" : "maroon",
+                border: "1px solid maroon",
+                "&:hover": {
+                  backgroundColor: "maroon",
+                  color: "white",
+                },
+              }}
             >
               {dept.dprtmnt_code}
             </Button>
           </Grid>
         ))}
       </Grid>
-      <Box p={4} display="grid" gridTemplateColumns="1fr 1fr" gap={4} style={{marginLeft: '-15rem',  height: 'calc(90vh - 120px)', overflowY: 'auto', overflowX: "hidden", width: '100rem'}}>
+      <Box p={4} display="grid" gridTemplateColumns="1fr 1fr" gap={4} style={{ marginLeft: '-15rem', height: 'calc(90vh - 120px)', overflowY: 'auto', overflowX: "hidden", width: '100rem' }}>
         {/* Available Courses */}
         <Box component={Paper} p={2}>
           {/* Search Student */}
           <Box>
-            <Typography variant="h6"> Name: &emsp;
+            <Typography variant="h6" > Name: &emsp;
               {first_name} {middle_name} {last_name}
               <br />
               Department/Course: &emsp;
@@ -395,7 +421,7 @@ const CourseTagging = () => {
         {/* Enrolled Courses */}
         <Box component={Paper} p={2}>
           <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle1" gutterBottom>
+            <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
               Department Section
             </Typography>
 
@@ -453,7 +479,7 @@ const CourseTagging = () => {
 
             <TableBody >
               {enrolled.map((e, idx) => (
-                
+
                 <TableRow key={idx} >
                   <TableCell style={{ display: "none" }}>{e.id}</TableCell>
                   <TableCell style={{ display: "none" }}>{e.course_id}</TableCell>

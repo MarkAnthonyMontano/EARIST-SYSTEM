@@ -527,11 +527,13 @@ const SearchCertificateOfGrades = () => {
             <Container sx={{ marginLeft: "40px", width: "100%", backgroundColor: "white", border: "2px solid black", padding: 4, borderRadius: 2, boxShadow: 3 }}>
 
               <Box>
-                <label className="w-40 font-medium">Student Number:</label>
-                <br />
+                <Typography variant="h4" color="maroon" fontWeight="bold" gutterBottom>
+                  Student Number:
+                </Typography>
+              
                 <TextField
                   label="Enter Student Number"
-                  style={{ width: "810px" }}
+                  style={{ width: "810px", marginTop: "-5px" }}
                   margin="normal"
                   value={studentNumber}
                   onChange={(e) => setStudentNumber(e.target.value)}

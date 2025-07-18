@@ -23,28 +23,41 @@ const ProfessorListPerSection = () => {
   const section_description = profList[0]?.section_description || "";
 
   return (
-    <div className="mr-[1rem]">
+    <div className="mt-3 flex justify-center">
       {profList.length === 0 ? (
         <p>No Professor Enrolled in this section</p>
       ) : (
-        <table border="1" cellPadding="8" cellSpacing="0" className="table-auto mt-[1rem] w-full border-collapse max-w-max border border-black">
+        <table
+          border="1"
+          cellPadding="8"
+          cellSpacing="0"
+          className="table-auto border-collapse border border-black"
+        >
           <thead>
             <tr>
-              <th colSpan={4}>Section {program_code} - {section_description} </th>
+              <th colSpan={4} className="text-center py-2">
+                Section {program_code} - {section_description}
+              </th>
             </tr>
             <tr>
-              <th className="border border-black">Course</th>
-              <th className="border border-black">Professor Name</th>
-              <th className="border border-black">Action</th>
+              <th className="border border-black px-4 py-2">Course</th>
+              <th className="border border-black px-4 py-2">Professor Name</th>
+              <th className="border border-black px-4 py-2">Action</th>
             </tr>
           </thead>
           <tbody>
             {profList.map((prof, index) => (
               <tr key={index}>
-                <td className="border border-black">{prof.course_description} ({prof.course_code})</td>
-                <td className="border border-black">{prof.fname} {prof.mname} {prof.lname}</td>
-                <td className="border border-black text-blue-400">
-                  <Link to={`/class_list/css/${curriculum_id}/${dstID}/${prof.course_id}/${prof.prof_id}`}>View Class</Link>
+                <td className="border border-black px-4 py-2">
+                  {prof.course_description} ({prof.course_code})
+                </td>
+                <td className="border border-black px-4 py-2">
+                  {prof.fname} {prof.mname} {prof.lname}
+                </td>
+                <td className="border border-black px-4 py-2 text-blue-500 underline">
+                  <Link to={`/class_list/css/${curriculum_id}/${dstID}/${prof.course_id}/${prof.prof_id}`}>
+                    View Class
+                  </Link>
                 </td>
               </tr>
             ))}

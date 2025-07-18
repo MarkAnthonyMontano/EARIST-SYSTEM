@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Box, Button, Typography, Paper } from '@mui/material';
 
 const StudentNumbering = () => {
     const [persons, setPersons] = useState([]);
@@ -34,54 +35,98 @@ const StudentNumbering = () => {
             });
             setAssignedNumber(res.data.student_number);
             setError('');
-            await fetchPersons(); // Reload the person list
-            setSelectedPerson(null); // Clear selection
+            await fetchPersons();
+            setSelectedPerson(null);
         } catch (err) {
-            if (err.response && err.response.data) {
-                setError(err.response.data);
-            } else {
-                setError('An error occurred.');
-            }
+            setError(err.response?.data || 'An error occurred.');
         }
     };
 
     return (
-        <div style={{ padding: '20px' }}>
-            <h1>Assign Student Number</h1>
-            <div style={{ display: 'flex', gap: '20px' }}>
-                <div style={{ flex: 1, height: '100%'}}>
-                    <h2 className=''>Person List</h2>
-                    {persons.length === 0 && <p>No available persons.</p>}
-                    <ul style={{ maxHeight: 'calc(100vh - 220px)', overflowY: 'scroll'}}>
+        <Box sx={{ padding: 4 }}>
+            <Typography variant="h4" fontWeight="bold" color="#800000" gutterBottom>
+                Assign Student Number
+            </Typography>
+
+            <Box display="flex" gap={4}>
+                {/* Person List */}
+                <Box flex={1}>
+                    <Typography variant="h6" fontWeight="bold" gutterBottom>
+                    Student List:
+                    </Typography>
+                    {persons.length === 0 && <Typography>No available persons.</Typography>}
+                    <Box sx={{ maxHeight: '70vh', overflowY: 'auto' }}>
                         {persons.map((person, index) => (
-                            <li key={person.person_id} className='p-2 border-[2px] mt-2 w-[20rem] cursor-pointer text-maroon-500 rounded border-maroon-500'>
-                                <button onClick={() => handlePersonClick(person)}>
-                                    {index + 1}.  {person.first_name} {person.middle_name} {person.last_name}
-                                </button>
-                            </li>
+                            <Paper
+                                key={person.person_id}
+                                onClick={() => handlePersonClick(person)}
+                                elevation={2}
+                                sx={{
+                                    p: 2,
+                                    mb: 2,
+                                    border: '2px solid #800000',
+                                    color: '#800000',
+                                    cursor: 'pointer',
+                                    '&:hover': {
+                                        backgroundColor: '#800000',
+                                        color: 'white',
+                                    },
+                                }}
+                            >
+                                <Typography>
+                                    {index + 1}. {person.first_name} {person.middle_name} {person.last_name}
+                                </Typography>
+                            </Paper>
                         ))}
-                    </ul>
-                </div>
-                <div style={{ flex: 1 }}>
-                    <h2>Selected Person</h2>
+                    </Box>
+                </Box>
+
+                {/* Selected Person + Result */}
+                <Box flex={1}>
+                    <Typography variant="h6" fontWeight="bold" gutterBottom>
+                        Selected Person
+                    </Typography>
+
                     {selectedPerson ? (
-                        <div>
-                            <p><strong>Name:</strong> {selectedPerson.first_name} {selectedPerson.middle_name} {selectedPerson.last_name}</p>
-                            <button onClick={handleAssignNumber} className='p-2 px-4 border-[2px] mt-2 rounded border-maroon-500 text-maroon-500'>Assign Student Number</button>
-                        </div>
+                        <Box>
+                            <Typography>
+                                <strong>Name:</strong> {selectedPerson.first_name} {selectedPerson.middle_name} {selectedPerson.last_name}
+                            </Typography>
+
+                            <Button
+                                variant="contained"
+                                sx={{
+                                    mt: 2,
+                                    backgroundColor: '#800000',
+                                    color: 'white',
+                                    '&:hover': {
+                                        backgroundColor: '#5e0000',
+                                    },
+                                }}
+                                onClick={handleAssignNumber}
+                            >
+                                Assign Student Number
+                            </Button>
+                        </Box>
                     ) : (
-                        <p>No person selected.</p>
+                        <Typography>No person selected.</Typography>
                     )}
+
                     {assignedNumber && (
-                        <p><strong>Assigned Student Number:</strong> {assignedNumber}</p>
+                        <Typography mt={2} color="green">
+                            <strong>Assigned Student Number:</strong> {assignedNumber}
+                        </Typography>
                     )}
+
                     {error && (
-                        <p style={{ color: 'red' }}>{error}</p>
+                        <Typography mt={2} color="error">
+                            {error}
+                        </Typography>
                     )}
-                </div>
-            </div>
-        </div>
+                </Box>
+            </Box>
+        </Box>
     );
-}
+};
 
 export default StudentNumbering;

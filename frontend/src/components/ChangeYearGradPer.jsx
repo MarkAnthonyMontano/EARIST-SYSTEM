@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Box, Typography } from '@mui/material'; // ✅ Import MUI components
 
 const ChangeGradingPeriod = () => {
   const [gradingPeriod, setGradingPeriod] = useState([]);
@@ -28,8 +29,16 @@ const ChangeGradingPeriod = () => {
   };
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.heading}>Grading Periods</h1>
+    <Box sx={styles.container}>
+      <Typography
+        variant="h4"
+        align="center"
+        fontWeight="bold"
+        sx={{ color: "#800000", mb: 2 }}
+      >
+        Grading Periods
+      </Typography>
+
       <div style={styles.periodList}>
         {gradingPeriod.map((period) => (
           <div key={period.id} style={styles.periodItem}>
@@ -49,26 +58,19 @@ const ChangeGradingPeriod = () => {
           </div>
         ))}
       </div>
-    </div>
+    </Box>
   );
 };
 
-// Styling object for better layout and design consistency
+// ✅ Styling object
 const styles = {
   container: {
+    maxWidth: 900,
+    margin: '30px auto',
     padding: '20px',
-    maxWidth: '900px',
-    margin: '0 auto',
     backgroundColor: '#f9f9f9',
     borderRadius: '8px',
-    marginTop: '30px',
     boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
-  },
-  heading: {
-    fontSize: '24px',
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: '20px',
   },
   periodList: {
     marginTop: '20px',
@@ -85,7 +87,7 @@ const styles = {
   },
   periodDescription: {
     fontSize: '18px',
-    fontWeight: '500',
+    fontWeight: 500,
     color: '#333',
   },
   buttonContainer: {
@@ -94,7 +96,7 @@ const styles = {
   },
   activateButton: {
     padding: '8px 15px',
-    backgroundColor: '#4CAF50', // Green for the "Activate" button
+    backgroundColor: '#4CAF50',
     color: 'white',
     border: 'none',
     borderRadius: '4px',

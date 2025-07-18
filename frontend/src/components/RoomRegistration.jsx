@@ -1,5 +1,18 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  Paper,
+  Grid,
+} from "@mui/material";
 
 const RoomRegistration = () => {
   const [roomName, setRoomName] = useState("");
@@ -31,115 +44,78 @@ const RoomRegistration = () => {
   };
 
   return (
-    <div style={styles.container}>
-      {/* Form Section */}
-      <div style={styles.formSection}>
-        <h2 style={styles.heading}>Room Registration</h2>
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Room Name:</label>
-          <input
-            type="text"
-            placeholder="Enter room name"
-            value={roomName}
-            onChange={(e) => setRoomName(e.target.value)}
-            style={styles.input}
-          />
-        </div>
-        <button onClick={handleAddRoom} style={styles.button}>Save</button>
-      </div>
+    <Box sx={{ maxWidth: 1200, mx: "auto", mt: 5, px: 2 }}>
+      <Typography
+        variant="h4"
+        align="center"
+        fontWeight="bold"
+        sx={{ color: "#800000", mb: 4 }}
+      >
+        Room Registration Panel
+      </Typography>
 
-      {/* Display Section */}
-      <div style={styles.displaySection}>
-        <h2 style={styles.heading}>Registered Rooms</h2>
-        <div style={styles.scrollableTableContainer}>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.tableCell}>Room ID</th>
-                <th style={styles.tableCell}>Room Name</th>
-              </tr>
-            </thead>
-            <tbody>
-              {roomList.map((room, index) => (
-                <tr key={index}>
-                  <td style={styles.tableCell}>{room.room_id}</td>
-                  <td style={styles.tableCell}>{room.room_description}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+      <Grid container spacing={4}>
+        {/* Form Section */}
+        <Grid item xs={12} md={5}>
+          <Paper elevation={3} sx={{ p: 3,  }}>
+            <Typography variant="h6" sx={{ mb: 2, color: "#000000", }}>
+              Register New Room
+            </Typography>
+
+            <TextField
+              fullWidth
+              label="Room Name"
+              
+              variant="outlined"
+              value={roomName}
+              onChange={(e) => setRoomName(e.target.value)}
+              sx={{ mb: 2, }}
+            />
+
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={handleAddRoom}
+              sx={{
+                backgroundColor: "#800000",
+                "&:hover": { backgroundColor: "#a00000" },
+              }}
+            >
+              Save
+            </Button>
+          </Paper>
+        </Grid>
+
+        {/* Room List Section */}
+        <Grid item xs={12} md={7}>
+          <Paper elevation={3} sx={{ p: 3 }}>
+            <Typography variant="h6" sx={{ mb: 2, color: "#000000" }}>
+              Registered Rooms
+            </Typography>
+
+            <Box sx={{ maxHeight: 400, overflowY: "auto" }}>
+              <Table stickyHeader size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: "bold" }}>Room ID</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>Room Name</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {roomList.map((room, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{room.room_id}</TableCell>
+                      <TableCell>{room.room_description}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Box>
   );
-};
-
-// Simplified inline styles
-const styles = {
-  container: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    maxWidth: '1000px',
-    margin: '40px auto',
-    padding: '20px',
-    backgroundColor: '#f9f9f9',
-    borderRadius: '10px',
-  },
-  formSection: {
-    width: '45%',
-    padding: '20px',
-    borderRadius: '8px',
-    backgroundColor: 'white',
-    boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-  },
-  displaySection: {
-    width: '50%',
-    padding: '20px',
-    borderRadius: '8px',
-    backgroundColor: 'white',
-    boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-  },
-  heading: {
-    fontSize: '20px',
-    marginBottom: '20px',
-    color: '#333',
-  },
-  formGroup: {
-    marginBottom: '20px',
-  },
-  label: {
-    display: 'block',
-    marginBottom: '8px',
-    fontWeight: 'bold',
-  },
-  input: {
-    width: '100%',
-    padding: '10px',
-    borderRadius: '5px',
-    border: '1px solid #ccc',
-  },
-  button: {
-    width: '100%',
-    padding: '12px',
-    backgroundColor: 'maroon',
-    color: 'white',
-    fontSize: '16px',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-  },
-  scrollableTableContainer: {
-    maxHeight: '400px',
-    overflowY: 'auto',
-  },
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-  },
-  tableCell: {
-    border: '1px solid #ddd',
-    padding: '10px',
-  },
 };
 
 export default RoomRegistration;

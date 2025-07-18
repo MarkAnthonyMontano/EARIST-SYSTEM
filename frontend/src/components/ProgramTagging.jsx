@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Box, Typography } from "@mui/material"; 
 
 const ProgramTagging = () => {
   const [progTag, setProgTag] = useState({
@@ -99,10 +100,19 @@ const ProgramTagging = () => {
   };
 
   return (
+    <Box sx={{ maxWidth: "1200px", mx: "auto", mt: 5, px: 2 }}>
+    <Typography
+      variant="h4"
+      fontWeight="bold"
+      color="maroon"
+      textAlign="center"
+      gutterBottom
+    >
+      Program and Course Management
+    </Typography>
     <div style={styles.container}>
       <div style={styles.formSection}>
-        <h2 style={styles.heading}>Program and Course Management</h2>
-
+    
         <div style={styles.formGroup}>
           <label style={styles.label}>Curriculum:</label>
           <select
@@ -206,6 +216,7 @@ const ProgramTagging = () => {
         </div>
       </div>
     </div>
+    </Box>
   );
 };
 

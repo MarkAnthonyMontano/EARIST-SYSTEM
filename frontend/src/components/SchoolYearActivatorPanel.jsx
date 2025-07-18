@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import {
+  Typography,
+
+} from '@mui/material';
+
 
 const SchoolYearActivatorPanel = () => {
     const [schoolYears, setSchoolYears] = useState([]);
@@ -39,7 +44,9 @@ const SchoolYearActivatorPanel = () => {
 
     return (
         <div className="p-4 max-w-2xl mx-auto">
-            <h2 className="text-xl font-bold mb-4 text-center">School Year Activator Panel</h2>
+           <Typography variant="h4" color="maroon" fontWeight="bold" textAlign="center" gutterBottom>
+       School Year Activator Panel
+      </Typography>
             <table className="w-full border border-gray-300" >
                 <thead>
                     <tr className="bg-gray-200">

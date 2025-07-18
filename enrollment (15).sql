@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 17, 2025 at 10:27 AM
+-- Generation Time: Jul 18, 2025 at 08:24 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -317,13 +317,13 @@ CREATE TABLE `dprtmnt_profs_table` (
 --
 
 INSERT INTO `dprtmnt_profs_table` (`dprtmnt_profs_id`, `dprtmnt_id`, `prof_id`) VALUES
-(1, 1, 1),
+(1, 5, 1),
 (2, 5, 2),
 (3, 5, 3),
 (4, 5, 4),
 (5, 5, 5),
 (6, 5, 6),
-(7, 5, 7),
+(7, 2, 7),
 (8, 5, 8),
 (9, 5, 9),
 (10, 5, 10),
@@ -335,7 +335,7 @@ INSERT INTO `dprtmnt_profs_table` (`dprtmnt_profs_id`, `dprtmnt_id`, `prof_id`) 
 (16, 2, 16),
 (17, 2, 17),
 (18, 2, 18),
-(19, 2, 19),
+(19, 5, 19),
 (20, 2, 20),
 (21, 2, 21),
 (22, 2, 22),
@@ -353,7 +353,17 @@ INSERT INTO `dprtmnt_profs_table` (`dprtmnt_profs_id`, `dprtmnt_id`, `prof_id`) 
 (34, 2, 26),
 (35, 2, 27),
 (36, 2, 29),
-(37, 2, 30);
+(37, 2, 30),
+(38, 11, 59),
+(39, 5, 60),
+(40, 5, 28),
+(41, 5, 37),
+(42, 5, 34),
+(43, 5, 31),
+(44, 5, 36),
+(45, 5, 32),
+(46, 5, 33),
+(47, 5, 35);
 
 -- --------------------------------------------------------
 
@@ -376,7 +386,14 @@ INSERT INTO `dprtmnt_room_table` (`dprtmnt_room_id`, `dprtmnt_id`, `room_id`, `l
 (3, 5, 3, 0),
 (4, 5, 4, 0),
 (5, 5, 5, 0),
-(12, 1, 2, 0);
+(13, 2, 13, 0),
+(14, 2, 14, 0),
+(15, 2, 15, 0),
+(16, 2, 16, 0),
+(17, 2, 17, 0),
+(18, 2, 18, 0),
+(19, 2, 19, 0),
+(20, 2, 20, 0);
 
 -- --------------------------------------------------------
 
@@ -520,17 +537,6 @@ INSERT INTO `enrolled_subject` (`id`, `student_number`, `curriculum_id`, `course
 (98, 202400011, 1, 4, 1, 0, 0, 0, 0, 1, 0),
 (99, 202400011, 1, 10, 1, 0, 0, 0, 0, 1, 0),
 (100, 202400011, 1, 11, 1, 0, 0, 0, 0, 1, 0),
-(101, 202400012, 1, 1, 1, 0, 0, 0, 0, 1, 0),
-(102, 202400012, 1, 4, 1, 0, 0, 0, 0, 1, 0),
-(103, 202400012, 1, 8, 1, 0, 0, 0, 0, 1, 0),
-(104, 202400012, 1, 6, 1, 0, 0, 0, 0, 1, 0),
-(105, 202400012, 1, 7, 1, 0, 0, 0, 0, 1, 0),
-(106, 202400012, 1, 5, 1, 0, 0, 0, 0, 1, 0),
-(107, 202400012, 1, 3, 1, 0, 0, 0, 0, 1, 0),
-(108, 202400012, 1, 9, 1, 0, 0, 0, 0, 1, 0),
-(109, 202400012, 1, 2, 1, 0, 0, 0, 0, 1, 0),
-(110, 202400012, 1, 11, 1, 0, 0, 0, 0, 1, 0),
-(111, 202400012, 1, 10, 1, 0, 0, 0, 0, 1, 0),
 (112, 202400013, 1, 1, 1, 0, 0, 0, 0, 1, 0),
 (113, 202400013, 1, 5, 1, 0, 0, 0, 0, 1, 0),
 (114, 202400013, 1, 6, 1, 0, 0, 0, 0, 1, 0),
@@ -606,7 +612,10 @@ CREATE TABLE `person_status_table` (
 
 INSERT INTO `person_status_table` (`id`, `person_id`, `exam_status`, `requirements`, `residency`, `student_registration_status`, `exam_result`, `hs_ave`) VALUES
 (20, 1, 0, 0, 0, 1, 0, 0),
-(21, 3, 0, 0, 0, 1, 0, 0);
+(21, 3, 0, 0, 0, 1, 0, 0),
+(22, 2, 0, 0, 0, 1, 0, 0),
+(23, 4, 0, 0, 0, 0, 0, 0),
+(24, 5, 0, 0, 0, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -768,7 +777,10 @@ CREATE TABLE `person_table` (
 
 INSERT INTO `person_table` (`person_id`, `profile_img`, `campus`, `academicProgram`, `classifiedAs`, `program`, `program2`, `program3`, `yearLevel`, `last_name`, `first_name`, `middle_name`, `extension`, `nickname`, `height`, `weight`, `lrnNumber`, `nolrnNumber`, `gender`, `pwdMember`, `pwdType`, `pwdId`, `birthOfDate`, `age`, `birthPlace`, `languageDialectSpoken`, `citizenship`, `religion`, `civilStatus`, `tribeEthnicGroup`, `cellphoneNumber`, `emailAddress`, `presentStreet`, `presentBarangay`, `presentZipCode`, `presentRegion`, `presentProvince`, `presentMunicipality`, `presentDswdHouseholdNumber`, `sameAsPresentAddress`, `permanentStreet`, `permanentBarangay`, `permanentZipCode`, `permanentRegion`, `permanentProvince`, `permanentMunicipality`, `permanentDswdHouseholdNumber`, `solo_parent`, `father_deceased`, `father_family_name`, `father_given_name`, `father_middle_name`, `father_ext`, `father_nickname`, `father_education`, `father_education_level`, `father_last_school`, `father_course`, `father_year_graduated`, `father_school_address`, `father_contact`, `father_occupation`, `father_employer`, `father_income`, `father_email`, `mother_deceased`, `mother_family_name`, `mother_given_name`, `mother_middle_name`, `mother_ext`, `mother_nickname`, `mother_education`, `mother_education_level`, `mother_last_school`, `mother_course`, `mother_year_graduated`, `mother_school_address`, `mother_contact`, `mother_occupation`, `mother_employer`, `mother_income`, `mother_email`, `guardian`, `guardian_family_name`, `guardian_given_name`, `guardian_middle_name`, `guardian_ext`, `guardian_nickname`, `guardian_address`, `guardian_contact`, `guardian_email`, `annual_income`, `schoolLevel`, `schoolLastAttended`, `schoolAddress`, `courseProgram`, `honor`, `generalAverage`, `yearGraduated`, `schoolLevel1`, `schoolLastAttended1`, `schoolAddress1`, `courseProgram1`, `honor1`, `generalAverage1`, `yearGraduated1`, `strand`, `cough`, `colds`, `fever`, `asthma`, `faintingSpells`, `heartDisease`, `tuberculosis`, `frequentHeadaches`, `hernia`, `chronicCough`, `headNeckInjury`, `hiv`, `highBloodPressure`, `diabetesMellitus`, `allergies`, `cancer`, `smokingCigarette`, `alcoholDrinking`, `hospitalized`, `hospitalizationDetails`, `medications`, `hadCovid`, `covidDate`, `vaccine1Brand`, `vaccine1Date`, `vaccine2Brand`, `vaccine2Date`, `booster1Brand`, `booster1Date`, `booster2Brand`, `booster2Date`, `chestXray`, `cbc`, `urinalysis`, `otherworkups`, `symptomsToday`, `remarks`, `termsOfAgreement`) VALUES
 (1, '1_1by1_2025.jpg', 0, 'Undergraduate', 'Freshman (First Year)', NULL, '6', '6', 'First Year', 'Does', 'Johncena15', 'MichaelHello', 'V', 'Johnny', '5\'11', '65kg', '1234567890', 0, 0, 0, '', '', '2003-06-20', 21, 'Manila, Philippines', 'Tagalog, English', 'FILIPINO', 'Born Again', 'Single', 'Agta', '09171234567999999', 'johndoe@email.com', '19 G Dona Yayang Street ', 'Libis', '1000', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'Quezon City', 'DSWD123456', 0, '19 G Dona Yayang Street ', 'Libis', '1000', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'Quezon City', 'DSWD123456', 0, 0, 'Doe Sr.', 'Jonathan', 'Smiths', 'III', 'Jon', 0, '', '', '', '', '', '09181234567', 'Engineer', 'ABC Corp', '50000', 'jon.doe@abc.com', 0, 'Jane', 'Mary', 'Anne', '', 'Janey', 0, '', '', '', '', '', '09221234567', 'Accountant', 'XYZ Corp', '45000', 'jane.doe@xyz.com', 'StepFather', 'Parker', 'Ben', 'Jose', 'IV', 'Benny', '789 Recto Av', '09192233445', '', '80,000 and below', 'Senior High School', 'CGEAHS', 'Pasig City', 'STEM', 'With Honors', 92.50, 2022, 'Senior High School', 'CGEAHS', 'Rizal High School', 'Rizal High School', '', 100.00, 0, 'Information and Communications Technology (ICT)', 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Wala ngani', 'Vitamins C', 1, '2022-02-11', 'Pfizer', '2022-03-14', 'Pfizer', '2022-04-13', 'Moderna', '2022-07-14', 'Pfizer', '2023-01-14', 'Normal', 'Normal', 'Normal', 'Normal', 1, 'Fit to enroll', 1),
-(3, '3_1by1_2025.jpg', 1, 'Techvoc', 'Freshman (First Year)', '7', '4', '3', 'First Year', 'Montano', 'Mark Anthony', 'p.', '', 'MARK', '5\'11', '65', '123456789012', NULL, 0, NULL, '', '', '2003-06-26', 21, 'Manila, Philippines', 'Tagalog, English', 'ALGERIAN', 'Iglesia Ni Cristo', 'Single', 'Cebuano', '09953242510', 'montano.ma.bsinfotech@gmail.com', '19 G Dona yayang Street Libis', 'Pag-asa', '4100', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'City Of Mandaluyong', 'DSWD123456', NULL, '19 G Dona yayang Street Libis', 'Malipayon', '4100', 'Region X (Northern Mindanao)', 'Bukidnon', 'Pangantucan', 'DSWD123456', 0, 0, '', '', '', '', '', 0, '', '', '', '', '', '', '', '', '', '', 0, '', '', '', '', '', 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0.00, 0, '', '', '', '', '', 0.00, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0, '', '', '', '', '', '', '', '', '', '', '', '', '', 0, '', 0);
+(3, '3_1by1_2025.jpg', 1, 'Techvoc', 'Freshman (First Year)', '7', '4', '3', 'First Year', 'Montano', 'Mark Anthony', 'p.', '', 'MARK', '5\'11', '65', '123456789012', NULL, 0, NULL, '', '', '2003-06-26', 21, 'Manila, Philippines', 'Tagalog, English', 'ALGERIAN', 'Iglesia Ni Cristo', 'Single', 'Cebuano', '09953242510', 'montano.ma.bsinfotech@gmail.com', '19 G Dona yayang Street Libis', 'Pag-asa', '4100', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'City Of Mandaluyong', 'DSWD123456', NULL, '19 G Dona yayang Street Libis', 'Malipayon', '4100', 'Region X (Northern Mindanao)', 'Bukidnon', 'Pangantucan', 'DSWD123456', 0, 0, '', '', '', '', '', 0, '', '', '', '', '', '', '', '', '', '', 0, '', '', '', '', '', 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0.00, 0, '', '', '', '', '', 0.00, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0, '', '', '', '', '', '', '', '', '', '', '', '', '', 0, '', 0),
+(2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Torres', 'Aira Lorainne', 'S', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(4, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Ciruela', 'Genny', 'D.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Dela Cruz', 'Lloyd Cedrick', 'P.', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -824,14 +836,13 @@ INSERT INTO `prof_table` (`prof_id`, `person_id`, `profile_image`, `fname`, `mna
 (28, NULL, '', 'Al', 'Ferrer', 'Santiago', 'al.santiago@earist.edu.ph', 'SANTIAGO', 0, 'faculty'),
 (29, NULL, '', 'Larex', 'Bartolome', 'Tagalog', 'larex.tagalog@earist.edu.ph', 'TAGALOG', 0, 'faculty'),
 (30, NULL, '', 'Jayson', 'D.', 'Tolentino', 'jayson.tolentino@earist.edu.ph', 'TOLENTINO', 0, 'faculty'),
-(31, NULL, '', 'Edmund Sinagub', '', 'Almazan', 'edmund.almazan@earist.edu.ph', 'ALMAZAN', 0, 'faculty'),
+(31, NULL, '', 'Edmund Sinagub', NULL, 'Almazan', 'edmund.almazan@earist.edu.ph', 'ALMAZAN', 0, 'faculty'),
 (32, NULL, '', 'Jesus', 'de los Santos', 'Paguigan', 'jesus.paguigan@earist.edu.ph', 'PAGUIGAN', 0, 'faculty'),
-(33, NULL, '', 'Kathleen', '', 'Dimaano', 'kathleen.dimaano@earist.edu.ph', 'DIMAANO', 0, 'faculty'),
-(34, NULL, '', 'Charlene', '', 'Ronda', 'charlene.ronda@earist.edu.ph', 'RONDA', 0, 'faculty'),
-(35, NULL, '', 'Maria Jasmine', '', 'Macasil', 'jasmine.macasil@earist.edu.ph', 'MACASIL', 0, 'faculty'),
-(36, NULL, '', 'Jefferson', '', 'Costales', 'jefferson.costales@earist.edu.ph', 'COSTALES', 0, 'faculty'),
-(37, NULL, '', 'Arjo', '', 'Ladia', 'arjo.ladia@earist.edu.ph', 'LADIA', 0, 'faculty'),
-(55, NULL, '55_ProfessorProfile_2025.jpg', 'Mark Anthony', 'P.', 'Montano', 'Ardenmecasio21@gmail.com', '$2b$10$kkxP/eE6XoIrFOXLhSyWseU9j3suBafQ2FX6MH5.ffzfeGsFDOA3S', 0, 'faculty');
+(33, NULL, '', 'Kathleen', NULL, 'Dimaano', 'kathleen.dimaano@earist.edu.ph', 'DIMAANO', 0, 'faculty'),
+(34, NULL, '', 'Charlene', NULL, 'Ronda', 'charlene.ronda@earist.edu.ph', 'RONDA', 0, 'faculty'),
+(35, NULL, '', 'Maria Jasmine', NULL, 'Macasil', 'jasmine.macasil@earist.edu.ph', 'MACASIL', 0, 'faculty'),
+(36, NULL, '', 'Jefferson', NULL, 'Costales', 'jefferson.costales@earist.edu.ph', 'COSTALES', 0, 'faculty'),
+(37, NULL, '', 'Arjo', NULL, 'Ladia', 'arjo.ladia@earist.edu.ph', 'LADIA', 0, 'faculty');
 
 -- --------------------------------------------------------
 
@@ -1089,7 +1100,15 @@ INSERT INTO `room_table` (`room_id`, `room_description`) VALUES
 (4, 'CCS Room 302'),
 (5, 'CCS Room 303'),
 (11, 'CSS Room 203'),
-(12, 'CAS Room 204');
+(12, 'CAS Room 204'),
+(13, 'CAS Room 401'),
+(14, 'CAS Room 402'),
+(15, 'CAS Room 403'),
+(16, 'CAS Room 404'),
+(17, 'CAS Room 405'),
+(18, 'CAS Room 406'),
+(19, 'CAS Room 409'),
+(20, 'CAS Room 411');
 
 -- --------------------------------------------------------
 
@@ -1204,8 +1223,8 @@ CREATE TABLE `student_counter` (
 --
 
 INSERT INTO `student_counter` (`id`, `que_number`) VALUES
-(1, 13),
-(2, 13);
+(1, 14),
+(2, 14);
 
 -- --------------------------------------------------------
 
@@ -1259,7 +1278,8 @@ CREATE TABLE `student_numbering_table` (
 
 INSERT INTO `student_numbering_table` (`student_number`, `person_id`) VALUES
 (202400012, 3),
-(202400013, 1);
+(202400013, 1),
+(202400014, 2);
 
 -- --------------------------------------------------------
 
@@ -1283,7 +1303,8 @@ CREATE TABLE `student_status_table` (
 
 INSERT INTO `student_status_table` (`id`, `student_number`, `active_curriculum`, `enrolled_status`, `year_level_id`, `active_school_year_id`, `control_status`) VALUES
 (5, 202400012, 1, '1', 1, 1, 0),
-(6, 202400013, 1, '1', 1, 1, 0);
+(6, 202400013, 1, '1', 1, 1, 0),
+(7, 202400014, 1, '1', 1, 1, 0);
 
 -- --------------------------------------------------------
 
@@ -1627,13 +1648,13 @@ ALTER TABLE `dprtmnt_curriculum_table`
 -- AUTO_INCREMENT for table `dprtmnt_profs_table`
 --
 ALTER TABLE `dprtmnt_profs_table`
-  MODIFY `dprtmnt_profs_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `dprtmnt_profs_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- AUTO_INCREMENT for table `dprtmnt_room_table`
 --
 ALTER TABLE `dprtmnt_room_table`
-  MODIFY `dprtmnt_room_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `dprtmnt_room_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `dprtmnt_section_table`
@@ -1645,7 +1666,7 @@ ALTER TABLE `dprtmnt_section_table`
 -- AUTO_INCREMENT for table `dprtmnt_table`
 --
 ALTER TABLE `dprtmnt_table`
-  MODIFY `dprtmnt_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `dprtmnt_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `enrolled_subject`
@@ -1669,7 +1690,7 @@ ALTER TABLE `person_prof_table`
 -- AUTO_INCREMENT for table `person_status_table`
 --
 ALTER TABLE `person_status_table`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `person_table`
@@ -1681,7 +1702,7 @@ ALTER TABLE `person_table`
 -- AUTO_INCREMENT for table `prof_table`
 --
 ALTER TABLE `prof_table`
-  MODIFY `prof_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=56;
+  MODIFY `prof_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
 
 --
 -- AUTO_INCREMENT for table `program_table`
@@ -1717,7 +1738,7 @@ ALTER TABLE `room_day_table`
 -- AUTO_INCREMENT for table `room_table`
 --
 ALTER TABLE `room_table`
-  MODIFY `room_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `room_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `school_time_table`
@@ -1765,7 +1786,7 @@ ALTER TABLE `student_numbering_table`
 -- AUTO_INCREMENT for table `student_status_table`
 --
 ALTER TABLE `student_status_table`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `time_table`

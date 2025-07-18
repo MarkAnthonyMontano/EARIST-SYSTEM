@@ -1596,17 +1596,31 @@ app.get("/department_section", async (req, res) => {
 // Fetch all professors
 app.get("/api/professors", async (req, res) => {
   try {
-    const [rows] = await db3.query("SELECT * FROM prof_table");
+    const [rows] = await db3.query(`
+   SELECT 
+  pft.prof_id,
+  pft.person_id,
+  pft.fname,
+  pft.mname,
+  pft.lname,
+   pft.email,
+  MIN(dpt.dprtmnt_name) AS dprtmnt_name
+FROM dprtmnt_profs_table AS dpft 
+INNER JOIN prof_table AS pft ON dpft.prof_id = pft.prof_id
+INNER JOIN dprtmnt_table AS dpt ON dpft.dprtmnt_id = dpt.dprtmnt_id
+GROUP BY pft.prof_id
+    `);
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: "Failed to retrieve professors", details: err.message });
   }
 });
 
+
 // ADD PROFESSOR ROUTE (Consistent with /api)
 app.post("/api/register_prof", upload.single("profileImage"), async (req, res) => {
   try {
-    const { person_id, fname, mname, lname, email, password, role } = req.body;
+    const { person_id, fname, mname, lname, email, password, dprtmnt_id, role } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
 
     let profileImage = null;
@@ -1622,7 +1636,12 @@ app.post("/api/register_prof", upload.single("profileImage"), async (req, res) =
     const sql = `INSERT INTO prof_table (person_id, fname, mname, lname, email, password, role, profile_image)
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
     const values = [person_id, fname, mname, lname, email, hashedPassword, role, profileImage];
-    await db3.query(sql, values);
+
+    const [result] = await db3.query(sql, values);
+    const prof_id = result.insertId;
+
+    const sql2 = `INSERT INTO dprtmnt_profs_table (dprtmnt_id, prof_id) VALUES (?, ?)`;
+    await db3.query(sql2, [dprtmnt_id, prof_id]);
 
     res.status(201).json({ message: "Professor added successfully" });
   } catch (err) {
@@ -1634,59 +1653,81 @@ app.post("/api/register_prof", upload.single("profileImage"), async (req, res) =
 
 // Update professor info
 app.put("/api/update_prof/:id", upload.single("profileImage"), async (req, res) => {
-  const { id } = req.params;
-  const { person_id, fname, mname, lname, email, password, role } = req.body;
+  const id = req.params.id;
+  const { person_id, fname, mname, lname, email, password, dprtmnt_id, role } = req.body;
 
   try {
-    const updates = [];
-    const values = [];
+    const checkSQL = `SELECT * FROM prof_table WHERE email = ? AND prof_id != ?`;
+    const [existingRows] = await db3.query(checkSQL, [email, id]);
 
-    // Add FF fields
-    if (person_id) { updates.push("person_id = ?"); values.push(person_id); }
-    if (fname) { updates.push("fname = ?"); values.push(fname); }
-    if (mname) { updates.push("mname = ?"); values.push(mname); }
-    if (lname) { updates.push("lname = ?"); values.push(lname); }
-    if (email) { updates.push("email = ?"); values.push(email); }
-    if (role) { updates.push("role = ?"); values.push(role); }
-
-    if (password) {
-      const hashed = await bcrypt.hash(password, 10);
-      updates.push("password = ?");
-      values.push(hashed);
+    if (existingRows.length > 0) {
+      return res.status(400).json({ error: "Email already exists for another professor." });
     }
 
-    if (req.file) {
-      const year = new Date().getFullYear();
-      const ext = path.extname(req.file.originalname).toLowerCase();
-      const filename = `${id}_ProfessorProfile_${year}${ext}`;
-      const uploadsDir = path.join(__dirname, "uploads");
+    let profileImage = req.file ? req.file.filename : null;
+    let updateSQL;
+    let values;
 
-      // Remove old files matching pattern
-      const files = await fs.promises.readdir(uploadsDir);
-      const old = files.filter(f => f.startsWith(`${id}_ProfessorProfile_${year}`));
-      for (const f of old) {
-        try { await fs.promises.unlink(path.join(uploadsDir, f)); }
-        catch (err) { console.warn("Could not delete", f, err.message); }
+    if (password && profileImage) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updateSQL = `
+        UPDATE prof_table 
+        SET person_id = ?, fname = ?, mname = ?, lname = ?, email = ?, password = ?, role = ?, profile_image = ?
+        WHERE prof_id = ?
+      `;
+      values = [person_id, fname, mname, lname, email, hashedPassword, role, profileImage, id];
+    } else if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updateSQL = `
+        UPDATE prof_table 
+        SET person_id = ?, fname = ?, mname = ?, lname = ?, email = ?, password = ?, role = ?
+        WHERE prof_id = ?
+      `;
+      values = [person_id, fname, mname, lname, email, hashedPassword, role, id];
+    } else if (profileImage) {
+      updateSQL = `
+        UPDATE prof_table 
+        SET person_id = ?, fname = ?, mname = ?, lname = ?, email = ?, role = ?, profile_image = ?
+        WHERE prof_id = ?
+      `;
+      values = [person_id, fname, mname, lname, email, role, profileImage, id];
+    } else {
+      updateSQL = `
+        UPDATE prof_table 
+        SET person_id = ?, fname = ?, mname = ?, lname = ?, email = ?, role = ?
+        WHERE prof_id = ?
+      `;
+      values = [person_id, fname, mname, lname, email, role, id];
+    }
+
+    await db3.query(updateSQL, values);
+
+    if (dprtmnt_id) {
+      const [existing] = await db3.query(
+        `SELECT * FROM dprtmnt_profs_table WHERE prof_id = ?`,
+        [id]
+      );
+
+      if (existing.length > 0) {
+        await db3.query(
+          `UPDATE dprtmnt_profs_table SET dprtmnt_id = ? WHERE prof_id = ?`,
+          [dprtmnt_id, id]
+        );
+      } else {
+        await db3.query(
+          `INSERT INTO dprtmnt_profs_table (dprtmnt_id, prof_id) VALUES (?, ?)`,
+          [dprtmnt_id, id]
+        );
       }
-
-      // Save new
-      await fs.promises.writeFile(path.join(uploadsDir, filename), req.file.buffer);
-      updates.push("profile_image = ?");
-      values.push(filename);
     }
 
-    if (!updates.length) return res.status(400).json({ error: "No fields to update" });
-
-    const sql = `UPDATE prof_table SET ${updates.join(", ")} WHERE prof_id = ?`;
-    values.push(id);
-
-    await db3.query(sql, values);
-    res.json({ message: "Professor updated successfully" });
+    res.json({ success: true, message: "Professor updated successfully." });
   } catch (err) {
-    console.error("Update error:", err);
-    res.status(500).json({ error: "Failed to update professor", details: err.message });
+    console.error("Error updating professor:", err);
+    res.status(500).json({ error: "Internal server error." });
   }
 });
+
 
 // Toggle professor status (Active/Inactive)
 app.put("/api/update_prof_status/:id", async (req, res) => {

@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import {
+  Typography,
+
+} from '@mui/material';
+
 
 const RequirementsForm = () => {
   const [description, setDescription] = useState("");
@@ -47,9 +52,9 @@ const RequirementsForm = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h2 className="text-2xl font-semibold text-center text-black mb-6">
+      <Typography variant="h4" color="maroon" fontWeight="bold" textAlign="center" gutterBottom>
         Manage Requirements
-      </h2>
+      </Typography>
 
       <div className="flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-8">
         {/* Left Side - Form */}
@@ -79,7 +84,7 @@ const RequirementsForm = () => {
 
         {/* Right Side - Display Saved Requirements */}
         <div className="md:w-1/2 bg-gray-50 p-6 rounded-lg shadow-sm max-h-96 overflow-y-auto">
-          <h3 className="text-xl font-semibold text-gray-700 mb-4">
+          <h3 className="text-xl font-semibold text-black-700 mb-4">
             Saved Requirements
           </h3>
           <ul className="space-y-2">

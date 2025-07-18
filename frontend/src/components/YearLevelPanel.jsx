@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Box, Typography, Button, TextField } from "@mui/material";
 
 const YearLevelPanel = () => {
   const [yearLevelDescription, setYearLevelDescription] = useState("");
@@ -19,10 +20,15 @@ const YearLevelPanel = () => {
   };
 
   const handleAddYearLevel = async () => {
-    if (!yearLevelDescription.trim()) return alert("Year level description is required");
+    if (!yearLevelDescription.trim()) {
+      alert("Year level description is required");
+      return;
+    }
 
     try {
-      await axios.post("http://localhost:5000/years_level", { year_level_description: yearLevelDescription });
+      await axios.post("http://localhost:5000/years_level", {
+        year_level_description: yearLevelDescription,
+      });
       setYearLevelDescription("");
       fetchYearLevelList();
     } catch (err) {
@@ -31,114 +37,101 @@ const YearLevelPanel = () => {
   };
 
   return (
-    <div style={styles.container}>
-      {/* Form Section */}
-      <div style={styles.formSection}>
-        <h2 style={styles.heading}>Year Level Registration</h2>
-        <div style={styles.formGroup}>
-          <label style={styles.label}>Year Level Description:</label>
-          <input
-            type="text"
-            placeholder="Enter year level description"
+    <Box sx={{ maxWidth: "1200px", mx: "auto", mt: 5, px: 2 }}>
+      <Typography
+        variant="h4"
+        color="maroon"
+        fontWeight="bold"
+        textAlign="center"
+        gutterBottom
+      >
+        Year Level Registration
+      </Typography>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          gap: 4,
+          mt: 4,
+        }}
+      >
+        {/* Form Section */}
+        <Box
+          sx={{
+            flex: 1,
+            p: 3,
+            bgcolor: "#fff",
+            boxShadow: 2,
+            borderRadius: 2,
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            Add Year Level
+          </Typography>
+          <TextField
+            fullWidth
+            label="Year Level Description"
             value={yearLevelDescription}
             onChange={(e) => setYearLevelDescription(e.target.value)}
-            style={styles.input}
+            margin="normal"
           />
-        </div>
-        <button onClick={handleAddYearLevel} style={styles.button}>Save</button>
-      </div>
+          <Button
+            fullWidth
+            variant="contained"
+            sx={{ mt: 2, bgcolor: "maroon", ":hover": { bgcolor: "#800000" } }}
+            onClick={handleAddYearLevel}
+          >
+            Save
+          </Button>
+        </Box>
 
-      {/* Display Section */}
-      <div style={styles.displaySection}>
-        <h2 style={styles.heading}>Registered Year Levels</h2>
-        <div style={styles.scrollableTableContainer}>
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.tableCell}>Year Level ID</th>
-                <th style={styles.tableCell}>Year Level Description</th>
-              </tr>
-            </thead>
-            <tbody>
-              {yearLevelList.map((level, index) => (
-                <tr key={index}>
-                  <td style={styles.tableCell}>{level.year_level_id}</td>
-                  <td style={styles.tableCell}>{level.year_level_description}</td>
+        {/* Display Section */}
+        <Box
+          sx={{
+            flex: 1,
+            p: 3,
+            bgcolor: "#fff",
+            boxShadow: 2,
+            borderRadius: 2,
+            overflowY: "auto",
+            maxHeight: 500,
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            Registered Year Levels
+          </Typography>
+          <Box sx={{ overflowY: "auto", maxHeight: 400 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ backgroundColor: "#f1f1f1" }}>
+                  <th style={styles.tableCell}>Year Level ID</th>
+                  <th style={styles.tableCell}>Year Level Description</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
+              </thead>
+              <tbody>
+                {yearLevelList.map((level, index) => (
+                  <tr key={index}>
+                    <td style={styles.tableCell}>{level.year_level_id}</td>
+                    <td style={styles.tableCell}>
+                      {level.year_level_description}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 
-// Simplified inline styles
 const styles = {
-  container: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    maxWidth: '1000px',
-    margin: '40px auto',
-    padding: '20px',
-    backgroundColor: '#f9f9f9',
-    borderRadius: '10px',
-  },
-  formSection: {
-    width: '45%',
-    padding: '20px',
-    borderRadius: '8px',
-    backgroundColor: 'white',
-    boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-  },
-  displaySection: {
-    width: '50%',
-    padding: '20px',
-    borderRadius: '8px',
-    backgroundColor: 'white',
-    boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-  },
-  heading: {
-    fontSize: '20px',
-    marginBottom: '20px',
-    color: '#333',
-  },
-  formGroup: {
-    marginBottom: '20px',
-  },
-  label: {
-    display: 'block',
-    marginBottom: '8px',
-    fontWeight: 'bold',
-  },
-  input: {
-    width: '100%',
-    padding: '10px',
-    borderRadius: '5px',
-    border: '1px solid #ccc',
-  },
-  button: {
-    width: '100%',
-    padding: '12px',
-    backgroundColor: 'maroon',
-    color: 'white',
-    fontSize: '16px',
-    border: 'none',
-    borderRadius: '5px',
-    cursor: 'pointer',
-  },
-  scrollableTableContainer: {
-    maxHeight: '400px',
-    overflowY: 'auto',
-  },
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-  },
   tableCell: {
-    border: '1px solid #ddd',
-    padding: '10px',
+    border: "1px solid #ccc",
+    padding: "10px",
+    textAlign: "center",
   },
 };
 
