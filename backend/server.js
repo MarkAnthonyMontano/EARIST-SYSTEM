@@ -1597,24 +1597,29 @@ app.get("/department_section", async (req, res) => {
 app.get("/api/professors", async (req, res) => {
   try {
     const [rows] = await db3.query(`
-   SELECT 
-  pft.prof_id,
-  pft.person_id,
-  pft.fname,
-  pft.mname,
-  pft.lname,
-   pft.email,
-  MIN(dpt.dprtmnt_name) AS dprtmnt_name
-FROM dprtmnt_profs_table AS dpft 
-INNER JOIN prof_table AS pft ON dpft.prof_id = pft.prof_id
-INNER JOIN dprtmnt_table AS dpt ON dpft.dprtmnt_id = dpt.dprtmnt_id
-GROUP BY pft.prof_id
+      SELECT 
+        pft.prof_id,
+        pft.person_id,
+        pft.fname,
+        pft.mname,
+        pft.lname,
+        pft.email,
+        pft.role,
+        pft.status, 
+        pft.profile_image,
+        MIN(dpt.dprtmnt_name) AS dprtmnt_name,
+        MIN(dpt.dprtmnt_code) AS dprtmnt_code 
+      FROM dprtmnt_profs_table AS dpft 
+      INNER JOIN prof_table AS pft ON dpft.prof_id = pft.prof_id
+      INNER JOIN dprtmnt_table AS dpt ON dpft.dprtmnt_id = dpt.dprtmnt_id
+      GROUP BY pft.prof_id
     `);
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: "Failed to retrieve professors", details: err.message });
   }
 });
+
 
 
 // ADD PROFESSOR ROUTE (Consistent with /api)
@@ -2578,14 +2583,27 @@ app.get("/api/department-sections", async (req, res) => {
   const { departmentId } = req.query;
 
   const query = `
-    SELECT * 
-    FROM dprtmnt_table as dt
-    INNER JOIN dprtmnt_curriculum_table as dc ON dc.dprtmnt_id  = dt.dprtmnt_id
-    INNER JOIN curriculum_table as c ON c.curriculum_id = dc.curriculum_id
-    INNER JOIN dprtmnt_section_table as ds ON ds.curriculum_id = c.curriculum_id
-    INNER JOIN program_table as pt ON c.program_id = pt.program_id
-    INNER JOIN section_table as st ON st.id = ds.section_id
-    WHERE dt.dprtmnt_id = ?
+    SELECT 
+      dt.dprtmnt_id, 
+      dt.dprtmnt_name, 
+      dt.dprtmnt_code, 
+      c.year_id, 
+      c.program_id, 
+      c.curriculum_id, 
+      ds.id as department_and_program_section_id, 
+      ds.section_id, 
+      pt.program_description, 
+      pt.program_code, 
+      pt.major, 
+      st.description, 
+      st.id as section_id
+      FROM dprtmnt_table as dt
+        INNER JOIN dprtmnt_curriculum_table as dc ON dc.dprtmnt_id  = dt.dprtmnt_id
+        INNER JOIN curriculum_table as c ON c.curriculum_id = dc.curriculum_id
+        INNER JOIN dprtmnt_section_table as ds ON ds.curriculum_id = c.curriculum_id
+        INNER JOIN program_table as pt ON c.program_id = pt.program_id
+        INNER JOIN section_table as st ON st.id = ds.section_id
+      WHERE dt.dprtmnt_id = ?
     ORDER BY ds.id
   `;
 

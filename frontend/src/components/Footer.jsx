@@ -25,7 +25,7 @@ const Footer = () => {
     return (
         <div className="FooterContainer hidden-print" style={footerStyle}>
             <p style={textStyle}>
-                © Eulogio "Amang" Rodriguez Institute of Science and Technology - Manila Campus 2025
+                © 2025 Eulogio "Amang" Rodriguez Institute of Science and Technology - Manila Campus
             </p>
         </div>
     );

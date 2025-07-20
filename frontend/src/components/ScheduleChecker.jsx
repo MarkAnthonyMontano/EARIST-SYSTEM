@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import {
+  Typography, Box
+} from "@mui/material";
 
 const ScheduleChecker = () => {
   const [selectedDay, setSelectedDay] = useState("");
@@ -18,31 +21,31 @@ const ScheduleChecker = () => {
   const [profList, setProfList] = useState([]);
   const [dayList, setDayList] = useState([]);
   const [sectionList, setSectionList] = useState([]);
-  const { dprtmnt_id } = useParams(); 
+  const { dprtmnt_id } = useParams();
 
   const fetchRoom = async () => {
-    try{
+    try {
       const response = await axios.get(`http://localhost:5000/room_list/${dprtmnt_id}`);
       setRoomList(response.data);
-    }catch(error){
+    } catch (error) {
       console.log(error);
     }
   }
 
   const fetchCourseList = async () => {
-    try{
+    try {
       const response = await axios.get(`http://localhost:5000/course_list`);
       setCourseList(response.data)
-    }catch(error){
+    } catch (error) {
       console.log(error);
     }
   }
 
   const fetchSchoolYearList = async () => {
-    try{
+    try {
       const response = await axios.get('http://localhost:5000/school_years');
       setSchoolYearList(response.data)
-    }catch(error){
+    } catch (error) {
       console.log(error);
     }
   }
@@ -57,20 +60,20 @@ const ScheduleChecker = () => {
   }
 
   const fetchDayList = async () => {
-    try{
+    try {
       const response = await axios.get('http://localhost:5000/day_list');
       setDayList(response.data)
-    }catch(error){
+    } catch (error) {
       console.log(error);
     }
   }
 
   const fetchSectionList = async () => {
-    try{
+    try {
       const response = await axios.get(`http://localhost:5000/section_table/${dprtmnt_id}`);
       console.log("Section List Response:", response.data);
       setSectionList(response.data)
-    }catch(error){
+    } catch (error) {
       console.log(error);
     }
   }
@@ -93,7 +96,7 @@ const ScheduleChecker = () => {
   }, []);
 
   useEffect(() => {
-    if (schoolYearList.length > 0){
+    if (schoolYearList.length > 0) {
       setSelectedSchoolYear(schoolYearList[0].id);
     }
   }, [schoolYearList]);
@@ -161,15 +164,46 @@ const ScheduleChecker = () => {
       setMessage("Failed to insert schedule.");
     }
   };
-  
+
 
   return (
-    <div className="container">
-      <h2 className="p-2 px-0 font-[700] text-[40px] w-[40rem] text-center">Schedule Checker</h2>
-      <form onSubmit={handleInsert} className="mt-[2rem]">
-        <div className="flex">
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="flex-start"  // <-- align to top
+      minHeight="100vh"
+      bgcolor="#fdfdfd"
+      px={2}
+      pt={5}  // <-- add top padding for spacing from top edge
+    >
+
+      <Typography
+        variant="h4"
+        fontWeight="bold"
+        color="maroon"
+        textAlign="center"
+        gutterBottom
+      >
+        Schedule Checker
+      </Typography>
+
+      <form
+        onSubmit={handleInsert}
+        style={{
+          width: "100%",
+          maxWidth: "600px",
+          backgroundColor: "white",
+          padding: "2rem",
+          borderRadius: "8px",
+          boxShadow: "0px 0px 10px rgba(0,0,0,0.1)",
+          marginTop: "1rem",
+        }}
+      >
+        {/* Day */}
+        <div className="flex mb-2">
           <div className="p-2 w-[12rem]">Day:</div>
-          <select className="border border-gray-500 outline-none rounded w-[29rem]" value={selectedDay} onChange={(e) => setSelectedDay(e.target.value)} required>
+          <select className="border border-gray-500 outline-none rounded w-full" value={selectedDay} onChange={(e) => setSelectedDay(e.target.value)} required>
             <option value="">Select Day</option>
             {dayList.map((day) => (
               <option key={day.id} value={day.id}>
@@ -178,9 +212,11 @@ const ScheduleChecker = () => {
             ))}
           </select>
         </div>
-        <div className="flex mt-2">
+
+        {/* Section */}
+        <div className="flex mb-2">
           <div className="p-2 w-[12rem]">Section:</div>
-          <select className="border border-gray-500  outline-none rounded w-[29rem]" value={selectedSection} onChange={(e) => setSelectedSection(e.target.value)} required>
+          <select className="border border-gray-500 outline-none rounded w-full" value={selectedSection} onChange={(e) => setSelectedSection(e.target.value)} required>
             <option value="">Select Section</option>
             {sectionList.map((section) => (
               <option key={section.id} value={section.section_id}>
@@ -189,9 +225,11 @@ const ScheduleChecker = () => {
             ))}
           </select>
         </div>
-        <div className="flex mt-2">
+
+        {/* Room */}
+        <div className="flex mb-2">
           <div className="p-2 w-[12rem]">Room:</div>
-          <select className="border border-gray-500 outline-none rounded w-[29rem]" value={selectedRoom} onChange={(e) => setSelectedRoom(e.target.value)} required>
+          <select className="border border-gray-500 outline-none rounded w-full" value={selectedRoom} onChange={(e) => setSelectedRoom(e.target.value)} required>
             <option value="">Select Room</option>
             {roomList.map((room) => (
               <option key={room.room_id} value={room.room_id}>
@@ -200,9 +238,11 @@ const ScheduleChecker = () => {
             ))}
           </select>
         </div>
-        <div className="flex mt-2">
+
+        {/* Course */}
+        <div className="flex mb-2">
           <div className="p-2 w-[12rem]">Course:</div>
-          <select className="border border-gray-500 outline-none rounded w-[29rem]"  value={selectedSubject} onChange={(e) => setSelectedSubject(e.target.value)} required>
+          <select className="border border-gray-500 outline-none rounded w-full" value={selectedSubject} onChange={(e) => setSelectedSubject(e.target.value)} required>
             <option value="">Select Course</option>
             {courseList.map((subject) => (
               <option key={subject.course_id} value={subject.course_id}>
@@ -211,9 +251,11 @@ const ScheduleChecker = () => {
             ))}
           </select>
         </div>
-        <div className="flex mt-2">
+
+        {/* Professor */}
+        <div className="flex mb-2">
           <div className="p-2 w-[12rem]">Professor:</div>
-          <select className="border border-gray-500 outline-none rounded w-[29rem]" value={selectedProf} onChange={(e) => setSelectedProf(e.target.value)} required>
+          <select className="border border-gray-500 outline-none rounded w-full" value={selectedProf} onChange={(e) => setSelectedProf(e.target.value)} required>
             <option value="">Select Professor</option>
             {profList.map((prof) => (
               <option key={prof.prof_id} value={prof.prof_id}>
@@ -222,9 +264,11 @@ const ScheduleChecker = () => {
             ))}
           </select>
         </div>
-        <div className="flex mt-2">
+
+        {/* School Year */}
+        <div className="flex mb-2">
           <div className="p-2 w-[12rem]">School Year:</div>
-          <div className="border border-gray-500 rounded w-[29rem] p-2 bg-gray-100">
+          <div className="border border-gray-500 rounded w-full p-2 bg-gray-100">
             {
               schoolYearList.find(sy => sy.id === selectedSchoolYear)?.year_description
             } - {
@@ -232,22 +276,37 @@ const ScheduleChecker = () => {
             }
           </div>
         </div>
-        <div className="flex mt-2">
-          <div className="p-2 w-[12rem]">Start Time:</div>
-          <input type="time" value={selectedStartTime} onChange={(e) => setSelectedStartTime(e.target.value)} required />
-        </div>
-        <div className="flex mt-2">
-          <div className="p-2 w-[12rem]">Start Time:</div>
-          <input type="time" value={selectedEndTime} onChange={(e) => setSelectedEndTime(e.target.value)} required />
-        </div>
-        <br /><br />
-        <button className="w-[20rem] bg-maroon-500 p-4 text-white rounded" onClick={handleSubmit}>Check Schedule</button>
-        <button className="w-[20rem] ml-[1rem] bg-maroon-500 p-4 text-white rounded" type="submit">Insert Schedule</button>
-      </form>
 
-      {message && <p>{message}</p>}
-    </div>
+        {/* Start Time */}
+        <div className="flex mb-2">
+          <div className="p-2 w-[12rem]">Start Time:</div>
+          <input className="border border-gray-500 rounded p-2 w-full" type="time" value={selectedStartTime} onChange={(e) => setSelectedStartTime(e.target.value)} required />
+        </div>
+
+        {/* End Time */}
+        <div className="flex mb-4">
+          <div className="p-2 w-[12rem]">End Time:</div>
+          <input className="border border-gray-500 rounded p-2 w-full" type="time" value={selectedEndTime} onChange={(e) => setSelectedEndTime(e.target.value)} required />
+        </div>
+
+        <div className="flex justify-between">
+          <button className="bg-[#800000] hover:bg-red-900 text-white px-6 py-2 rounded" onClick={handleSubmit}>
+            Check Schedule
+          </button>
+          <button className="bg-[#800000] hover:bg-red-900 text-white px-6 py-2 rounded" type="submit">
+            Insert Schedule
+          </button>
+        </div>
+
+        {message && (
+          <Typography mt={3} textAlign="center" color="maroon">
+            {message}
+          </Typography>
+        )}
+      </form>
+    </Box>
   );
+
 };
 
 export default ScheduleChecker;

@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-import { Container, Checkbox } from "@mui/material";
+import { Container, Checkbox, Box } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import '../styles/Container.css';
 import Logo from '../assets/Logo.png';
+import SchoolImage from '../assets/EaristBackground.jpg';
 
 const LoginProf = ({ setIsAuthenticated }) => {
     const [email, setEmail] = useState("");
@@ -39,7 +40,30 @@ const LoginProf = ({ setIsAuthenticated }) => {
 
     return (
         <>  
-            <Container style={{display: "flex", alignItems: "center", marginTop: '1.5%', justifyContent: 'center', height: '100%'}}>
+                 <Box
+    sx={{
+      /* 🔗 full‑screen background */
+      backgroundImage: `url(${SchoolImage})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+      width: "100%",
+      minHeight: "100vh",   // 100 % of the viewport height
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    }}
+  >
+    {/* keep your existing Container for the card itself */}
+    <Container
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        /* you don’t need margin‑top any more because we’re vertically‑centred */
+      }}
+      maxWidth={false}   /* optional: remove MUI max‑width limit */
+    >
                 <div className="Container">
                     <div className="Header">
                         <div className="HeaderTitle">
@@ -115,6 +139,7 @@ const LoginProf = ({ setIsAuthenticated }) => {
                     </div>
                 </div>
             </Container>
+            </Box>
         </>        
     );
 }

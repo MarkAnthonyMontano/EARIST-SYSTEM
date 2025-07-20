@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import {
+  Grid,
+  Button,
+  Typography,
+  Box
+} from '@mui/material';
 
 const ScheduleFilterer = () => {
   const [departmentList, setDepartmentsList] = useState([]);
@@ -22,24 +28,55 @@ const ScheduleFilterer = () => {
 
   const handleFilterID = (id) => {
     setFilterDepId(id);
-    navigate(`/schedule_checker/${id}`)
+    navigate(`/schedule_checker/${id}`);
   };
 
   return (
-    <div>
-      <h2>Select a Department</h2>
-      <div className='flex gap-[1rem]'>
-        {departmentList.map((department) => (
-          <button 
-            key={department.dprtmnt_id} 
-            className='rounded border border-maroon-500 p-2 px-5'
-            onClick={() => handleFilterID(department.dprtmnt_id)}
-          >
-           {department.dprtmnt_code}
-          </button>
+    <Box p={3}>
+      <Typography
+        variant="h4"
+        fontWeight="bold"
+        color="maroon"
+        textAlign="center"
+        gutterBottom
+        mb={3}
+      >
+        Select a Department
+      </Typography>
+
+      <Grid
+        container
+        spacing={4}
+        gap={2}
+        justifyContent="center"
+        textAlign="center"
+        style={{ backgroundColor: "white", padding: "1rem 0rem" }}
+      >
+        {departmentList.map((department, index) => (
+          <Grid key={department.dprtmnt_id}>
+            <Button
+              fullWidth
+              key={index}
+              variant="contained"
+              value={department.dprtmnt_id}
+              onClick={() => handleFilterID(department.dprtmnt_id)}
+              sx={{
+                backgroundColor:
+                  filterDepId === department.dprtmnt_id ? "maroon" : "white",
+                color: filterDepId === department.dprtmnt_id ? "white" : "maroon",
+                border: "1px solid maroon",
+                "&:hover": {
+                  backgroundColor: "maroon",
+                  color: "white",
+                },
+              }}
+            >
+              {department.dprtmnt_code}
+            </Button>
+          </Grid>
         ))}
-      </div>
-    </div>
+      </Grid>
+    </Box>
   );
 };
 

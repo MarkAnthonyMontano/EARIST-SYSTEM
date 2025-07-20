@@ -75,18 +75,23 @@ const RegisterProf = () => {
     fetchDepartments();
   }, []);
 
-  const filteredProfessors = professors
-    .filter((p) =>
-      `${p.fname || ""} ${p.mname || ""} ${p.lname || ""} ${p.email || ""}`
-        .toLowerCase()
-        .includes(searchQuery)
-    )
+  const [selectedDepartmentFilter, setSelectedDepartmentFilter] = useState("");
 
+
+  const filteredProfessors = professors
+    .filter((p) => {
+      const fullText = `${p.fname || ""} ${p.mname || ""} ${p.lname || ""} ${p.email || ""}`.toLowerCase();
+      const matchesSearch = fullText.includes(searchQuery);
+      const matchesDepartment =
+        selectedDepartmentFilter === "" || p.dprtmnt_name === selectedDepartmentFilter;
+      return matchesSearch && matchesDepartment;
+    })
     .sort((a, b) => {
       const nameA = `${a.fname} ${a.lname}`.toLowerCase();
       const nameB = `${b.fname} ${b.lname}`.toLowerCase();
       return sortAsc ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
     });
+
 
   const itemsPerPage = 20;
   const totalPages = Math.ceil(filteredProfessors.length / itemsPerPage);
@@ -98,7 +103,6 @@ const RegisterProf = () => {
   let startPage = Math.max(1, currentPage - Math.floor(maxButtonsToShow / 2));
   let endPage = Math.min(totalPages, startPage + maxButtonsToShow - 1);
 
-  // Adjust startPage if we are at the end
   if (endPage - startPage < maxButtonsToShow - 1) {
     startPage = Math.max(1, endPage - maxButtonsToShow + 1);
   }
@@ -263,6 +267,23 @@ const RegisterProf = () => {
           >
             Add Professor
           </Button>
+          <FormControl sx={{ minWidth: 300, mr: 2 }} size="small">
+            <InputLabel id="filter-department-label">Filter by Department</InputLabel>
+            <Select
+              labelId="filter-department-label"
+              value={selectedDepartmentFilter}
+              onChange={(e) => setSelectedDepartmentFilter(e.target.value)}
+              label="Filter by Department"
+            >
+              <MenuItem value="">All Departments</MenuItem>
+              {department.map((dep) => (
+                <MenuItem key={dep.dprtmnt_id} value={dep.dprtmnt_name}>
+                  {dep.dprtmnt_name} ({dep.dprtmnt_code})
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
 
           <Button
             variant="outlined"
@@ -415,16 +436,28 @@ const RegisterProf = () => {
         </DialogActions>
       </Dialog>
       <Box sx={{ display: "flex", justifyContent: "right", mt: 3, flexWrap: "wrap", gap: 1 }}>
+        {/* When on Page 2 or higher, show First & Prev */}
+        {currentPage >= 2 && (
+          <>
+            <Button
+              onClick={() => setCurrentPage(1)}
+              variant="outlined"
+              sx={{ borderColor: "maroon", color: "maroon" }}
+            >
+              First
+            </Button>
 
-        <Button
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-          variant="outlined"
-          sx={{ borderColor: "maroon", color: "maroon" }}
-        >
-          Prev
-        </Button>
+            <Button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              variant="outlined"
+              sx={{ borderColor: "maroon", color: "maroon" }}
+            >
+              Prev
+            </Button>
+          </>
+        )}
 
+        {/* Always show Page 1 and 2 */}
         {visiblePages.map((num) => (
           <Button
             key={num}
@@ -441,6 +474,7 @@ const RegisterProf = () => {
           </Button>
         ))}
 
+        {/* Always show Next and Last */}
         <Button
           onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
           disabled={currentPage === totalPages}

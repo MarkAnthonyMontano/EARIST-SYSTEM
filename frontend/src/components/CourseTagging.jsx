@@ -306,7 +306,7 @@ const CourseTagging = () => {
         gutterBottom
         mb={3}
       >
-        Select Department
+        Select a Department
       </Typography>
       <Grid
         container
@@ -446,7 +446,7 @@ const CourseTagging = () => {
                   <em>Select a department section</em>
                 </MenuItem>
                 {sections.map((section) => (
-                  <MenuItem key={section.id} value={section.id}>
+                  <MenuItem key={section.department_and_program_section_id} value={section.department_and_program_section_id}>
                     {section.program_code} - {section.description}
                   </MenuItem>
                 ))}

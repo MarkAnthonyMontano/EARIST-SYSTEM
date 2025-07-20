@@ -81,29 +81,44 @@ const DepartmentRegistration = () => {
         </Button>
       </Box>
 
-    <Grid container spacing={2}>
-  {departmentList.map((department) => (
-    <Grid item xs={12} sm={6} md={3} key={department.dprtmnt_id}>
-      <Card
-        variant="outlined"
-        sx={{
-          borderColor: "maroon",
-          borderWidth: "3px",
-          height: "100%",
-        }}
-      >
-        <CardContent>
-          <Typography variant="h6" fontWeight="bold" color="text.primary">
-            {department.dprtmnt_name}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Code: {department.dprtmnt_code}
-          </Typography>
-        </CardContent>
-      </Card>
-    </Grid>
-  ))}
-</Grid>
+      <Grid container spacing={2}>
+        {departmentList.map((department) => (
+          <Grid item xs={12} sm={6} md={3} key={department.dprtmnt_id}>
+            <Card
+              variant="outlined"
+              sx={{
+                borderColor: "maroon",
+                borderWidth: "3px",
+                height: "100%", // allow card to fill the grid height
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: 160, // set a consistent card height
+              }}
+            >
+              <CardContent
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  textAlign: "center",
+                }}
+              >
+                <Typography variant="h6" fontWeight="bold" color="text.primary">
+                  {department.dprtmnt_name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Code: {department.dprtmnt_code}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
 
 
       <Dialog open={openModal} onClose={() => setOpenModal(false)} fullWidth maxWidth="sm">
