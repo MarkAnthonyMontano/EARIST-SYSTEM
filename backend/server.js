@@ -337,6 +337,20 @@ app.get("/api/person/:id", async (req, res) => {
   }
 });
 
+// Count how many applicants are enrolled
+app.get("/api/enrolled-count", async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      "SELECT COUNT(*) AS total FROM person_table WHERE classifiedAs = 'Freshman (First Year)' OR classifiedAs = 'Transferee' OR classifiedAs = 'Returnee'"
+    );
+    res.json({ total: rows[0].total });
+  } catch (error) {
+    console.error("Error fetching enrolled count:", error);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+
 
 // PUT update person details by person_id
 app.put("/api/person/:id", async (req, res) => {
@@ -2142,6 +2156,24 @@ app.get("/api/persons", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
+// GET total number of accepted students
+app.get("/api/accepted-students-count", async (req, res) => {
+  try {
+    const [rows] = await db3.execute(`
+      SELECT COUNT(*) AS total
+      FROM person_table p
+      JOIN person_status_table ps ON p.person_id = ps.person_id
+      WHERE ps.student_registration_status = 1
+    `);
+
+    res.json(rows[0]); // { total: 25 }
+  } catch (err) {
+    console.error("Error fetching accepted students count:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
 
 // ASSIGN A STUDENT NUMBER TO THAT STUDENT (UPDATED!)
 app.post("/api/assign-student-number", async (req, res) => {

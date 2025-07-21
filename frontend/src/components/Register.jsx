@@ -5,7 +5,8 @@ import '../styles/Container.css';
 import Logo from '../assets/Logo.png';
 import { Container, Checkbox, Box } from "@mui/material";
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import SchoolImage from '../assets/EaristBackground.jpg';
+import SchoolImage from '../assets/image.png';
+
 
 
 const Register = () => {
@@ -61,7 +62,8 @@ const Register = () => {
                     }}
                     maxWidth={false}   /* optional: remove MUI max‑width limit */
                 >
-                    <div className="Container">
+                 <div style={{border: "5px solid white"}}
+                 className="Container">
 
                         <div className="Header">
                             <div className="HeaderTitle">

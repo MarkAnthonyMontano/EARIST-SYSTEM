@@ -35,7 +35,7 @@ const YearUpdateForm = () => {
   }, []);
 
   return (
-  <Box sx={{ maxWidth: 1200, mx: "auto", mt: 5, px: 2 }}>
+  <Box sx={{ maxWidth: 1200, mx: "auto", mt: 3, px: 2 }}>
       <Typography
         variant="h4"
         align="center"

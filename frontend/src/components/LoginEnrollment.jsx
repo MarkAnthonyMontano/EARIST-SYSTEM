@@ -5,7 +5,7 @@ import { Container, Checkbox, Box } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import '../styles/Container.css';
 import Logo from '../assets/Logo.png';
-import SchoolImage from '../assets/EaristBackground.jpg';
+import SchoolImage from '../assets/image.png';
 
 const LoginEnrollment = ({ setIsAuthenticated }) => {
     const [email, setEmail] = useState("");
@@ -42,39 +42,30 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
         <>
             <Box
                 sx={{
-                    position: "relative",
+                    /* 🔗 full‑screen background */
                     backgroundImage: `url(${SchoolImage})`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     backgroundRepeat: "no-repeat",
                     width: "100%",
-                    minHeight: "100vh",
+                    minHeight: "100vh",   // 100 % of the viewport height
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    "&::before": {
-                        content: '""',
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: "rgba(255, 255, 255, 0.2)", // white overlay
-                        backdropFilter: "blur(1px)", // subtle blur to blend better
-                        zIndex: 1,
-                    },
                 }}
             >
+                {/* keep your existing Container for the card itself */}
                 <Container
                     style={{
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        zIndex: 2, // ensure it's above the overlay
+                        /* you don’t need margin‑top any more because we’re vertically‑centred */
                     }}
-                    maxWidth={false}
+                    maxWidth={false}   /* optional: remove MUI max‑width limit */
                 >
-                    <div className="Container">
+                     <div style={{border: "5px solid white"}}
+                     className="Container">
                         <div className="Header">
                             <div className="HeaderTitle">
                                 <div className="CircleCon">

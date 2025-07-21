@@ -27,24 +27,6 @@ const AdmissionDashboardPanel = () => {
             </div>
 
             <div className="relative">
-                <Link to={'/student_requirement_form'}>
-                    <div className="bg-white p-4 border-4 rounded-lg border-solid border-maroon-500 absolute left-16 top-8 w-enough">
-                        <CollectionsBookmark className="text-maroon-500 text-2xl"/>
-                    </div>
-                    <button className="bg-white text-maroon-500 border-4 rounded-lg border-solid border-maroon-500 p-4 w-80 rounded-md h-32 font-medium mr-4 mt-16 ml-8 flex items-end justify-center">STUDENT REQUIREMENTS FORM</button>
-                </Link>
-            </div>
-
-            <div className="relative">
-                <Link to={'/student_registration_form'}>
-                    <div className="bg-white p-4 border-4 rounded-lg border-solid border-maroon-500 absolute left-16 top-8 w-enough">
-                        <CollectionsBookmark className="text-maroon-500 text-2xl"/>
-                    </div>
-                    <button className="bg-white text-maroon-500 border-4 rounded-lg border-solid border-maroon-500 p-4 w-80 rounded-md h-32 font-medium mr-4 mt-16 ml-8 flex items-end justify-center">STUDENT REGISTRATION FORM</button>
-                </Link>
-            </div>
-
-            <div className="relative">
                 <Link to={'/shifting_form'}>
                     <div className="bg-white p-4 border-4 rounded-lg border-solid border-maroon-500 absolute left-16 top-8 w-enough">
                         <CollectionsBookmark className="text-maroon-500 text-2xl"/>
