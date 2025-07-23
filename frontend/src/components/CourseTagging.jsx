@@ -447,7 +447,7 @@ const CourseTagging = () => {
                 </MenuItem>
                 {sections.map((section) => (
                   <MenuItem key={section.department_and_program_section_id} value={section.department_and_program_section_id}>
-                    {section.program_code} - {section.description}
+                    {section.program_code} - {section.program_description} - {section.description}
                   </MenuItem>
                 ))}
               </TextField>

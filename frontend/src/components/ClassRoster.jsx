@@ -1,14 +1,22 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { Box, Typography } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Button,
+  Paper,
+  Card,
+  CardContent,
+  Grid
+} from '@mui/material';
 
 const ClassRoster = () => {
   const [departments, setDepartments] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [selectedDept, setSelectedDept] = useState(null);
+  const [selectedProgramId, setSelectedProgramId] = useState(null);
 
-  // Fetch departments
   const fetchDepartments = async () => {
     try {
       const response = await axios.get('http://localhost:5000/get_department');
@@ -18,9 +26,9 @@ const ClassRoster = () => {
     }
   };
 
-  // Fetch programs by department
   const fetchPrograms = async (deptId) => {
     setSelectedDept(deptId);
+    setSelectedProgramId(null); // clear selected program when dept changes
     try {
       const response = await axios.get(`http://localhost:5000/class_roster/ccs/${deptId}`);
       setPrograms(response.data);
@@ -35,36 +43,42 @@ const ClassRoster = () => {
   }, []);
 
   return (
-    <Box sx={{ maxWidth: '1200px', mx: 'auto', mt: 4, px: 2 }}>
-      <Typography
-        variant="h4"
-        fontWeight="bold"
-        color="#800000"
-        textAlign="center"
-        gutterBottom
-      >
+    <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, p: 4 }}>
+      <Typography variant="h4" fontWeight="bold" color="#800000" textAlign="center" gutterBottom>
         Class Roster
       </Typography>
 
-      <Typography variant="h6" fontWeight="600" gutterBottom>
-        Select a Department:
-      </Typography>
+      <Paper elevation={3} sx={{ p: 3, mb: 2 }}>
+        <Typography fontWeight={700} fontSize={16} gutterBottom>
+          Select a Department
+        </Typography>
 
-      <Box display="flex" flexWrap="wrap" gap={2} mb={3}>
-        {departments.map(dept => (
-          <button
-            key={dept.dprtmnt_id}
-            onClick={() => fetchPrograms(dept.dprtmnt_id)}
-            className={`p-2 w-[100px] border border-black rounded font-semibold 
-              ${selectedDept === dept.dprtmnt_id ? 'bg-[#800000] text-white' : 'text-black bg-white'}`}
-          >
-            {dept.dprtmnt_code}
-          </button>
-        ))}
-      </Box>
+        <Grid container spacing={2}>
+          {departments.map(dept => (
+            <Grid item key={dept.dprtmnt_id}>
+              <Button
+                onClick={() => fetchPrograms(dept.dprtmnt_id)}
+                sx={{
+                  backgroundColor: selectedDept === dept.dprtmnt_id ? '#800000' : '#ffffff',
+                  color: selectedDept === dept.dprtmnt_id ? '#ffffff' : '#800000',
+                  border: '1px solid #800000',
+                  fontWeight: 'bold',
+                  minWidth: '118.5px',
+                  height: '50px',
+                  '&:hover': {
+                    backgroundColor: '#800000',
+                    color: '#ffffff',
+                  }
+                }}
+              >
+                {dept.dprtmnt_code}
+              </Button>
+            </Grid>
+          ))}
+        </Grid>
+      </Paper>
 
-      {/* Program Section */}
-      <Box mt={4}>
+      <Box>
         {selectedDept && programs.length === 0 && (
           <Typography color="text.secondary" fontStyle="italic">
             There are no programs in the selected department.
@@ -72,22 +86,58 @@ const ClassRoster = () => {
         )}
 
         {programs.length > 0 && (
-          <>
-            <Typography fontWeight="bold" mb={1}>
+          <Paper elevation={2} sx={{ p: 2 }}>
+            <Typography style={{fontSize: 14}} fontWeight="bold" mb={2}>
               {programs[0].dprtmnt_name} ({programs[0].dprtmnt_code})
             </Typography>
 
-            {programs.map(program => (
-              <Box key={program.program_id} mb={1}>
-                <Link
-                  to={`class_list/ccs/${program.curriculum_id}`}
-                  className="text-blue-600 hover:underline"
-                >
-                  {program.program_description} ({program.program_code})
-                </Link>
-              </Box>
-            ))}
-          </>
+            <Grid container spacing={2}>
+              {programs.map(program => {
+                const isSelected = selectedProgramId === program.curriculum_id;
+                return (
+                  <Grid item xs={12} sm={6} md={4} key={program.program_id}>
+                    <Card
+                      onClick={() => setSelectedProgramId(program.curriculum_id)}
+                      sx={{
+                        height: '100px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                        textAlign: 'center',
+                        backgroundColor: isSelected ? '#800000' : '#ffffff',
+                        color: isSelected ? '#ffffff' : '#800000',
+                        border: '2px solid #800000',
+                        cursor: 'pointer',
+                        transition: '0.3s',
+                        '&:hover': {
+                          backgroundColor: '#800000',
+                          color: '#ffffff'
+                        }
+                      }}
+                    >
+                      <CardContent>
+                        <Typography
+                          component={Link}
+                          to={`class_list/ccs/${program.curriculum_id}`}
+                          onClick={(e) => e.stopPropagation()} // prevent parent onClick if link clicked
+                          sx={{
+                            textDecoration: 'none',
+                            color: 'inherit',
+                            fontWeight: 500,
+                            '&:hover': {
+                              textDecoration: 'underline'
+                            }
+                          }}
+                        >
+                          {program.program_description} ({program.program_code})
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                );
+              })}
+            </Grid>
+          </Paper>
         )}
       </Box>
     </Box>

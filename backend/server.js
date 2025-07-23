@@ -3223,6 +3223,78 @@ app.get('/class_roster/classinfo/:cID/:dstID/:courseID/:professorID', async (req
   }
 })
 
+app.get('/statistics/student_count/department/:dprtmnt_id', async (req, res) => {
+  const { dprtmnt_id } = req.params;
+
+  try {
+    const query = `
+      SELECT COUNT(DISTINCT es.student_number) AS student_count
+      FROM enrolled_subject AS es
+      INNER JOIN curriculum_table AS ct ON es.curriculum_id = ct.curriculum_id
+      INNER JOIN dprtmnt_curriculum_table AS dct ON ct.curriculum_id = dct.curriculum_id
+      INNER JOIN dprtmnt_table AS dt ON dct.dprtmnt_id = dt.dprtmnt_id
+      INNER JOIN active_school_year_table AS asyt ON es.active_school_year_id = asyt.id
+      INNER JOIN student_status_table AS sst ON es.student_number = sst.student_number
+      INNER JOIN student_numbering_table AS snt ON sst.student_number = snt.student_number
+      INNER JOIN person_table AS pst ON snt.person_id = pst.person_id
+      WHERE dt.dprtmnt_id = ?
+        AND asyt.astatus = 1
+        AND sst.enrolled_status = 1
+    `;
+
+    const [rows] = await db3.execute(query, [dprtmnt_id]);
+    res.json({ count: rows[0]?.student_count || 0 });
+  } catch (err) {
+    console.error("Error fetching total student count by department:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
+
+
+app.get('/api/departments', async (req, res) => {
+  try {
+    const [departments] = await db3.execute(`
+      SELECT dprtmnt_id, dprtmnt_name FROM dprtmnt_table
+    `);
+    res.json(departments);
+  } catch (err) {
+    console.error("Error fetching departments:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// NEW ENDPOINT: All Year Levels Count
+app.get('/statistics/student_count/department/:dprtmnt_id/by_year_level', async (req, res) => {
+  const { dprtmnt_id } = req.params;
+
+  try {
+    const query = `
+      SELECT ylt.year_level_id, ylt.year_level_description, COUNT(DISTINCT es.student_number) AS student_count
+      FROM enrolled_subject AS es
+      INNER JOIN curriculum_table AS ct ON es.curriculum_id = ct.curriculum_id
+      INNER JOIN dprtmnt_curriculum_table AS dct ON ct.curriculum_id = dct.curriculum_id
+      INNER JOIN dprtmnt_table AS dt ON dct.dprtmnt_id = dt.dprtmnt_id
+      INNER JOIN active_school_year_table AS asyt ON es.active_school_year_id = asyt.id
+      INNER JOIN student_status_table AS sst ON es.student_number = sst.student_number
+      INNER JOIN year_level_table AS ylt ON sst.year_level_id = ylt.year_level_id
+      WHERE dt.dprtmnt_id = ?
+        AND asyt.astatus = 1
+        AND sst.enrolled_status = 1
+      GROUP BY ylt.year_level_id
+      ORDER BY ylt.year_level_id ASC;
+    `;
+
+    const [rows] = await db3.execute(query, [dprtmnt_id]);
+    res.json(rows); // [{ year_level_id: 1, year_level_description: "1st Year", student_count: 123 }, ...]
+  } catch (err) {
+    console.error("Error fetching year-level counts:", err);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+
 
 
 app.listen(5000, () => {
