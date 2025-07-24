@@ -45,49 +45,7 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: multer.memoryStorage() });
-
 const nodemailer = require("nodemailer");
-
-io.on("connection", (socket) => {
-  console.log("A client connected");
-
-  socket.on("forgot-password", async (email) => {
-    try {
-      const [rows] = await db3.query("SELECT * FROM user_accounts WHERE email = ?", [email]);
-      if (rows.length === 0) {
-        socket.emit("password-reset-result", { success: false, message: "Email not found." });
-        return;
-      }
-
-      const newPassword = Math.random().toString(36).slice(-8);
-      const hashed = await bcrypt.hash(newPassword, 10);
-
-      await db3.query("UPDATE user_accounts SET password = ? WHERE email = ?", [hashed, email]);
-
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS,
-        },
-      });
-
-      const mailOptions = {
-        from: `"EARIST - Manila" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: "EARIST: Your Password Has Been Reset",
-        text: `Your new password is: ${newPassword}`,
-      };
-
-      await transporter.sendMail(mailOptions);
-
-      socket.emit("password-reset-result", { success: true, message: "New password sent to your email." });
-    } catch (error) {
-      console.error("Reset error:", error);
-      socket.emit("password-reset-result", { success: false, message: "Internal server error." });
-    }
-  });
-});
 
 
 //MYSQL CONNECTION FOR ADMISSION
@@ -753,7 +711,7 @@ app.delete("/requirements_table/:id", async (req, res) => {
 //   }
 // });
 
-// NEW LOGIN API
+// Login For Registrar
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -797,6 +755,118 @@ app.post("/login", async (req, res) => {
   }
 });
 
+// Change Password (after login)
+app.post("/change-password", async (req, res) => {
+  const { person_id, currentPassword, newPassword } = req.body;
+
+  if (!person_id || !currentPassword || !newPassword) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  try {
+    // Get user by person_id
+    const [rows] = await db3.query("SELECT * FROM user_accounts WHERE person_id = ?", [person_id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const user = rows[0];
+
+    // Check current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Current password is incorrect" });
+    }
+
+    // Password strength validation
+    const strong =
+      newPassword.length >= 8 &&
+      /[a-z]/.test(newPassword) &&
+      /[A-Z]/.test(newPassword) &&
+      /\d/.test(newPassword) &&
+      /[!#$^*@]/.test(newPassword);
+
+    if (!strong) {
+      return res.status(400).json({ message: "New password does not meet complexity requirements" });
+    }
+
+    // Hash new password
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    // Debug log (optional)
+    console.log("Updating password for person_id:", person_id);
+    console.log("New password hash:", hashed);
+
+    // Update password in DB
+    await db3.query("UPDATE user_accounts SET password = ? WHERE person_id = ?", [hashed, person_id]);
+
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Password update error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
+// For email Resetting the password
+io.on("connection", (socket) => {
+  console.log("A client connected");
+
+  socket.on("forgot-password", async (email) => {
+    try {
+      const [rows] = await db3.query("SELECT * FROM user_accounts WHERE email = ?", [email]);
+      if (rows.length === 0) {
+        socket.emit("password-reset-result", { success: false, message: "Email not found." });
+        return;
+      }
+
+      const newPassword = Math.random().toString(36).slice(-8).toUpperCase(); // All caps
+      const hashed = await bcrypt.hash(newPassword, 10);
+
+      await db3.query("UPDATE user_accounts SET password = ? WHERE email = ?", [hashed, email]);
+
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+
+      const mailOptions = {
+        from: `"EARIST Enrollment Notice" <noreply-earist@pinnacle.edu.ph>`,
+        to: email,
+        subject: "Your Password has been Reset!",
+        text: `
+Hi,
+
+Please login with your new password: ${newPassword}
+
+Yours Truly,
+EARIST MANILA
+        `.trim()
+      };
+
+      await transporter.sendMail(mailOptions);
+
+      socket.emit("password-reset-result", {
+        success: true,
+        message: "New password sent to your email.",
+      });
+    } catch (error) {
+      console.error("Reset error:", error);
+      socket.emit("password-reset-result", {
+        success: false,
+        message: "Internal server error.",
+      });
+    }
+  });
+});
+
+
+
+// Login for Applicants
 app.post("/login_applicant", async (req, res) => {
   const { email, password } = req.body;
 
@@ -840,6 +910,7 @@ app.post("/login_applicant", async (req, res) => {
   }
 });
 
+// Login for Proffesor
 app.post("/login_prof", async (req, res) => {
   const { email, password } = req.body;
 

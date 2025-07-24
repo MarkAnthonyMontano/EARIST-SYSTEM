@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Register from './components/Register';
 import Login from './components/Login';
 import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -124,6 +125,7 @@ function App() {
               <Route path="/faculty_dashboard" element={<ProtectedRoute allowedRoles={['faculty']}><FacultyDashboard /></ProtectedRoute>} />
               <Route path="/applicant_dashboard" element={<ProtectedRoute><ApplicantDashboard /></ProtectedRoute>} />
               <Route path="/register_prof" element={<ProtectedRoute><RegisterProf /></ProtectedRoute>} />
+              <Route path="/reset_password" element={<ProtectedRoute><ResetPassword /></ProtectedRoute>} />
               <Route path="/room_registration" element={<ProtectedRoute><RoomRegistration /></ProtectedRoute>} />
               <Route path="/course_management" element={<ProtectedRoute><CourseManagement /></ProtectedRoute>} />
               <Route path="/program_tagging" element={<ProtectedRoute><ProgramTagging /></ProtectedRoute>} />

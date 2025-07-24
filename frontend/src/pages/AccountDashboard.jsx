@@ -1,4 +1,4 @@
-import {ListAlt, PersonAdd} from "@mui/icons-material";
+import { ListAlt, PersonAdd, LockReset } from "@mui/icons-material";
 import React from "react";
 import {Link} from 'react-router-dom';
 
@@ -21,6 +21,15 @@ const AccountDashboard = () => {
                         <ListAlt className="text-maroon-500 " style={{fontSize: '2rem'}}/>
                     </div>
                     <button className="bg-white text-maroon-500 border-4 rounded-lg border-solid border-maroon-500 p-4 w-[17rem] rounded-md h-32 font-medium mr-3 mt-16 ml-8 flex items-end justify-center">STUDENT INFO UPDATE FORM</button>
+                </Link>
+            </div>
+
+             <div className="relative">
+                <Link to={'/reset_password'}>
+                    <div className="bg-white p-4 border-4 rounded-lg border-solid border-maroon-500 absolute left-16 top-8 w-enough">
+                        <LockReset className="text-maroon-500" style={{ fontSize: '2rem' }} />
+                    </div>
+                    <button className="bg-white text-maroon-500 border-4 rounded-lg border-solid border-maroon-500 p-4 w-[17rem] rounded-md h-32 font-medium mr-3 mt-16 ml-8 flex items-end justify-center">RESET PASSWORD</button>
                 </Link>
             </div>
 
