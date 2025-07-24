@@ -64,8 +64,8 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
                     }}
                     maxWidth={false}   /* optional: remove MUI max‑width limit */
                 >
-                     <div style={{border: "5px solid white"}}
-                     className="Container">
+                    <div style={{ border: "5px solid white" }}
+                        className="Container">
                         <div className="Header">
                             <div className="HeaderTitle">
                                 <div className="CircleCon">
@@ -126,7 +126,8 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
                                 <span>Log In</span>
                             </div>
                             <div className="LinkContainer">
-                                <span>Forget password?</span>
+                                <span><Link to="/forgot_password">Forgot your password</Link></span>
+
                             </div>
                             <div className="LinkContainer RegistrationLink" style={{ margin: '0.1rem 0rem' }}>
                                 <p>Doesn't Have an Account?</p>

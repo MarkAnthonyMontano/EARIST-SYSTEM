@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 23, 2025 at 08:48 PM
+-- Generation Time: Jul 24, 2025 at 10:36 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -160,7 +160,7 @@ CREATE TABLE `curriculum_table` (
   `curriculum_id` int(11) NOT NULL,
   `year_id` int(11) DEFAULT NULL,
   `program_id` int(11) DEFAULT NULL,
-  `lock_status` int(11) NOT NULL
+  `lock_status` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -1028,17 +1028,6 @@ INSERT INTO `enrolled_subject` (`id`, `student_number`, `curriculum_id`, `course
 (131, 202400015, 1, 9, 1, 0, 0, 0, 0, 1, 0),
 (132, 202400015, 1, 11, 1, 0, 0, 0, 0, 1, 0),
 (133, 202400015, 1, 3, 1, 0, 0, 0, 0, 1, 0),
-(134, 202400012, 1, 1, 1, 0, 0, 0, 0, 1, 0),
-(135, 202400012, 1, 4, 1, 0, 0, 0, 0, 1, 0),
-(136, 202400012, 1, 5, 1, 0, 0, 0, 0, 1, 0),
-(137, 202400012, 1, 7, 1, 0, 0, 0, 0, 1, 0),
-(138, 202400012, 1, 8, 1, 0, 0, 0, 0, 1, 0),
-(139, 202400012, 1, 9, 1, 0, 0, 0, 0, 1, 0),
-(140, 202400012, 1, 10, 1, 0, 0, 0, 0, 1, 0),
-(141, 202400012, 1, 6, 1, 0, 0, 0, 0, 1, 0),
-(142, 202400012, 1, 11, 1, 0, 0, 0, 0, 1, 0),
-(143, 202400012, 1, 3, 1, 0, 0, 0, 0, 1, 0),
-(144, 202400012, 1, 2, 1, 0, 0, 0, 0, 1, 0),
 (145, 202400016, 1, 1, 1, 0, 0, 0, 0, 1, 0),
 (146, 202400016, 1, 8, 1, 0, 0, 0, 0, 1, 0),
 (147, 202400016, 1, 9, 1, 0, 0, 0, 0, 1, 0),
@@ -1090,7 +1079,18 @@ INSERT INTO `enrolled_subject` (`id`, `student_number`, `curriculum_id`, `course
 (215, 202400018, 1, 72, 1, 0, 0, 0, 0, 31, 0),
 (216, 202400018, 1, 71, 1, 0, 0, 0, 0, 31, 0),
 (217, 202400018, 1, 70, 1, 0, 0, 0, 0, 31, 0),
-(218, 202400018, 1, 69, 1, 0, 0, 0, 0, 31, 0);
+(218, 202400018, 1, 69, 1, 0, 0, 0, 0, 31, 0),
+(219, 202400012, 1, 1, 1, 0, 0, 0, 0, 2, 0),
+(220, 202400012, 1, 11, 1, 0, 0, 0, 0, 2, 0),
+(221, 202400012, 1, 2, 1, 0, 0, 0, 0, 2, 0),
+(222, 202400012, 1, 4, 1, 0, 0, 0, 0, 2, 0),
+(223, 202400012, 1, 3, 1, 0, 0, 0, 0, 2, 0),
+(224, 202400012, 1, 6, 1, 0, 0, 0, 0, 2, 0),
+(225, 202400012, 1, 5, 1, 0, 0, 0, 0, 2, 0),
+(226, 202400012, 1, 7, 1, 0, 0, 0, 0, 2, 0),
+(227, 202400012, 1, 8, 1, 0, 0, 0, 0, 2, 0),
+(228, 202400012, 1, 9, 1, 0, 0, 0, 0, 2, 0),
+(229, 202400012, 1, 10, 1, 0, 0, 0, 0, 2, 0);
 
 -- --------------------------------------------------------
 
@@ -1164,8 +1164,8 @@ INSERT INTO `person_status_table` (`id`, `person_id`, `exam_status`, `requiremen
 (8, 8, 0, 0, 0, 1, 0, 0),
 (9, 9, 0, 0, 0, 1, 0, 0),
 (10, 10, 0, 0, 0, 1, 0, 0),
-(11, 11, 0, 0, 0, 0, 0, 0),
-(12, 12, 0, 0, 0, 0, 0, 0),
+(11, 11, 0, 0, 0, 1, 0, 0),
+(12, 12, 0, 0, 0, 1, 0, 0),
 (13, 13, 0, 0, 0, 0, 0, 0),
 (14, 14, 0, 0, 0, 0, 0, 0),
 (15, 15, 0, 0, 0, 0, 0, 0),
@@ -1815,8 +1815,8 @@ CREATE TABLE `student_counter` (
 --
 
 INSERT INTO `student_counter` (`id`, `que_number`) VALUES
-(1, 20),
-(2, 20);
+(1, 22),
+(2, 22);
 
 -- --------------------------------------------------------
 
@@ -1877,7 +1877,9 @@ INSERT INTO `student_numbering_table` (`student_number`, `person_id`) VALUES
 (202400017, 6),
 (202400018, 7),
 (202400019, 8),
-(202500020, 10);
+(202500020, 10),
+(202500021, 11),
+(202500022, 12);
 
 -- --------------------------------------------------------
 
@@ -1908,7 +1910,9 @@ INSERT INTO `student_status_table` (`id`, `student_number`, `active_curriculum`,
 (10, 202400017, 1, '1', 1, 1, 0),
 (11, 202400018, 1, '1', 1, 1, 0),
 (12, 202400019, 1, '1', 1, 1, 0),
-(13, 202500020, 1, '1', 1, 1, 0);
+(13, 202500020, 1, '1', 1, 1, 0),
+(14, 202500021, 1, '1', 1, 1, 0),
+(15, 202500022, 1, '1', 1, 1, 0);
 
 -- --------------------------------------------------------
 
@@ -2033,9 +2037,7 @@ ALTER TABLE `course_table`
 -- Indexes for table `curriculum_table`
 --
 ALTER TABLE `curriculum_table`
-  ADD PRIMARY KEY (`curriculum_id`),
-  ADD KEY `year_id` (`year_id`),
-  ADD KEY `program_id` (`program_id`);
+  ADD PRIMARY KEY (`curriculum_id`);
 
 --
 -- Indexes for table `dprtmnt_curriculum_table`
@@ -2237,12 +2239,6 @@ ALTER TABLE `course_table`
   MODIFY `course_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
 
 --
--- AUTO_INCREMENT for table `curriculum_table`
---
-ALTER TABLE `curriculum_table`
-  MODIFY `curriculum_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
-
---
 -- AUTO_INCREMENT for table `dprtmnt_curriculum_table`
 --
 ALTER TABLE `dprtmnt_curriculum_table`
@@ -2276,7 +2272,7 @@ ALTER TABLE `dprtmnt_table`
 -- AUTO_INCREMENT for table `enrolled_subject`
 --
 ALTER TABLE `enrolled_subject`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=219;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=230;
 
 --
 -- AUTO_INCREMENT for table `period_status`
@@ -2390,7 +2386,7 @@ ALTER TABLE `student_numbering_table`
 -- AUTO_INCREMENT for table `student_status_table`
 --
 ALTER TABLE `student_status_table`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `time_table`
@@ -2402,7 +2398,7 @@ ALTER TABLE `time_table`
 -- AUTO_INCREMENT for table `user_accounts`
 --
 ALTER TABLE `user_accounts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `year_level_table`

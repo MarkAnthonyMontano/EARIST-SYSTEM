@@ -110,7 +110,7 @@ const Dashboard = () => {
           },
           {
             label: "Total Professors",
-            value: professorCount,
+            value: professorCount, 
             icon: <PersonIcon style={{ fontSize: "50px" }} />,
             color: "#A3C4F3",
           },

@@ -11,6 +11,11 @@ const fs = require("fs");
 
 require("dotenv").config();
 const app = express();
+const http = require("http").createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(http, {
+  cors: { origin: "*" }
+});
 
 //MIDDLEWARE
 app.use(express.json());
@@ -18,6 +23,7 @@ app.use(cors());
 app.use(bodyparser.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 
 const uploadPath = path.join(__dirname, "uploads");
 app.use("/uploads", express.static(uploadPath));
@@ -40,7 +46,48 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+const nodemailer = require("nodemailer");
 
+io.on("connection", (socket) => {
+  console.log("A client connected");
+
+  socket.on("forgot-password", async (email) => {
+    try {
+      const [rows] = await db3.query("SELECT * FROM user_accounts WHERE email = ?", [email]);
+      if (rows.length === 0) {
+        socket.emit("password-reset-result", { success: false, message: "Email not found." });
+        return;
+      }
+
+      const newPassword = Math.random().toString(36).slice(-8);
+      const hashed = await bcrypt.hash(newPassword, 10);
+
+      await db3.query("UPDATE user_accounts SET password = ? WHERE email = ?", [hashed, email]);
+
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+
+      const mailOptions = {
+        from: `"EARIST - Manila" <${process.env.EMAIL_USER}>`,
+        to: email,
+        subject: "EARIST: Your Password Has Been Reset",
+        text: `Your new password is: ${newPassword}`,
+      };
+
+      await transporter.sendMail(mailOptions);
+
+      socket.emit("password-reset-result", { success: true, message: "New password sent to your email." });
+    } catch (error) {
+      console.error("Reset error:", error);
+      socket.emit("password-reset-result", { success: false, message: "Internal server error." });
+    }
+  });
+});
 
 
 //MYSQL CONNECTION FOR ADMISSION
@@ -3294,9 +3341,6 @@ app.get('/statistics/student_count/department/:dprtmnt_id/by_year_level', async 
   }
 });
 
-
-
-
-app.listen(5000, () => {
-  console.log("Server runnning");
+http.listen(5000, () => {
+  console.log("Server with Socket.IO running on port 5000");
 });
