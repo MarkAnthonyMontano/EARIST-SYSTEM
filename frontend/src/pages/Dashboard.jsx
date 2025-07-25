@@ -10,6 +10,7 @@ import {
   FormControl,
   Select,
   InputLabel,
+  Paper,
 } from "@mui/material";
 import GroupIcon from "@mui/icons-material/Groups";
 import SchoolIcon from "@mui/icons-material/School";
@@ -82,51 +83,61 @@ const Dashboard = () => {
     }
   }, [selectedDepartment]);
 
+  const stats = [
+    {
+      label: "Total Applicants",
+      value: enrolledCount,
+      icon: <GroupIcon fontSize="large" />,
+      color: "#F6D167",
+    },
+    {
+      label: "Enrolled Students",
+      value: acceptedCount,
+      icon: <SchoolIcon fontSize="large" />,
+      color: "#84B082",
+    },
+    {
+      label: "Professors",
+      value: professorCount,
+      icon: <PersonIcon fontSize="large" />,
+      color: "#A3C4F3",
+    },
+  ];
+
   return (
-    <Box sx={{ px: 5, py: 2, backgroundColor: "#f9f9f9", minHeight: "100vh" }}>
+    <Box sx={{ p: 4, backgroundColor: "#F5F7FA", minHeight: "100vh" }}>
       <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <Typography variant="h5" fontWeight="bold">
-          Welcome, Admin {user}!
+        <Typography variant="h4" fontWeight="bold" mb={2}>
+          Welcome, Admin {user.split("@")[0]}!
         </Typography>
         <Typography variant="body1" style={{ color: "black", fontSize: "25px" }}>
           {formattedDate}
         </Typography>
       </Box>
-
-      {/* Statistics Cards */}
+      {/* Stats Section */}
       <Grid container spacing={3}>
-        {[
-          {
-            label: "Total Applicants",
-            value: enrolledCount,
-            icon: <GroupIcon style={{ fontSize: "50px" }} />,
-            color: "#F6D167",
-          },
-          {
-            label: "Total Enrolled Students",
-            value: acceptedCount,
-            icon: <SchoolIcon style={{ fontSize: "50px" }} />,
-            color: "#84B082",
-          },
-          {
-            label: "Total Professors",
-            value: professorCount, 
-            icon: <PersonIcon style={{ fontSize: "50px" }} />,
-            color: "#A3C4F3",
-          },
-        ].map((stat, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
-            <Card sx={{ display: "flex", alignItems: "center", p: 2, boxShadow: 3 }}>
+        {stats.map((stat, i) => (
+          <Grid item xs={12} sm={6} md={4} key={i}>
+            <Card
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                p: 3,
+                borderRadius: 3,
+                transition: "transform 0.2s ease",
+                "&:hover": { transform: "scale(1.03)" },
+              }}
+            >
               <Box
                 sx={{
-                  width: 80,
-                  height: 80,
+                  width: 70,
+                  height: 70,
+                  borderRadius: "50%",
                   backgroundColor: stat.color,
-                  borderRadius: 2,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  mr: 2,
+                  mr: 3,
                 }}
               >
                 {stat.icon}
@@ -144,75 +155,67 @@ const Dashboard = () => {
         ))}
       </Grid>
 
-      {/* Department Selection & Stats */}
-      <Grid container spacing={3} mt={2}>
+      {/* Department Section */}
+      <Typography variant="h6" mt={6} mb={2}>
+        Department Overview
+      </Typography>
+
+      <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: "350px", boxShadow: 3 }}>
-            <CardContent>
-              <Typography  fontWeight="bold" sx={{ mb: 1, fontSize: "16px" }}>
-                Select College / Department
-              </Typography>
-              <FormControl fullWidth style={{fontSize: "14px"}}>
-                <InputLabel>Select Department</InputLabel>
-                <Select
-                  value={selectedDepartment}
-                  onChange={(e) => setSelectedDepartment(e.target.value)}
-                  label="Select Department"
-                >
-                  <MenuItem value="">
-                    <em>-Select Department-</em>
+          <Paper elevation={3} sx={{ p: 3, borderRadius: 3, height: 400 }}>
+            <Typography fontWeight="bold" mb={2}>
+              Select Department
+            </Typography>
+            <FormControl fullWidth>
+              <InputLabel>Select Department</InputLabel>
+              <Select
+                value={selectedDepartment}
+                onChange={(e) => setSelectedDepartment(e.target.value)}
+                label="Select Department"
+              >
+                <MenuItem value="">
+                  <em>- Select -</em>
+                </MenuItem>
+                {departments.map((dept) => (
+                  <MenuItem key={dept.dprtmnt_id} value={dept.dprtmnt_id}>
+                    {dept.dprtmnt_name}
                   </MenuItem>
-                  {departments.map((dept) => (
-                    <MenuItem key={dept.dprtmnt_id} value={dept.dprtmnt_id}>
-                      {dept.dprtmnt_name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </CardContent>
-          </Card>
+                ))}
+              </Select>
+            </FormControl>
+          </Paper>
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Card sx={{ height: "350px", boxShadow: 3 }}>
-            <CardContent>
-              <Typography  fontWeight="bold" sx={{ mb: 1, fontSize: "16px" }}>
-                Department Student
+          <Paper elevation={3} sx={{ p: 3, borderRadius: 3, height: 400 }}>
+            <Typography fontWeight="bold" mb={2}>
+              Student Summary
+            </Typography>
+            <Typography variant="body1" mb={2}>
+              Total Enrolled Students:{" "}
+              <Typography component="span" fontWeight="bold" color="primary">
+                {selectedDepartment ? studentCount : "—"}
               </Typography>
-              <Typography variant="body1" sx={{ mb: 1, fontSize: "14px" }}>
-                Total Enrolled:{" "}
-                <Typography component="span" fontWeight="bold" color="maroon" sx={{ fontSize: "14px" }}>
-                  {selectedDepartment ? studentCount : "—"}
-                </Typography>
-              </Typography>
+            </Typography>
 
-              {yearLevelCounts.length > 0 ? (
-                yearLevelCounts.map((item) => (
-                  <Typography
-                    key={item.year_level_id}
-                    variant="body1"
-                    sx={{ mb: 1, fontSize: "14px" }}
-                  >
-                    {item.year_level_description}:{" "}
-                    <Typography
-                      component="span"
-                      fontWeight="bold"
-                      color="maroon"
-                      sx={{ fontSize: "14px" }}
-                    >
-                      {item.student_count}
-                    </Typography>
+            {yearLevelCounts.length > 0 ? (
+              yearLevelCounts.map((item) => (
+                <Typography key={item.year_level_id} variant="body2" mb={1}>
+                  {item.year_level_description}:{" "}
+                  <Typography component="span" fontWeight="bold" color="maroon">
+                    {item.student_count}
                   </Typography>
-                ))
-              ) : (
-                <Typography variant="body2" color="textSecondary" sx={{ mt: 2 }}>
-                  No year level data available.
                 </Typography>
-              )}
-            </CardContent>
-          </Card>
+              ))
+            ) : (
+              <Typography variant="body2" color="textSecondary">
+                No year level data available.
+              </Typography>
+            )}
+          </Paper>
         </Grid>
       </Grid>
+
     </Box>
   );
 };

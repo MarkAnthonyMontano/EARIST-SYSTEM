@@ -9,6 +9,10 @@ import {
     Avatar,
 } from '@mui/material';
 import { Search } from '@mui/icons-material';
+import { io } from "socket.io-client";
+import { Snackbar, Alert } from '@mui/material';
+
+const socket = io("http://localhost:5000");
 
 const StudentNumbering = () => {
     const [persons, setPersons] = useState([]);
@@ -17,6 +21,8 @@ const StudentNumbering = () => {
     const [error, setError] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+    const [snack, setSnack] = useState({ open: false, message: '', severity: 'info' });
+
 
     const itemsPerPage = 20;
     const filteredPersons = persons.filter((person) => {
@@ -68,20 +74,29 @@ const StudentNumbering = () => {
         setError('');
     };
 
-    const handleAssignNumber = async () => {
+    const handleAssignNumber = () => {
         if (!selectedPerson) return;
-        try {
-            const res = await axios.post('http://localhost:5000/api/assign-student-number', {
-                person_id: selectedPerson.person_id,
-            });
-            setAssignedNumber(res.data.student_number);
-            setError('');
-            await fetchPersons();
-            setSelectedPerson(null);
-        } catch (err) {
-            setError(err.response?.data || 'An error occurred.');
-        }
+
+        socket.emit("assign-student-number", selectedPerson.person_id);
+
+        socket.once("assign-student-number-result", (data) => {
+            if (data.success) {
+                setAssignedNumber(data.student_number);
+                setSnack({ open: true, message: "Student number assigned and email sent.", severity: "success" });
+                fetchPersons();
+                setSelectedPerson(null);
+            } else {
+                setSnack({ open: true, message: data.message || "❌ Failed to assign student number.", severity: "error" });
+            }
+        });
     };
+
+    const handleSnackClose = (_, reason) => {
+        if (reason === 'clickaway') return;
+        setSnack(prev => ({ ...prev, open: false }));
+    };
+
+
 
     return (
         <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, p: 2 }}>
@@ -154,15 +169,15 @@ const StudentNumbering = () => {
 
                 {/* Selected Person + Assignment */}
                 <Box flex={1}>
-                    <Typography  fontSize={16} fontWeight="bold" gutterBottom>
+                    <Typography fontSize={16} fontWeight="bold" gutterBottom>
                         Selected Person
                     </Typography>
 
                     {selectedPerson ? (
                         <Box>
-                            <Typography style={{ fontSize: "25px" }}>
+                            <Typography style={{ fontSize: "16px" }}>
                                 <strong >Name:</strong> {selectedPerson.first_name} {selectedPerson.middle_name}{' '}
-                                {selectedPerson.last_name}
+                                {selectedPerson.last_name}  |   <strong >Email Address:</strong> {selectedPerson.emailAddress}
                             </Typography>
                             <Button
                                 variant="contained"
@@ -255,6 +270,16 @@ const StudentNumbering = () => {
                     </>
                 )}
             </Box>
+            <Snackbar
+                open={snack.open}
+             
+                onClose={handleSnackClose}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert onClose={handleSnackClose} severity={snack.severity} sx={{ width: '100%' }}>
+                    {snack.message}
+                </Alert>
+            </Snackbar>
 
         </Box>
     );

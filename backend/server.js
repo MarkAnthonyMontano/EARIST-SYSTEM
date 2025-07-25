@@ -808,21 +808,19 @@ app.post("/change-password", async (req, res) => {
   }
 });
 
-// Reset Password for Applicant
 io.on("connection", (socket) => {
-  console.log("A client connected");
+  console.log("✅ Socket.IO client connected");
 
+  // ---------------------- Forgot Password: Applicant ----------------------
   socket.on("forgot-password-applicant", async (email) => {
     try {
       const [rows] = await db.query("SELECT * FROM user_accounts WHERE email = ?", [email]);
       if (rows.length === 0) {
-        socket.emit("password-reset-result-applicant", { success: false, message: "Email not found." });
-        return;
+        return socket.emit("password-reset-result-applicant", { success: false, message: "Email not found." });
       }
 
-      const newPassword = Math.random().toString(36).slice(-8).toUpperCase(); // All caps
+      const newPassword = Math.random().toString(36).slice(-8).toUpperCase();
       const hashed = await bcrypt.hash(newPassword, 10);
-
       await db.query("UPDATE user_accounts SET password = ? WHERE email = ?", [hashed, email]);
 
       const transporter = nodemailer.createTransport({
@@ -837,14 +835,7 @@ io.on("connection", (socket) => {
         from: `"EARIST Enrollment Notice" <noreply-earistmis@gmail.com>`,
         to: email,
         subject: "Your Password has been Reset!",
-        text: `
-Hi,
-
-Please login with your new password: ${newPassword}
-
-Yours Truly,
-EARIST MANILA
-        `.trim()
+        text: `Hi,\n\nPlease login with your new password: ${newPassword}\n\nYours Truly,\nEARIST MANILA`,
       };
 
       await transporter.sendMail(mailOptions);
@@ -854,30 +845,24 @@ EARIST MANILA
         message: "New password sent to your email.",
       });
     } catch (error) {
-      console.error("Reset error:", error);
+      console.error("Reset error (applicant):", error);
       socket.emit("password-reset-result-applicant", {
         success: false,
         message: "Internal server error.",
       });
     }
   });
-});
 
-// Reset Password for Registrar
-io.on("connection", (socket) => {
-  console.log("A client connected");
-
+  // ---------------------- Forgot Password: Registrar ----------------------
   socket.on("forgot-password-registrar", async (email) => {
     try {
       const [rows] = await db3.query("SELECT * FROM user_accounts WHERE email = ?", [email]);
       if (rows.length === 0) {
-        socket.emit("password-reset-result-registrar", { success: false, message: "Email not found." });
-        return;
+        return socket.emit("password-reset-result-registrar", { success: false, message: "Email not found." });
       }
 
-      const newPassword = Math.random().toString(36).slice(-8).toUpperCase(); // All caps
+      const newPassword = Math.random().toString(36).slice(-8).toUpperCase();
       const hashed = await bcrypt.hash(newPassword, 10);
-
       await db3.query("UPDATE user_accounts SET password = ? WHERE email = ?", [hashed, email]);
 
       const transporter = nodemailer.createTransport({
@@ -892,14 +877,7 @@ io.on("connection", (socket) => {
         from: `"EARIST Enrollment Notice" <noreply-earistmis@gmail.com>`,
         to: email,
         subject: "Your Password has been Reset!",
-        text: `
-Hi,
-
-Please login with your new password: ${newPassword}
-
-Yours Truly,
-EARIST MANILA
-        `.trim()
+        text: `Hi,\n\nPlease login with your new password: ${newPassword}\n\nYours Truly,\nEARIST MANILA`,
       };
 
       await transporter.sendMail(mailOptions);
@@ -909,14 +887,115 @@ EARIST MANILA
         message: "New password sent to your email.",
       });
     } catch (error) {
-      console.error("Reset error:", error);
+      console.error("Reset error (registrar):", error);
       socket.emit("password-reset-result-registrar", {
         success: false,
         message: "Internal server error.",
       });
     }
   });
+
+
+  // ---------------------- Assign Student Number ----------------------
+  socket.on("assign-student-number", async (person_id) => {
+    try {
+      const [rows] = await db3.query(
+        `SELECT first_name, middle_name, last_name, emailAddress FROM person_table WHERE person_id = ?`,
+        [person_id]
+      );
+
+      if (rows.length === 0) {
+        return socket.emit("assign-student-number-result", {
+          success: false,
+          message: "Person not found.",
+        });
+      }
+
+      const { first_name, middle_name, last_name, emailAddress } = rows[0];
+      const student_number = `${new Date().getFullYear()}${String(person_id).padStart(5, "0")}`;
+      const tempPassword = last_name.toUpperCase();
+      const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+      // ✅ Save to student_numbering_table
+      await db3.query(
+        `INSERT INTO student_numbering_table (student_number, person_id) VALUES (?, ?)`,
+        [student_number, person_id]
+      );
+
+      // ✅ Also update student_registration_status = 1
+      await db3.query(
+        `UPDATE person_status_table SET student_registration_status = 1 WHERE person_id = ?`,
+        [person_id]
+      );
+
+      // ✅ Insert or update login credentials
+      const [existingUser] = await db3.query(`SELECT * FROM user_accounts WHERE person_id = ?`, [person_id]);
+
+      if (existingUser.length === 0) {
+        await db3.query(
+          `INSERT INTO user_accounts (person_id, email, password, role) VALUES (?, ?, ?, 'student')`,
+          [person_id, emailAddress, hashedPassword]
+        );
+      } else {
+        await db3.query(
+          `UPDATE user_accounts SET email = ?, password = ?, role = 'student' WHERE person_id = ?`,
+          [emailAddress, hashedPassword, person_id]
+        );
+      }
+
+      // ✅ Emit success
+      socket.emit("assign-student-number-result", {
+        success: true,
+        student_number,
+        message: "Student number assigned successfully.",
+      });
+
+      // 📧 Send Email (optional but useful)
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+
+      const mailOptions = {
+        from: `"EARIST Enrollment Office" <noreply-earistmis@gmail.com>`,
+        to: emailAddress,
+        subject: "🎓 Welcome to EARIST - Your Student Login Info",
+        text: `
+Hi, ${first_name} ${middle_name} ${last_name},
+
+🎉 Congratulations! You are now officially enrolled and Part of Eulogio 'Amang'
+Rodriguez Institute of Science and Technology of EARIST Community.
+
+Your Student Number is: ${student_number} 
+
+Your Email Address is: ${emailAddress} 
+Your temporary password is: ${tempPassword}
+You may change your password and keep it secured.
+
+👉 Click the link below to log in to EARIST:
+
+http://localhost:5173/login
+
+
+      `.trim(),
+      };
+
+      // Send email in background
+      transporter.sendMail(mailOptions).catch(console.error);
+    } catch (error) {
+      console.error("Error in assign-student-number:", error);
+      socket.emit("assign-student-number-result", {
+        success: false,
+        message: "Internal server error.",
+      });
+    }
+  });
 });
+
+
 
 
 // Login for Applicants
@@ -2312,15 +2391,14 @@ app.post("/api/insert-schedule", async (req, res) => {
 // GET STUDENTS THAT HAVE NO STUDENT NUMBER (UPDATED!)
 app.get("/api/persons", async (req, res) => {
   try {
-    // Execute the query using the promise-based API
     const [rows] = await db3.execute(`
       SELECT p.* 
       FROM person_table p
       JOIN person_status_table ps ON p.person_id = ps.person_id
       WHERE ps.student_registration_status = 0
+      AND p.person_id NOT IN (SELECT person_id FROM student_numbering_table)
     `);
 
-    // Send the result as JSON
     res.json(rows);
   } catch (err) {
     console.error("Database query error:", err);
