@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Register from './components/Register';
 import Login from './components/Login';
 import ForgotPassword from './components/ForgotPassword';
+import ApplicantForgotPassword from './components/ApplicantForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import Navbar from './components/Navbar';
@@ -117,6 +118,7 @@ function App() {
             <Routes>
               <Route path="/register" element={<Register />} />
               <Route path="/forgot_password" element={<ForgotPassword />} />
+              <Route path="/applicant_forgot_password" element={<ApplicantForgotPassword />} />
               <Route path="/" element={<LoginEnrollment setIsAuthenticated={setIsAuthenticated} />} />
               <Route path="/login_applicant" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
               <Route path="/login_prof" element={<LoginProf setIsAuthenticated={setIsAuthenticated} />} />

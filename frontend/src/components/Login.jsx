@@ -54,6 +54,8 @@ const Login = ({ setIsAuthenticated }) => {
     }
   };
 
+  
+
   const handleClose = (_, reason) => {
     if (reason === 'clickaway') return;
     setSnack(prev => ({ ...prev, open: false }));
@@ -161,9 +163,10 @@ const Login = ({ setIsAuthenticated }) => {
                 <span>Log In</span>
               </div>
 
-              <div className="LinkContainer">
-                <span>Forget password?</span>
+             <div className="LinkContainer">
+                <span><Link to="/applicant_forgot_password">Forgot your password</Link></span>
               </div>
+
 
               <div className="LinkContainer RegistrationLink" style={{ margin: '0.1rem 0rem' }}>
                 <p>Doesn't Have an Account?</p>

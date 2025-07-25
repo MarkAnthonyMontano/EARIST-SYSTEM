@@ -19,7 +19,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 // Connect to backend
 const socket = io("http://localhost:5000");
 
-const ForgotPassword = () => {
+const ApplicantForgotPassword = () => {
   const [capVal, setCapVal] = useState(null);
   const [email, setEmail] = useState("");
   const [snack, setSnack] = useState({ open: false, message: '', severity: 'info' });
@@ -35,7 +35,7 @@ const ForgotPassword = () => {
       return;
     }
 
-    socket.emit("forgot-password-registrar", email);
+    socket.emit("forgot-password-applicant", email);
   };
 
   useEffect(() => {
@@ -47,11 +47,8 @@ const ForgotPassword = () => {
       });
     };
 
-    socket.on("password-reset-result-registrar", listener);
-
-    return () => {
-      socket.off("password-reset-result-registrar", listener);
-    };
+    socket.on("password-reset-result-applicant", listener);
+    return () => socket.off("password-reset-result-applicant", listener);
   }, []);
 
   const handleClose = (_, reason) => {
@@ -149,7 +146,7 @@ const ForgotPassword = () => {
             <div className="LinkContainer" style={{ marginTop: "1rem" }}>
               <p>To go to login page,</p>
               <span>
-                <Link to="/" style={{ textDecoration: 'underline' }}>
+                <Link to="/login_applicant" style={{ textDecoration: 'underline' }}>
                   Click here
                 </Link>
               </span>
@@ -180,4 +177,4 @@ const ForgotPassword = () => {
   );
 };
 
-export default ForgotPassword;
+export default ApplicantForgotPassword;

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 25, 2025 at 11:17 AM
+-- Generation Time: Jul 25, 2025 at 03:05 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -1968,7 +1968,7 @@ CREATE TABLE `user_accounts` (
 INSERT INTO `user_accounts` (`id`, `person_id`, `role`, `email`, `password`) VALUES
 (1, 20, 'registrar', 'Ardenmecasio21@gmail.com', '$2b$10$FR.08E3pPApsIbU0uQ3H9.IbjjWvc70cwRk4Bu2BwBwSFLGCp0o4.'),
 (2, 4, 'student', 'ardenhello@gmail.com', '$2b$10$dxs3rjyLGQtPIeDpyeAUTOsViqjJWC6ZYb1uhlWSZLePjvPOj/qZ.'),
-(3, 1, 'registrar', 'montano.ma.bsinfotech@gmail.com', '$2b$10$hps1Ql7R3fjxjsFBGfyjguuthm.9dJKWH8QPIvGRZFV5qSLg8Gixy');
+(3, 1, 'registrar', 'montano.ma.bsinfotech@gmail.com', '$2b$10$sm67rVo6ZE/NmsPJh/yiRu0LB9v8L04xFdFtdG9Fm0wimbNdDFQyS');
 
 -- --------------------------------------------------------
 

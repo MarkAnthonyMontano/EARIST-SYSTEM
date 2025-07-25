@@ -808,16 +808,70 @@ app.post("/change-password", async (req, res) => {
   }
 });
 
-
-// For email Resetting the password
+// Reset Password for Applicant
 io.on("connection", (socket) => {
   console.log("A client connected");
 
-  socket.on("forgot-password", async (email) => {
+  socket.on("forgot-password-applicant", async (email) => {
+    try {
+      const [rows] = await db.query("SELECT * FROM user_accounts WHERE email = ?", [email]);
+      if (rows.length === 0) {
+        socket.emit("password-reset-result-applicant", { success: false, message: "Email not found." });
+        return;
+      }
+
+      const newPassword = Math.random().toString(36).slice(-8).toUpperCase(); // All caps
+      const hashed = await bcrypt.hash(newPassword, 10);
+
+      await db.query("UPDATE user_accounts SET password = ? WHERE email = ?", [hashed, email]);
+
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+
+      const mailOptions = {
+        from: `"EARIST Enrollment Notice" <noreply-earistmis@gmail.com>`,
+        to: email,
+        subject: "Your Password has been Reset!",
+        text: `
+Hi,
+
+Please login with your new password: ${newPassword}
+
+Yours Truly,
+EARIST MANILA
+        `.trim()
+      };
+
+      await transporter.sendMail(mailOptions);
+
+      socket.emit("password-reset-result-applicant", {
+        success: true,
+        message: "New password sent to your email.",
+      });
+    } catch (error) {
+      console.error("Reset error:", error);
+      socket.emit("password-reset-result-applicant", {
+        success: false,
+        message: "Internal server error.",
+      });
+    }
+  });
+});
+
+// Reset Password for Registrar
+io.on("connection", (socket) => {
+  console.log("A client connected");
+
+  socket.on("forgot-password-registrar", async (email) => {
     try {
       const [rows] = await db3.query("SELECT * FROM user_accounts WHERE email = ?", [email]);
       if (rows.length === 0) {
-        socket.emit("password-reset-result", { success: false, message: "Email not found." });
+        socket.emit("password-reset-result-registrar", { success: false, message: "Email not found." });
         return;
       }
 
@@ -835,7 +889,7 @@ io.on("connection", (socket) => {
       });
 
       const mailOptions = {
-        from: `"EARIST Enrollment Notice" <noreply-earist@pinnacle.edu.ph>`,
+        from: `"EARIST Enrollment Notice" <noreply-earistmis@gmail.com>`,
         to: email,
         subject: "Your Password has been Reset!",
         text: `
@@ -850,20 +904,19 @@ EARIST MANILA
 
       await transporter.sendMail(mailOptions);
 
-      socket.emit("password-reset-result", {
+      socket.emit("password-reset-result-registrar", {
         success: true,
         message: "New password sent to your email.",
       });
     } catch (error) {
       console.error("Reset error:", error);
-      socket.emit("password-reset-result", {
+      socket.emit("password-reset-result-registrar", {
         success: false,
         message: "Internal server error.",
       });
     }
   });
 });
-
 
 
 // Login for Applicants
