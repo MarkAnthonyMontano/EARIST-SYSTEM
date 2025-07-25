@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -16,6 +16,7 @@ const ClassRoster = () => {
   const [programs, setPrograms] = useState([]);
   const [selectedDept, setSelectedDept] = useState(null);
   const [selectedProgramId, setSelectedProgramId] = useState(null);
+  const navigate = useNavigate(); // used for navigation on card click
 
   const fetchDepartments = async () => {
     try {
@@ -87,55 +88,40 @@ const ClassRoster = () => {
 
         {programs.length > 0 && (
           <Paper elevation={2} sx={{ p: 2 }}>
-            <Typography style={{fontSize: 14}} fontWeight="bold" mb={2}>
+            <Typography style={{ fontSize: 14 }} fontWeight="bold" mb={2}>
               {programs[0].dprtmnt_name} ({programs[0].dprtmnt_code})
             </Typography>
 
             <Grid container spacing={2}>
-              {programs.map(program => {
-                const isSelected = selectedProgramId === program.curriculum_id;
-                return (
-                  <Grid item xs={12} sm={6} md={4} key={program.program_id}>
-                    <Card
-                      onClick={() => setSelectedProgramId(program.curriculum_id)}
-                      sx={{
-                        height: '100px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        textAlign: 'center',
-                        backgroundColor: isSelected ? '#800000' : '#ffffff',
-                        color: isSelected ? '#ffffff' : '#800000',
-                        border: '2px solid #800000',
-                        cursor: 'pointer',
-                        transition: '0.3s',
-                        '&:hover': {
-                          backgroundColor: '#800000',
-                          color: '#ffffff'
-                        }
-                      }}
-                    >
-                      <CardContent>
-                        <Typography
-                          component={Link}
-                          to={`class_list/ccs/${program.curriculum_id}`}
-                          onClick={(e) => e.stopPropagation()} // prevent parent onClick if link clicked
-                          sx={{
-                            textDecoration: 'none',
-                            color: 'inherit',
-                            fontWeight: 500,
-                            '&:hover': {
-                              textDecoration: 'underline'
-                            }
-                          }}
-                        >
-                          {program.program_description} ({program.program_code})
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                );
-              })}
+              {programs.map(program => (
+                <Grid item xs={12} sm={6} md={4} key={program.program_id}>
+                  <Card
+                    onClick={() => navigate(`class_list/ccs/${program.curriculum_id}`)}
+                    sx={{
+                      height: '100px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      textAlign: 'center',
+                      backgroundColor: '#ffffff',
+                      color: '#800000',
+                      border: '2px solid #800000',
+                      cursor: 'pointer',
+                      transition: '0.3s',
+                      '&:hover': {
+                        backgroundColor: '#800000',
+                        color: '#ffffff'
+                      }
+                    }}
+                  >
+                    <CardContent>
+                      <Typography fontWeight={500}>
+                        {program.program_description} ({program.program_code})
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
             </Grid>
           </Paper>
         )}

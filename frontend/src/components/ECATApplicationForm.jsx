@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { Box, Container, } from "@mui/material";
 import EaristLogo from "../assets/EaristLogo.png";
 import axios from "axios";
-import { FcPrint } from "react-icons/fc";  
+import { FcPrint } from "react-icons/fc";
 
 const ECATApplicationForm = () => {
   const [userID, setUserID] = useState("");
@@ -71,29 +71,29 @@ const ECATApplicationForm = () => {
     }
   };
 
- 
-      // do not alter
-      useEffect(() => {
-        const storedUser = localStorage.getItem("email");
-        const storedRole = localStorage.getItem("role");
-        const storedID = localStorage.getItem("person_id");
-    
-        if (storedUser && storedRole && storedID) {
-          setUser(storedUser);
-          setUserRole(storedRole);
-          setUserID(storedID);
-    
-          if (storedRole === "applicant") {
-           
-          } else {
-            window.location.href = "/login";
-          }
-        } else {
-          window.location.href = "/login";
-        }
-      }, []);
-    
- 
+
+  // do not alter
+  useEffect(() => {
+    const storedUser = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
+    const storedID = localStorage.getItem("person_id");
+
+    if (storedUser && storedRole && storedID) {
+      setUser(storedUser);
+      setUserRole(storedRole);
+      setUserID(storedID);
+
+      if (storedRole === "applicant") {
+
+      } else {
+        window.location.href = "/login";
+      }
+    } else {
+      window.location.href = "/login";
+    }
+  }, []);
+
+
 
   const [shortDate, setShortDate] = useState("");
 
@@ -211,22 +211,22 @@ const ECATApplicationForm = () => {
 
   }
 
-// 🔒 Disable right-click
-document.addEventListener('contextmenu', (e) => e.preventDefault());
+  // 🔒 Disable right-click
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-// 🔒 Block DevTools shortcuts silently
-document.addEventListener('keydown', (e) => {
-  const isBlockedKey =
-    e.key === 'F12' ||
-    e.key === 'F11' ||
-    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-    (e.ctrlKey && e.key === 'U');
+  // 🔒 Block DevTools shortcuts silently
+  document.addEventListener('keydown', (e) => {
+    const isBlockedKey =
+      e.key === 'F12' ||
+      e.key === 'F11' ||
+      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+      (e.ctrlKey && e.key === 'U');
 
-  if (isBlockedKey) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-});
+    if (isBlockedKey) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
 
   return (
 
@@ -248,31 +248,31 @@ document.addEventListener('keydown', (e) => {
         <Container>
           <h1 style={{ fontSize: "40px", fontWeight: "bold", textAlign: "Left", color: "maroon", marginTop: "25px" }}> ECAT APPLICATION FORM</h1>
           <hr style={{ border: "1px solid #ccc", width: "44%" }} />
-         <button
-        onClick={printDiv}
-        style={{
-          marginBottom: "1rem",
-          padding: "10px 20px",
-          border: "2px solid black",
-          backgroundColor: "#f0f0f0",
-          color: "black",
-          borderRadius: "5px",
-          marginTop: "20px",
-          cursor: "pointer",
-          fontSize: "16px",
-          fontWeight: "bold",
-          transition: "background-color 0.3s, transform 0.2s",
-        }}
-        onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
-        onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
-        onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
-        onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
-      >
-        <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <FcPrint size={20} />
-          Print ECAT Application Form
-        </span>
-      </button>
+          <button
+            onClick={printDiv}
+            style={{
+              marginBottom: "1rem",
+              padding: "10px 20px",
+              border: "2px solid black",
+              backgroundColor: "#f0f0f0",
+              color: "black",
+              borderRadius: "5px",
+              marginTop: "20px",
+              cursor: "pointer",
+              fontSize: "16px",
+              fontWeight: "bold",
+              transition: "background-color 0.3s, transform 0.2s",
+            }}
+            onMouseEnter={(e) => (e.target.style.backgroundColor = "#d3d3d3")}
+            onMouseLeave={(e) => (e.target.style.backgroundColor = "#f0f0f0")}
+            onMouseDown={(e) => (e.target.style.transform = "scale(0.95)")}
+            onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FcPrint size={20} />
+              Print ECAT Application Form
+            </span>
+          </button>
 
         </Container>
 
@@ -472,7 +472,7 @@ document.addEventListener('keydown', (e) => {
         >
           <tbody>
 
-           
+
             <tr>
               <td colSpan={40} style={{ padding: "8px" }}>
                 {/* ENTRY STATUS heading */}

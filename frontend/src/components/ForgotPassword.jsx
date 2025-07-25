@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
-import { Snackbar, Alert, Box, Container } from '@mui/material';
+import { Snackbar, Alert, Box, Container, TextField, InputAdornment, Button } from '@mui/material';
 import { Link } from 'react-router-dom';
 import '../styles/Container.css';
 import Logo from '../assets/Logo.png';
 import SchoolImage from '../assets/image.png';
+import { Email } from '@mui/icons-material';
+import ReCAPTCHA from "react-google-recaptcha";
 
+// Connect to backend
 const socket = io("http://localhost:5000");
 
 const ForgotPassword = () => {
+  const [capVal, setCapVal] = useState(null);
   const [email, setEmail] = useState("");
   const [snack, setSnack] = useState({ open: false, message: '', severity: 'info' });
 
@@ -17,6 +21,12 @@ const ForgotPassword = () => {
       setSnack({ open: true, message: "Please enter your email.", severity: "warning" });
       return;
     }
+
+    if (!capVal) {
+      setSnack({ open: true, message: "Please verify you're not a robot.", severity: "warning" });
+      return;
+    }
+
     socket.emit("forgot-password", email);
   };
 
@@ -37,6 +47,8 @@ const ForgotPassword = () => {
     setSnack(prev => ({ ...prev, open: false }));
   };
 
+  const isButtonDisabled = !email || !capVal;
+
   return (
     <Box
       sx={{
@@ -53,6 +65,7 @@ const ForgotPassword = () => {
     >
       <Container style={{ display: "flex", alignItems: "center", justifyContent: "center" }} maxWidth={false}>
         <div style={{ border: "5px solid white" }} className="Container">
+          {/* Header */}
           <div className="Header">
             <div className="HeaderTitle">
               <div className="CircleCon">
@@ -65,30 +78,73 @@ const ForgotPassword = () => {
             </div>
           </div>
 
+          {/* Body */}
           <div className="Body">
-            <div className="TextField">
-              <label htmlFor="email">Enter your registered email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                placeholder="example@email.com"
-                className="border"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+            <label htmlFor="email">Email Address:</label>
+            <TextField
+              fullWidth
+              type="email"
+              placeholder="Enter your Email Address (e.g., username@gmail.com)"
+              variant="outlined"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Email />
+                  </InputAdornment>
+                ),
+                sx: {
+                  height: "50px",
+                  '& input': {
+                    height: "50px",
+                    padding: "0 10px",
+                    boxSizing: "border-box",
+                  }
+                }
+              }}
+            />
+
+            {/* CAPTCHA */}
+            <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+              <ReCAPTCHA
+                sitekey="6Lfem44rAAAAAEeAexdQxvN0Lpm1V4KPu1bBxaGy"
+                onChange={(val) => setCapVal(val)}
               />
-            </div>
+            </Box>
 
-            <div style={{ marginTop: "40px" }}className="Button" onClick={handleReset}>
-              <span>Reset Password</span>
-            </div>
+            {/* Submit Button */}
+            <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+              <Button
+                onClick={handleReset}
+                variant="contained"
+                disabled={isButtonDisabled}
+                sx={{
+                  width: '100%',
+                  py: 1.5,
+                  backgroundColor: '#6D2323',
+                  color: 'white',
+                  '&:hover': {
+                    backgroundColor: '#6D2323', // slightly lighter maroon on hover
+                  }
+                }}
+              >
+                Reset Password
+              </Button>
+            </Box>
 
+            {/* Back to login */}
             <div className="LinkContainer" style={{ marginTop: "1rem" }}>
-              <p>Back to Login?</p>
-              <span><Link to="/">Click here</Link></span>
+              <p>To go to login page,</p>
+              <span>
+                <Link to="/" style={{ textDecoration: 'underline' }}>
+                  Click here
+                </Link>
+              </span>
             </div>
           </div>
 
+          {/* Footer */}
           <div className="Footer">
             <div className="FooterText">
               &copy; 2025 EARIST Information System. All rights reserved.

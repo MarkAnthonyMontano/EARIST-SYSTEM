@@ -23,27 +23,27 @@ const Dashboard5 = () => {
 
 
 
-   // do not alter
-   useEffect(() => {
-     const storedUser = localStorage.getItem("email");
-     const storedRole = localStorage.getItem("role");
-     const storedID = localStorage.getItem("person_id");
- 
-     if (storedUser && storedRole && storedID) {
-       setUser(storedUser);
-       setUserRole(storedRole);
-       setUserID(storedID);
- 
-       if (storedRole === "applicant") {
-         fetchPersonData(storedID);
-       } else {
-         window.location.href = "/login";
-       }
-     } else {
-       window.location.href = "/login";
-     }
-   }, []);
- 
+  // do not alter
+  useEffect(() => {
+    const storedUser = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
+    const storedID = localStorage.getItem("person_id");
+
+    if (storedUser && storedRole && storedID) {
+      setUser(storedUser);
+      setUserRole(storedRole);
+      setUserID(storedID);
+
+      if (storedRole === "applicant") {
+        fetchPersonData(storedID);
+      } else {
+        window.location.href = "/login";
+      }
+    } else {
+      window.location.href = "/login";
+    }
+  }, []);
+
 
   const steps = [
     { label: "Personal Information", icon: <PersonIcon />, path: "/dashboard1", onChange: () => handleChange({ label: "Personal Information", path: "/dashboard1" }) },
@@ -200,7 +200,7 @@ const Dashboard5 = () => {
             </Link>
           </Box>
         </Box>
-  
+
         <Container>
           <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>
             APPLICANT FORM

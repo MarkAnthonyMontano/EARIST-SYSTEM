@@ -143,7 +143,7 @@ const Dashboard2 = () => {
 
   const [isFatherDeceased, setIsFatherDeceased] = useState(false);
   const [isMotherDeceased, setIsMotherDeceased] = useState(false);
- 
+
   useEffect(() => {
     setIsFatherDeceased(person.father_deceased === 1);
   }, [person.father_deceased]);
@@ -175,85 +175,85 @@ const Dashboard2 = () => {
 
   const [errors, setErrors] = useState({});
 
- const isFormValid = () => {
-  const requiredFields = [];
+  const isFormValid = () => {
+    const requiredFields = [];
 
-  // If father is NOT deceased, require father fields:
-  if (person.father_deceased !== 1) {
+    // If father is NOT deceased, require father fields:
+    if (person.father_deceased !== 1) {
+      requiredFields.push(
+        "father_family_name", "father_given_name", "father_middle_name", "father_nickname",
+        "father_contact", "father_occupation", "father_employer", "father_income", "father_email"
+      );
+
+      // but only require education details if father_education !== 1
+      if (person.father_education !== 1) {
+        requiredFields.push(
+          "father_education_level", "father_last_school", "father_course", "father_year_graduated", "father_school_address"
+        );
+      }
+    }
+
+    // If mother is NOT deceased, require mother fields:
+    if (person.mother_deceased !== 1) {
+      requiredFields.push(
+        "mother_family_name", "mother_given_name", "mother_middle_name", "mother_nickname",
+        "mother_contact", "mother_occupation", "mother_employer", "mother_income", "mother_email"
+      );
+
+      // only require education details if mother_education !== 1
+      if (person.mother_education !== 1) {
+        requiredFields.push(
+          "mother_education_level", "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address"
+        );
+      }
+    }
+
+    // Guardian fields always required:
     requiredFields.push(
-      "father_family_name", "father_given_name", "father_middle_name", "father_nickname",
-      "father_contact", "father_occupation", "father_employer", "father_income", "father_email"
+      "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
+      "guardian_nickname", "guardian_address", "guardian_contact"
     );
 
-    // but only require education details if father_education !== 1
-    if (person.father_education !== 1) {
-      requiredFields.push(
-        "father_education_level", "father_last_school", "father_course", "father_year_graduated", "father_school_address"
-      );
-    }
-  }
+    // Annual income always required:
+    requiredFields.push("annual_income");
 
-  // If mother is NOT deceased, require mother fields:
-  if (person.mother_deceased !== 1) {
-    requiredFields.push(
-      "mother_family_name", "mother_given_name", "mother_middle_name", "mother_nickname",
-      "mother_contact", "mother_occupation", "mother_employer", "mother_income", "mother_email"
-    );
+    let newErrors = {};
+    let isValid = true;
 
-    // only require education details if mother_education !== 1
-    if (person.mother_education !== 1) {
-      requiredFields.push(
-        "mother_education_level", "mother_last_school", "mother_course", "mother_year_graduated", "mother_school_address"
-      );
-    }
-  }
+    requiredFields.forEach((field) => {
+      const value = person[field];
+      const stringValue = value?.toString().trim();
 
-  // Guardian fields always required:
-  requiredFields.push(
-    "guardian", "guardian_family_name", "guardian_given_name", "guardian_middle_name",
-    "guardian_nickname", "guardian_address", "guardian_contact"
-  );
+      if (!stringValue) {
+        newErrors[field] = true;
+        isValid = false;
+      }
+    });
 
-  // Annual income always required:
-  requiredFields.push("annual_income");
-
-  let newErrors = {};
-  let isValid = true;
-
-  requiredFields.forEach((field) => {
-    const value = person[field];
-    const stringValue = value?.toString().trim();
-
-    if (!stringValue) {
-      newErrors[field] = true;
-      isValid = false;
-    }
-  });
-
-  setErrors(newErrors);
-  return isValid;
-};
+    setErrors(newErrors);
+    return isValid;
+  };
 
 
 
   const [soloParentChoice, setSoloParentChoice] = useState("");
 
   // 🔒 Disable right-click
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-    // 🔒 Block DevTools shortcuts silently
-    document.addEventListener('keydown', (e) => {
-        const isBlockedKey =
-            e.key === 'F12' ||
-            e.key === 'F11' ||
-            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-            (e.ctrlKey && e.key === 'U');
+  // 🔒 Block DevTools shortcuts silently
+  document.addEventListener('keydown', (e) => {
+    const isBlockedKey =
+      e.key === 'F12' ||
+      e.key === 'F11' ||
+      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+      (e.ctrlKey && e.key === 'U');
 
-        if (isBlockedKey) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-    });
+    if (isBlockedKey) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  });
 
 
 

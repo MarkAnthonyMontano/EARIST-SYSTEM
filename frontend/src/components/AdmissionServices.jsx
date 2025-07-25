@@ -7,7 +7,7 @@ import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt
 import MoodBadIcon from '@mui/icons-material/MoodBad';
 import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
 import SentimentSatisfiedIcon from '@mui/icons-material/SentimentSatisfied';
-import { FcPrint } from "react-icons/fc";  
+import { FcPrint } from "react-icons/fc";
 
 const AdmissionServices = () => {
 
@@ -37,7 +37,7 @@ const AdmissionServices = () => {
             setUserID(storedID);
 
             if (storedRole === "applicant") {
-           
+
             } else {
                 window.location.href = "/login";
             }

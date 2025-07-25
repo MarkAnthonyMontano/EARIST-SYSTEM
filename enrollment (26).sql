@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 24, 2025 at 11:21 PM
+-- Generation Time: Jul 25, 2025 at 11:17 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -360,7 +360,8 @@ INSERT INTO `dprtmnt_profs_table` (`dprtmnt_profs_id`, `dprtmnt_id`, `prof_id`) 
 (44, 5, 36),
 (45, 5, 32),
 (46, 5, 33),
-(47, 5, 35);
+(47, 5, 35),
+(48, 5, 61);
 
 -- --------------------------------------------------------
 
@@ -1437,7 +1438,8 @@ INSERT INTO `prof_table` (`prof_id`, `person_id`, `profile_image`, `fname`, `mna
 (34, NULL, '', 'Charlene', NULL, 'Ronda', 'charlene.ronda@earist.edu.ph', 'RONDA', 0, 'faculty'),
 (35, NULL, '', 'Maria Jasmine', NULL, 'Macasil', 'jasmine.macasil@earist.edu.ph', 'MACASIL', 0, 'faculty'),
 (36, NULL, '', 'Jefferson', NULL, 'Costales', 'jefferson.costales@earist.edu.ph', 'COSTALES', 0, 'faculty'),
-(37, NULL, '', 'Arjo', NULL, 'Ladia', 'arjo.ladia@earist.edu.ph', 'LADIA', 0, 'faculty');
+(37, NULL, '', 'Arjo', NULL, 'Ladia', 'arjo.ladia@earist.edu.ph', 'LADIA', 0, 'faculty'),
+(61, 123, '123_ProfessorProfile_2025.jpg', 'Mark Anthony', 'P.', 'Montano', ' markmontano@gmail.com', '$2b$10$m3/G421i8oWLtqzXt7s26Oq9ImFrJ9q6.q92eT5G9hku3b/H/3D7G', 0, 'faculty');
 
 -- --------------------------------------------------------
 
@@ -1966,7 +1968,7 @@ CREATE TABLE `user_accounts` (
 INSERT INTO `user_accounts` (`id`, `person_id`, `role`, `email`, `password`) VALUES
 (1, 20, 'registrar', 'Ardenmecasio21@gmail.com', '$2b$10$FR.08E3pPApsIbU0uQ3H9.IbjjWvc70cwRk4Bu2BwBwSFLGCp0o4.'),
 (2, 4, 'student', 'ardenhello@gmail.com', '$2b$10$dxs3rjyLGQtPIeDpyeAUTOsViqjJWC6ZYb1uhlWSZLePjvPOj/qZ.'),
-(3, 1, 'registrar', 'montano.ma.bsinfotech@gmail.com', '$2b$10$Om9cQLxdiFy29toOSUpCUu.JjXdrjPY92piLGFfP7r4eS/2H.6CXC');
+(3, 1, 'registrar', 'montano.ma.bsinfotech@gmail.com', '$2b$10$hps1Ql7R3fjxjsFBGfyjguuthm.9dJKWH8QPIvGRZFV5qSLg8Gixy');
 
 -- --------------------------------------------------------
 
@@ -2249,7 +2251,7 @@ ALTER TABLE `dprtmnt_curriculum_table`
 -- AUTO_INCREMENT for table `dprtmnt_profs_table`
 --
 ALTER TABLE `dprtmnt_profs_table`
-  MODIFY `dprtmnt_profs_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
+  MODIFY `dprtmnt_profs_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
 
 --
 -- AUTO_INCREMENT for table `dprtmnt_room_table`
@@ -2303,7 +2305,7 @@ ALTER TABLE `person_table`
 -- AUTO_INCREMENT for table `prof_table`
 --
 ALTER TABLE `prof_table`
-  MODIFY `prof_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
+  MODIFY `prof_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
 
 --
 -- AUTO_INCREMENT for table `program_table`
