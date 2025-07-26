@@ -25,7 +25,7 @@ const AccountDashboard = () => {
             </div>
 
              <div className="relative">
-                <Link to={'/reset_password'}>
+                <Link to={'/registrar_reset_password'}>
                     <div className="bg-white p-4 border-4 rounded-lg border-solid border-maroon-500 absolute left-16 top-8 w-enough">
                         <LockReset className="text-maroon-500" style={{ fontSize: '2rem' }} />
                     </div>

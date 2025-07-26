@@ -11,16 +11,6 @@ import { FcPrint } from "react-icons/fc";
 
 const AdmissionServices = () => {
 
-    const getPersonIdFromToken = () => {
-        const token = localStorage.getItem("token");
-        if (token) {
-            const decoded = jwtDecode(token);
-            console.log("Decoded Token: ", decoded);
-            return decoded.person_id; // Make sure your token contains this field
-        }
-        return null;
-    };
-
     const [userID, setUserID] = useState("");
     const [user, setUser] = useState("");
     const [userRole, setUserRole] = useState("");

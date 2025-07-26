@@ -177,7 +177,9 @@ const StudentNumbering = () => {
                         <Box>
                             <Typography style={{ fontSize: "16px" }}>
                                 <strong >Name:</strong> {selectedPerson.first_name} {selectedPerson.middle_name}{' '}
-                                {selectedPerson.last_name}  |   <strong >Email Address:</strong> {selectedPerson.emailAddress}
+                                {selectedPerson.last_name}  
+                                 <br />
+                                <strong >Email Address:</strong> {selectedPerson.emailAddress}
                             </Typography>
                             <Button
                                 variant="contained"

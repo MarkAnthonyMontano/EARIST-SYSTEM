@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Dashboard, Apartment, Business, LibraryBooks, People, LogoutOutlined, Settings, AccountCircle, AccountCircleOutlined, Token } from '@mui/icons-material';
-import UserProfile from '../assets/UserProfile.png'
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import LockResetIcon from '@mui/icons-material/LockReset';
 import '../styles/SideBar.css'
 import { Avatar } from '@mui/material';
 
@@ -105,24 +108,39 @@ const SideBar = ({ setIsAuthenticated }) => {
         )}
         {role === 'applicant' && (
           <>
+            <Link to="/applicant_dashboard">
+              <li className={`w-full flex items-center border border-maroon-500 px-2 rounded m-2 mx-0 button-hover 
+    ${location.pathname.startsWith("/applicant_dashboard") ? "bg-maroon-500 text-white" : ""}`}>
+                <DashboardIcon />
+                <span className='pl-4 p-2 px-0 pointer-events-none'>Dashboard</span>
+              </li>
+            </Link>
+
             <Link to="/dashboard1">
-              <li
-                className={`w-full flex items-center border border-maroon-500 px-2 rounded button-hover 
-      ${location.pathname.startsWith("/dashboard") ? "bg-maroon-500 text-white" : ""}`}
-              >
-                <Dashboard />
+              <li className={`w-full flex items-center border border-maroon-500 px-2 rounded m-2 mx-0 button-hover 
+    ${location.pathname.startsWith("/dashboard1") ? "bg-maroon-500 text-white" : ""}`}>
+                <AssignmentIndIcon />
                 <span className='pl-4 p-2 px-0 pointer-events-none'>Applicant Form</span>
               </li>
             </Link>
 
-
-
             <Link to="/requirements_uploader">
-              <li className={`w-full flex items-center border border-maroon-500 px-2 rounded m-2 mx-0 button-hover ${location.pathname === "/requirements_uploader" ? "bg-maroon-500 text-white" : ""}`}>
-                <Business />
+              <li className={`w-full flex items-center border border-maroon-500 px-2 rounded m-2 mx-0 button-hover 
+    ${location.pathname.startsWith("/requirements_uploader") ? "bg-maroon-500 text-white" : ""}`}>
+                <CloudUploadIcon />
                 <span className='pl-4 p-2 px-0 pointer-events-none'>Upload Requirements</span>
               </li>
             </Link>
+
+            <Link to="/applicant_reset_password">
+              <li className={`w-full flex items-center border border-maroon-500 px-2 rounded m-2 mx-0 button-hover 
+    ${location.pathname.startsWith("/applicant_reset_password") ? "bg-maroon-500 text-white" : ""}`}>
+                <LockResetIcon />
+                <span className='pl-4 p-2 px-0 pointer-events-none'>Change Password</span>
+              </li>
+            </Link>
+
+
           </>
         )}
         {role === 'faculty' && (

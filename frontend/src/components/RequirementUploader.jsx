@@ -1,95 +1,86 @@
-import { useEffect, useState, useRef } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
-  Container,
   Typography,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  TextField,
   Paper,
-  CircularProgress,
   Table,
   TableBody,
   TableCell,
   TableContainer,
+  Container,
   TableHead,
-  TableRow,
-  IconButton
+  TableRow
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import axios from 'axios';
 
-function RequirementUploader() {
-  const [requirements, setRequirements] = useState([]);
+const requiredDocs = [
+  { label: 'PSA Birth Certificate', key: 'BirthCertificate' },
+  { label: 'Form 138 (4th Quarter / No failing Grades)', key: 'Form138' },
+  { label: 'Certificate of Good Moral Character', key: 'GoodMoralCharacter' },
+  { label: 'Certificate Belonging to Graduating Class', key: 'CertificateOfGraduatingClass' }
+];
+
+const vaccineDoc = { label: 'Copy of Vaccine Card (1st and 2nd Dose)', key: 'VaccineCard' };
+
+const RequirementUploader = () => {
   const [uploads, setUploads] = useState([]);
-  const [selectedRequirement, setSelectedRequirement] = useState('');
-  const [file, setFile] = useState(null);
-  const [loading, setLoading] = useState(false);
-
   const [userID, setUserID] = useState('');
-  const [user, setUser] = useState('');
-  const [userRole, setUserRole] = useState('');
-
-  const fileInputRef = useRef(null); // ✅ add ref for file input
+  const [selectedFiles, setSelectedFiles] = useState({}); // holds file name per key
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('email');
-    const storedRole = localStorage.getItem('role');
-    const storedID = localStorage.getItem('person_id');
-
-    if (storedUser && storedRole && storedID) {
-      setUser(storedUser);
-      setUserRole(storedRole);
-      setUserID(storedID);
-
-      if (storedRole === 'applicant') {
-        fetchRequirements();
-        fetchUploads(storedID);
-      } else {
-        window.location.href = '/login';
-      }
-    } else {
-      window.location.href = '/login';
+    const id = localStorage.getItem('person_id');
+    if (id) {
+      setUserID(id);
+      fetchUploads(id);
     }
   }, []);
-
-  const fetchRequirements = async () => {
-    try {
-      const res = await axios.get('http://localhost:5000/requirements');
-      setRequirements(res.data);
-    } catch (err) {
-      console.error('Error fetching requirements:', err);
-    }
-  };
 
   const fetchUploads = async (personId) => {
     try {
       const res = await axios.get('http://localhost:5000/uploads', {
-        headers: {
-          'x-person-id': personId
-        }
+        headers: { 'x-person-id': personId }
       });
-      setUploads(res.data);
+
+      const uploadsData = res.data;
+      setUploads(uploadsData);
+
+      const rebuiltSelectedFiles = {};
+      uploadsData.forEach((upload) => {
+        const description = upload.description.toLowerCase();
+        const filename = upload.original_name; // ✅ use safe original name
+
+        if (description.includes('form 138')) rebuiltSelectedFiles['Form138'] = filename;
+        if (description.includes('good moral')) rebuiltSelectedFiles['GoodMoralCharacter'] = filename;
+        if (description.includes('birth certificate')) rebuiltSelectedFiles['BirthCertificate'] = filename;
+        if (description.includes('graduating class')) rebuiltSelectedFiles['CertificateOfGraduatingClass'] = filename;
+        if (description.includes('vaccine card')) rebuiltSelectedFiles['VaccineCard'] = filename;
+      });
+
+      setSelectedFiles(rebuiltSelectedFiles);
     } catch (err) {
-      console.error('Error fetching uploads:', err);
+      console.error('Fetch uploads failed:', err);
     }
   };
 
-  const handleUpload = async () => {
-    if (!selectedRequirement || !file) {
-      return alert('Please select a requirement and upload a file.');
-    }
+
+  const handleUpload = async (key, file) => {
+    if (!file) return;
+
+    setSelectedFiles((prev) => ({ ...prev, [key]: file.name }));
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('requirements_id', selectedRequirement);
+
+    const requirementId = await getRequirementIdByKey(key);
+    if (!requirementId) return alert('Requirement not found.');
+
+    formData.append('requirements_id', requirementId);
 
     try {
-      setLoading(true);
       await axios.post('http://localhost:5000/upload', formData, {
         headers: {
           'x-person-id': userID,
@@ -97,220 +88,248 @@ function RequirementUploader() {
         }
       });
 
-      setSelectedRequirement('');
-      setFile(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''; // ✅ Clear file input
-      }
-
-      await fetchUploads(userID);
+      fetchUploads(userID);
     } catch (err) {
-      console.error('Upload failed:', err);
+      console.error('Upload error:', err);
       alert('Failed to upload. Please try again.');
-    } finally {
-      setLoading(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this upload?')) {
-      try {
-        await axios.delete(`http://localhost:5000/uploads/${id}`, {
-          headers: {
-            'x-person-id': userID
-          }
-        });
-        await fetchUploads(userID);
-      } catch (err) {
-        console.error('Delete failed:', err);
-        alert('Failed to delete. Please try again.');
-      }
-    }
-  };
-
-  // 🔒 Disable right-click
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-    // 🔒 Block DevTools shortcuts silently
-    document.addEventListener('keydown', (e) => {
-        const isBlockedKey =
-            e.key === 'F12' ||
-            e.key === 'F11' ||
-            (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-            (e.ctrlKey && e.key === 'U');
-
-        if (isBlockedKey) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
+  const getRequirementIdByKey = async (key) => {
+    const res = await axios.get('http://localhost:5000/requirements');
+    const match = res.data.find((r) => {
+      const lower = r.description.toLowerCase();
+      if (key === 'Form138') return lower.includes('form 138');
+      if (key === 'GoodMoralCharacter') return lower.includes('good moral');
+      if (key === 'BirthCertificate') return lower.includes('birth certificate');
+      if (key === 'CertificateOfGraduatingClass') return lower.includes('graduating class');
+      if (key === 'VaccineCard') return lower.includes('vaccine card');
+      return false;
     });
+    return match?.id || null;
+  };
 
-  return (
-    <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
-      <Container maxWidth="md" sx={{ mt: 5 }}>
-        <Container>
-          <h1 style={{ fontSize: '40px', fontWeight: 'bold', textAlign: 'center', color: 'maroon', marginTop: '25px' }}>
-            UPLOAD REQUIREMENT DOCUMENT
-          </h1>
-          <div style={{ textAlign: 'center' }}>
-            Complete the applicant form to secure your place for the upcoming academic year at EARIST.
-          </div>
-        </Container>
-        <br />
-        <Container
-          maxWidth="100%"
-          sx={{
-            backgroundColor: '#6D2323',
-            border: '2px solid black',
-            maxHeight: '500px',
-            overflowY: 'auto',
-            color: 'white',
-            borderRadius: 2,
-            boxShadow: 3,
-            padding: '4px'
-          }}
-        >
-          <Box sx={{ width: '100%' }}>
-            <Typography style={{ fontSize: '20px', padding: '10px', fontFamily: 'Arial Black' }}>
-              Step 6: Upload Documents
-            </Typography>
-          </Box>
-        </Container>
+  const handleDelete = async (uploadId) => {
+    try {
+      await axios.delete(`http://localhost:5000/uploads/${uploadId}`, {
+        headers: { 'x-person-id': userID }
+      });
 
-        <Paper elevation={3} sx={{ p: 4, borderRadius: 3, border: '1px solid black', backgroundColor: '#f1f1f1' }}>
-          <Typography style={{ fontSize: '20px', color: '#6D2323', fontWeight: 'bold' }}>Select Documents:</Typography>
-          <hr style={{ border: '1px solid #ccc', width: '100%' }} />
+      // Refresh uploaded files list
+      fetchUploads(userID);
 
-          <Box display="flex" flexDirection="column" gap={3} mt={2}>
-            <label style={{ marginTop: '-5px', marginBottom: '-20px' }} className="w-40 font-medium">
-              Requirement:
-            </label>
-            <FormControl fullWidth>
-              <InputLabel id="requirement-label">Select Requirement</InputLabel>
-              <Select
-                labelId="requirement-label"
-                value={selectedRequirement}
-                onChange={(e) => setSelectedRequirement(e.target.value)}
-                label="Select Requirement"
+      // Also remove file name from selectedFiles
+      const deletedUpload = uploads.find((u) => u.upload_id === uploadId);
+      if (deletedUpload) {
+        const matchedKey = Object.keys(selectedFiles).find((key) =>
+          deletedUpload.description.toLowerCase().includes(
+            requiredDocs.concat(vaccineDoc).find((doc) => doc.key === key)?.label.toLowerCase() || ''
+          )
+        );
+
+        if (matchedKey) {
+          setSelectedFiles((prev) => {
+            const updated = { ...prev };
+            delete updated[matchedKey];
+            return updated;
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert('Failed to delete. Please try again.');
+    }
+  };
+
+
+  const renderRow = (doc) => {
+    const uploaded = uploads.find((u) =>
+      u.description.toLowerCase().includes(doc.label.toLowerCase())
+    );
+
+    return (
+      <TableRow key={doc.key}>
+        {/* Document label */}
+        <TableCell sx={{ fontWeight: 'bold', width: '25%' }}>{doc.label}</TableCell>
+
+        <TableCell sx={{ width: '30%' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+            {/* Fixed wrapper to prevent shifting */}
+            <Box sx={{ width: '180px', flexShrink: 0 }}>
+              {selectedFiles[doc.key] ? (
+                <Box
+                  sx={{
+                    backgroundColor: '#e0e0e0',
+                    padding: '6px 12px',
+                    borderRadius: '4px',
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                    height: '40px',
+                    textAlign: "Center",
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'Center',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                  }}
+                  title={selectedFiles[doc.key]}
+                >
+                  {selectedFiles[doc.key]}
+                </Box>
+              ) : (
+                <Box sx={{ height: '40px' }} />
+              )}
+            </Box>
+
+            <Box sx={{ flexShrink: 0 }}>
+              <Button
+                variant="contained"
+                component="label"
+                startIcon={<CloudUploadIcon />}
+                sx={{
+                  backgroundColor: '#FFB300',
+                  color: 'black',
+                  fontWeight: 'bold',
+                  height: '40px',
+                  textTransform: 'none',
+                  minWidth: '140px',
+                }}
               >
-                <MenuItem value="">
-                  <em>-- Select Requirement --</em>
-                </MenuItem>
-                {requirements.map((req) => (
-                  <MenuItem key={req.id} value={req.id}>
-                    {req.description}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+                Browse File
+                <input
+                  key={selectedFiles[doc.key] || Date.now()}
+                  hidden
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.pdf"
+                  onChange={(e) => handleUpload(doc.key, e.target.files[0])}
+                />
+              </Button>
+            </Box>
+          </Box>
+        </TableCell>
 
-            <label style={{ marginTop: '-5px', marginBottom: '-20px' }} className="w-40 font-medium">
-              Upload Documents:
-            </label>
-            <TextField
-              type="file"
-              onChange={(e) => setFile(e.target.files[0])}
-              inputRef={fileInputRef} // ✅ Ref to reset input
-              inputProps={{ accept: '.png,.jpg,.jpeg,.pdf' }}
-              fullWidth
-            />
 
+        {/* Remarks */}
+        <TableCell sx={{ width: '10%' }}>
+          {/* Placeholder for future remarks */}
+        </TableCell>
+
+        {/* Preview */}
+        <TableCell sx={{ width: '10%' }}>
+          {uploaded && (
             <Button
-              onClick={handleUpload}
               variant="contained"
-              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <PhotoCameraIcon />}
-              disabled={loading}
+              color="primary"
+              href={`http://localhost:5000${uploaded.file_path}`}
+              target="_blank"
+              startIcon={<VisibilityIcon />}
               sx={{
-                backgroundColor: '#6D2323',
-                '&:hover': { backgroundColor: '#5a1f1f' },
-                color: 'white',
-                fontWeight: 'bold',
+                height: '40px',
                 textTransform: 'none',
-                py: 1
+                minWidth: '100px',
+                width: '100%',
               }}
             >
-              {loading ? 'Uploading...' : 'Upload'}
+              Preview
             </Button>
-          </Box>
-        </Paper>
+          )}
+        </TableCell>
 
-        <Typography variant="h6" align="center" mt={5} mb={2} color="#6D2323">
-          Uploaded Documents
-        </Typography>
+        {/* Delete */}
+        <TableCell sx={{ width: '10%' }}>
+          {uploaded && (
+            <Button
+              onClick={() => handleDelete(uploaded.upload_id)}
+              startIcon={<DeleteIcon />}
+              sx={{
+                backgroundColor: 'maroon',
+                color: 'white',
+                '&:hover': { backgroundColor: '#600000' },
+                fontWeight: 'bold',
+                height: '40px',
+                textTransform: 'none',
+                minWidth: '100px',
+                width: '100%',
+              }}
+            >
+              Delete
+            </Button>
+          )}
+        </TableCell>
+      </TableRow>
 
-        <Typography style={{ fontSize: "15px", color: "black", fontFamily: "Arial" }}>
-          PLEASE NOTE: ONLY JPG, JPEG, OR PNG WITH MAXIMUM OF FILE SIZE OF 4MB ARE ALLOWED
-        </Typography>
+    );
+  };
 
-        <TableContainer
-          component={Paper}
-          sx={{
-            borderRadius: 3,
-          
-            padding: 2,              // optional: adds space inside
-            maxWidth: '100%',       // adjust width if needed
-            margin: '0 auto'        // center if container allows
-            
-          }}
-        >
-          <Table>
-            <TableHead sx={{ backgroundColor: '#f1f1f1' }}>
-              <TableRow>
-                <TableCell>Document</TableCell>
-                <TableCell>Upload</TableCell>
-                <TableCell>Date Uploaded</TableCell>
-                <TableCell>Action</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {uploads.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} align="center" sx={{ color: '#888', fontStyle: 'italic' }}>
-                    No uploads found.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                uploads.map((upload) => (
-                  <TableRow key={upload.upload_id}>
-                    <TableCell>{upload.description}</TableCell>
-                    <TableCell>
-                      <a
-                        href={`http://localhost:5000${upload.file_path}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: '#007bff', textDecoration: 'none' }}
-                      >
-                        Preview
-                      </a>
-                    </TableCell>
-                    <TableCell>{upload.created_at ? new Date(upload.created_at).toLocaleString() : 'N/A'}</TableCell>
-                    <TableCell>
-                      <IconButton
-                        onClick={() => handleDelete(upload.upload_id)}
-                        sx={{
-                          color: 'white',
-                          backgroundColor: 'maroon',
-                          borderRadius: '4px',
-                          fontSize: "15px",
-                          '&:hover': { backgroundColor: '#600000' }
-                        }}
-                      >
-                        <DeleteIcon sx={{ color: 'white' }} />
-                        DELETE
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-
-
+  return (
+    <Box sx={{ mt: 2, px: 2, marginLeft: "-10px" }}>
+      <Container>
+        <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>UPLOAD DOCUMENTS</h1>
+        <div style={{ textAlign: "center" }}>Complete the applicant form to secure your place for the upcoming academic year at EARIST.</div>
       </Container>
+
+      <div style={{ height: "25px" }}></div>
+
+      <Typography
+        style={{
+          fontSize: '15px',
+          color: 'black',
+          fontFamily: 'Arial',
+          textAlign: 'left',
+          marginBottom: '5px'
+        }}
+      >
+        PLEASE NOTE: ONLY JPG, JPEG, PNG or PDF WITH MAXIMUM OF FILE SIZE OF 4MB ARE ALLOWED
+      </Typography>
+
+      <TableContainer component={Paper} sx={{ width: '95%' }}>
+        <Table>
+          <TableHead sx={{ backgroundColor: '#6D2323' }}>
+            <TableRow>
+              <TableCell sx={{ color: 'white' }}>Document</TableCell>
+              <TableCell sx={{ color: 'white' }}>Upload</TableCell>
+              <TableCell sx={{ color: 'white' }}>Remarks</TableCell>
+              <TableCell sx={{ color: 'white' }}>Preview</TableCell>
+              <TableCell sx={{ color: 'white' }}>Delete</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>{requiredDocs.map((doc) => renderRow(doc))}</TableBody>
+        </Table>
+      </TableContainer>
+
+      <Typography variant="h6" sx={{ mt: 2, color: '#6D2323' }}>
+        Upload Your Medical Documents
+      </Typography>
+
+      <Typography
+        style={{
+          fontSize: '15px',
+          color: 'black',
+          fontFamily: 'Arial',
+          textAlign: 'left',
+          marginBottom: '5px'
+        }}
+      >
+        PLEASE NOTE: ONLY JPG, JPEG, PNG or PDF WITH MAXIMUM OF FILE SIZE OF 4MB ARE ALLOWED
+      </Typography>
+
+      <TableContainer component={Paper} sx={{ width: '95%', mt: 2 }}>
+        <Table>
+          <TableHead sx={{ backgroundColor: '#6D2323' }}>
+            <TableRow>
+              <TableCell sx={{ color: 'white' }}>Document</TableCell>
+              <TableCell sx={{ color: 'white' }}>Upload</TableCell>
+              <TableCell sx={{ color: 'white' }}>Remarks</TableCell>
+              <TableCell sx={{ color: 'white' }}>Preview</TableCell>
+              <TableCell sx={{ color: 'white' }}>Delete</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>{renderRow(vaccineDoc)}</TableBody>
+        </Table>
+      </TableContainer>
     </Box>
   );
-}
+};
 
 export default RequirementUploader;

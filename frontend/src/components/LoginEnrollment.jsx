@@ -169,7 +169,7 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
               </div>
 
               <div className="LinkContainer">
-                <span><Link to="/forgot_password">Forgot your password</Link></span>
+                <span><Link to="/registrar_forgot_password">Forgot your password</Link></span>
               </div>
 
               <div className="LinkContainer RegistrationLink" style={{ margin: '0.1rem 0rem' }}>

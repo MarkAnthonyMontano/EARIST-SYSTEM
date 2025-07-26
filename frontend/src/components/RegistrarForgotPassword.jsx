@@ -19,7 +19,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 // Connect to backend
 const socket = io("http://localhost:5000");
 
-const ForgotPassword = () => {
+const RegistrarForgotPassword = () => {
   const [capVal, setCapVal] = useState(null);
   const [email, setEmail] = useState("");
   const [snack, setSnack] = useState({ open: false, message: '', severity: 'info' });
@@ -180,4 +180,4 @@ const ForgotPassword = () => {
   );
 };
 
-export default ForgotPassword;
+export default RegistrarForgotPassword;

@@ -81,7 +81,7 @@ const PersonalDataForm = () => {
       setUserID(storedID);
 
       if (storedRole === "applicant") {
-
+        fetchPersonData(storedID);
       } else {
         window.location.href = "/login";
       }

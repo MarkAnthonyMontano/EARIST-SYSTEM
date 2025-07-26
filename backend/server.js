@@ -196,18 +196,19 @@ app.post("/transfer", async (req, res) => {
   }
 });
 
-// Upload requirement file with custom filename - Applicant
 // 📌 Converts full requirement description to short label
 const getShortLabel = (desc) => {
   const lower = desc.toLowerCase();
   if (lower.includes("form 138")) return "Form138";
   if (lower.includes("good moral")) return "GoodMoralCharacter";
   if (lower.includes("birth certificate")) return "BirthCertificate";
-  if (lower.includes("form 137")) return "Form137";
+  if (lower.includes("belonging to graduating class")) return "CertificateOfGraduatingClass";
+  if (lower.includes("vaccine card")) return "VaccineCard";
   return "Unknown";
 };
 
-// ✅ UPLOAD
+
+// ✅ UPLOAD route
 app.post("/upload", upload.single("file"), async (req, res) => {
   const { requirements_id } = req.body;
   const person_id = req.headers["x-person-id"];
@@ -227,14 +228,13 @@ app.post("/upload", upload.single("file"), async (req, res) => {
     const filename = `${person_id}_${shortLabel}_${year}${ext}`;
     const finalPath = path.join(__dirname, "uploads", filename);
 
-    // ✅ Find existing uploads for this person_id + shortLabel + year (any extension)
+    // ✅ Remove existing upload for same person + requirement
     const [existingFiles] = await db.query(
       `SELECT upload_id, file_path FROM requirement_uploads 
        WHERE person_id = ? AND requirements_id = ? AND file_path LIKE ?`,
       [person_id, requirements_id, `%${person_id}_${shortLabel}_${year}%`]
     );
 
-    // ✅ Remove existing files from disk and DB
     for (const file of existingFiles) {
       const fullFilePath = path.join(__dirname, file.file_path);
       try {
@@ -245,19 +245,81 @@ app.post("/upload", upload.single("file"), async (req, res) => {
       await db.query("DELETE FROM requirement_uploads WHERE upload_id = ?", [file.upload_id]);
     }
 
-    // ✅ Save new file
+    // ✅ Save the new file
     await fs.promises.writeFile(finalPath, req.file.buffer);
 
     const filePath = `/uploads/${filename}`;
+    const originalName = req.file.originalname;
+
     await db.query(
-      "INSERT INTO requirement_uploads (requirements_id, person_id, file_path) VALUES (?, ?, ?)",
-      [requirements_id, person_id, filePath]
+      "INSERT INTO requirement_uploads (requirements_id, person_id, file_path, original_name) VALUES (?, ?, ?, ?)",
+      [requirements_id, person_id, filePath, originalName]
     );
 
     res.status(201).json({ message: "Upload successful", filename });
   } catch (err) {
     console.error("Upload error:", err);
     res.status(500).json({ message: "Upload failed", error: err.message });
+  }
+});
+
+
+// REQUIREMENTS PANEL (UPDATED!) ADMIN
+app.post("/requirements", async (req, res) => {
+  const { requirements_description } = req.body;
+
+  // Validate the input
+  if (!requirements_description) {
+    return res.status(400).json({ error: "Description required" });
+  }
+
+  const query = "INSERT INTO requirements_table (description) VALUES (?)";
+
+  try {
+    // Execute the query using promise-based `execute` method
+    const [result] = await db.execute(query, [requirements_description]);
+
+    // Respond with the inserted ID
+    res.status(201).json({ requirements_id: result.insertId });
+  } catch (err) {
+    console.error("Insert error:", err);
+    return res.status(500).json({ error: "Failed to save requirement" });
+  }
+});
+
+// GET THE REQUIREMENTS (UPDATED!)
+app.get("/requirements", async (req, res) => {
+  const query = "SELECT * FROM requirements_table";
+
+  try {
+    // Execute the query using promise-based `execute` method
+    const [results] = await db.execute(query);
+
+    // Send the results in the response
+    res.json(results);
+  } catch (err) {
+    console.error("Fetch error:", err);
+    return res.status(500).json({ error: "Failed to fetch requirements" });
+  }
+});
+
+
+// DELETE (REQUIREMNET PANEL)
+app.delete("/requirements_table/:id", async (req, res) => {
+  const { id } = req.params;
+  const query = "DELETE FROM requirements_table WHERE id = ?";
+
+  try {
+    const [result] = await db.execute(query, [id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Requirement not found" });
+    }
+
+    res.status(200).json({ message: "Requirement deleted successfully" });
+  } catch (err) {
+    console.error("Delete error:", err);
+    res.status(500).json({ error: "Failed to delete requirement" });
   }
 });
 
@@ -274,6 +336,7 @@ app.get("/uploads", async (req, res) => {
       ru.upload_id, 
       r.description, 
       ru.file_path, 
+      ru.original_name,   -- ✅ Include this
       ru.created_at
     FROM requirement_uploads ru
     JOIN requirements_table r ON ru.requirements_id = r.id
@@ -287,6 +350,7 @@ app.get("/uploads", async (req, res) => {
     res.status(500).json({ message: "Internal Server Error", error: err });
   }
 });
+
 
 // ✅ DELETE (only own files)
 app.delete("/uploads/:id", async (req, res) => {
@@ -521,63 +585,7 @@ app.get("/api/applied_program", async (req, res) => {
   }
 });
 
-// REQUIREMENTS PANEL (UPDATED!) ADMIN
-app.post("/requirements", async (req, res) => {
-  const { requirements_description } = req.body;
 
-  // Validate the input
-  if (!requirements_description) {
-    return res.status(400).json({ error: "Description required" });
-  }
-
-  const query = "INSERT INTO requirements_table (description) VALUES (?)";
-
-  try {
-    // Execute the query using promise-based `execute` method
-    const [result] = await db.execute(query, [requirements_description]);
-
-    // Respond with the inserted ID
-    res.status(201).json({ requirements_id: result.insertId });
-  } catch (err) {
-    console.error("Insert error:", err);
-    return res.status(500).json({ error: "Failed to save requirement" });
-  }
-});
-
-// GET THE REQUIREMENTS (UPDATED!)
-app.get("/requirements", async (req, res) => {
-  const query = "SELECT * FROM requirements_table";
-
-  try {
-    // Execute the query using promise-based `execute` method
-    const [results] = await db.execute(query);
-
-    // Send the results in the response
-    res.json(results);
-  } catch (err) {
-    console.error("Fetch error:", err);
-    return res.status(500).json({ error: "Failed to fetch requirements" });
-  }
-});
-
-// DELETE (REQUIREMNET PANEL)
-app.delete("/requirements_table/:id", async (req, res) => {
-  const { id } = req.params;
-  const query = "DELETE FROM requirements_table WHERE id = ?";
-
-  try {
-    const [result] = await db.execute(query, [id]);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Requirement not found" });
-    }
-
-    res.status(200).json({ message: "Requirement deleted successfully" });
-  } catch (err) {
-    console.error("Delete error:", err);
-    res.status(500).json({ error: "Failed to delete requirement" });
-  }
-});
 
 
 /*---------------------------  ENROLLMENT -----------------------*/
@@ -755,8 +763,61 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// Change Password (after login)
-app.post("/change-password", async (req, res) => {
+// Applicant Change Password 
+app.post("/applicant-change-password", async (req, res) => {
+  const { person_id, currentPassword, newPassword } = req.body;
+
+  if (!person_id || !currentPassword || !newPassword) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  try {
+    // Get user by person_id
+    const [rows] = await db.query("SELECT * FROM user_accounts WHERE person_id = ?", [person_id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const user = rows[0];
+
+    // Check current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Current password is incorrect" });
+    }
+
+    // Password strength validation
+    const strong =
+      newPassword.length >= 8 &&
+      /[a-z]/.test(newPassword) &&
+      /[A-Z]/.test(newPassword) &&
+      /\d/.test(newPassword) &&
+      /[!#$^*@]/.test(newPassword);
+
+    if (!strong) {
+      return res.status(400).json({ message: "New password does not meet complexity requirements" });
+    }
+
+    // Hash new password
+    const hashed = await bcrypt.hash(newPassword, 10);
+
+    // Debug log (optional)
+    console.log("Updating password for person_id:", person_id);
+    console.log("New password hash:", hashed);
+
+    // Update password in DB
+    await db.query("UPDATE user_accounts SET password = ? WHERE person_id = ?", [hashed, person_id]);
+
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Password update error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Registrar Change Password 
+app.post("/registrar-change-password", async (req, res) => {
   const { person_id, currentPassword, newPassword } = req.body;
 
   if (!person_id || !currentPassword || !newPassword) {

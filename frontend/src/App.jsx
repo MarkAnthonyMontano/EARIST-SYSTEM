@@ -3,9 +3,12 @@ import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Register from './components/Register';
 import Login from './components/Login';
-import ForgotPassword from './components/ForgotPassword';
 import ApplicantForgotPassword from './components/ApplicantForgotPassword';
-import ResetPassword from './components/ResetPassword';
+import ApplicantResetPassword from './components/ApplicantResetPassword';
+import RegistrarForgotPassword from './components/RegistrarForgotPassword';
+import RegistrarResetPassword from './components/RegistrarResetPassword';
+
+
 import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -116,18 +119,24 @@ function App() {
 
           <main className='w-full'>
             <Routes>
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot_password" element={<ForgotPassword />} />
-              <Route path="/applicant_forgot_password" element={<ApplicantForgotPassword />} />
               <Route path="/" element={<LoginEnrollment setIsAuthenticated={setIsAuthenticated} />} />
               <Route path="/login_applicant" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
               <Route path="/login_prof" element={<LoginProf setIsAuthenticated={setIsAuthenticated} />} />
               <Route path="/login" element={<LoginEnrollment setIsAuthenticated={setIsAuthenticated} />} />
+              <Route path="/register" element={<Register />} />
+
+              <Route path="/applicant_forgot_password" element={<ApplicantForgotPassword />} />
+              <Route path="/applicant_reset_password" element={<ProtectedRoute><ApplicantResetPassword /></ProtectedRoute>} />
+
+              <Route path="/registrar_forgot_password" element={<RegistrarForgotPassword />} />
+              <Route path="/registrar_reset_password" element={<ProtectedRoute><RegistrarResetPassword /></ProtectedRoute>} />
+
+
               <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['registrar']}><Dashboard /></ProtectedRoute>} />
               <Route path="/faculty_dashboard" element={<ProtectedRoute allowedRoles={['faculty']}><FacultyDashboard /></ProtectedRoute>} />
               <Route path="/applicant_dashboard" element={<ProtectedRoute><ApplicantDashboard /></ProtectedRoute>} />
               <Route path="/register_prof" element={<ProtectedRoute><RegisterProf /></ProtectedRoute>} />
-              <Route path="/reset_password" element={<ProtectedRoute><ResetPassword /></ProtectedRoute>} />
+
               <Route path="/room_registration" element={<ProtectedRoute><RoomRegistration /></ProtectedRoute>} />
               <Route path="/course_management" element={<ProtectedRoute><CourseManagement /></ProtectedRoute>} />
               <Route path="/program_tagging" element={<ProtectedRoute><ProgramTagging /></ProtectedRoute>} />

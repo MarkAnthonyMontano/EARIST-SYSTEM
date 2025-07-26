@@ -1,20 +1,10 @@
 import { useRef, useState, useEffect } from "react";
 import { Box, Container, } from "@mui/material";
 import EaristLogo from "../assets/EaristLogo.png";
-import { jwtDecode } from "jwt-decode";
 import ForwardIcon from '@mui/icons-material/Forward';
 import { FcPrint } from "react-icons/fc";
 
 const AdmissionFormProcess = () => {
-  const getPersonIdFromToken = () => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      const decoded = jwtDecode(token);
-      console.log("Decoded Token: ", decoded);
-      return decoded.person_id; // Ensure your token includes this
-    }
-    return null;
-  };
 
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
