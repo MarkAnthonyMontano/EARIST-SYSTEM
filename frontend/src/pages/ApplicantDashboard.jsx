@@ -5,7 +5,10 @@ import {
   Container,
   Box,
   Typography,
+  Card, CardContent
+
 } from "@mui/material";
+
 import { TbArrowBadgeRightFilled as ArrowIcon } from "react-icons/tb";
 
 // Step data
@@ -106,6 +109,7 @@ const ApplicantDashboard = () => {
   }, []);
 
   return (
+
     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
 
       <Container>
@@ -119,6 +123,7 @@ const ApplicantDashboard = () => {
         sx={{
           backgroundColor: "#6D2323",
           border: "2px solid black",
+          borderRadius: "10px",
           color: "white",
           width: "95%",
           boxShadow: 3,
@@ -136,10 +141,14 @@ const ApplicantDashboard = () => {
           }}
         >
           <Typography sx={{ fontSize: "20px", fontFamily: "Arial Black" }}>
-            Applicant ID: {userID}
+            Applicant ID: <span style={{ textDecoration: "underline" }}>{userID}</span>
           </Typography>
+
           <Typography sx={{ fontSize: "20px", fontFamily: "Arial Black" }}>
-            Applicant Name: {person.last_name?.toUpperCase()}, {person.first_name?.toUpperCase()} {person.middle_name?.toUpperCase()} {person.extension_name?.toUpperCase()}
+            Applicant Name:{" "}
+            <span style={{ textDecoration: "underline" }}>
+              {person.last_name?.toUpperCase()}, {person.first_name?.toUpperCase()} {person.middle_name?.toUpperCase()} {person.extension_name?.toUpperCase()}
+            </span>
           </Typography>
 
         </Box>
@@ -151,7 +160,7 @@ const ApplicantDashboard = () => {
           backgroundColor: "#f1f1f1",
           border: "2px solid black",
           padding: 4,
-
+          borderRadius: "10px",
           width: "95%",
           boxShadow: 3,
           mx: "auto",
@@ -175,24 +184,28 @@ const ApplicantDashboard = () => {
             <Box
               key={index}
               sx={{
-                width: "12.3%",          // ✅ (12.3% * 8 ≈ 98.4% total, leaving room for spacing)
+                width: "12.3%",
                 textAlign: "center",
+                marginLeft: "-10px",
               }}
             >
-
-              <StepIcon label={step.label} color={step.color} style={step.style} />
-              <Box
+              <StepIcon style={{ marginLeft: "-20px", }} label={step.label} color={step.color} />
+              <Card
                 sx={{
                   backgroundColor: "#fff",
-                  border: "1px solid #ccc",
-                  padding: "10px",
-                  minHeight: "60px",
-                  height: "200px",
+                  borderRadius: 2,
+                  boxShadow: 3,
+                  marginTop: "10px",
+                  paddingLeft: "-20px",
                   width: "150px",
-                  fontSize: "13px",
-                  marginTop: "5px",
+                  minHeight: "200px",
+                  mx: "auto",
+                  transition: "transform 0.2s ease",
+                  "&:hover": { transform: "scale(1.03)" },
                 }}
-              ></Box>
+              >
+
+              </Card>
             </Box>
           ))}
         </Box>
@@ -212,7 +225,7 @@ const ApplicantDashboard = () => {
           <Box
             sx={{
               backgroundColor: "#f1f1f1",
-              
+
               padding: "10px",
               minHeight: "60px",
               height: "90px",
@@ -238,78 +251,101 @@ const ApplicantDashboard = () => {
           </Box>
         </Box>
 
+        {/* Admission & Entrance Exam */}
         <Box
           sx={{ display: "flex", alignItems: "center", marginTop: "5px", width: "97.9%", marginLeft: "30px" }}
         >
           <StepIcon label="Admission & Entrance Exam" color="#F0C03F" />
-          <Box
+          <Card
             sx={{
               backgroundColor: "#fff",
-              border: "1px solid #ccc",
-              padding: "10px",
-              minHeight: "60px",
-              height: "90px",
-              fontSize: "13px",
-              flex: 1,
+              borderRadius: 2,
+              boxShadow: 3,
+              marginTop: "10px",
               marginLeft: "100px",
+              flex: 1,
+              minHeight: "100px",
+              transition: "transform 0.2s ease",
+              "&:hover": { transform: "scale(1.03)" },
             }}
-          ></Box>
+          >
+            <CardContent>
+
+            </CardContent>
+          </Card>
         </Box>
 
+        {/* Interview */}
         <Box
           sx={{ display: "flex", alignItems: "center", marginTop: "5px", width: "97.9%", marginLeft: "30px" }}
         >
           <StepIcon label="Interview" color="#4B83C3" />
-          <Box
+          <Card
             sx={{
               backgroundColor: "#fff",
-              border: "1px solid #ccc",
-              padding: "10px",
-              minHeight: "60px",
-              height: "90px",
-              fontSize: "13px",
-              flex: 1,
+              borderRadius: 2,
+              boxShadow: 3,
+              marginTop: "10px",
               marginLeft: "100px",
+              flex: 1,
+              minHeight: "100px",
+              transition: "transform 0.2s ease",
+              "&:hover": { transform: "scale(1.03)" },
             }}
-          ></Box>
+          >
+            <CardContent>
+
+            </CardContent>
+          </Card>
         </Box>
 
+        {/* Qualifying Exam / Aptitude Test */}
         <Box
           sx={{ display: "flex", alignItems: "center", marginTop: "5px", width: "97.9%", marginLeft: "30px" }}
         >
-          <StepIcon label="Qualifying Exam / Aptitude Test" color="#4CAF50" />
-          <Box
+          <StepIcon label="Qualifying Exam/Aptitude Test" color="#4CAF50" />
+          <Card
             sx={{
               backgroundColor: "#fff",
-              border: "1px solid #ccc",
-              padding: "10px",
-              minHeight: "60px",
-              height: "90px",
-              fontSize: "13px",
-              flex: 1,
+              borderRadius: 2,
+              boxShadow: 3,
+              marginTop: "10px",
               marginLeft: "100px",
+              flex: 1,
+              minHeight: "100px",
+              transition: "transform 0.2s ease",
+              "&:hover": { transform: "scale(1.03)" },
             }}
-          ></Box>
+          >
+            <CardContent>
+
+            </CardContent>
+          </Card>
         </Box>
 
+        {/* Announcement */}
         <Box
           sx={{ display: "flex", alignItems: "center", marginTop: "5px", width: "97.9%", marginLeft: "30px" }}
         >
           <StepIcon label="Announcement" color="#00ACC1" />
-          <Box
+          <Card
             sx={{
               backgroundColor: "#fff",
-              border: "1px solid #ccc",
-              padding: "10px",
-              minHeight: "60px",
-              height: "90px",
-              fontSize: "13px",
-              flex: 1,
+              borderRadius: 2,
+              boxShadow: 3,
+              marginTop: "10px",
               marginLeft: "100px",
+              flex: 1,
+              minHeight: "100px",
+              transition: "transform 0.2s ease",
+              "&:hover": { transform: "scale(1.03)" },
             }}
-          ></Box>
-        </Box>
+          >
+            <CardContent>
 
+            </CardContent>
+          </Card>
+        </Box>
 
       </Box>
     </Box>

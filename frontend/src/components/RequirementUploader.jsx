@@ -29,7 +29,7 @@ const vaccineDoc = { label: 'Copy of Vaccine Card (1st and 2nd Dose)', key: 'Vac
 const RequirementUploader = () => {
   const [uploads, setUploads] = useState([]);
   const [userID, setUserID] = useState('');
-  const [selectedFiles, setSelectedFiles] = useState({}); // holds file name per key
+  const [selectedFiles, setSelectedFiles] = useState({});
 
   useEffect(() => {
     const id = localStorage.getItem('person_id');
@@ -147,6 +147,23 @@ const RequirementUploader = () => {
       u.description.toLowerCase().includes(doc.label.toLowerCase())
     );
 
+    // 🔒 Disable right-click
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    // 🔒 Block DevTools shortcuts silently
+    document.addEventListener('keydown', (e) => {
+      const isBlockedKey =
+        e.key === 'F12' ||
+        e.key === 'F11' ||
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+        (e.ctrlKey && e.key === 'U');
+
+      if (isBlockedKey) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+
     return (
       <TableRow key={doc.key}>
         {/* Document label */}
@@ -188,8 +205,8 @@ const RequirementUploader = () => {
                 component="label"
                 startIcon={<CloudUploadIcon />}
                 sx={{
-                  backgroundColor: '#FFB300',
-                  color: 'black',
+                  backgroundColor: '#F0C03F',
+                  color: 'white',
                   fontWeight: 'bold',
                   height: '40px',
                   textTransform: 'none',

@@ -2547,7 +2547,7 @@ app.post("/api/assign-student-number", async (req, res) => {
 
     const activeSchoolYear = activeSchoolYearRows[0];
 
-    await connection.query("INSERT INTO student_status_table (student_number, active_curriculum, enrolled_status, year_level_id, active_school_year_id, control_status) VALUES (?, ?, ?, ?, ?, ?)", [student_number, 1, 1, 1, activeSchoolYear.id, 0]);
+    await connection.query("INSERT INTO student_status_table (student_number, active_curriculum, enrolled_status, year_level_id, active_school_year_id, control_status) VALUES (?, ?, ?, ?, ?, ?)", [student_number, 0, 0, 0, activeSchoolYear.id, 0]);
     await connection.commit();
     res.json({ student_number });
   } catch (err) {
@@ -2728,13 +2728,21 @@ app.post("/add-all-to-enrolled-courses", async (req, res) => {
 
     await db3.query(insertSql, [subject_id, user_id, activeSchoolYearId, curriculumID, departmentSectionID]);
     console.log(`Student ${user_id} successfully enrolled in subject ${subject_id}`);
+
+    const updateStatusSql = `
+      UPDATE student_status_table 
+      SET enrolled_status = 1, active_curriculum = ?, year_level_id = ?
+      WHERE student_number = ?
+    `;
+
+    await db3.query(updateStatusSql, [curriculumID, year_level_id, user_id]);
+
     res.status(200).json({ message: "Course enrolled successfully" });
   } catch (err) {
     console.error("Error:", err);
     return res.status(500).json({ error: err.message });
   }
 });
-
 //(UPDATED!)
 app.post("/add-to-enrolled-courses/:userId/:currId/", async (req, res) => {
   const { subject_id, department_section_id } = req.body;
@@ -2794,6 +2802,7 @@ app.delete("/courses/user/:userId", async (req, res) => {
 });
 
 // Login User (UPDATED!)
+
 app.post("/student-tagging", async (req, res) => {
   const { studentNumber } = req.body;
 
@@ -2803,14 +2812,15 @@ app.post("/student-tagging", async (req, res) => {
 
   try {
     const sql = `
-    SELECT * FROM student_status_table as ss 
-    INNER JOIN curriculum_table as c ON c.curriculum_id = ss.active_curriculum
-    INNER JOIN program_table as pt ON c.program_id = pt.program_id
-    INNER JOIN year_table as yt ON c.year_id = yt.year_id
-    INNER JOIN student_numbering_table as sn ON sn.student_number = ss.student_number
-    INNER JOIN person_table as ptbl ON ptbl.person_id = sn.person_id
-    INNER JOIN year_level_table as ylt ON ss.year_level_id = ylt.year_level_id
-    WHERE ss.student_number = ?`;
+    SELECT * FROM student_status_table AS ss
+      LEFT JOIN curriculum_table AS c ON c.curriculum_id = ss.active_curriculum
+      LEFT JOIN program_table AS pt ON c.program_id = pt.program_id
+      LEFT JOIN year_table AS yt ON c.year_id = yt.year_id
+      INNER JOIN student_numbering_table AS sn ON sn.student_number = ss.student_number
+      INNER JOIN person_table AS ptbl ON ptbl.person_id = sn.person_id
+      LEFT JOIN year_level_table AS ylt ON ss.year_level_id = ylt.year_level_id
+      WHERE ss.student_number = ?
+    `;
 
     const [results] = await db3.query(sql, [studentNumber]);
 
@@ -2819,6 +2829,10 @@ app.post("/student-tagging", async (req, res) => {
     }
 
     const student = results[0];
+
+    console.log(student)
+    const isEnrolled = student.enrolled_status === '1';
+
     const token = webtoken.sign(
       {
         id: student.student_status_id,
@@ -2828,8 +2842,8 @@ app.post("/student-tagging", async (req, res) => {
         major: student.major,
         yearLevel: student.year_level_id,
         yearLevelDescription: student.year_level_description,
-        courseCode: student.program_code,
-        courseDescription: student.program_description,
+        courseCode: isEnrolled ? student.program_code : "Not",
+        courseDescription: isEnrolled ? student.program_description : "Enrolled",
         department: student.dprtmnt_name,
         yearDesc: student.year_description,
         firstName: student.first_name,
@@ -2878,8 +2892,8 @@ app.post("/student-tagging", async (req, res) => {
       major: student.major,
       yearLevel: student.year_level_id,
       yearLevelDescription: student.year_level_description,
-      courseCode: student.program_code,
-      courseDescription: student.program_description,
+      courseCode: isEnrolled ? student.program_code : "Not",
+      courseDescription: isEnrolled ? student.program_description : "Enrolled",
       department: student.dprtmnt_name,
       yearDesc: student.year_description,
       firstName: student.first_name,
@@ -2899,6 +2913,30 @@ app.post("/student-tagging", async (req, res) => {
 });
 
 let lastSeenId = 0;
+
+// ✅ Updates year_level_id for a student
+app.put("/api/update-student-year", async (req, res) => {
+  const { student_number, year_level_id } = req.body;
+
+  if (!student_number || !year_level_id) {
+    return res.status(400).json({ error: "Missing student_number or year_level_id" });
+  }
+
+  try {
+    const sql = `UPDATE student_status_table SET year_level_id = ? WHERE student_number = ?`;
+    const [result] = await db3.query(sql, [year_level_id, student_number]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    res.status(200).json({ message: "Year level updated successfully" });
+  } catch (err) {
+    console.error("Error updating year level:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
 
 // (UPDATED!)
 app.get("/check-new", async (req, res) => {
@@ -2923,7 +2961,7 @@ app.get("/check-new", async (req, res) => {
 // (UPDATED!)
 app.get("/api/department-sections", async (req, res) => {
   const { departmentId } = req.query;
-
+  
   const query = `
     SELECT 
       dt.dprtmnt_id, 
@@ -2958,6 +2996,66 @@ app.get("/api/department-sections", async (req, res) => {
     return res.status(500).json({ error: "Database error", details: err.message });
   }
 });
+
+app.put("/api/update-active-curriculum", async (req, res) => {
+  const { studentId, departmentSectionId } = req.body;
+
+  if (!studentId || !departmentSectionId) {
+    return res.status(400).json({ error: "studentId and departmentSectionId are required" });
+  }
+
+  const fetchCurriculumQuery = `
+    SELECT curriculum_id
+    FROM dprtmnt_section_table
+    WHERE id = ?
+  `;
+
+  try {
+    const [curriculumResult] = await db3.query(fetchCurriculumQuery, [departmentSectionId]);
+
+    if (curriculumResult.length === 0) {
+      return res.status(404).json({ error: "Section not found" });
+    }
+
+    const curriculumId = curriculumResult[0].curriculum_id;
+
+    const updateQuery = `
+      UPDATE student_status_table 
+      SET active_curriculum = ? 
+      WHERE student_number = ?
+    `;
+    await db3.query(updateQuery, [curriculumId, studentId]);
+
+    res.status(200).json({ 
+      message: "Active curriculum updated successfully", 
+    });
+
+  } catch (err) {
+    console.error("Error updating active curriculum:", err);
+    res.status(500).json({ error: "Database error", details: err.message });
+  }
+});
+
+app.get('/api/search-student/:sectionId', async (req, res) => {
+  const {sectionId} = req.params
+  try{
+    const getProgramQuery = `
+      SELECT dst.curriculum_id, pt.program_description, pt.program_code 
+      FROM dprtmnt_section_table AS dst
+        INNER JOIN curriculum_table AS ct ON dst.curriculum_id = ct.curriculum_id
+        INNER JOIN program_table AS pt ON ct.program_id = pt.program_id
+      WHERE dst.id = ?
+    `;
+    const [programResult] = await db3.query(getProgramQuery, [sectionId]);
+    res.status(200).json(programResult);
+  }catch(err){
+    console.error("Error updating active curriculum:", err);
+    res.status(500).json({ error: "Database error", details: err.message });
+  }
+})
+
+
+
 
 // Express route (UPDATED!)
 app.get("/departments", async (req, res) => {

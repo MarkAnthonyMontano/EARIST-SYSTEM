@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 25, 2025 at 06:12 PM
+-- Generation Time: Jul 27, 2025 at 06:29 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -1438,8 +1438,7 @@ INSERT INTO `prof_table` (`prof_id`, `person_id`, `profile_image`, `fname`, `mna
 (34, NULL, '', 'Charlene', NULL, 'Ronda', 'charlene.ronda@earist.edu.ph', 'RONDA', 0, 'faculty'),
 (35, NULL, '', 'Maria Jasmine', NULL, 'Macasil', 'jasmine.macasil@earist.edu.ph', 'MACASIL', 0, 'faculty'),
 (36, NULL, '', 'Jefferson', NULL, 'Costales', 'jefferson.costales@earist.edu.ph', 'COSTALES', 0, 'faculty'),
-(37, NULL, '', 'Arjo', NULL, 'Ladia', 'arjo.ladia@earist.edu.ph', 'LADIA', 0, 'faculty'),
-(61, 123, '123_ProfessorProfile_2025.jpg', 'Mark Anthony', 'P.', 'Montano', ' markmontano@gmail.com', '$2b$10$m3/G421i8oWLtqzXt7s26Oq9ImFrJ9q6.q92eT5G9hku3b/H/3D7G', 0, 'faculty');
+(37, NULL, '', 'Arjo', NULL, 'Ladia', 'arjo.ladia@earist.edu.ph', 'LADIA', 0, 'faculty');
 
 -- --------------------------------------------------------
 
@@ -1879,7 +1878,7 @@ INSERT INTO `student_numbering_table` (`student_number`, `person_id`) VALUES
 (202400017, 6),
 (202400018, 7),
 (202400019, 8),
-(202500013, 13),
+(202500013, 9),
 (202500020, 10),
 (202500021, 11),
 (202500022, 12);
@@ -1905,18 +1904,18 @@ CREATE TABLE `student_status_table` (
 --
 
 INSERT INTO `student_status_table` (`id`, `student_number`, `active_curriculum`, `enrolled_status`, `year_level_id`, `active_school_year_id`, `control_status`) VALUES
-(5, 202400012, 1, '1', 3, 1, 0),
-(6, 202400013, 1, '1', 2, 1, 0),
-(7, 202400014, 1, '1', 4, 1, 0),
-(8, 202400015, 1, '1', 1, 1, 0),
-(9, 202400016, 1, '1', 1, 1, 0),
-(10, 202400017, 1, '1', 1, 1, 0),
-(11, 202400018, 1, '1', 1, 1, 0),
-(12, 202400019, 1, '1', 1, 1, 0),
-(13, 202500020, 1, '1', 1, 1, 0),
-(14, 202500021, 1, '1', 1, 1, 0),
-(15, 202500022, 1, '1', 1, 1, 0),
-(16, 202500023, 1, '1', 1, 1, 0);
+(1, 202400012, 1, '1', 3, 1, 0),
+(2, 202400013, 1, '1', 2, 1, 0),
+(3, 202400014, 1, '1', 4, 1, 0),
+(4, 202400015, 1, '1', 1, 1, 0),
+(5, 202400016, 1, '1', 1, 1, 0),
+(6, 202400017, 1, '1', 1, 1, 0),
+(7, 202400018, 1, '1', 1, 1, 0),
+(8, 202400019, 1, '1', 1, 1, 0),
+(9, 202500020, 1, '1', 1, 1, 0),
+(10, 202500021, 13, '1', 1, 1, 0),
+(11, 202500022, 2, '1', 1, 1, 0),
+(12, 202500023, 1, '1', 1, 1, 0);
 
 -- --------------------------------------------------------
 
@@ -2278,7 +2277,7 @@ ALTER TABLE `dprtmnt_table`
 -- AUTO_INCREMENT for table `enrolled_subject`
 --
 ALTER TABLE `enrolled_subject`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=230;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=241;
 
 --
 -- AUTO_INCREMENT for table `period_status`
@@ -2392,7 +2391,7 @@ ALTER TABLE `student_numbering_table`
 -- AUTO_INCREMENT for table `student_status_table`
 --
 ALTER TABLE `student_status_table`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `time_table`

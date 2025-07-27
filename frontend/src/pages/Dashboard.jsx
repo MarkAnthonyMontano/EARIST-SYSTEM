@@ -8,6 +8,7 @@ import {
   Grid,
   MenuItem,
   FormControl,
+
   Select,
   InputLabel,
   Paper,
@@ -162,59 +163,82 @@ const Dashboard = () => {
 
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ p: 3, borderRadius: 3, height: 400 }}>
-            <Typography fontWeight="bold" mb={2}>
-              Select Department
-            </Typography>
-            <FormControl fullWidth>
-              <InputLabel>Select Department</InputLabel>
-              <Select
-                value={selectedDepartment}
-                onChange={(e) => setSelectedDepartment(e.target.value)}
-                label="Select Department"
-              >
-                <MenuItem value="">
-                  <em>- Select -</em>
-                </MenuItem>
-                {departments.map((dept) => (
-                  <MenuItem key={dept.dprtmnt_id} value={dept.dprtmnt_id}>
-                    {dept.dprtmnt_name}
+          <Card
+            sx={{
+              p: 1,
+              borderRadius: 3,
+              height: 400,
+              transition: "transform 0.2s ease",
+              boxShadow: 3,
+              "&:hover": { transform: "scale(1.03)" },
+            }}
+          >
+            <CardContent>
+              <Typography fontWeight="bold" mb={2}>
+                Select Department
+              </Typography>
+              <FormControl fullWidth>
+                <InputLabel>Select Department</InputLabel>
+                <Select
+                  value={selectedDepartment}
+                  onChange={(e) => setSelectedDepartment(e.target.value)}
+                  label="Select Department"
+                >
+                  <MenuItem value="">
+                    <em>- Select -</em>
                   </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Paper>
+                  {departments.map((dept) => (
+                    <MenuItem key={dept.dprtmnt_id} value={dept.dprtmnt_id}>
+                      {dept.dprtmnt_name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </CardContent>
+          </Card>
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Paper elevation={3} sx={{ p: 3, borderRadius: 3, height: 400 }}>
-            <Typography fontWeight="bold" mb={2}>
-              Student Summary
-            </Typography>
-            <Typography variant="body1" mb={2}>
-              Total Enrolled Students:{" "}
-              <Typography component="span" fontWeight="bold" color="primary">
-                {selectedDepartment ? studentCount : "—"}
+          <Card
+            sx={{
+              p: 1,
+              borderRadius: 3,
+              height: 400,
+              transition: "transform 0.2s ease",
+              boxShadow: 3,
+              "&:hover": { transform: "scale(1.03)" },
+            }}
+          >
+            <CardContent>
+              <Typography fontWeight="bold" mb={2}>
+                Student Summary
               </Typography>
-            </Typography>
-
-            {yearLevelCounts.length > 0 ? (
-              yearLevelCounts.map((item) => (
-                <Typography key={item.year_level_id} variant="body2" mb={1}>
-                  {item.year_level_description}:{" "}
-                  <Typography component="span" fontWeight="bold" color="maroon">
-                    {item.student_count}
-                  </Typography>
+              <Typography variant="body1" mb={2}>
+                Total Enrolled Students:{" "}
+                <Typography component="span" fontWeight="bold" color="primary">
+                  {selectedDepartment ? studentCount : "—"}
                 </Typography>
-              ))
-            ) : (
-              <Typography variant="body2" color="textSecondary">
-                No year level data available.
               </Typography>
-            )}
-          </Paper>
+
+              {yearLevelCounts.length > 0 ? (
+                yearLevelCounts.map((item) => (
+                  <Typography key={item.year_level_id} variant="body2" mb={1}>
+                    {item.year_level_description}:{" "}
+                    <Typography component="span" fontWeight="bold" color="maroon">
+                      {item.student_count}
+                    </Typography>
+                  </Typography>
+                ))
+              ) : (
+                <Typography variant="body2" color="textSecondary">
+                  No year level data available.
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
         </Grid>
       </Grid>
+
 
     </Box>
   );

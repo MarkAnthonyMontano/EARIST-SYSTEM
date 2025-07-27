@@ -2,26 +2,40 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Box, Button, Grid, Typography, Table, TableBody, TableCell, TableHead, TableRow, Paper, TextField, MenuItem, Container } from "@mui/material";
 import LinearWithValueLabel from './LinearWithValueLabel';
-import { jwtDecode } from "jwt-decode";
+import { Snackbar, Alert } from "@mui/material";
 
 const CourseTagging = () => {
-
-  const getEmployeeNumFromToken = () => {
-    const token = localStorage.getItem("token"); // Get token from localStorage
-    if (token) {
-      const decoded = jwtDecode(token);
-      return decoded.employeeNumber; // Get the employeeNumber
-    }
-    return null;
-  };
-  // Store the employeeNumber in a new variable
   const [data, setdata] = useState([]);
   const [currentDate, setCurrentDate] = useState("");
-  // Now filter after initializing the states
-  const employeeNum = getEmployeeNumFromToken();
-  const filteredData = data.filter((item) => String(item.employeeID) === String(employeeNum));
-
   const [personID, setPersonID] = useState('');
+  const [snack, setSnack] = useState({ open: false, message: "", severity: "info" });
+
+  const [userID, setUserID] = useState("");
+  const [user, setUser] = useState("");
+  const [userRole, setUserRole] = useState("");
+
+  // do not alter
+  useEffect(() => {
+    const storedUser = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
+    const storedID = localStorage.getItem("person_id");
+
+    if (storedUser && storedRole && storedID) {
+      setUser(storedUser);
+      setUserRole(storedRole);
+      setUserID(storedID);
+
+      if (storedRole === "registrar") {
+
+      } else {
+        window.location.href = "/login";
+      }
+    } else {
+      window.location.href = "/login";
+    }
+  }, []);
+
+
 
   useEffect(() => {
     const updateDate = () => {
@@ -139,19 +153,41 @@ const CourseTagging = () => {
     }
   };
 
-  const handleSectionChange = (e) => {
+  const handleSectionChange = async (e) => {
     const sectionId = e.target.value;
     setSelectedSection(sectionId);
-    console.log(sectionId);
+    console.log("Selected section ID:", sectionId);
 
-    // Find the selected section object from the array
     const selectedSectionObj = sections.find(
       (section) => section.section_id === parseInt(sectionId)
     );
+    console.log("Selected section object:", selectedSectionObj);
 
-    // Do something with the selected section if needed
-    console.log("Selected section:", selectedSectionObj);
+    try {
+
+      const response = await axios.put("http://localhost:5000/api/update-active-curriculum", {
+        studentId: studentNumber,
+        departmentSectionId: sectionId,
+      });
+
+      setCurr(sectionId.curriculum_id);
+      console.log("Updating curriculum ID to:", sectionId.curriculum_id);
+
+      const courseRes = await axios.get(`http://localhost:5000/api/search-student/${sectionId}`);
+      if (courseRes.data.length > 0) {
+        setCourseCode(courseRes.data[0].program_code);
+        setCourseDescription(courseRes.data[0].program_description);
+      } else {
+        console.warn("No program data found for selected section");
+      }
+
+      console.log("Curriculum updated:", response.data);
+
+    } catch (error) {
+      console.error("Error updating curriculum:", error);
+    }
   };
+
 
   const isEnrolled = (course_id) => enrolled.some((item) => item.course_id === course_id);
 
@@ -243,7 +279,8 @@ const CourseTagging = () => {
 
   const handleSearchStudent = async () => {
     if (!studentNumber.trim()) {
-      alert("Please fill in the student number");
+      setSnack({ open: true, message: "Please fill in the student number", severity: "warning" });
+
       return;
     }
 
@@ -272,9 +309,14 @@ const CourseTagging = () => {
       setCourseCode(course_code); // Set Program Code
       setCourseDescription(course_desc); // Set Program Description
       setPersonID(person_id);
-      alert("Student found and authenticated!");
+      setSnack({ open: true, message: "Student found and authenticated!", severity: "success" });
     } catch (error) {
-      alert(error.response?.data?.message || "Student not found");
+      setSnack({
+        open: true,
+        message: error.response?.data?.message || "Student not found",
+        severity: "error",
+      });
+
     }
   };
 
@@ -306,7 +348,7 @@ const CourseTagging = () => {
         gutterBottom
         mb={3}
       >
-        Select a Department
+        Select Department
       </Typography>
       <Grid
         container
@@ -334,23 +376,31 @@ const CourseTagging = () => {
                   color: "white",
                 },
               }}
+              style={{ opacity: '1px' }}
             >
               {dept.dprtmnt_code}
             </Button>
           </Grid>
         ))}
       </Grid>
-      <Box p={4} display="grid" gridTemplateColumns="1fr 1fr" gap={4} style={{ marginLeft: '-15rem', height: 'calc(90vh - 120px)', overflowY: 'auto', overflowX: "hidden", width: '100rem' }}>
+      <Box p={4} display="grid" gridTemplateColumns="1fr 1fr" gap={4} style={{ marginLeft: '-15rem', height: 'calc(90vh - 120px)', overflowY: 'auto', overflowX: "hidden", width: '100rem', }}>
         {/* Available Courses */}
-        <Box component={Paper} p={2}>
+        <Box component={Paper} backgroundColor={"#f1f1f1"} p={2}>
           {/* Search Student */}
           <Box>
-            <Typography variant="h6" > Name: &emsp;
+            <Typography variant="h6">
+              Name: &emsp;
               {first_name} {middle_name} {last_name}
               <br />
-              Department/Course: &emsp;
-              {courseCode} - {courseDescription}
+              Department/Course/Section: &emsp;
+              {courseCode} {courseDescription} {selectedSection
+                ? (() => {
+                  const section = sections.find(s => s.department_and_program_section_id === parseInt(selectedSection));
+                  return section ? `- ${section.description}` : "";
+                })()
+                : ""}
             </Typography>
+
             <TextField
               label="Student Number"
               fullWidth
@@ -419,7 +469,7 @@ const CourseTagging = () => {
         </Box>
 
         {/* Enrolled Courses */}
-        <Box component={Paper} p={2}>
+        <Box component={Paper} backgroundColor={"#f1f1f1"} p={2}>
           <Box sx={{ mb: 2 }}>
             <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
               Department Section
@@ -508,6 +558,21 @@ const CourseTagging = () => {
         </Box>
 
       </Box>
+      <Snackbar
+        open={snack.open}
+        autoHideDuration={3000}
+        onClose={() => setSnack({ ...snack, open: false })}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          severity={snack.severity}
+          onClose={() => setSnack({ ...snack, open: false })}
+          sx={{ width: '100%' }}
+        >
+          {snack.message}
+        </Alert>
+      </Snackbar>
+
     </Container>
   );
 };

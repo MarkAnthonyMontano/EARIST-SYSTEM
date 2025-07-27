@@ -14,25 +14,45 @@ const SideBar = ({ setIsAuthenticated }) => {
   const [role, setRole] = useState('');
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const decoded = JSON.parse(atob(token.split('.')[1]));
-        setRole(decoded.role);
-        console.log(decoded.role);
-      } catch (err) {
-        console.log(err)
+  const token = localStorage.getItem('token');
+  const savedRole = localStorage.getItem('role');
+  
+  if (token && savedRole) {
+    try {
+      const decoded = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Date.now() / 1000;
+      
+      if (decoded.exp < currentTime) {
+        // Token expired
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        setIsAuthenticated(false);
+        navigate('/');
+      } else {
+        setRole(savedRole); // ✅ Load from saved value
+        setIsAuthenticated(true);
       }
-    } else {
-      console.log("There's no token in localstorage");
+    } catch (err) {
+      console.log("Token decode error:", err);
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
+      setIsAuthenticated(false);
+      navigate('/');
     }
-  }, []);
-
-  const Logout = () => {
-    localStorage.removeItem('token');
+  } else {
+    console.log("Missing token or role");
     setIsAuthenticated(false);
     navigate('/');
   }
+}, []);
+
+
+ const Logout = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('role'); // ✅ remove role
+  setIsAuthenticated(false);
+  navigate('/');
+}
 
   return (
     <div className='h-full w-enough hidden-print'>
