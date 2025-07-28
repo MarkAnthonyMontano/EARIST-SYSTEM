@@ -26,8 +26,9 @@ const StudentNumbering = () => {
 
     const itemsPerPage = 20;
     const filteredPersons = persons.filter((person) => {
-        const fullName = `${person.first_name} ${person.middle_name} ${person.last_name}`.toLowerCase();
-        return fullName.includes(searchQuery.toLowerCase());
+        const fullText = `${person.first_name} ${person.middle_name} ${person.last_name} ${person.emailAddress} ${person.applicant_number || ''}`.toLowerCase();
+        return fullText.includes(searchQuery.toLowerCase());
+
     });
 
     const totalPages = Math.ceil(filteredPersons.length / itemsPerPage);
@@ -47,6 +48,12 @@ const StudentNumbering = () => {
     for (let i = startPage; i <= endPage; i++) {
         visiblePages.push(i);
     }
+
+    const fetchApplicantNumber = async (personID) => {
+        const res = await axios.get(`http://localhost:5000/api/applicant_number/${personID}`);
+        setApplicantID(res.data?.applicant_number || "N/A");
+    };
+
 
 
     const fetchPersons = async () => {
@@ -111,7 +118,7 @@ const StudentNumbering = () => {
                     </Typography>
                     <TextField
                         variant="outlined"
-                        placeholder="Search Student Name"
+                        placeholder="Search Applicant Name / Email / Applicant ID"
                         size="small"
                         style={{ width: '500px' }}
                         value={searchQuery}
@@ -158,10 +165,21 @@ const StudentNumbering = () => {
                                     },
                                 }}
                             >
-                                <Typography>
-                                    {indexOfFirstItem + index + 1}. {person.first_name} {person.middle_name}{' '}
-                                    {person.last_name}
-                                </Typography>
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "10px",           // ← consistent spacing
+                                        px: 2,                 // padding left/right
+                                        fontSize: "16px",
+                                    }}
+                                >
+                                    <span>{indexOfFirstItem + index + 1}.</span>
+                                    <span>{person.applicant_number || "N/A"}</span> |
+                                    <span>{person.first_name} {person.middle_name} {person.last_name}</span> |
+                                    <span>{person.emailAddress}</span>
+                                </Box>
+
                             </Paper>
                         ))}
                     </Box>
@@ -170,17 +188,17 @@ const StudentNumbering = () => {
                 {/* Selected Person + Assignment */}
                 <Box flex={1}>
                     <Typography fontSize={16} fontWeight="bold" gutterBottom>
-                        Selected Person
+                        Selected Person:
                     </Typography>
 
                     {selectedPerson ? (
                         <Box>
                             <Typography style={{ fontSize: "16px" }}>
-                                <strong >Name:</strong> {selectedPerson.first_name} {selectedPerson.middle_name}{' '}
-                                {selectedPerson.last_name}  
-                                 <br />
-                                <strong >Email Address:</strong> {selectedPerson.emailAddress}
+                                <strong>Applicant ID:</strong> {selectedPerson.applicant_number || "N/A"} <br />
+                                <strong>Name:</strong> {selectedPerson.first_name} {selectedPerson.middle_name} {selectedPerson.last_name}<br />
+                                <strong>Email Address:</strong> {selectedPerson.emailAddress}
                             </Typography>
+
                             <Button
                                 variant="contained"
                                 sx={{
@@ -274,7 +292,7 @@ const StudentNumbering = () => {
             </Box>
             <Snackbar
                 open={snack.open}
-             
+
                 onClose={handleSnackClose}
                 anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
             >

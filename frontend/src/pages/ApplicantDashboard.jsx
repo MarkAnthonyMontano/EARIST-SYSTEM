@@ -69,6 +69,8 @@ const ApplicantDashboard = () => {
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
+  const [applicantID, setApplicantID] = useState("");
+
   const [person, setPerson] = useState({
 
     last_name: "",
@@ -77,6 +79,19 @@ const ApplicantDashboard = () => {
     extension: "",
 
   });
+
+  // Calls the backend to fetch the applicant number using personID
+const fetchApplicantNumber = async (personID) => {
+  try {
+    const res = await axios.get(`http://localhost:5000/api/applicant_number/${personID}`);
+    if (res.data && res.data.applicant_number) {
+      setApplicantID(res.data.applicant_number);
+    }
+  } catch (error) {
+    console.error("Failed to fetch applicant number:", error);
+  }
+};
+
 
   const fetchPersonData = async (id) => {
     try {
@@ -100,6 +115,7 @@ const ApplicantDashboard = () => {
 
       if (storedRole === "applicant") {
         fetchPersonData(storedID);
+        fetchApplicantNumber(storedID); // ✅ fetch applicant number too
       } else {
         window.location.href = "/login";
       }
@@ -107,6 +123,7 @@ const ApplicantDashboard = () => {
       window.location.href = "/login";
     }
   }, []);
+
 
   return (
 
@@ -141,8 +158,9 @@ const ApplicantDashboard = () => {
           }}
         >
           <Typography sx={{ fontSize: "20px", fontFamily: "Arial Black" }}>
-            Applicant ID: <span style={{ textDecoration: "underline" }}>{userID}</span>
+            Applicant ID: <span style={{ textDecoration: "underline" }}>{applicantID || "N/A"}</span>
           </Typography>
+
 
           <Typography sx={{ fontSize: "20px", fontFamily: "Arial Black" }}>
             Applicant Name:{" "}

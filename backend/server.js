@@ -73,36 +73,111 @@ const db3 = mysql.createPool({
 /*---------------------------------START---------------------------------------*/
 
 //ADMISSION
-
-//REGISTER (UPDATED!)
 app.post("/register", async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email) {
-    return res.status(400).send({ message: "Please fill up all required form" });
+  if (!email || !password) {
+    return res.status(400).json({ message: "Please fill up all required fields" });
   }
+
+  let person_id = null;
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // First insert into person_table
-    const query1 = "INSERT INTO person_table () VALUES ()";
-    const [result1] = await db.query(query1);
-    const person_id = result1.insertId;
+    // 🚫 OPTIONAL: Check if email already exists
+    const [existingUser] = await db.query("SELECT * FROM user_accounts WHERE email = ?", [email.trim().toLowerCase()]);
+    if (existingUser.length > 0) {
+      return res.status(400).json({ message: "Email is already registered" });
+    }
 
-    // Second insert into user_accounts
-    const query2 = "INSERT INTO user_accounts (person_id, email, password, role) VALUES (?, ?, ?,'applicant')";
-    const [result2] = await db.query(query2, [person_id, email, hashedPassword]);
+    // ✅ STEP 1: Insert into person_table
+    const [personResult] = await db.query("INSERT INTO person_table () VALUES ()");
+    person_id = personResult.insertId;
+    console.log("✅ person_table insert:", person_id);
 
-    res.status(201).send({ message: "Registered Successfully", result2 });
+    // ✅ STEP 2: Insert into user_accounts
+    await db.query(
+      "INSERT INTO user_accounts (person_id, email, password, role) VALUES (?, ?, ?, 'applicant')",
+      [person_id, email.trim().toLowerCase(), hashedPassword]
+    );
+    console.log("✅ user_accounts insert for:", email);
+
+    // ✅ STEP 3: Get year + semester from ENROLLMENT DB (db3)
+    const [activeYearResult] = await db3.query(`
+      SELECT yt.year_description, st.semester_code
+      FROM active_school_year_table sy
+      JOIN year_table yt ON yt.year_id = sy.year_id
+      JOIN semester_table st ON st.semester_id = sy.semester_id
+      WHERE sy.astatus = 1
+      LIMIT 1
+    `);
+
+    if (activeYearResult.length === 0) {
+      throw new Error("No active school year/semester found in ENROLLMENT DB.");
+    }
+
+    const year = activeYearResult[0].year_description.split("-")[0]; // e.g. "2025"
+    const semCode = activeYearResult[0].semester_code; // e.g. "1"
+    console.log("✅ Active Year:", year, "| Semester Code:", semCode);
+
+    // ✅ STEP 4: Generate applicant_number
+    const [countRes] = await db.query("SELECT COUNT(*) AS count FROM applicant_numbering_table");
+    const padded = String(countRes[0].count + 1).padStart(5, "0"); // → "00001"
+    const applicant_number = `${year}${semCode}${padded}`; // → "2025100001"
+    console.log("✅ Generated applicant_number:", applicant_number);
+
+    // ✅ STEP 5: Insert into applicant_numbering_table
+    await db.query(
+      "INSERT INTO applicant_numbering_table (applicant_number, person_id) VALUES (?, ?)",
+      [applicant_number, person_id]
+    );
+    console.log("✅ applicant_numbering_table insert successful");
+
+    // ✅ Final response
+    res.status(201).json({
+      message: "Registered Successfully",
+      person_id,
+      applicant_number,
+    });
+
   } catch (error) {
-    // If any query fails, we rollback the first insert
-    const rollback = "DELETE FROM person_table WHERE person_id = ?";
-    await db.query(rollback, [person_id]);
+    console.error("❌ Registration Error:", error);
 
-    res.status(500).send({ message: "Internal Server Error" });
+    // Optional rollback if person was already created
+    if (person_id) {
+      await db.query("DELETE FROM person_table WHERE person_id = ?", [person_id]);
+    }
+
+    res.status(500).json({
+      message: "Internal Server Error",
+      error: error.message,
+    });
   }
 });
+
+// Get applicant_number by person_id
+app.get("/api/applicant_number/:person_id", async (req, res) => {
+  const { person_id } = req.params;
+
+  try {
+    const [rows] = await db.query(
+      "SELECT applicant_number FROM applicant_numbering_table WHERE person_id = ?",
+      [person_id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ applicant_number: null });
+    }
+
+    res.json(rows[0]); // returns { applicant_number: "2025100001" }
+  } catch (error) {
+    console.error("Error fetching applicant number:", error);
+    res.status(500).json({ message: "Database error", error: error.message });
+  }
+});
+
+
 
 // REGISTER API (NEW)
 // app.post("/register_account", async (req, res) => {
@@ -974,7 +1049,7 @@ io.on("connection", (socket) => {
 
       const { first_name, middle_name, last_name, emailAddress } = rows[0];
       const student_number = `${new Date().getFullYear()}${String(person_id).padStart(5, "0")}`;
-      const tempPassword = last_name.toUpperCase();
+      const tempPassword = Math.random().toString(36).slice(-8).toUpperCase();
       const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
       // ✅ Save to student_numbering_table
@@ -1068,11 +1143,11 @@ app.post("/login_applicant", async (req, res) => {
   }
 
   try {
-    const query = `SELECT * FROM user_accounts as ua
-      LEFT JOIN person_table as pt
-      ON pt.person_id = ua.person_id
-    WHERE email = ?`;
-
+    const query = `
+      SELECT * FROM user_accounts AS ua
+      LEFT JOIN person_table AS pt ON pt.person_id = ua.person_id
+      WHERE email = ?
+    `;
     const [results] = await db.query(query, [email]);
 
     if (results.length === 0) {
@@ -1086,9 +1161,52 @@ app.post("/login_applicant", async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    const token = webtoken.sign({ person_id: user.person_id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const person_id = user.person_id;
 
-    console.log("Login response:", { token, person_id: user.person_id, email: user.email, role: user.role });
+    // ✅ Check if applicant_number already exists
+    const [existing] = await db.query(
+      "SELECT applicant_number FROM applicant_numbering_table WHERE person_id = ?",
+      [person_id]
+    );
+
+    if (existing.length === 0) {
+      // ✅ Get active school year & semester
+      const [activeYear] = await db3.query(`
+        SELECT yt.year_description, st.semester_description, st.semester_code
+        FROM active_school_year_table AS sy
+        JOIN year_table AS yt ON yt.year_id = sy.year_id
+        JOIN semester_table AS st ON st.semester_id = sy.semester_id
+        WHERE sy.astatus = 1
+        LIMIT 1
+      `);
+
+      if (activeYear.length === 0) {
+        return res.status(500).json({ message: "No active school year found" });
+      }
+
+      const year = activeYear[0].year_description.split("-")[0]; // Get starting year (e.g., 2025)
+      const semCode = activeYear[0].semester_code; // Assumes values like 1, 2, 3
+
+      // ✅ Get next number (count + 1, padded to 5 digits)
+      const [countRes] = await db.query("SELECT COUNT(*) AS count FROM applicant_numbering_table");
+      const next = countRes[0].count + 1;
+      const padded = String(next).padStart(5, "0");
+
+      const applicantNumber = `${year}${semCode}${padded}`;
+
+      // ✅ Insert into table
+      await db.query(
+        "INSERT INTO applicant_numbering_table (applicant_number, person_id) VALUES (?, ?)",
+        [applicantNumber, person_id]
+      );
+    }
+
+    // ✅ Generate JWT token
+    const token = webtoken.sign(
+      { person_id: user.person_id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
 
     res.json({
       message: "Login successful",
@@ -2452,7 +2570,8 @@ app.post("/api/insert-schedule", async (req, res) => {
 // GET STUDENTS THAT HAVE NO STUDENT NUMBER (UPDATED!)
 app.get("/api/persons", async (req, res) => {
   try {
-    const [rows] = await db3.execute(`
+    // STEP 1: Get all eligible persons (from ENROLLMENT DB)
+    const [persons] = await db3.execute(`
       SELECT p.* 
       FROM person_table p
       JOIN person_status_table ps ON p.person_id = ps.person_id
@@ -2460,12 +2579,37 @@ app.get("/api/persons", async (req, res) => {
       AND p.person_id NOT IN (SELECT person_id FROM student_numbering_table)
     `);
 
-    res.json(rows);
+    if (persons.length === 0) return res.json([]);
+
+    const personIds = persons.map(p => p.person_id);
+
+    // STEP 2: Get all applicant numbers for those person_ids (from ADMISSION DB)
+    const [applicantNumbers] = await db.query(`
+      SELECT applicant_number, person_id 
+      FROM applicant_numbering_table 
+      WHERE person_id IN (?)
+    `, [personIds]);
+
+    // Create a quick lookup map
+    const applicantMap = {};
+    for (let row of applicantNumbers) {
+      applicantMap[row.person_id] = row.applicant_number;
+    }
+
+    // STEP 3: Merge applicant_number into each person object
+    const merged = persons.map(person => ({
+      ...person,
+      applicant_number: applicantMap[person.person_id] || null
+    }));
+
+    res.json(merged);
+
   } catch (err) {
-    console.error("Database query error:", err);
+    console.error("❌ Error merging person + applicant ID:", err);
     res.status(500).send("Server error");
   }
 });
+
 
 // GET total number of accepted students
 app.get("/api/accepted-students-count", async (req, res) => {

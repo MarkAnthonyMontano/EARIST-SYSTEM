@@ -34,16 +34,24 @@ const FacultyDashboard = () => {
     }
   }, []);
   
-  const fetchPersonData = async (id) => {
-    try{
-      const res = await axios.get(`http://localhost:5000/get_prof_data/${id}`);
+ const fetchPersonData = async (id) => {
+  try {
+    const res = await axios.get(`http://localhost:5000/get_prof_data/${id}`);
+    
+    if (res.data && res.data.length > 0) {
       setPerson(res.data[0]);
-      setLoading(false);
-    } catch (err) {
-      setLoading(false);
-      setMessage('Error fetching data');
+    } else {
+      setMessage("No profile data found.");
+      setPerson({ fname: "", lname: "", mname: "" }); // fallback
     }
+
+    setLoading(false);
+  } catch (err) {
+    setLoading(false);
+    setMessage("Error fetching data.");
+    setPerson({ fname: "", lname: "", mname: "" }); // fallback
   }
+};
 
   return (
     <div>
