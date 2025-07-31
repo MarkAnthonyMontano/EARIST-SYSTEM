@@ -67,32 +67,32 @@ const RequirementUploader = () => {
   };
 
 
- const handleUpload = async (key, file) => {
-  if (!file) return;
+  const handleUpload = async (key, file) => {
+    if (!file) return;
 
-  setSelectedFiles((prev) => ({ ...prev, [key]: file.name }));
+    setSelectedFiles((prev) => ({ ...prev, [key]: file.name }));
 
-  const requirementId = await getRequirementIdByKey(key);
-  if (!requirementId) return alert('Requirement not found.');
+    const requirementId = await getRequirementIdByKey(key);
+    if (!requirementId) return alert('Requirement not found.');
 
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('requirements_id', requirementId);
-  formData.append('person_id', userID); // ✅ Correctly send person_id in body
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('requirements_id', requirementId);
+    formData.append('person_id', userID); // ✅ Correctly send person_id in body
 
-  try {
-    await axios.post('http://localhost:5000/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data' // ✅ No need for 'x-person-id'
-      }
-    });
+    try {
+      await axios.post('http://localhost:5000/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data' // ✅ No need for 'x-person-id'
+        }
+      });
 
-    fetchUploads(userID);
-  } catch (err) {
-    console.error('Upload error:', err);
-    alert('Failed to upload. Please try again.');
-  }
-};
+      fetchUploads(userID);
+    } catch (err) {
+      console.error('Upload error:', err);
+      alert('Failed to upload. Please try again.');
+    }
+  };
 
   const getRequirementIdByKey = async (key) => {
     const res = await axios.get('http://localhost:5000/requirements');
@@ -164,6 +164,7 @@ const RequirementUploader = () => {
     });
 
     return (
+      
       <TableRow key={doc.key}>
         {/* Document label */}
         <TableCell sx={{ fontWeight: 'bold', width: '25%' }}>{doc.label}</TableCell>
@@ -226,10 +227,33 @@ const RequirementUploader = () => {
         </TableCell>
 
 
-        {/* Remarks */}
-        <TableCell sx={{ width: '10%' }}>
-          {/* Placeholder for future remarks */}
-        </TableCell>
+     <TableCell sx={{ width: '15%' }}>
+  {/* Remarks */}
+  <Typography
+    sx={{
+      fontStyle: uploaded?.remarks ? "normal" : "italic",
+      color: uploaded?.remarks ? "inherit" : "#888",
+    }}
+  >
+    {uploaded?.remarks || "No remarks"}
+  </Typography>
+
+  {/* Status (Only if Approved or Disapproved) */}
+  {uploaded?.status == 1 || uploaded?.status == 2 ? (
+    <Typography
+      sx={{
+        mt: 0.5,
+        fontSize: "14px",
+        color: uploaded?.status == 1 ? "green" : "red",
+        fontWeight: "bold",
+      }}
+    >
+      {uploaded?.status == 1 ? "Approved" : "Disapproved"}
+    </Typography>
+  ) : null}
+</TableCell>
+
+
 
         {/* Preview */}
         <TableCell sx={{ width: '10%' }}>
@@ -279,6 +303,9 @@ const RequirementUploader = () => {
   };
 
   return (
+      <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
+    
+    
     <Box sx={{ mt: 2, px: 2, marginLeft: "-10px" }}>
       <Container>
         <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>UPLOAD DOCUMENTS</h1>
@@ -344,6 +371,7 @@ const RequirementUploader = () => {
           <TableBody>{renderRow(vaccineDoc)}</TableBody>
         </Table>
       </TableContainer>
+    </Box>
     </Box>
   );
 };

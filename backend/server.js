@@ -525,7 +525,9 @@ app.get("/uploads", async (req, res) => {
       r.description, 
       ru.file_path, 
       ru.original_name,   
-      ru.created_at
+      ru.created_at,
+      ru.status,          
+      ru.remarks 
     FROM requirement_uploads ru
     JOIN requirements_table r ON ru.requirements_id = r.id
     WHERE ru.person_id = ?
