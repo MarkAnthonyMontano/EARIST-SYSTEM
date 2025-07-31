@@ -197,6 +197,12 @@ const SideBar = ({ setIsAuthenticated }) => {
                 <span className='pl-4 p-2 px-0 pointer-events-none'>Schedule</span>
               </li>
             </Link>
+              <Link to="/faculty_reset_password">
+              <li className={`w-full flex items-center border border-maroon-500 px-2 rounded m-2 mx-0 button-hover ${location.pathname === "/faculty_reset_password" ? "bg-maroon-500 text-white" : ""}`}>
+                <LockResetIcon />
+                <span className='pl-4 p-2 px-0 pointer-events-none'>Reset Password</span>
+              </li>
+            </Link>
           </>
         )}
         {role === 'student' && (
@@ -207,6 +213,13 @@ const SideBar = ({ setIsAuthenticated }) => {
                 <span className='pl-4 p-2 px-0 pointer-events-none'>Dashboard</span>
               </li>
             </Link>
+               <Link to="/student_reset_password">
+              <li className={`w-full flex items-center border border-maroon-500 px-2 rounded m-2 mx-0 button-hover ${location.pathname === "/student_reset_password" ? "bg-maroon-500 text-white" : ""}`}>
+                <LockResetIcon />
+                <span className='pl-4 p-2 px-0 pointer-events-none'>Reset Password</span>
+              </li>
+            </Link>
+            
           </>
         )}
         <li className='w-full flex items-center border border-maroon-500 px-2 rounded m-2 mx-0 cursor-pointer button-hover' onClick={Logout}>

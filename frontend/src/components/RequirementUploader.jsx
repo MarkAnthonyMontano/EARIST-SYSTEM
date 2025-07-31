@@ -67,33 +67,32 @@ const RequirementUploader = () => {
   };
 
 
-  const handleUpload = async (key, file) => {
-    if (!file) return;
+ const handleUpload = async (key, file) => {
+  if (!file) return;
 
-    setSelectedFiles((prev) => ({ ...prev, [key]: file.name }));
+  setSelectedFiles((prev) => ({ ...prev, [key]: file.name }));
 
-    const formData = new FormData();
-    formData.append('file', file);
+  const requirementId = await getRequirementIdByKey(key);
+  if (!requirementId) return alert('Requirement not found.');
 
-    const requirementId = await getRequirementIdByKey(key);
-    if (!requirementId) return alert('Requirement not found.');
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('requirements_id', requirementId);
+  formData.append('person_id', userID); // ✅ Correctly send person_id in body
 
-    formData.append('requirements_id', requirementId);
+  try {
+    await axios.post('http://localhost:5000/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data' // ✅ No need for 'x-person-id'
+      }
+    });
 
-    try {
-      await axios.post('http://localhost:5000/upload', formData, {
-        headers: {
-          'x-person-id': userID,
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-
-      fetchUploads(userID);
-    } catch (err) {
-      console.error('Upload error:', err);
-      alert('Failed to upload. Please try again.');
-    }
-  };
+    fetchUploads(userID);
+  } catch (err) {
+    console.error('Upload error:', err);
+    alert('Failed to upload. Please try again.');
+  }
+};
 
   const getRequirementIdByKey = async (key) => {
     const res = await axios.get('http://localhost:5000/requirements');

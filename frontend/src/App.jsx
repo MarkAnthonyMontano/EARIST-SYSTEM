@@ -7,6 +7,8 @@ import ApplicantForgotPassword from './components/ApplicantForgotPassword';
 import ApplicantResetPassword from './components/ApplicantResetPassword';
 import RegistrarForgotPassword from './components/RegistrarForgotPassword';
 import RegistrarResetPassword from './components/RegistrarResetPassword';
+import StudentResetPassword from './components/StudentResetPassword';
+import FacultyResetPassword from './components/FacultyResetPassword';
 
 
 import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
@@ -24,7 +26,6 @@ import CurriculumPanel from './components/CurriculumPanel';
 import SectionPanel from './components/SectionPanel';
 import DepartmentSection from './components/DepartmentSection';
 import ProtectedRoute from './components/ProtectedRoute';
-import LoginProf from './components/LoginProf';
 import RegisterProf from './components/RegisterProf';
 import StudentProfileForm from './components/StudentProfile';
 import YearLevelPanel from './components/YearLevelPanel';
@@ -51,7 +52,9 @@ import Dashboard from './pages/Dashboard'; // For SuperAdmin & Admin
 import ApplicantDashboard from './pages/ApplicantDashboard';
 
 import Unauthorized from './components/Unauthorized';
-import RequirementUploader from './components/RequirementUploader';
+import StudentRequirements from './components/StudentRequirements';
+
+
 import GradingSheet from './components/GradingSheet';
 import FacultyWorkload from './components/FacultyWorkload';
 import FacultyMasterList from './components/FacultyMasterlist';
@@ -65,6 +68,7 @@ import Dashboard2 from './components/Dashboard2';
 import Dashboard3 from './components/Dashboard3';
 import Dashboard4 from './components/Dashboard4';
 import Dashboard5 from './components/Dashboard5';
+import RequirementUploader from './components/RequirementUploader';
 
 import PersonalDataForm from './components/PersonalDataForm';
 import ECATApplicationForm from './components/ECATApplicationForm';
@@ -121,7 +125,6 @@ function App() {
             <Routes>
               <Route path="/" element={<LoginEnrollment setIsAuthenticated={setIsAuthenticated} />} />
               <Route path="/login_applicant" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
-              <Route path="/login_prof" element={<LoginProf setIsAuthenticated={setIsAuthenticated} />} />
               <Route path="/login" element={<LoginEnrollment setIsAuthenticated={setIsAuthenticated} />} />
               <Route path="/register" element={<Register />} />
 
@@ -131,8 +134,10 @@ function App() {
               <Route path="/registrar_forgot_password" element={<RegistrarForgotPassword />} />
               <Route path="/registrar_reset_password" element={<ProtectedRoute><RegistrarResetPassword /></ProtectedRoute>} />
 
+              <Route path="/student_reset_password" element={<ProtectedRoute><StudentResetPassword /></ProtectedRoute>} />
+              <Route path="/faculty_reset_password" element={<ProtectedRoute><FacultyResetPassword /></ProtectedRoute>} />
 
-              <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['registrar']}><Dashboard /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/faculty_dashboard" element={<ProtectedRoute allowedRoles={['faculty']}><FacultyDashboard /></ProtectedRoute>} />
               <Route path="/applicant_dashboard" element={<ProtectedRoute><ApplicantDashboard /></ProtectedRoute>} />
               <Route path="/register_prof" element={<ProtectedRoute><RegisterProf /></ProtectedRoute>} />
@@ -184,6 +189,9 @@ function App() {
               <Route path="/dashboard4" element={<ProtectedRoute allowedRoles={['applicant']}><Dashboard4 /></ProtectedRoute>} />
               <Route path="/dashboard5" element={<ProtectedRoute allowedRoles={['applicant']}><Dashboard5 /></ProtectedRoute>} />
               <Route path="/requirements_uploader" element={<ProtectedRoute allowedRoles={['applicant']}><RequirementUploader /></ProtectedRoute>} />
+              <Route path="/student_requirements" element={<ProtectedRoute ><StudentRequirements /></ProtectedRoute>} />
+
+
 
               <Route path="/personal_data_form" element={<ProtectedRoute allowedRoles={['applicant']}><PersonalDataForm /></ProtectedRoute>} />
               <Route path="/ecat_application_form" element={<ProtectedRoute allowedRoles={['applicant']}><ECATApplicationForm /></ProtectedRoute>} />

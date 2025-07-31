@@ -33,7 +33,6 @@ const Dashboard3 = () => {
     honor1: "",
     generalAverage1: "",
     yearGraduated1: "",
-
     strand: "",
   });
 
@@ -362,7 +361,7 @@ const Dashboard3 = () => {
                         <em>Select School Level</em>
                       </MenuItem>
                       <MenuItem value="High School/Junior High School">High School/Junior High School</MenuItem>
-                      <MenuItem value="Senior High School">Senior High School</MenuItem>
+                      <MenuItem value="Senior High School Graduate">Senior High School Graduate</MenuItem>
                       <MenuItem value="Undergraduate">Undergraduate</MenuItem>
                       <MenuItem value="Graduate">Graduate</MenuItem>
                       <MenuItem value="ALS">ALS</MenuItem>
@@ -527,7 +526,7 @@ const Dashboard3 = () => {
                   >
                     <MenuItem value=""><em>Select School Level</em></MenuItem>
                     <MenuItem value="High School/Junior High School">High School/Junior High School</MenuItem>
-                    <MenuItem value="Senior High School">Senior High School</MenuItem>
+                    <MenuItem value="Senior High School Graduate">Senior High School Graduate</MenuItem>
                     <MenuItem value="Undergraduate">Undergraduate</MenuItem>
                     <MenuItem value="Graduate">Graduate</MenuItem>
                     <MenuItem value="ALS">ALS</MenuItem>

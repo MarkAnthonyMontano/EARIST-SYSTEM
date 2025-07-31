@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
+import { Modal, TextField } from "@mui/material";
 import {
   Container,
   Checkbox,
   Box,
+  Typography,
+  Button,
   Snackbar,
   Alert
 } from "@mui/material";
@@ -23,48 +26,61 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [snack, setSnack] = useState({ open: false, message: "", severity: "info" });
+  const [otp, setOtp] = useState("");
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [tempLoginData, setTempLoginData] = useState(null);
 
   const navigate = useNavigate();
 
   const handleLogin = async () => {
     if (!email || !password) {
-      setSnack({ open: true, message: "Please fill in all fields", severity: "warning" });
-      return;
+      return setSnack({ open: true, message: "Please fill in all fields", severity: "warning" });
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/login", { email, password }, {
-        headers: { "Content-Type": "application/json" }
-      });
+      const res = await axios.post("http://localhost:5000/login", { email, password });
 
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("email", response.data.email);
-      localStorage.setItem("role", response.data.role);
-      localStorage.setItem("person_id", response.data.person_id);
+      await axios.post("http://localhost:5000/request-otp", { email });
 
-      setIsAuthenticated(true);
-
-      setSnack({
-        open: true,
-        message: "Login Successfully",
-        severity: "success"
-      });
-
-      navigate("/dashboard");
+      setTempLoginData(res.data);
+      setShowOtpModal(true);
 
     } catch (error) {
       setSnack({
         open: true,
-        message: error.response?.data?.message || "Invalid credentials",
+        message: error.response?.data?.message || "Login failed",
         severity: "error"
       });
     }
   };
 
+
   const handleClose = (_, reason) => {
     if (reason === 'clickaway') return;
     setSnack(prev => ({ ...prev, open: false }));
   };
+
+  const verifyOtp = async () => {
+    try {
+      const res = await axios.post("http://localhost:5000/verify-otp", { email, otp });
+
+      localStorage.setItem("token", tempLoginData.token);
+      localStorage.setItem("email", tempLoginData.email);
+      localStorage.setItem("role", tempLoginData.role);
+      localStorage.setItem("person_id", tempLoginData.person_id);
+      setIsAuthenticated(true);
+      setShowOtpModal(false);
+
+      navigate(
+        tempLoginData.role === "registrar" ? "/dashboard"
+          : tempLoginData.role === "faculty" ? "/faculty_dashboard"
+            : "/student_dashboard"
+      );
+    } catch (err) {
+      setSnack({ open: true, message: "Invalid OTP", severity: "error" });
+    }
+  };
+
 
   return (
     <>
@@ -197,6 +213,77 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
             {snack.message}
           </Alert>
         </Snackbar>
+        <Modal open={showOtpModal} onClose={() => setShowOtpModal(false)}>
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              bgcolor: "#fff",
+              border: "3px solid black",
+              p: 4,
+              borderRadius: "12px",
+              width: 350,
+              boxShadow: 24,
+              textAlign: "center",
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{
+                mb: 2,
+                fontWeight: "bold",
+                fontSize: "20px",
+                color: "#6D2323",
+              }}
+            >
+              Enter the 6-digit OTP
+            </Typography>
+
+            <Typography
+              variant="body2"
+              sx={{
+                mb: 3,
+                color: "#666",
+              }}
+            >
+              We sent a verification code to your Gmail address.
+            </Typography>
+
+            <TextField
+              fullWidth
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              placeholder="Enter OTP"
+              inputProps={{
+                maxLength: 6,
+                style: {  textAlign: "center", fontSize: "18px" },
+              }}
+              sx={{ mb: 3 }}
+            />
+
+            <Button
+              variant="contained"
+              onClick={verifyOtp}
+              sx={{
+                width: "100%",
+                backgroundColor: "#6D2323",
+                "&:hover": {
+                  backgroundColor: "#6D2323",
+                },
+                textTransform: "none",
+                fontWeight: "bold",
+                fontSize: "16px",
+                py: 1,
+              }}
+            >
+              Verify OTP
+            </Button>
+          </Box>
+        </Modal>
+
+
       </Box>
     </>
   );

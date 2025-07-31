@@ -81,16 +81,16 @@ const ApplicantDashboard = () => {
   });
 
   // Calls the backend to fetch the applicant number using personID
-const fetchApplicantNumber = async (personID) => {
-  try {
-    const res = await axios.get(`http://localhost:5000/api/applicant_number/${personID}`);
-    if (res.data && res.data.applicant_number) {
-      setApplicantID(res.data.applicant_number);
+  const fetchApplicantNumber = async (personID) => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/applicant_number/${personID}`);
+      if (res.data && res.data.applicant_number) {
+        setApplicantID(res.data.applicant_number);
+      }
+    } catch (error) {
+      console.error("Failed to fetch applicant number:", error);
     }
-  } catch (error) {
-    console.error("Failed to fetch applicant number:", error);
-  }
-};
+  };
 
 
   const fetchPersonData = async (id) => {
