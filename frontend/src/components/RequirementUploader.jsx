@@ -164,7 +164,7 @@ const RequirementUploader = () => {
     });
 
     return (
-      
+
       <TableRow key={doc.key}>
         {/* Document label */}
         <TableCell sx={{ fontWeight: 'bold', width: '25%' }}>{doc.label}</TableCell>
@@ -227,31 +227,31 @@ const RequirementUploader = () => {
         </TableCell>
 
 
-     <TableCell sx={{ width: '15%' }}>
-  {/* Remarks */}
-  <Typography
-    sx={{
-      fontStyle: uploaded?.remarks ? "normal" : "italic",
-      color: uploaded?.remarks ? "inherit" : "#888",
-    }}
-  >
-    {uploaded?.remarks || "No remarks"}
-  </Typography>
+        <TableCell sx={{ width: '15%' }}>
+          {/* Remarks */}
+          <Typography
+            sx={{
+              fontStyle: uploaded?.remarks ? "normal" : "italic",
+              color: uploaded?.remarks ? "inherit" : "#888",
+            }}
+          >
+            {uploaded?.remarks || ""}
+          </Typography>
 
-  {/* Status (Only if Approved or Disapproved) */}
-  {uploaded?.status == 1 || uploaded?.status == 2 ? (
-    <Typography
-      sx={{
-        mt: 0.5,
-        fontSize: "14px",
-        color: uploaded?.status == 1 ? "green" : "red",
-        fontWeight: "bold",
-      }}
-    >
-      {uploaded?.status == 1 ? "Approved" : "Disapproved"}
-    </Typography>
-  ) : null}
-</TableCell>
+          {/* Status (Only if Approved or Disapproved) */}
+          {uploaded?.status == 1 || uploaded?.status == 2 ? (
+            <Typography
+              sx={{
+                mt: 0.5,
+                fontSize: "14px",
+                color: uploaded?.status == 1 ? "green" : "red",
+                fontWeight: "bold",
+              }}
+            >
+              {uploaded?.status == 1 ? "Approved" : "Disapproved"}
+            </Typography>
+          ) : null}
+        </TableCell>
 
 
 
@@ -303,75 +303,75 @@ const RequirementUploader = () => {
   };
 
   return (
-      <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
-    
-    
-    <Box sx={{ mt: 2, px: 2, marginLeft: "-10px" }}>
-      <Container>
-        <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>UPLOAD DOCUMENTS</h1>
-        <div style={{ textAlign: "center" }}>Complete the applicant form to secure your place for the upcoming academic year at EARIST.</div>
-      </Container>
+    <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
 
-      <div style={{ height: "25px" }}></div>
 
-      <Typography
-        style={{
-          fontSize: '15px',
-          color: 'black',
-          fontFamily: 'Arial',
-          textAlign: 'left',
-          marginBottom: '5px'
-        }}
-      >
-        PLEASE NOTE: ONLY JPG, JPEG, PNG or PDF WITH MAXIMUM OF FILE SIZE OF 4MB ARE ALLOWED
-      </Typography>
+      <Box sx={{ mt: 2, px: 2, marginLeft: "-10px" }}>
+        <Container>
+          <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>UPLOAD DOCUMENTS</h1>
+          <div style={{ textAlign: "center" }}>Complete the applicant form to secure your place for the upcoming academic year at EARIST.</div>
+        </Container>
 
-      <TableContainer component={Paper} sx={{ width: '95%' }}>
-        <Table>
-          <TableHead sx={{ backgroundColor: '#6D2323' }}>
-            <TableRow>
-              <TableCell sx={{ color: 'white' }}>Document</TableCell>
-              <TableCell sx={{ color: 'white' }}>Upload</TableCell>
-              <TableCell sx={{ color: 'white' }}>Remarks</TableCell>
-              <TableCell sx={{ color: 'white' }}>Preview</TableCell>
-              <TableCell sx={{ color: 'white' }}>Delete</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>{requiredDocs.map((doc) => renderRow(doc))}</TableBody>
-        </Table>
-      </TableContainer>
+        <div style={{ height: "25px" }}></div>
 
-      <Typography variant="h6" sx={{ mt: 2, color: '#6D2323' }}>
-        Upload Your Medical Documents
-      </Typography>
+        <Typography
+          style={{
+            fontSize: '15px',
+            color: 'black',
+            fontFamily: 'Arial',
+            textAlign: 'left',
+            marginBottom: '5px'
+          }}
+        >
+          PLEASE NOTE: ONLY JPG, JPEG, PNG or PDF WITH MAXIMUM OF FILE SIZE OF 4MB ARE ALLOWED
+        </Typography>
 
-      <Typography
-        style={{
-          fontSize: '15px',
-          color: 'black',
-          fontFamily: 'Arial',
-          textAlign: 'left',
-          marginBottom: '5px'
-        }}
-      >
-        PLEASE NOTE: ONLY JPG, JPEG, PNG or PDF WITH MAXIMUM OF FILE SIZE OF 4MB ARE ALLOWED
-      </Typography>
+        <TableContainer component={Paper} sx={{ width: '95%' }}>
+          <Table>
+            <TableHead sx={{ backgroundColor: '#6D2323' }}>
+              <TableRow>
+                <TableCell sx={{ color: 'white' }}>Document</TableCell>
+                <TableCell sx={{ color: 'white' }}>Upload</TableCell>
+                <TableCell sx={{ color: 'white' }}>Remarks</TableCell>
+                <TableCell sx={{ color: 'white' }}>Preview</TableCell>
+                <TableCell sx={{ color: 'white' }}>Delete</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>{requiredDocs.map((doc) => renderRow(doc))}</TableBody>
+          </Table>
+        </TableContainer>
 
-      <TableContainer component={Paper} sx={{ width: '95%', mt: 2 }}>
-        <Table>
-          <TableHead sx={{ backgroundColor: '#6D2323' }}>
-            <TableRow>
-              <TableCell sx={{ color: 'white' }}>Document</TableCell>
-              <TableCell sx={{ color: 'white' }}>Upload</TableCell>
-              <TableCell sx={{ color: 'white' }}>Remarks</TableCell>
-              <TableCell sx={{ color: 'white' }}>Preview</TableCell>
-              <TableCell sx={{ color: 'white' }}>Delete</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>{renderRow(vaccineDoc)}</TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
+        <Typography variant="h6" sx={{ mt: 2, color: '#6D2323' }}>
+          Upload Your Medical Documents
+        </Typography>
+
+        <Typography
+          style={{
+            fontSize: '15px',
+            color: 'black',
+            fontFamily: 'Arial',
+            textAlign: 'left',
+            marginBottom: '5px'
+          }}
+        >
+          PLEASE NOTE: ONLY JPG, JPEG, PNG or PDF WITH MAXIMUM OF FILE SIZE OF 4MB ARE ALLOWED
+        </Typography>
+
+        <TableContainer component={Paper} sx={{ width: '95%', mt: 2 }}>
+          <Table>
+            <TableHead sx={{ backgroundColor: '#6D2323' }}>
+              <TableRow>
+                <TableCell sx={{ color: 'white' }}>Document</TableCell>
+                <TableCell sx={{ color: 'white' }}>Upload</TableCell>
+                <TableCell sx={{ color: 'white' }}>Remarks</TableCell>
+                <TableCell sx={{ color: 'white' }}>Preview</TableCell>
+                <TableCell sx={{ color: 'white' }}>Delete</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>{renderRow(vaccineDoc)}</TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
     </Box>
   );
 };

@@ -67,7 +67,7 @@ const CourseTagging = () => {
   const [currId, setCurr] = useState(null); // Dynamic userId
   const [courseCode, setCourseCode] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
-
+  const [sectionDescription, setSectionDescription] = useState("");
   const [sections, setSections] = useState([]);
   const [selectedSection, setSelectedSection] = useState("");
   const [loading, setLoading] = useState(true);
@@ -170,11 +170,10 @@ const CourseTagging = () => {
         departmentSectionId: sectionId,
       });
 
-      setCurr(sectionId.curriculum_id);
-      console.log("Updating curriculum ID to:", sectionId.curriculum_id);
 
       const courseRes = await axios.get(`http://localhost:5000/api/search-student/${sectionId}`);
       if (courseRes.data.length > 0) {
+        setCurr(courseRes.data[0].curriculum_id);
         setCourseCode(courseRes.data[0].program_code);
         setCourseDescription(courseRes.data[0].program_description);
       } else {
@@ -224,6 +223,7 @@ const CourseTagging = () => {
       await Promise.all(
         newCourses.map(async (course) => {
           try {
+            console.log("Curriculum ID for this course taggging is:", currId);
             const res = await axios.post("http://localhost:5000/add-all-to-enrolled-courses", {
               subject_id: course.course_id,
               user_id: userId,
@@ -241,7 +241,10 @@ const CourseTagging = () => {
       // Refresh enrolled courses list
       const { data } = await axios.get(`http://localhost:5000/enrolled_courses/${userId}/${currId}`);
       setEnrolled(data);
-
+      setCourseCode(data[0].program_code);
+      setCourseDescription(data[0].program_description);
+      setSectionDescription(data[0].section);
+      
     } catch (err) {
       console.error("Unexpected error during enrollment:", err);
     }
@@ -266,11 +269,12 @@ const CourseTagging = () => {
     try {
       // Delete all user courses
       await axios.delete(`http://localhost:5000/courses/user/${userId}`);
-
+      setCourseCode("Not");
+      setCourseDescription("Currently Enrolled");
+      setSectionDescription("");
       // Refresh enrolled courses list
       const { data } = await axios.get(`http://localhost:5000/enrolled_courses/${userId}/${currId}`);
       setEnrolled(data);
-
       console.log("Cart cleared and enrolled courses refreshed");
     } catch (err) {
       console.error("Error deleting cart or refreshing enrolled list:", err);
@@ -287,7 +291,7 @@ const CourseTagging = () => {
     try {
       const response = await axios.post("http://localhost:5000/student-tagging", { studentNumber }, { headers: { "Content-Type": "application/json" } });
 
-      const { token, person_id, studentNumber: studentNum, activeCurriculum: active_curriculum, yearLevel, courseCode: course_code, courseDescription: course_desc, firstName: first_name,
+      const { token, person_id, studentNumber: studentNum, section: section, activeCurriculum: active_curriculum, yearLevel, courseCode: courseCode, courseDescription: courseDescription, firstName: first_name,
         middleName: middle_name, lastName: last_name, } = response.data;
 
       localStorage.setItem("token", token);
@@ -295,20 +299,26 @@ const CourseTagging = () => {
       localStorage.setItem("studentNumber", studentNum);
       localStorage.setItem("activeCurriculum", active_curriculum);
       localStorage.setItem("yearLevel", yearLevel);
-      localStorage.setItem("courseCode", course_code);
-      localStorage.setItem("courseDescription", course_desc);
+      localStorage.setItem("courseCode", courseCode);
+      localStorage.setItem("courseDescription", courseDescription);
       localStorage.setItem("firstName", first_name);
       localStorage.setItem("middleName", middle_name);
       localStorage.setItem("lastName", last_name);
-
+      localStorage.setItem("section", section);
       setUserId(studentNum); // Set dynamic userId
       setUserFirstName(first_name); // Set dynamic userId
       setUserMiddleName(middle_name); // Set dynamic userId
       setUserLastName(last_name); // Set dynamic userId
       setCurr(active_curriculum); // Set Program Code based on curriculum
-      setCourseCode(course_code); // Set Program Code
-      setCourseDescription(course_desc); // Set Program Description
+      setCourseCode(courseCode); // Set Program Code
+      setCourseDescription(courseDescription); // Set Program Description
       setPersonID(person_id);
+      setSectionDescription(section);
+
+      console.log(studentNum);
+      console.log(userId);
+      console.log(active_curriculum);
+      console.log(currId);
       setSnack({ open: true, message: "Student found and authenticated!", severity: "success" });
     } catch (error) {
       setSnack({
@@ -393,12 +403,7 @@ const CourseTagging = () => {
               {first_name} {middle_name} {last_name}
               <br />
               Department/Course/Section: &emsp;
-              {courseCode} {courseDescription} {selectedSection
-                ? (() => {
-                  const section = sections.find(s => s.department_and_program_section_id === parseInt(selectedSection));
-                  return section ? `- ${section.description}` : "";
-                })()
-                : ""}
+              {courseCode} - {courseDescription} - {sectionDescription}
             </Typography>
 
             <TextField

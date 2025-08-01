@@ -17,6 +17,8 @@ import {
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import Search from '@mui/icons-material/Search';
 
+import io from 'socket.io-client';
+
 
 const requiredDocs = [
   { label: 'PSA Birth Certificate', key: 'BirthCertificate' },
@@ -24,8 +26,6 @@ const requiredDocs = [
   { label: 'Certificate of Good Moral Character', key: 'GoodMoralCharacter' },
   { label: 'Certificate Belonging to Graduating Class', key: 'CertificateOfGraduatingClass' }
 ];
-
-const vaccineDoc = { label: 'Copy of Vaccine Card (1st and 2nd Dose)', key: 'VaccineCard' };
 
 const StudentRequirements = () => {
   const [uploads, setUploads] = useState([]);
@@ -36,7 +36,6 @@ const StudentRequirements = () => {
   const [applicantID, setApplicantID] = useState("");
   const [remarksMap, setRemarksMap] = useState({});
   const [userID, setUserID] = useState("");
-
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
   const [person, setPerson] = useState({
@@ -50,7 +49,31 @@ const StudentRequirements = () => {
     middle_name: "",
     extension: "",
   });
-  const [editingRemarkId, setEditingRemarkId] = useState(null); 
+  const [editingRemarkId, setEditingRemarkId] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  useEffect(() => {
+    // Load saved notifications from DB on first load
+    axios.get("http://localhost:5000/api/notifications")
+      .then(res => {
+        setNotifications(res.data.map(n => ({
+          ...n,
+          timestamp: n.timestamp
+        })));
+      })
+      .catch(err => console.error("Failed to load saved notifications:", err));
+  }, []);
+
+
+  useEffect(() => {
+    const socket = io("http://localhost:5000");
+    socket.on("notification", (data) => {
+      setNotifications((prev) => [data, ...prev]);
+    });
+    return () => socket.disconnect();
+  }, []);
+
 
   useEffect(() => {
     if (editingRemarkId !== null) {
@@ -344,6 +367,7 @@ const StudentRequirements = () => {
                 minHeight: '40px',
                 display: 'flex',
                 alignItems: 'center',
+
                 px: 1
               }}
             >
@@ -487,9 +511,49 @@ const StudentRequirements = () => {
     <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', paddingRight: 1 }}>
       <Box sx={{ mt: 2, px: 2 }}>
         <Box sx={{ position: 'absolute', top: 10, right: 24 }}>
-          <Button sx={{ width: 65, height: 65, borderRadius: '50%', '&:hover': { backgroundColor: '#E8C999' } }}>
+          <Button
+            sx={{ width: 65, height: 65, borderRadius: '50%', '&:hover': { backgroundColor: '#E8C999' } }}
+            onClick={() => setShowNotifications(!showNotifications)}
+          >
             <NotificationsIcon sx={{ fontSize: 50, color: 'white' }} />
+            {notifications.length > 0 && (
+              <Box sx={{
+                position: 'absolute', top: 5, right: 5,
+                background: 'red', color: 'white',
+                borderRadius: '50%', width: 20, height: 20,
+                display: 'flex', justifyContent: 'center', alignItems: 'center',
+                fontSize: '12px'
+              }}>
+                {notifications.length}
+              </Box>
+            )}
           </Button>
+
+          {showNotifications && (
+            <Paper sx={{
+              position: 'absolute',
+              top: 70, right: 0,
+              width: 300, maxHeight: 400,
+              overflowY: 'auto',
+              bgcolor: 'white',
+              boxShadow: 3,
+              zIndex: 10,
+              borderRadius: 1
+            }}>
+              {notifications.length === 0 ? (
+                <Typography sx={{ p: 2 }}>No notifications</Typography>
+              ) : (
+                notifications.map((notif, idx) => (
+                  <Box key={idx} sx={{ p: 1, borderBottom: '1px solid #ccc' }}>
+                    <Typography sx={{ fontSize: '14px' }}>{notif.message}</Typography>
+                    <Typography sx={{ fontSize: '10px', color: '#888' }}>
+                      {new Date(notif.timestamp).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}
+                    </Typography>
+                  </Box>
+                ))
+              )}
+            </Paper>
+          )}
         </Box>
 
         {/* Top header: DOCUMENTS SUBMITTED + Search */}
@@ -557,35 +621,76 @@ const StudentRequirements = () => {
         </Box>
 
         {/* SHS GWA and Height row below Applicant Name */}
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "flex-start", // left align
-            alignItems: "center",
-            gap: 4,
-            px: 2,
-            mb: 2, // margin bottom before image
-          }}
-        >
-          <Typography sx={{ fontSize: "12px", fontFamily: "Arial Black" }}>
-            SHS GWA:{" "}
-            <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
-              {person.generalAverage1 || "N/A"}
-            </span>
-          </Typography>
+        <Box sx={{ px: 2, mb: 2 }}>
+          {/* SHS GWA Field */}
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Typography
+              sx={{
+                fontSize: "14px",
+                fontFamily: "Arial Black",
+                minWidth: "100px",
+                mr: 1,
+              }}
+            >
+              SHS GWA:
+            </Typography>
+            <TextField
+              size="small"
+              name="generalAverage1"
+              placeholder="Enter SHS GWA"
+              value={person.generalAverage1 || ""}
+              sx={{ width: "300px" }}
+              InputProps={{
+                sx: {
+                  height: 30, // control outer height
+                },
+              }}
+              inputProps={{
+                style: {
+                  padding: "4px 8px", // control inner padding
+                  fontSize: "12px",
+                },
+              }}
+            />
+          </Box>
 
-          <Typography sx={{ fontSize: "12px", fontFamily: "Arial Black" }}>
-            Height:{" "}
-            <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
-              {person.height || "N/A"} cm
-            </span>
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+            <Typography
+              sx={{
+                fontSize: "14px",
+                fontFamily: "Arial Black",
+                minWidth: "100px",
+                mr: 1,
+              }}
+            >
+              Height:
+            </Typography>
+            <TextField
+              size="small"
+              name="height"
 
+              value={person.height || ""}
+              sx={{ width: "100px" }}
+              InputProps={{
+                sx: {
+                  height: 30,
+                },
+              }}
+              inputProps={{
+                style: {
+                  padding: "4px 8px",
+                  fontSize: "12px",
+                },
+              }}
+            />
+            <div style={{ fontSize: "12px", marginLeft: "10px" }}>cm.</div>
+          </Box>
         </Box>
 
 
+        <br />
+        <br />
 
-        {/* Applying As, Strand, and ID Photo side by side */}
         <Box
           sx={{
             display: "flex",
@@ -597,84 +702,129 @@ const StudentRequirements = () => {
         >
           {/* Left side: Applying As and Strand */}
           <Box>
-            <Typography sx={{ fontSize: "14px", fontFamily: "Arial Black" }}>
-              Applying As:{" "}
-              <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
-                {person.schoolLevel1 || "N/A"}
-              </span>
-            </Typography>
+            {/* Applying As */}
+            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+              <Typography
+                sx={{
+                  fontSize: "14px",
+                  fontFamily: "Arial Black",
+                  minWidth: "120px",
 
-            <Typography sx={{ fontSize: "14px", fontFamily: "Arial Black" }}>
-              Document Status:{" "}
-              <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
-                {person.strand || "N/A"}
-              </span>
-            </Typography>
+                  mr: 4.8,
+                }}
+              >
+                Applying As:
+              </Typography>
+              <TextField
+                select
+                size="small"
+                name="schoolLevel1"
+                value={person.schoolLevel1 || ""}
+                placeholder="Select School Level"
+                sx={{ width: "300px" }}
+                InputProps={{ sx: { height: 30 } }}
+                inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
+              >
+                <MenuItem value="">
+                  <em>Select School Level</em>
+                </MenuItem>
+                <MenuItem value="High School/Junior High School">High School/Junior High School</MenuItem>
+                <MenuItem value="Senior High School Graduate">Senior High School Graduate</MenuItem>
+                <MenuItem value="Undergraduate">Undergraduate</MenuItem>
+                <MenuItem value="Graduate">Graduate</MenuItem>
+                <MenuItem value="ALS">ALS</MenuItem>
+                <MenuItem value="Vocational/Trade Course">Vocational/Trade Course</MenuItem>
+              </TextField>
+            </Box>
 
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+            {/* Document Status */}
+            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+              <Typography
+                sx={{
+                  fontSize: "14px",
+                  fontFamily: "Arial Black",
+                  minWidth: "140px",
+                  mr: 2.3,
+                }}
+              >
+                Document Status:
+              </Typography>
+              <TextField
+                select
+                size="small"
+                name="strand"
+                value={person.strand || ""}
+                placeholder="Select Document Status"
+                sx={{ width: "300px" }}
+                InputProps={{ sx: { height: 30 } }}
+                inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
+              >
+                <MenuItem value="">
+                  <em>Select Document Status</em>
+                </MenuItem>
+                <MenuItem value="On process">On process</MenuItem>
+                <MenuItem value="Documents Verified & ECAT">Documents Verified & ECAT</MenuItem>
+                <MenuItem value="Disapproved">Disapproved</MenuItem>
+                <MenuItem value="Program Closed">Program Closed</MenuItem>
+              </TextField>
+            </Box>
+
+            {/* Document Type & File Upload */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, mb: 2 }}>
               {/* Document Type */}
-              <Box sx={{ display: 'flex', alignItems: 'center', }}>
-                <Typography
-                  sx={{
-                    fontSize: "14px",
-                    fontFamily: "Arial Black",
-                    width: "150px", // fix label width for alignment
-                  }}
-                >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography sx={{ fontSize: "14px", fontFamily: "Arial Black", width: "150px" }}>
                   Document Type:
                 </Typography>
                 <TextField
                   select
                   size="small"
-                  label="Select Documents"
+                  placeholder="Select Documents"
                   value={selectedFiles.requirements_id || ''}
                   onChange={(e) =>
-                    setSelectedFiles((prev) => ({
+                    setSelectedFiles(prev => ({
                       ...prev,
                       requirements_id: e.target.value,
                     }))
                   }
                   sx={{ width: 300 }}
+                  InputProps={{ sx: { height: 30 } }}
+                  inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
                 >
-                  <MenuItem value=""><em>Select Documents</em></MenuItem>
+                  <MenuItem value="">
+                    <em>Select Documents</em>
+                  </MenuItem>
                   <MenuItem value={1}>PSA Birth Certificate</MenuItem>
-                  <MenuItem value={2}>Form 138 (4th Quarter / No failing Grades)</MenuItem>
+                  <MenuItem value={2}>Form 138 (With at least 3rd Quarter posting / No failing grade)</MenuItem>
                   <MenuItem value={3}>Certificate of Good Moral Character</MenuItem>
                   <MenuItem value={4}>Certificate Belonging to Graduating Class</MenuItem>
-                  <MenuItem value={5}>Copy of Vaccine Card (1st and 2nd Dose)</MenuItem>
                 </TextField>
               </Box>
 
               {/* Document File */}
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Typography
-                  sx={{
-                    fontSize: "14px",
-                    fontFamily: "Arial Black",
-                    width: "150px", // same as above for alignment
-                  }}
-                >
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography sx={{ fontSize: "14px", fontFamily: "Arial Black", width: "150px" }}>
                   Document File:
                 </Typography>
-
                 <TextField
                   size="small"
-                  label="Select File"
+                  placeholder="Select File"
                   value={selectedFiles.file?.name || ''}
                   InputProps={{
                     readOnly: true,
+                    sx: { height: 30 },
                   }}
+                  inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
                   sx={{ width: 300 }}
                   onClick={() => document.getElementById("fileInput").click()}
                 />
-
                 <input
                   id="fileInput"
                   type="file"
                   hidden
                   accept=".jpg,.jpeg,.png,.pdf"
                   onChange={(e) =>
-                    setSelectedFiles((prev) => ({
+                    setSelectedFiles(prev => ({
                       ...prev,
                       file: e.target.files[0],
                     }))
@@ -682,6 +832,7 @@ const StudentRequirements = () => {
                 />
               </Box>
             </Box>
+
 
             <Button
               variant="contained"
@@ -691,12 +842,12 @@ const StudentRequirements = () => {
                 textTransform: "none",
                 fontWeight: "bold",
                 height: "35px",
-                width: "140px"
+                width: "200px"
               }}
               onClick={handleUploadSubmit}
               disabled={!selectedFiles.requirements_id || !selectedFiles.file}
             >
-              Upload
+              Submit Documents
             </Button>
           </Box>
 
@@ -708,6 +859,7 @@ const StudentRequirements = () => {
                 height: "2in",
                 border: "1px solid #ccc",
                 overflow: "hidden",
+                marginTop: "-220px",
                 borderRadius: "4px",
               }}
             >
@@ -741,29 +893,11 @@ const StudentRequirements = () => {
             </Table>
           </TableContainer>
 
-          <Typography variant="h6" sx={{ mt: 2, color: '#6D2323' }}>
-            Upload Your Medical Documents
-          </Typography>
 
-          <TableContainer component={Paper} sx={{ width: '100%', mt: 2 }}>
-            <Table>
-              <TableHead sx={{ backgroundColor: '#6D2323' }}>
-                <TableRow>
-                  <TableCell sx={{ color: 'white', textAlign: "Center" }}>Document Type</TableCell>
-                  <TableCell sx={{ color: 'white', textAlign: "Center" }}>Remarks</TableCell>
-                  <TableCell sx={{ color: 'white', textAlign: "Center" }}>Status</TableCell>
-                  <TableCell sx={{ color: 'white', textAlign: "Center" }}>Date and Time Submitted</TableCell>
-                  <TableCell sx={{ color: 'white', textAlign: "Center" }}>User</TableCell>
-                  <TableCell sx={{ color: 'white', textAlign: "Center" }}>Action</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>{renderRow(vaccineDoc)}</TableBody>
-            </Table>
-          </TableContainer>
         </>
 
       </Box>
-    </Box>
+    </Box >
   );
 };
 

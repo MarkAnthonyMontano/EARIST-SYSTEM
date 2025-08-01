@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 31, 2025 at 08:12 PM
+-- Generation Time: Aug 01, 2025 at 02:29 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -76,6 +76,35 @@ INSERT INTO `exam_schedule` (`exam_id`, `exam_date`, `exam_start_time`, `exam_en
 (2, '2025-05-21', '12:00', '13:30'),
 (3, '2025-05-21', '09:30', '10:30'),
 (4, '2025-05-21', '07:00', '21:00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `notifications`
+--
+
+CREATE TABLE `notifications` (
+  `id` int(11) NOT NULL,
+  `type` varchar(20) DEFAULT NULL,
+  `message` text DEFAULT NULL,
+  `applicant_number` varchar(20) DEFAULT NULL,
+  `timestamp` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `notifications`
+--
+
+INSERT INTO `notifications` (`id`, `type`, `message`, `applicant_number`, `timestamp`) VALUES
+(1, 'update', '✏️ Updated remarks on document (Applicant #2025100005)', '2025100005', '2025-08-01 19:49:11'),
+(2, 'upload', '📥 Uploaded new document by Applicant #2025100005', '2025100005', '2025-08-01 19:49:44'),
+(3, 'delete', '🗑️ Deleted document (Applicant #2025100005)', '2025100005', '2025-08-01 19:49:54'),
+(4, 'upload', '📥 Uploaded new document by Applicant #2025100002', '2025100002', '2025-08-01 20:26:36'),
+(5, 'update', '✏️ Updated remarks on document (Applicant #2025100002)', '2025100002', '2025-08-01 20:26:41'),
+(6, 'update', '✏️ Updated remarks on document (Applicant #2025100002)', '2025100002', '2025-08-01 20:26:51'),
+(7, 'update', '✏️ Updated remarks on document (Applicant #2025100002)', '2025100002', '2025-08-01 20:26:53'),
+(8, 'update', '✏️ Updated remarks on document (Applicant #2025100002)', '2025100002', '2025-08-01 20:26:56'),
+(9, 'delete', '🗑️ Deleted document (Applicant #2025100002)', '2025100002', '2025-08-01 20:27:02');
 
 -- --------------------------------------------------------
 
@@ -319,9 +348,8 @@ CREATE TABLE `requirement_uploads` (
 
 INSERT INTO `requirement_uploads` (`upload_id`, `requirements_id`, `person_id`, `file_path`, `original_name`, `remarks`, `status`, `created_at`) VALUES
 (86, 1, 5, '/uploads/1_BirthCertificate_2025.pdf', 'Mark.pdf', NULL, NULL, '2025-07-30 06:10:06'),
-(95, 3, 204, '/uploads/2025100005_GoodMoralCharacter_2025.pdf', 'Certifate_of_registration.pdf', 'hi', 0, '2025-07-31 17:28:50'),
-(96, 1, 204, '/uploads/2025100005_BirthCertificate_2025.jpg', 'Mark.jpg', NULL, 0, '2025-07-31 17:47:32'),
-(97, 3, 3, '/uploads/2025100003_GoodMoralCharacter_2025.jpg', 'Mark.jpg', NULL, 0, '2025-07-31 17:55:41');
+(98, 1, 204, '/uploads/2025100005_BirthCertificate_2025.pdf', 'Recommendation-MIS-new-SA-7-2025.pdf', 'okay', 1, '2025-07-31 18:40:02'),
+(100, 2, 204, '2025100005_Form138_2025.pdf', 'Mark.pdf', 'pwede na ngani', 1, '2025-08-01 05:35:29');
 
 -- --------------------------------------------------------
 
@@ -369,6 +397,12 @@ ALTER TABLE `exam_applicants`
 --
 ALTER TABLE `exam_schedule`
   ADD PRIMARY KEY (`exam_id`);
+
+--
+-- Indexes for table `notifications`
+--
+ALTER TABLE `notifications`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `person_status_table`
@@ -419,6 +453,12 @@ ALTER TABLE `exam_schedule`
   MODIFY `exam_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
+-- AUTO_INCREMENT for table `notifications`
+--
+ALTER TABLE `notifications`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
 -- AUTO_INCREMENT for table `person_status_table`
 --
 ALTER TABLE `person_status_table`
@@ -440,7 +480,7 @@ ALTER TABLE `requirements_table`
 -- AUTO_INCREMENT for table `requirement_uploads`
 --
 ALTER TABLE `requirement_uploads`
-  MODIFY `upload_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
+  MODIFY `upload_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=103;
 
 --
 -- AUTO_INCREMENT for table `user_accounts`

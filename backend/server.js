@@ -154,7 +154,7 @@ app.post("/register", async (req, res) => {
     await db.query("INSERT INTO person_status_table (person_id, applicant_id, exam_status, requirements, residency, student_registration_status, exam_result, hs_ave, qualifying_result, interview_result) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [person_id, applicant_number, 0, 0, 0, 0, 0, 0, 0, 0]
     );
-    
+
     console.log("✅ applicant_numbering_table insert successful");
 
     // ✅ Final response
@@ -432,6 +432,30 @@ app.delete("/requirements_table/:id", async (req, res) => {
 app.post("/api/upload", upload.single("file"), async (req, res) => {
   const { requirements_id, person_id, remarks } = req.body;
 
+  // After saving upload successfully (inside try block):
+  const [appRows] = await db.query(
+    "SELECT applicant_number FROM applicant_numbering_table WHERE person_id = ?",
+    [person_id]
+  );
+  const applicant_number = appRows[0]?.applicant_number || 'Unknown';
+
+  const message = `📥 Uploaded new document by Applicant #${applicant_number}`;
+
+  // Save to DB
+  await db.query(
+    "INSERT INTO notifications (type, message, applicant_number) VALUES (?, ?, ?)",
+    ['upload', message, applicant_number]
+  );
+
+  // Emit to frontend
+  io.emit("notification", {
+    type: "upload",
+    message,
+    applicant_number,
+    timestamp: new Date().toISOString()
+  });
+
+
   if (!requirements_id || !person_id || !req.file) {
     return res.status(400).json({ error: "Missing required fields or file" });
   }
@@ -500,7 +524,7 @@ app.post("/api/upload", upload.single("file"), async (req, res) => {
        VALUES (?, ?, ?, ?, 0, ?)`,
       [requirements_id, person_id, filePath, originalName, remarks || null]
     );
-    
+
 
     res.status(201).json({ message: "Upload successful", filePath });
   } catch (err) {
@@ -581,10 +605,39 @@ app.delete("/uploads/:id", async (req, res) => {
 app.put("/uploads/remarks/:upload_id", async (req, res) => {
   const { upload_id } = req.params;
   const { status, remarks } = req.body;
+  // After updating remarks (inside try block):
+  const [uploadRows] = await db.query(
+    "SELECT person_id FROM requirement_uploads WHERE upload_id = ?",
+    [upload_id]
+  );
+  const personId = uploadRows[0]?.person_id;
+  const [appRows] = await db.query(
+    "SELECT applicant_number FROM applicant_numbering_table WHERE person_id = ?",
+    [personId]
+  );
+  const applicant_number = appRows[0]?.applicant_number || 'Unknown';
+
+  const message = `✏️ Updated remarks on document (Applicant #${applicant_number})`;
+
+  // Save to DB
+  await db.query(
+    "INSERT INTO notifications (type, message, applicant_number) VALUES (?, ?, ?)",
+    ['update', message, applicant_number]
+  );
+
+  // Emit to frontend
+  io.emit("notification", {
+    type: "update",
+    message,
+    applicant_number,
+    timestamp: new Date().toISOString()
+  });
+
+
 
   // ✅ Allow status 0 (default), 1 (Approved), 2 (Disapproved)
   const validStatuses = ["0", "1", "2"];
- 
+
   if (!validStatuses.includes(String(status))) {
     return res.status(400).json({ error: "Status must be '0', '1', or '2'" });
   }
@@ -592,7 +645,7 @@ app.put("/uploads/remarks/:upload_id", async (req, res) => {
   try {
     const [result] = await db.query(
       "UPDATE requirement_uploads SET status = ?, remarks = ? WHERE upload_id = ?",
-      
+
       [status, remarks || null, upload_id]
     );
 
@@ -709,6 +762,34 @@ app.get("/api/upload_documents", async (req, res) => {
 app.delete("/admin/uploads/:uploadId", async (req, res) => {
   const { uploadId } = req.params;
 
+  // After deleting file in DB (inside try block):
+ const [uploadRows] = await db.query(
+  "SELECT person_id FROM requirement_uploads WHERE upload_id = ?", 
+  [uploadId]
+);
+const personId = uploadRows[0]?.person_id;
+const [appRows] = await db.query(
+  "SELECT applicant_number FROM applicant_numbering_table WHERE person_id = ?", 
+  [personId]
+);
+const applicant_number = appRows[0]?.applicant_number || 'Unknown';
+
+const message = `🗑️ Deleted document (Applicant #${applicant_number})`;
+
+// Save to DB
+await db.query(
+  "INSERT INTO notifications (type, message, applicant_number) VALUES (?, ?, ?)",
+  ['delete', message, applicant_number]
+);
+
+// Emit to frontend
+io.emit("notification", {
+  type: "delete",
+  message,
+  applicant_number,
+  timestamp: new Date().toISOString()
+});
+
   try {
     await db.query("DELETE FROM requirement_uploads WHERE upload_id = ?", [uploadId]);
     res.status(200).json({ message: "Upload deleted successfully." });
@@ -717,6 +798,19 @@ app.delete("/admin/uploads/:uploadId", async (req, res) => {
     res.status(500).json({ error: "Failed to delete the upload." });
   }
 });
+
+app.get("/api/notifications", async (req, res) => {
+  try {
+    const [rows] = await db.query(
+      "SELECT * FROM notifications ORDER BY timestamp DESC LIMIT 50"
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error("Error fetching notifications:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 
 
 
@@ -1583,7 +1677,7 @@ io.on("connection", (socket) => {
       // ✅ Emit success
       socket.emit("assign-student-number-result", {
         success: true,
-        student_number, 
+        student_number,
         message: "Student number assigned successfully.",
       });
 
@@ -3315,6 +3409,7 @@ app.get("/enrolled_courses/:userId/:currId", async (req, res) => {
 });
 
 //(UPDATED!)
+
 app.post("/add-all-to-enrolled-courses", async (req, res) => {
   const { subject_id, user_id, curriculumID, departmentSectionID } = req.body;
   console.log("Received request:", { subject_id, user_id, curriculumID, departmentSectionID });
@@ -3369,11 +3464,11 @@ app.post("/add-all-to-enrolled-courses", async (req, res) => {
     }
 
     const insertSql = `
-      INSERT INTO enrolled_subject (course_id, student_number, active_school_year_id, curriculum_id, department_section_id) 
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO enrolled_subject (course_id, student_number, active_school_year_id, curriculum_id, department_section_id, status) 
+      VALUES (?, ?, ?, ?, ?, ?)
     `;
 
-    await db3.query(insertSql, [subject_id, user_id, activeSchoolYearId, curriculumID, departmentSectionID]);
+    await db3.query(insertSql, [subject_id, user_id, activeSchoolYearId, curriculumID, departmentSectionID, 1]);
     console.log(`Student ${user_id} successfully enrolled in subject ${subject_id}`);
 
     const updateStatusSql = `
@@ -3390,6 +3485,7 @@ app.post("/add-all-to-enrolled-courses", async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
+
 //(UPDATED!)
 app.post("/add-to-enrolled-courses/:userId/:currId/", async (req, res) => {
   const { subject_id, department_section_id } = req.body;
@@ -3459,14 +3555,40 @@ app.post("/student-tagging", async (req, res) => {
 
   try {
     const sql = `
-    SELECT * FROM student_status_table AS ss
-      LEFT JOIN curriculum_table AS c ON c.curriculum_id = ss.active_curriculum
-      LEFT JOIN program_table AS pt ON c.program_id = pt.program_id
-      LEFT JOIN year_table AS yt ON c.year_id = yt.year_id
-      INNER JOIN student_numbering_table AS sn ON sn.student_number = ss.student_number
-      INNER JOIN person_table AS ptbl ON ptbl.person_id = sn.person_id
-      LEFT JOIN year_level_table AS ylt ON ss.year_level_id = ylt.year_level_id
-      WHERE ss.student_number = ?
+    SELECT 
+        ss.id AS student_status_id, 
+        ptbl.person_id,
+        ss.student_number,
+        st.description AS section_description,
+        ss.active_curriculum,
+        pt.program_id,
+        pt.major,
+        pt.program_description,
+        pt.program_code,
+        ylt.year_level_id,
+        ylt.year_level_description,
+        yt.year_description,
+        ptbl.first_name,
+        ptbl.middle_name,
+        ptbl.last_name,
+        ptbl.age,
+        ptbl.gender,
+        ptbl.emailAddress,
+        ptbl.program,
+        ptbl.profile_img,
+        ptbl.extension,
+        es.status AS enrolled_status
+    FROM student_status_table AS ss 
+    LEFT JOIN curriculum_table AS c ON c.curriculum_id = ss.active_curriculum 
+    LEFT JOIN program_table AS pt ON c.program_id = pt.program_id 
+    LEFT JOIN year_table AS yt ON c.year_id = yt.year_id 
+    INNER JOIN student_numbering_table AS sn ON sn.student_number = ss.student_number 
+    INNER JOIN person_table AS ptbl ON ptbl.person_id = sn.person_id 
+    LEFT JOIN year_level_table AS ylt ON ss.year_level_id = ylt.year_level_id 
+    LEFT JOIN enrolled_subject AS es ON ss.student_number = es.student_number 
+    LEFT JOIN dprtmnt_section_table AS dst ON es.department_section_id = dst.id
+    LEFT JOIN section_table AS st ON dst.section_id = st.id 
+    WHERE ss.student_number = ?;
     `;
 
     const [results] = await db3.query(sql, [studentNumber]);
@@ -3478,13 +3600,14 @@ app.post("/student-tagging", async (req, res) => {
     const student = results[0];
 
     console.log(student)
-    const isEnrolled = student.enrolled_status === '1';
+    const isEnrolled = student.enrolled_status === 1;
 
     const token = webtoken.sign(
       {
         id: student.student_status_id,
         person_id: student.person_id,
         studentNumber: student.student_number,
+        section: student.section_description,
         activeCurriculum: student.active_curriculum,
         major: student.major,
         yearLevel: student.year_level_id,
@@ -3512,6 +3635,7 @@ app.post("/student-tagging", async (req, res) => {
       studentNumber: student.student_number,
       person_id: student.person_id,
       activeCurriculum: student.active_curriculum,
+      section: student.section_description,
       major: student.major,
       yearLevel: student.year_level_id,
       yearLevelDescription: student.year_level_description,
@@ -3535,6 +3659,7 @@ app.post("/student-tagging", async (req, res) => {
       token,
       studentNumber: student.student_number,
       person_id: student.person_id,
+      section: student.section_description,
       activeCurriculum: student.active_curriculum,
       major: student.major,
       yearLevel: student.year_level_id,
@@ -3546,7 +3671,7 @@ app.post("/student-tagging", async (req, res) => {
       firstName: student.first_name,
       middleName: student.middle_name,
       lastName: student.last_name,
-      age: student.agecd,
+      age: student.age,
       gender: student.gender,
       email: student.emailAddress,
       program: student.program,
@@ -3608,7 +3733,7 @@ app.get("/check-new", async (req, res) => {
 // (UPDATED!)
 app.get("/api/department-sections", async (req, res) => {
   const { departmentId } = req.query;
-  
+
   const query = `
     SELECT 
       dt.dprtmnt_id, 
@@ -3673,8 +3798,8 @@ app.put("/api/update-active-curriculum", async (req, res) => {
     `;
     await db3.query(updateQuery, [curriculumId, studentId]);
 
-    res.status(200).json({ 
-      message: "Active curriculum updated successfully", 
+    res.status(200).json({
+      message: "Active curriculum updated successfully",
     });
 
   } catch (err) {
@@ -3700,7 +3825,6 @@ app.get('/api/search-student/:sectionId', async (req, res) => {
     res.status(500).json({ error: "Database error", details: err.message });
   }
 })
-
 
 
 
