@@ -40,11 +40,11 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
     try {
       const res = await axios.post("http://localhost:5000/login", { email, password });
 
-      await axios.post("http://localhost:5000/request-otp", { email });
+      // ❌ REMOVE THIS LINE
+      // await axios.post("http://localhost:5000/request-otp", { email });
 
       setTempLoginData(res.data);
       setShowOtpModal(true);
-
     } catch (error) {
       setSnack({
         open: true,
@@ -55,6 +55,7 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
   };
 
 
+
   const handleClose = (_, reason) => {
     if (reason === 'clickaway') return;
     setSnack(prev => ({ ...prev, open: false }));
@@ -62,7 +63,11 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
 
   const verifyOtp = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/verify-otp", { email, otp });
+      const res = await axios.post("http://localhost:5000/verify-otp", {
+        email: tempLoginData.email, // ✅ this is the real email
+        otp,
+      });
+
 
       localStorage.setItem("token", tempLoginData.token);
       localStorage.setItem("email", tempLoginData.email);
@@ -258,7 +263,7 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
               placeholder="Enter OTP"
               inputProps={{
                 maxLength: 6,
-                style: {  textAlign: "center", fontSize: "18px" },
+                style: { textAlign: "center", fontSize: "18px" },
               }}
               sx={{ mb: 3 }}
             />

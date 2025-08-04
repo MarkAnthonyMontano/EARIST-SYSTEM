@@ -33,7 +33,6 @@ const StudentRequirements = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFiles, setSelectedFiles] = useState({});
   const [selectedPerson, setSelectedPerson] = useState(null);
-  const [applicantID, setApplicantID] = useState("");
   const [remarksMap, setRemarksMap] = useState({});
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
@@ -42,8 +41,8 @@ const StudentRequirements = () => {
     profile_img: "",
     generalAverage1: "",
     height: "",
-    schoolLevel1: "",
-    strand: "",
+    applyingAs: "",
+    document_status: "",
     last_name: "",
     first_name: "",
     middle_name: "",
@@ -97,8 +96,9 @@ const StudentRequirements = () => {
       setUserID(storedID);
 
       if (storedRole === "registrar") {
+        
         if (storedID !== "undefined") {
-
+  fetchApplicantNumber(storedID); 
         } else {
           console.warn("Stored person_id is invalid:", storedID);
         }
@@ -175,8 +175,8 @@ const StudentRequirements = () => {
         profile_img: "",
         generalAverage1: "",
         height: "",
-        schoolLevel1: "",
-        strand: "",
+        applyingAs: "",
+        document_status: "",
         last_name: "",
         first_name: "",
         middle_name: "",
@@ -201,8 +201,8 @@ const StudentRequirements = () => {
         profile_img: "",
         generalAverage1: "",
         height: "",
-        schoolLevel1: "",
-        strand: "",
+        applyingAs: "",
+        document_status: "",
         last_name: "",
         first_name: "",
         middle_name: "",
@@ -237,6 +237,18 @@ const StudentRequirements = () => {
       console.error('Error updating Status:', err);
     }
   };
+
+   const fetchApplicantNumber = async (personID) => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/applicant_number/${personID}`);
+        if (res.data && res.data.applicant_number) {
+          setApplicantID(res.data.applicant_number);
+        }
+      } catch (error) {
+        console.error("Failed to fetch applicant number:", error);
+      }
+    };
+  
 
   const handleUploadSubmit = async () => {
     if (!selectedFiles.requirements_id || !selectedFiles.file || !selectedPerson?.person_id) {
@@ -308,6 +320,10 @@ const StudentRequirements = () => {
     }
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setPerson((prev) => ({ ...prev, [name]: value }));
+  };
 
 
   const renderRow = (doc) => {
@@ -718,22 +734,23 @@ const StudentRequirements = () => {
               <TextField
                 select
                 size="small"
-                name="schoolLevel1"
-                value={person.schoolLevel1 || ""}
-                placeholder="Select School Level"
+                name="applyingAs"
+                value={person.applyingAs || ""}
+                placeholder="Select applyingAs"
                 sx={{ width: "300px" }}
                 InputProps={{ sx: { height: 30 } }}
                 inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
               >
-                <MenuItem value="">
-                  <em>Select School Level</em>
-                </MenuItem>
-                <MenuItem value="High School/Junior High School">High School/Junior High School</MenuItem>
+
+                <MenuItem value=""><em>Select Applying</em></MenuItem>
                 <MenuItem value="Senior High School Graduate">Senior High School Graduate</MenuItem>
-                <MenuItem value="Undergraduate">Undergraduate</MenuItem>
-                <MenuItem value="Graduate">Graduate</MenuItem>
-                <MenuItem value="ALS">ALS</MenuItem>
-                <MenuItem value="Vocational/Trade Course">Vocational/Trade Course</MenuItem>
+                <MenuItem value="Senior High School Graduating Student">Senior High School Graduating Student</MenuItem>
+                <MenuItem value="ALS Passer">ALS (Alternative Learning System) Passer</MenuItem>
+                <MenuItem value="Transferee">Transferee from other University/College</MenuItem>
+                <MenuItem value="Cross Enrolee">Cross Enrolee Student</MenuItem>
+                <MenuItem value="Foreign Applicant">Foreign Applicant/Student</MenuItem>
+                <MenuItem value="Baccalaureate Graduate">Baccalaureate Graduate</MenuItem>
+                <MenuItem value="Master Degree Graduate">Master Degree Graduate</MenuItem>
               </TextField>
             </Box>
 
@@ -752,9 +769,10 @@ const StudentRequirements = () => {
               <TextField
                 select
                 size="small"
-                name="strand"
-                value={person.strand || ""}
+                name="document_status"
+                value={person.document_status || ""}
                 placeholder="Select Document Status"
+                onChange={handleChange} // make sure this updates state
                 sx={{ width: "300px" }}
                 InputProps={{ sx: { height: 30 } }}
                 inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}

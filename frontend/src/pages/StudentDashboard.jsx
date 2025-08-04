@@ -37,16 +37,12 @@ const StudentDashboard = () => {
       }, []);
 
       const fetchPersonData = async (id) => {
-        try {
-          const res = await axios.get(`http://localhost:5000/api/student-dashboard/${id}`);
-          console.log(res.data)
-          setPerson(res.data[0]);
-          setLoading(false);
-        } catch (error) {
-          setMessage("Error fetching person data.");
-          setLoading(false);
-        }
-      };
+          try {
+            const res = await axios.get(`http://localhost:5000/api/person/${id}`);
+            setPerson(res.data);
+          } catch (error) { }
+        };
+      
 
   return (
     <div>

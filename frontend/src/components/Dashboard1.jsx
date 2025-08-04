@@ -27,6 +27,7 @@ const Dashboard1 = () => {
     campus: "",
     academicProgram: "",
     classifiedAs: "",
+    applyingAs: "",
     program: "",
     program2: "",
     program3: "",
@@ -409,7 +410,7 @@ const Dashboard1 = () => {
 
   const isFormValid = () => {
     const requiredFields = [
-      "campus", "academicProgram", "classifiedAs", "program", "program2", "program3",
+      "campus", "academicProgram", "classifiedAs", "applyingAs", "program", "program2", "program3",
       "yearLevel", "profile_img", "last_name", "first_name", "middle_name", "nickname",
       "height", "weight", "gender", "birthOfDate", "age", "birthPlace",
       "languageDialectSpoken", "citizenship", "religion", "civilStatus", "tribeEthnicGroup",
@@ -733,6 +734,36 @@ const Dashboard1 = () => {
               </FormControl>
 
             </div>
+
+            <div className="flex items-center mb-4 gap-4">
+              <label className="w-40 font-medium">Applying As:</label>
+              <FormControl fullWidth size="small" required error={!!errors.applyingAs} className="mb-4">
+                <InputLabel id="applying-as-label">Applying As</InputLabel>
+                <Select
+                  labelId="applying-as-label"
+                  id="applying-as-select"
+                  name="applyingAs"
+                  value={person.applyingAs || ""}
+                  label="Applying As"
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                >
+                  <MenuItem value=""><em>Select Applying</em></MenuItem>
+                  <MenuItem value="Senior High School Graduate">Senior High School Graduate</MenuItem>
+                  <MenuItem value="Senior High School Graduating Student">Senior High School Graduating Student</MenuItem>
+                  <MenuItem value="ALS Passer">ALS (Alternative Learning System) Passer</MenuItem>
+                  <MenuItem value="Transferee">Transferee from other University/College</MenuItem>
+                  <MenuItem value="Cross Enrolee">Cross Enrolee Student</MenuItem>
+                  <MenuItem value="Foreign Applicant">Foreign Applicant/Student</MenuItem>
+                  <MenuItem value="Baccalaureate Graduate">Baccalaureate Graduate</MenuItem>
+                  <MenuItem value="Master Degree Graduate">Master Degree Graduate</MenuItem>
+                </Select>
+                {errors.applyingAs && (
+                  <FormHelperText>This field is required.</FormHelperText>
+                )}
+              </FormControl>
+            </div>
+
 
             <br />
 
