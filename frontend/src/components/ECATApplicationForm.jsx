@@ -441,12 +441,12 @@ const ECATApplicationForm = () => {
                   textAlign: "left",
                   padding: "8px",
                   fontWeight: "bold",
-                  fontSize: "10px",
+                  fontSize: "12px",
                   verticalAlign: "top",
                 }}
               >
                 <div>Course & Major:</div>
-                <div>
+                <div style={{fontFamily: "Times New Roman", fontSize: "14px", paddingTop: "2px", fontWeight: "Normal"}}>
                   {curriculumOptions.length > 0
                     ? curriculumOptions.find(
                       (item) =>

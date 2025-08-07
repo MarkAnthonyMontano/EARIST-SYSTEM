@@ -1,6 +1,6 @@
 import React, { useState, useEffect, } from "react";
 import axios from "axios";
-import { Button, Box, TextField, Container, Typography, FormHelperText, FormControl, InputLabel, Select, MenuItem, } from "@mui/material";
+import { Button, Box, TextField, Container, Typography, TableContainer, Paper, Table, TableHead, TableRow, TableCell, FormHelperText, FormControl, InputLabel, Select, MenuItem, Modal, FormControlLabel, Checkbox, IconButton } from "@mui/material";
 import { Link } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
 import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
@@ -10,11 +10,11 @@ import InfoIcon from "@mui/icons-material/Info";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ErrorIcon from '@mui/icons-material/Error';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-
-const Dashboard3 = () => {
+const AdminDashboard3 = () => {
   const navigate = useNavigate();
+  const [selectedPerson, setSelectedPerson] = useState(null);
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
@@ -35,8 +35,11 @@ const Dashboard3 = () => {
     yearGraduated1: "",
     strand: "",
   });
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const queryPersonId = queryParams.get("person_id");
 
-  // do not alter
+
   useEffect(() => {
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
@@ -47,73 +50,54 @@ const Dashboard3 = () => {
       setUserRole(storedRole);
       setUserID(storedID);
 
-      if (storedRole === "applicant") {
-        fetchPersonData(storedID);
+      // 👇 If accessed with ?person_id=, treat that person as selected
+      if (queryPersonId) {
+        fetchPersonData(queryPersonId);
+        setSelectedPerson({ person_id: queryPersonId });
       } else {
+        fetchPersonData(storedID);
+      }
+
+      if (storedRole !== "registrar") {
         window.location.href = "/login";
       }
     } else {
       window.location.href = "/login";
     }
-  }, []);
+  }, [queryPersonId]);
 
-
-  // Do not alter
   const fetchPersonData = async (id) => {
     try {
       const res = await axios.get(`http://localhost:5000/api/person/${id}`);
-
-      const safePerson = Object.fromEntries(
-        Object.entries(res.data).map(([key, val]) => [key, val ?? ""])
-      );
-
-      setPerson(safePerson);
-    } catch (error) {
-      console.error("Failed to fetch person data", error);
-    }
+      setPerson(res.data);
+    } catch (error) { }
   };
+
 
   // Do not alter
-  const handleUpdate = async (updatedPerson) => {
+  const handleUpdate = async (updatedData) => {
+    if (!person || !person.person_id) return;
+
     try {
-      await axios.put(`http://localhost:5000/api/person/${userID}`, updatedPerson);
-      console.log("Auto-saved");
+      await axios.put(`http://localhost:5000/api/person/${person.person_id}`, updatedData);
+      console.log("✅ Auto-saved successfully");
     } catch (error) {
-      console.error("Auto-save failed:", error);
-    }
-  };
-
-  // Real-time save on every character typed
-  const handleChange = (e) => {
-    const { name, type, checked, value } = e.target;
-    const updatedPerson = {
-      ...person,
-      [name]: type === "checkbox" ? (checked ? 1 : 0) : value,
-    };
-    setPerson(updatedPerson);
-    handleUpdate(updatedPerson); // No delay, real-time save
-  };
-
-
-
-  const handleBlur = async () => {
-    try {
-      await axios.put(`http://localhost:5000/api/person/${userID}`, person);
-      console.log("Auto-saved");
-    } catch (err) {
-      console.error("Auto-save failed", err);
+      console.error("❌ Auto-save failed:", error);
     }
   };
 
 
 
-  const steps = [
-    { label: "Personal Information", icon: <PersonIcon />, path: "/dashboard1", onChange: () => handleChange({ label: "Personal Information", path: "/dashboard1" }) },
-    { label: "Family Background", icon: <FamilyRestroomIcon />, path: "/dashboard2", onChange: () => handleChange({ label: "Family Background", path: "/dashboard2" }) },
-    { label: "Educational Attainment", icon: <SchoolIcon />, path: "/dashboard3", onChange: () => handleChange({ label: "Educational Attainment", path: "/dashboard3" }) },
-    { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: "/dashboard4", onChange: () => handleChange({ label: "Health Medical Records", path: "/dashboard4" }) },
-    { label: "Other Information", icon: <InfoIcon />, path: "/dashboard5", onChange: () => handleChange({ label: "Other Information", path: "/dashboard5" }) },
-  ];
+
+  const steps = person.person_id
+    ? [
+      { label: "Personal Information", icon: <PersonIcon />, path: `/admin_dashboard1?person_id=${person.person_id}` },
+      { label: "Family Background", icon: <FamilyRestroomIcon />, path: `/admin_dashboard2?person_id=${person.person_id}` },
+      { label: "Educational Attainment", icon: <SchoolIcon />, path: `/admin_dashboard3?person_id=${person.person_id}` },
+      { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: `/admin_dashboard4?person_id=${person.person_id}` },
+      { label: "Other Information", icon: <InfoIcon />, path: `/admin_dashboard5?person_id=${person.person_id}` },
+    ]
+    : [];
 
 
   const [activeStep, setActiveStep] = useState(2);
@@ -150,22 +134,6 @@ const Dashboard3 = () => {
   };
 
 
-  // 🔒 Disable right-click
-  document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-  // 🔒 Block DevTools shortcuts silently
-  document.addEventListener('keydown', (e) => {
-    const isBlockedKey =
-      e.key === 'F12' ||
-      e.key === 'F11' ||
-      (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-      (e.ctrlKey && e.key === 'U');
-
-    if (isBlockedKey) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  });
 
 
 
@@ -173,6 +141,7 @@ const Dashboard3 = () => {
     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
 
       <Container>
+
         <Box sx={{ display: "flex", width: "100%" }}>
           {/* Left: Instructions (75%) */}
           <Box sx={{ width: "75%", padding: "10px" }}>
@@ -246,66 +215,67 @@ const Dashboard3 = () => {
           <div style={{ textAlign: "center" }}>Complete the applicant form to secure your place for the upcoming academic year at EARIST.</div>
         </Container>
         <br />
-
-        <Box sx={{ display: "flex", justifyContent: "center", width: "100%", px: 4 }}>
-          {steps.map((step, index) => (
-            <React.Fragment key={index}>
-              {/* Wrap the step with Link for routing */}
-              <Link to={step.path} style={{ textDecoration: "none" }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    cursor: "pointer",
-                  }}
-
-                >
-                  {/* Step Icon */}
+        {person.person_id && (
+          <Box sx={{ display: "flex", justifyContent: "center", width: "100%", px: 4 }}>
+            {steps.map((step, index) => (
+              <React.Fragment key={index}>
+                {/* Wrap the step with Link for routing */}
+                <Link to={step.path} style={{ textDecoration: "none" }}>
                   <Box
                     sx={{
-                      width: 50,
-                      height: 50,
-                      borderRadius: "50%",
-                      backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
-                      color: activeStep === index ? "#fff" : "#000",
                       display: "flex",
+                      flexDirection: "column",
                       alignItems: "center",
-                      justifyContent: "center",
+                      cursor: "pointer",
                     }}
+                    onClick={() => handleStepClick(index)}
                   >
-                    {step.icon}
+                    {/* Step Icon */}
+                    <Box
+                      sx={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: "50%",
+                        backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                        color: activeStep === index ? "#fff" : "#000",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {step.icon}
+                    </Box>
+
+                    {/* Step Label */}
+                    <Typography
+                      sx={{
+                        mt: 1,
+                        color: activeStep === index ? "#6D2323" : "#000",
+                        fontWeight: activeStep === index ? "bold" : "normal",
+                        fontSize: 14,
+                      }}
+                    >
+                      {step.label}
+                    </Typography>
                   </Box>
+                </Link>
 
-                  {/* Step Label */}
-                  <Typography
+                {/* Connector Line */}
+                {index < steps.length - 1 && (
+                  <Box
                     sx={{
-                      mt: 1,
-                      color: activeStep === index ? "#6D2323" : "#000",
-                      fontWeight: activeStep === index ? "bold" : "normal",
-                      fontSize: 14,
+                      height: "2px",
+                      backgroundColor: "#6D2323",
+                      flex: 1,
+                      alignSelf: "center",
+                      mx: 2,
                     }}
-                  >
-                    {step.label}
-                  </Typography>
-                </Box>
-              </Link>
-
-              {/* Connector Line */}
-              {index < steps.length - 1 && (
-                <Box
-                  sx={{
-                    height: "2px",
-                    backgroundColor: "#6D2323",
-                    flex: 1,
-                    alignSelf: "center",
-                    mx: 2,
-                  }}
-                />
-              )}
-            </React.Fragment>
-          ))}
-        </Box>
+                  />
+                )}
+              </React.Fragment>
+            ))}
+          </Box>
+        )}
         <br />
 
         <form>
@@ -351,11 +321,11 @@ const Dashboard3 = () => {
                     <Select
                       labelId="schoolLevel-label"
                       id="schoolLevel"
+                      readOnly
                       name="schoolLevel"
                       value={person.schoolLevel ?? ""}
                       label="School Level"
-                      onChange={handleChange}
-                      onBlur={handleBlur}
+
                     >
                       <MenuItem value="">
                         <em>Select School Level</em>
@@ -383,12 +353,13 @@ const Dashboard3 = () => {
                 <TextField
                   fullWidth
                   size="small"
+                  InputProps={{ readOnly: true }}
+
                   required
                   name="schoolLastAttended"
                   placeholder="Enter School Last Attended"
                   value={person.schoolLastAttended}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+
                   error={errors.schoolLastAttended}
                   helperText={errors.schoolLastAttended ? "This field is required." : ""}
                 />
@@ -401,12 +372,14 @@ const Dashboard3 = () => {
                 <TextField
                   fullWidth
                   size="small"
+                  InputProps={{ readOnly: true }}
+
                   required
                   name="schoolAddress"
                   value={person.schoolAddress}
-                  onChange={handleChange}
+
                   placeholder="Enter your School Address"
-                  onBlur={handleBlur}
+
                   error={errors.schoolAddress}
                   helperText={errors.schoolAddress ? "This field is required." : ""}
                 />
@@ -419,12 +392,13 @@ const Dashboard3 = () => {
                 <TextField
                   fullWidth
                   size="small"
+                  InputProps={{ readOnly: true }}
+
                   name="courseProgram"
                   required
                   value={person.courseProgram}
                   placeholder="Enter your Course Program"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+
                   error={errors.courseProgram}
                   helperText={errors.courseProgram ? "This field is required." : ""}
                 />
@@ -445,12 +419,13 @@ const Dashboard3 = () => {
                 <TextField
                   fullWidth
                   size="small"
+                  InputProps={{ readOnly: true }}
+
                   name="honor"
                   required
                   value={person.honor}
                   placeholder="Enter your Honor"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+
                   error={errors.honor}
                   helperText={errors.honor ? "This field is required." : ""}
                 />
@@ -463,12 +438,13 @@ const Dashboard3 = () => {
                 <TextField
                   fullWidth
                   size="small"
+                  InputProps={{ readOnly: true }}
+
                   required
                   name="generalAverage"
                   value={person.generalAverage}
                   placeholder="Enter your General Average"
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+
                   error={errors.generalAverage}
                   helperText={errors.generalAverage ? "This field is required." : ""}
                 />
@@ -482,11 +458,12 @@ const Dashboard3 = () => {
                   fullWidth
                   size="small"
                   required
+                  InputProps={{ readOnly: true }}
+
                   name="yearGraduated"
                   placeholder="Enter your Year Graduated"
                   value={person.yearGraduated}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+
                   error={errors.yearGraduated}
                   helperText={errors.yearGraduated ? "This field is required." : ""}
                 />
@@ -518,11 +495,11 @@ const Dashboard3 = () => {
                   <Select
                     labelId="schoolLevel1-label"
                     id="schoolLevel1"
+                    readOnly
                     name="schoolLevel1"
                     value={person.schoolLevel1 ?? ""}
                     label="School Level"
-                    onChange={handleChange}
-                    onBlur={handleBlur}
+
                   >
                     <MenuItem value=""><em>Select School Level</em></MenuItem>
                     <MenuItem value="High School/Junior High School">High School/Junior High School</MenuItem>
@@ -547,11 +524,12 @@ const Dashboard3 = () => {
                   fullWidth
                   size="small"
                   required
+                  InputProps={{ readOnly: true }}
+
                   name="schoolLastAttended1"
                   placeholder="Enter School Last Attended"
                   value={person.schoolLastAttended1}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+
                   error={errors.schoolLastAttended1}
                   helperText={errors.schoolLastAttended1 ? "This field is required." : ""}
                 />
@@ -567,10 +545,11 @@ const Dashboard3 = () => {
                   size="small"
                   required
                   name="schoolAddress1"
+                  InputProps={{ readOnly: true }}
+
                   placeholder="Enter your School Address"
                   value={person.schoolAddress1}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+
                   error={errors.schoolAddress1}
                   helperText={errors.schoolAddress1 ? "This field is required." : ""}
                 />
@@ -585,11 +564,12 @@ const Dashboard3 = () => {
                   fullWidth
                   size="small"
                   required
+                  InputProps={{ readOnly: true }}
+
                   name="courseProgram1"
                   placeholder="Enter your Course Program"
                   value={person.courseProgram1}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+
                   error={errors.courseProgram1}
                   helperText={errors.courseProgram1 ? "This field is required." : ""}
                 />
@@ -613,10 +593,11 @@ const Dashboard3 = () => {
                   size="small"
                   required
                   name="honor1"
+                  InputProps={{ readOnly: true }}
+
                   placeholder="Enter your Honor"
                   value={person.honor1}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+
                   error={errors.honor1}
                   helperText={errors.honor1 ? "This field is required." : ""}
                 />
@@ -631,11 +612,12 @@ const Dashboard3 = () => {
                   fullWidth
                   size="small"
                   required
+                  InputProps={{ readOnly: true }}
+
                   name="generalAverage1"
                   placeholder="Enter your General Average"
                   value={person.generalAverage1}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+
                   error={errors.generalAverage1}
                   helperText={errors.generalAverage1 ? "This field is required." : ""}
                 />
@@ -650,11 +632,12 @@ const Dashboard3 = () => {
                   fullWidth
                   size="small"
                   required
+                  InputProps={{ readOnly: true }}
+
                   name="yearGraduated1"
                   placeholder="Enter your Year Graduated"
                   value={person.yearGraduated1}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
+
                   error={errors.yearGraduated1}
                   helperText={errors.yearGraduated1 ? "This field is required." : ""}
                 />
@@ -674,10 +657,10 @@ const Dashboard3 = () => {
                 labelId="strand-label"
                 id="strand-select"
                 name="strand"
+                readOnly
                 value={person.strand ?? ""}
                 label="Strand"
-                onChange={handleChange}
-                onBlur={handleBlur}
+
               >
                 <MenuItem value="">
                   <em>Select Strand</em>
@@ -713,7 +696,7 @@ const Dashboard3 = () => {
               <Button
                 variant="contained"
                 component={Link}
-                to="/dashboard2"
+                to="/admin_dashboard2"
                 startIcon={
                   <ArrowBackIcon
                     sx={{
@@ -741,10 +724,10 @@ const Dashboard3 = () => {
               <Button
                 variant="contained"
                 onClick={(e) => {
-                  handleUpdate();
+
 
                   if (isFormValid()) {
-                    navigate("/dashboard4");
+                    navigate("/admin_dashboard4");
                   } else {
                     alert("Please complete all required fields before proceeding.");
                   }
@@ -783,4 +766,4 @@ const Dashboard3 = () => {
 };
 
 
-export default Dashboard3;
+export default AdminDashboard3;

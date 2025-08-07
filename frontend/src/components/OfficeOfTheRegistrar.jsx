@@ -634,15 +634,22 @@ const OfficeOfTheRegistrar = () => {
                     fontSize: "12px",
                     paddingTop: "5px",  // you can reduce this if needed
                     marginTop: 0,
-                    fontWeight: "bold",
                     textAlign: "center",
                     border: "1px solid black",
-
-
                     height: "30px"
-
                   }}
                 >
+                  {
+                    curriculumOptions.length > 0
+                      ? (
+                        curriculumOptions.find(
+                          (item) =>
+                            item?.curriculum_id?.toString() === (person?.program ?? "").toString()
+                        )?.major || ""
+                      ).toUpperCase()
+                      : "Loading..."
+                  }
+
 
                 </td>
                 <td

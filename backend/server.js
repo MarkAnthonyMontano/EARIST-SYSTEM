@@ -273,25 +273,6 @@ app.post("/transfer", async (req, res) => {
 //   }
 // });
 
-app.get("/api/applicant_number/:person_id", async (req, res) => {
-  const { person_id } = req.params;
-
-  console.log(`Fetching applicant_number for person_id: ${person_id}`); // 👈 Add this line
-
-  try {
-    const [rows] = await db.query("SELECT applicant_number FROM applicant_numbering_table WHERE person_id = ?", [person_id]);
-
-    if (!rows.length) {
-      console.warn(`No applicant_number found for person_id ${person_id}`);
-      return res.status(404).json({ message: "Applicant number not found" });
-    }
-
-    res.json(rows[0]);
-  } catch (err) {
-    console.error("Error fetching applicant number:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
 
 
 // Get applicant_number by person_id
@@ -699,6 +680,30 @@ app.put("/uploads/remarks/:upload_id", async (req, res) => {
   }
 });
 
+app.put("/uploads/document-status/:upload_id", async (req, res) => {
+  const { upload_id } = req.params;
+  const { document_status } = req.body;
+
+  if (!document_status) {
+    return res.status(400).json({ error: "Missing document_status" });
+  }
+
+  try {
+    const [result] = await db.query(
+      "UPDATE requirement_uploads SET document_status = ? WHERE upload_id = ?",
+      [document_status, upload_id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Upload not found" });
+    }
+
+    res.status(200).json({ message: "Document status updated successfully" });
+  } catch (err) {
+    console.error("Failed to update document_status:", err);
+    res.status(500).json({ error: "Failed to update document_status" });
+  }
+});
 
 
 
@@ -715,6 +720,7 @@ app.get('/uploads/all', async (req, res) => {
         ru.remarks,
         ru.status,    
         ru.document_status,
+        ru.registrar_status,
         ru.created_at,
         rt.description,
         p.applicant_number,
@@ -763,6 +769,7 @@ app.get("/uploads/by-applicant/:applicant_number", async (req, res) => {
         ru.remarks,         -- ✅ Include this line
         ru.status,
         ru.document_status,
+        ru.registrar_status,
         ru.created_at,
         rt.description
       FROM requirement_uploads ru
@@ -866,6 +873,71 @@ app.get("/api/notifications", async (req, res) => {
 
 // -------------------------------------------- GET APPLICANT ADMISSION DATA ------------------------------------------------//
 
+// GET ALL APPLICANTS WITH APPLICANT NUMBER
+app.get("/api/all-applicants", async (req, res) => {
+  try {
+    const [rows] = await db.execute(`
+      SELECT 
+        p.*, 
+        a.applicant_number 
+      FROM admission.person_table p
+      LEFT JOIN admission.applicant_numbering_table a 
+      ON p.person_id = a.person_id
+      ORDER BY p.person_id ASC
+    `);
+    res.json(rows);
+  } catch (err) {
+    console.error("❌ Error fetching all applicants:", err);
+    res.status(500).send("Server error");
+  }
+});
+
+// GET ONLY APPLICANTS WITH AN APPLICANT NUMBER
+app.get("/api/applicants-with-number", async (req, res) => {
+  try {
+    const [rows] = await db.execute(`
+      SELECT 
+        p.*, 
+        a.applicant_number 
+      FROM admission.person_table p
+      INNER JOIN admission.applicant_numbering_table a 
+      ON p.person_id = a.person_id
+      ORDER BY p.person_id ASC
+    `);
+    res.json(rows);
+  } catch (err) {
+    console.error("❌ Error fetching applicants with number:", err);
+    res.status(500).send("Server error");
+  }
+});
+
+
+
+app.get("/api/person_with_applicant/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [rows] = await db.query(`
+      SELECT 
+        p.*,
+        a.applicant_number
+      FROM person_table p
+      LEFT JOIN applicant_numbering_table a ON p.person_id = a.person_id
+      WHERE p.person_id = ?
+    `, [id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Person not found" });
+    }
+
+    res.json(rows[0]);
+  } catch (error) {
+    console.error("Error fetching person with applicant_number:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+
 // GET person details by person_id
 app.get("/api/person/:id", async (req, res) => {
   const { id } = req.params;
@@ -921,7 +993,7 @@ app.put("/api/person/:id", async (req, res) => {
     headNeckInjury, hiv, highBloodPressure, diabetesMellitus, allergies, cancer, smokingCigarette, alcoholDrinking,
     hospitalized, hospitalizationDetails, medications, hadCovid, covidDate, vaccine1Brand, vaccine1Date,
     vaccine2Brand, vaccine2Date, booster1Brand, booster1Date, booster2Brand, booster2Date,
-    chestXray, cbc, urinalysis, otherworkups, symptomsToday, remarks, termsOfAgreement
+    chestXray, cbc, urinalysis, otherworkups, symptomsToday, remarks, termsOfAgreement, created_at
   } = req.body;
 
   try {
@@ -944,7 +1016,7 @@ app.put("/api/person/:id", async (req, res) => {
       headNeckInjury=?, hiv=?, highBloodPressure=?, diabetesMellitus=?, allergies=?, cancer=?, smokingCigarette=?, alcoholDrinking=?,
       hospitalized=?, hospitalizationDetails=?, medications=?, hadCovid=?, covidDate=?, vaccine1Brand=?, vaccine1Date=?,
       vaccine2Brand=?, vaccine2Date=?, booster1Brand=?, booster1Date=?, booster2Brand=?, booster2Date=?,
-      chestXray=?, cbc=?, urinalysis=?, otherworkups=?, symptomsToday=?, remarks=?, termsOfAgreement=?
+      chestXray=?, cbc=?, urinalysis=?, otherworkups=?, symptomsToday=?, remarks=?, termsOfAgreement=?, created_at=?
       WHERE person_id=?`, [
       profile_img, campus, academicProgram, classifiedAs, applyingAs, program, program2, program3, yearLevel,
       last_name, first_name, middle_name, extension, nickname, height, weight, lrnNumber, nolrnNumber, gender, pwdMember, pwdType, pwdId,
@@ -964,7 +1036,7 @@ app.put("/api/person/:id", async (req, res) => {
       headNeckInjury, hiv, highBloodPressure, diabetesMellitus, allergies, cancer, smokingCigarette, alcoholDrinking,
       hospitalized, hospitalizationDetails, medications, hadCovid, covidDate, vaccine1Brand, vaccine1Date,
       vaccine2Brand, vaccine2Date, booster1Brand, booster1Date, booster2Brand, booster2Date,
-      chestXray, cbc, urinalysis, otherworkups, symptomsToday, remarks, termsOfAgreement, id
+      chestXray, cbc, urinalysis, otherworkups, symptomsToday, remarks, termsOfAgreement, created_at, id
     ]);
 
     if (result.affectedRows === 0) {
@@ -1092,6 +1164,7 @@ app.get("/api/applied_program", async (req, res) => {
   SELECT 
     ct.curriculum_id, 
     pt.program_description,
+    pt.program_code,
     pt.major
   FROM curriculum_table AS ct
   INNER JOIN program_table AS pt ON pt.program_id = ct.program_id

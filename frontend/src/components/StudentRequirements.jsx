@@ -96,9 +96,9 @@ const StudentRequirements = () => {
       setUserID(storedID);
 
       if (storedRole === "registrar") {
-        
+
         if (storedID !== "undefined") {
-  fetchApplicantNumber(storedID); 
+          fetchApplicantNumber(storedID);
         } else {
           console.warn("Stored person_id is invalid:", storedID);
         }
@@ -140,11 +140,12 @@ const StudentRequirements = () => {
     try {
       const res = await axios.get(`http://localhost:5000/api/person/${personID}`);
 
-      const safePerson = Object.fromEntries(
-        Object.entries(res.data).map(([key, val]) => [key, val ?? ""])
-      );
-
+      const safePerson = {
+        ...res.data,
+        document_status: res.data.document_status || "On process", // set default here
+      };
       setPerson(safePerson);
+
     } catch (error) {
       console.error("❌ Failed to fetch person data:", error?.response?.data || error.message);
     }
@@ -176,7 +177,7 @@ const StudentRequirements = () => {
         generalAverage1: "",
         height: "",
         applyingAs: "",
-        document_status: "",
+        document_status: "On Process",
         last_name: "",
         first_name: "",
         middle_name: "",
@@ -202,7 +203,7 @@ const StudentRequirements = () => {
         generalAverage1: "",
         height: "",
         applyingAs: "",
-        document_status: "",
+        document_status: "On Process",
         last_name: "",
         first_name: "",
         middle_name: "",
@@ -238,17 +239,17 @@ const StudentRequirements = () => {
     }
   };
 
-   const fetchApplicantNumber = async (personID) => {
-      try {
-        const res = await axios.get(`http://localhost:5000/api/applicant_number/${personID}`);
-        if (res.data && res.data.applicant_number) {
-          setApplicantID(res.data.applicant_number);
-        }
-      } catch (error) {
-        console.error("Failed to fetch applicant number:", error);
+  const fetchApplicantNumber = async (personID) => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/applicant_number/${personID}`);
+      if (res.data && res.data.applicant_number) {
+
       }
-    };
-  
+    } catch (error) {
+      console.error("Failed to fetch applicant number:", error);
+    }
+  };
+
 
   const handleUploadSubmit = async () => {
     if (!selectedFiles.requirements_id || !selectedFiles.file || !selectedPerson?.person_id) {
@@ -320,10 +321,39 @@ const StudentRequirements = () => {
     }
   };
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const { name, value } = e.target;
     setPerson((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "document_status") {
+      if (uploads.length === 0) {
+        console.warn("No uploads found for selected person.");
+        return;
+      }
+
+      try {
+        // Update document_status for all uploaded documents
+        await Promise.all(
+          uploads.map((upload) =>
+            axios.put(`http://localhost:5000/uploads/document-status/${upload.upload_id}`, {
+              document_status: value,
+            })
+          )
+        );
+
+        console.log("✅ Document status updated for all uploads");
+
+        if (selectedPerson?.applicant_number) {
+          await fetchUploadsByApplicantNumber(selectedPerson.applicant_number);
+        }
+
+      } catch (err) {
+        console.error("❌ Failed to update document statuses:", err);
+      }
+    }
+
   };
+
 
 
   const renderRow = (doc) => {
@@ -597,49 +627,52 @@ const StudentRequirements = () => {
 
           <TextField
             variant="outlined"
-            placeholder="Search Applicant Name / Email / Applicant ID"
+            placeholder="Search  Applicant ID / Applicant Name / Email "
             size="small"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             InputProps={{ startAdornment: <Search sx={{ mr: 1 }} /> }}
-            sx={{ width: { xs: '100%', sm: '350px' }, mt: { xs: 2, sm: 0 } }}
+            sx={{ width: { xs: '100%', sm: '425px' }, mt: { xs: 2, sm: 0 } }}
           />
         </Box>
+
         <hr style={{ border: "1px solid #ccc", width: "100%" }} />
 
-
+        <br />
         {/* Applicant ID and Name */}
-        <Box
-          sx={{
-            width: "100%",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            px: 2,
-            mb: 1, // small margin bottom
-          }}
-        >
-          <Typography sx={{ fontSize: "20px", fontFamily: "Arial Black" }}>
-            Applicant ID:{" "}
-            <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
-              {selectedPerson?.applicant_number || "N/A"}
-            </span>
-          </Typography>
+        <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroonx`" }}>
+          <Table>
+            <TableHead sx={{ backgroundColor: '#6D2323',  }}>
+              <TableRow>
+                {/* Left cell: Applicant ID */}
+                <TableCell sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}>
+                  Applicant ID:&nbsp;
+                  <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
+                    {selectedPerson?.applicant_number || "N/A"}
+                  </span>
+                </TableCell>
 
-          <Typography sx={{ fontSize: "20px", fontFamily: "Arial Black" }}>
-            Applicant Name:{" "}
-            <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
-              {selectedPerson?.last_name?.toUpperCase()}, {selectedPerson?.first_name?.toUpperCase()}{" "}
-              {selectedPerson?.middle_name?.toUpperCase()} {selectedPerson?.extension_name?.toUpperCase() || ""}
-            </span>
-          </Typography>
+                {/* Right cell: Applicant Name, right-aligned */}
+                <TableCell
+                  align="right"
+                  sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}
+                >
+                  Applicant Name:&nbsp;
+                  <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
+                    {selectedPerson?.last_name?.toUpperCase()}, {selectedPerson?.first_name?.toUpperCase()}{" "}
+                    {selectedPerson?.middle_name?.toUpperCase()} {selectedPerson?.extension_name?.toUpperCase() || ""}
+                  </span>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+          </Table>
+        </TableContainer>
 
-        </Box>
-
+    <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon" }}>
         {/* SHS GWA and Height row below Applicant Name */}
-        <Box sx={{ px: 2, mb: 2 }}>
+        <Box sx={{ px: 2, mb: 2,mt: 2   }}>
           {/* SHS GWA Field */}
-          <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", mb: 1, }}>
             <Typography
               sx={{
                 fontSize: "14px",
@@ -771,21 +804,19 @@ const StudentRequirements = () => {
                 size="small"
                 name="document_status"
                 value={person.document_status || ""}
-                placeholder="Select Document Status"
-                onChange={handleChange} // make sure this updates state
+                onChange={handleChange} // ✅ this stays
                 sx={{ width: "300px" }}
                 InputProps={{ sx: { height: 30 } }}
                 inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
               >
-                <MenuItem value="">
-                  <em>Select Document Status</em>
-                </MenuItem>
+                <MenuItem value=""><em>Select Document Status</em></MenuItem>
                 <MenuItem value="On process">On process</MenuItem>
                 <MenuItem value="Documents Verified & ECAT">Documents Verified & ECAT</MenuItem>
                 <MenuItem value="Disapproved">Disapproved</MenuItem>
                 <MenuItem value="Program Closed">Program Closed</MenuItem>
               </TextField>
             </Box>
+
 
             {/* Document Type & File Upload */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, mb: 2 }}>
@@ -889,13 +920,15 @@ const StudentRequirements = () => {
             </Box>
           )}
         </Box>
+        </TableContainer>
+        
 
 
 
         <>
-          <TableContainer component={Paper} sx={{ width: '100%' }}>
+          <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon" }}>
             <Table>
-              <TableHead sx={{ backgroundColor: '#6D2323' }}>
+              <TableHead sx={{ backgroundColor: '#6D2323',  }}>
                 <TableRow>
                   <TableCell sx={{ color: 'white', textAlign: "Center" }}>Document Type</TableCell>
                   <TableCell sx={{ color: 'white', textAlign: "Center" }}>Remarks</TableCell>

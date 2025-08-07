@@ -109,13 +109,11 @@ const StudentNumbering = () => {
         <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, p: 2 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h4" fontWeight="bold" color="maroon">
-                    Assign Student Number
+                    ASSIGN STUDENT NUMBER
                 </Typography>
 
                 <Box>
-                    <Typography variant="subtitle2" sx={{ color: 'black', mb: 0.5 }}>
-                        Search Student Name:
-                    </Typography>
+                  
                     <TextField
                         variant="outlined"
                         placeholder="Search Applicant Name / Email / Applicant ID"

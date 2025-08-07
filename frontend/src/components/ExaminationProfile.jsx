@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { Box, Container, Typography, TextField } from "@mui/material";
+import { Box, Container, Typography, TextField, TableContainer, Paper, Table, TableHead, TableRow, TableCell } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
 import EaristLogo from "../assets/EaristLogo.png";
 import '../styles/Print.css'
@@ -252,6 +252,11 @@ const ExaminationProfile = () => {
 
     }
 
+    curriculumOptions.find(
+        (item) => item?.curriculum_id?.toString() === (person?.program ?? "").toString()
+    )
+
+
 
     return (
         <Box sx={{ height: 'calc(100vh - 120px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
@@ -285,15 +290,46 @@ const ExaminationProfile = () => {
 
                     <TextField
                         variant="outlined"
-                        placeholder="Search Applicant Name / Email / Applicant ID"
+                        placeholder="Search  Applicant ID / Applicant Name / Email "
                         size="small"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         InputProps={{ startAdornment: <Search sx={{ mr: 1 }} /> }}
-                        sx={{ width: { xs: '100%', sm: '350px' }, mt: { xs: 2, sm: 0 } }}
+                        sx={{ width: { xs: '100%', sm: '425px' }, mt: { xs: 2, sm: 0 } }}
                     />
                 </Box>
+
                 <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+
+                <br />
+                {/* Applicant ID and Name */}
+                <TableContainer component={Paper} sx={{ width: '100%', mb: 1, }}>
+                    <Table>
+                        <TableHead sx={{ backgroundColor: '#6D2323' }}>
+                            <TableRow>
+                                {/* Left cell: Applicant ID */}
+                                <TableCell sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}>
+                                    Applicant ID:&nbsp;
+                                    <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
+                                        {selectedPerson?.applicant_number || "N/A"}
+                                    </span>
+                                </TableCell>
+
+                                {/* Right cell: Applicant Name, right-aligned */}
+                                <TableCell
+                                    align="right"
+                                    sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}
+                                >
+                                    Applicant Name:&nbsp;
+                                    <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
+                                        {selectedPerson?.last_name?.toUpperCase()}, {selectedPerson?.first_name?.toUpperCase()}{" "}
+                                        {selectedPerson?.middle_name?.toUpperCase()} {selectedPerson?.extension_name?.toUpperCase() || ""}
+                                    </span>
+                                </TableCell>
+                            </TableRow>
+                        </TableHead>
+                    </Table>
+                </TableContainer>
 
 
                 <button
@@ -579,7 +615,7 @@ const ExaminationProfile = () => {
                                                     fontFamily: "Arial",
                                                     fontWeight: "normal",
                                                     fontSize: "15px",
-                                                    minWidth: "300px",
+                                                    minWidth: "265px",
                                                     height: "1.2em",
                                                     display: "flex",
                                                     alignItems: "center",
@@ -598,7 +634,24 @@ const ExaminationProfile = () => {
                                     <td colSpan={20}>
                                         <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
                                             <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Major:</label>
-                                            <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.2em" }}></span>
+                                            <span
+                                                style={{
+                                                    flexGrow: 1,
+                                                    borderBottom: "1px solid black",
+                                                    height: "1.2em",
+                                                    display: "flex",
+                                                    fontFamily: "Arial",
+                                                    alignItems: "center",
+                                                }}
+                                            >
+                                                {curriculumOptions.length > 0
+                                                    ? curriculumOptions.find(
+                                                        (item) =>
+                                                            item?.curriculum_id?.toString() === (person?.program ?? "").toString()
+                                                    )?.major || ""
+                                                    : "Loading..."}
+                                            </span>
+
                                         </div>
                                     </td>
                                 </tr>

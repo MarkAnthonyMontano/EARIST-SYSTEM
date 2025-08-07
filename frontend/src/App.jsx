@@ -62,6 +62,14 @@ import FacultyStudentClassList from './components/FacultyStudentClassList';
 import FacultySchedule from './components/FacultySchedule';
 import StudentDashboard from './pages/StudentDashboard';
 
+import ApplicantList from './components/ApplicantList';
+
+import AdminDashboard1 from './components/AdminDashboard1';
+import AdminDashboard2 from './components/AdminDashboard2';
+import AdminDashboard3 from './components/AdminDashboard3';
+import AdminDashboard4 from './components/AdminDashboard4';
+import AdminDashboard5 from './components/AdminDashboard5';
+
 import ExaminationProfile from './components/ExaminationProfile';
 import Dashboard1 from './components/Dashboard1';
 import Dashboard2 from './components/Dashboard2';
@@ -182,6 +190,14 @@ function App() {
 
               <Route path="/student_dashboard" element={<ProtectedRoute allowedRoles={'student'}><StudentDashboard /></ProtectedRoute>} />
               <Route path="/unauthorized" element={<Unauthorized />} />
+
+              <Route path="/applicant_list" element={<ProtectedRoute allowedRoles={['registrar']}><ApplicantList /></ProtectedRoute>} />
+
+              <Route path="/admin_dashboard1" element={<ProtectedRoute allowedRoles={['registrar']}><AdminDashboard1 /></ProtectedRoute>} />
+              <Route path="/admin_dashboard2" element={<ProtectedRoute allowedRoles={['registrar']}><AdminDashboard2 /></ProtectedRoute>} />
+              <Route path="/admin_dashboard3" element={<ProtectedRoute allowedRoles={['registrar']}><AdminDashboard3 /></ProtectedRoute>} />
+              <Route path="/admin_dashboard4" element={<ProtectedRoute allowedRoles={['registrar']}><AdminDashboard4 /></ProtectedRoute>} />
+              <Route path="/admin_dashboard5" element={<ProtectedRoute allowedRoles={['registrar']}><AdminDashboard5 /></ProtectedRoute>} />
 
               <Route path="/dashboard1" element={<ProtectedRoute allowedRoles={['applicant']}><Dashboard1 /></ProtectedRoute>} />
               <Route path="/dashboard2" element={<ProtectedRoute allowedRoles={['applicant']}><Dashboard2 /></ProtectedRoute>} />
