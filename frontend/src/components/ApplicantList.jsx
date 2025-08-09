@@ -75,16 +75,122 @@ const ApplicantList = () => {
         fetchCurriculums();
     }, []);
 
+    const [selectedApplicantStatus, setSelectedApplicantStatus] = useState("");
+    const [sortBy, setSortBy] = useState("name");
+    const [sortOrder, setSortOrder] = useState("asc");
+
+    const [selectedRegistrarStatus, setSelectedRegistrarStatus] = useState("");
+
+    const [selectedDepartmentFilter, setSelectedDepartmentFilter] = useState("");
+    const [selectedProgramFilter, setSelectedProgramFilter] = useState("");
+    const [department, setDepartment] = useState([]);
+    const [allCurriculums, setAllCurriculums] = useState([]);
+    const [schoolYears, setSchoolYears] = useState([]);
+    const [semesters, setSemesters] = useState([]);
+    const [selectedSchoolYear, setSelectedSchoolYear] = useState("");
+    const [selectedSemester, setSelectedSemester] = useState("");
+
+    useEffect(() => {
+        axios.get("http://localhost:5000/api/year_table")
+            .then(res => setSchoolYears(res.data))
+            .catch(err => console.error("Error fetching years:", err));
+
+        axios.get("http://localhost:5000/api/semester_table")
+            .then(res => setSemesters(res.data))
+            .catch(err => console.error("Error fetching semesters:", err));
+    }, []);
+
+
+const filteredPersons = persons
+  .filter((personData) => {
+    const fullText = `${personData.first_name} ${personData.middle_name} ${personData.last_name} ${personData.emailAddress ?? ''} ${personData.applicant_number ?? ''}`.toLowerCase();
+    const matchesSearch = fullText.includes(searchQuery.toLowerCase());
+
+    const matchesCampus =
+      person.campus === "" || String(personData.campus) === String(person.campus);
+
+    const matchesApplicantStatus =
+      selectedApplicantStatus === "" ||
+      personData.applicant_status === selectedApplicantStatus;
+
+    const matchesRegistrarStatus =
+      selectedRegistrarStatus === "" ||
+      personData.registrar_status === selectedRegistrarStatus;
+
+    const programInfo = allCurriculums.find(
+      (opt) => opt.curriculum_id?.toString() === personData.program?.toString()
+    );
+
+    const matchesProgram =
+      selectedProgramFilter === "" ||
+      programInfo?.program_code === selectedProgramFilter;
+
+    const matchesDepartment =
+      selectedDepartmentFilter === "" ||
+      programInfo?.dprtmnt_name === selectedDepartmentFilter;
+
+    const matchesSchoolYear =
+      selectedSchoolYear === "" ||
+      String(personData.school_year) === String(selectedSchoolYear);
+
+    const matchesSemester =
+      selectedSemester === "" ||
+      String(personData.semester) === String(selectedSemester);
+
+    // ✅ Match by Date Applied range
+    let matchesDateRange = true;
+    if (person.fromDate && person.toDate) {
+      const appliedDate = new Date(personData.created_at);
+      const from = new Date(person.fromDate);
+      const to = new Date(person.toDate);
+      matchesDateRange = appliedDate >= from && appliedDate <= to;
+    } else if (person.fromDate) {
+      const appliedDate = new Date(personData.created_at);
+      const from = new Date(person.fromDate);
+      matchesDateRange = appliedDate >= from;
+    } else if (person.toDate) {
+      const appliedDate = new Date(personData.created_at);
+      const to = new Date(person.toDate);
+      matchesDateRange = appliedDate <= to;
+    }
+
+    return (
+      matchesSearch &&
+      matchesCampus &&
+      matchesApplicantStatus &&
+      matchesRegistrarStatus &&
+      matchesDepartment &&
+      matchesProgram &&
+      matchesSchoolYear &&
+      matchesSemester &&
+      matchesDateRange
+    );
+  })
+  // ✅ Sorting logic
+  .sort((a, b) => {
+    let fieldA, fieldB;
+
+    if (sortBy === "name") {
+      fieldA = `${a.last_name} ${a.first_name} ${a.middle_name || ''}`.toLowerCase();
+      fieldB = `${b.last_name} ${b.first_name} ${b.middle_name || ''}`.toLowerCase();
+    } else if (sortBy === "id") {
+      fieldA = a.applicant_number || "";
+      fieldB = b.applicant_number || "";
+    } else if (sortBy === "email") {
+      fieldA = a.emailAddress?.toLowerCase() || "";
+      fieldB = b.emailAddress?.toLowerCase() || "";
+    } else {
+      return 0; // no sorting if no sortBy
+    }
+
+    if (fieldA < fieldB) return sortOrder === "asc" ? -1 : 1;
+    if (fieldA > fieldB) return sortOrder === "asc" ? 1 : -1;
+    return 0;
+  });
 
 
 
-
-    const itemsPerPage = 100;
-    const filteredPersons = persons.filter((person) => {
-        const fullText = `${person.first_name} ${person.middle_name} ${person.last_name} ${person.emailAddress} ${person.applicant_number || ''}`.toLowerCase();
-        return fullText.includes(searchQuery.toLowerCase());
-
-    });
+    const [itemsPerPage, setItemsPerPage] = useState(50);
 
     const totalPages = Math.ceil(filteredPersons.length / itemsPerPage);
     const indexOfLastItem = currentPage * itemsPerPage;
@@ -104,23 +210,6 @@ const ApplicantList = () => {
         visiblePages.push(i);
     }
 
-    const fetchApplicantNumber = async (personID) => {
-        const res = await axios.get(`http://localhost:5000/api/applicant_number/${personID}`);
-        setApplicantID(res.data?.applicant_number || "N/A");
-    };
-
-
-
-    const fetchPersons = async () => {
-        try {
-            const res = await axios.get('http://localhost:5000/api/persons');
-            setPersons(res.data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-
     useEffect(() => {
         fetch("http://localhost:5000/api/all-applicants") // 👈 This is the new endpoint
             .then((res) => res.json())
@@ -130,18 +219,7 @@ const ApplicantList = () => {
 
 
 
-    const [sortBy, setSortBy] = useState("name");
-    const [sortOrder, setSortOrder] = useState("asc");
 
-    const [selectedSY, setSelectedSY] = useState("2025-2026");
-    const [selectedSemester, setSelectedSemester] = useState("First");
-
-    const [selectedApplicantStatus, setSelectedApplicantStatus] = useState("");
-    const [selectedRegistrarStatus, setSelectedRegistrarStatus] = useState("");
-
-    const [selectedDepartmentFilter, setSelectedDepartmentFilter] = useState("");
-    const [selectedProgramFilter, setSelectedProgramFilter] = useState("");
-    const [department, setDepartment] = useState([]);
 
     useEffect(() => {
         const fetchDepartments = async () => {
@@ -163,29 +241,29 @@ const ApplicantList = () => {
         }
     }, [filteredPersons.length, totalPages]);
 
-  const [notifications, setNotifications] = useState([]);
-  const [showNotifications, setShowNotifications] = useState(false);
+    const [notifications, setNotifications] = useState([]);
+    const [showNotifications, setShowNotifications] = useState(false);
 
-  useEffect(() => {
-    // Load saved notifications from DB on first load
-    axios.get("http://localhost:5000/api/notifications")
-      .then(res => {
-        setNotifications(res.data.map(n => ({
-          ...n,
-          timestamp: n.timestamp
-        })));
-      })
-      .catch(err => console.error("Failed to load saved notifications:", err));
-  }, []);
+    useEffect(() => {
+        // Load saved notifications from DB on first load
+        axios.get("http://localhost:5000/api/notifications")
+            .then(res => {
+                setNotifications(res.data.map(n => ({
+                    ...n,
+                    timestamp: n.timestamp
+                })));
+            })
+            .catch(err => console.error("Failed to load saved notifications:", err));
+    }, []);
 
 
-  useEffect(() => {
-    const socket = io("http://localhost:5000");
-    socket.on("notification", (data) => {
-      setNotifications((prev) => [data, ...prev]);
-    });
-    return () => socket.disconnect();
-  }, []);
+    useEffect(() => {
+        const socket = io("http://localhost:5000");
+        socket.on("notification", (data) => {
+            setNotifications((prev) => [data, ...prev]);
+        });
+        return () => socket.disconnect();
+    }, []);
 
 
     const handleSnackClose = (_, reason) => {
@@ -195,57 +273,80 @@ const ApplicantList = () => {
 
 
 
+    useEffect(() => {
+        axios.get("http://localhost:5000/api/applied_program")
+            .then(res => {
+                setAllCurriculums(res.data);
+                setCurriculumOptions(res.data);
+            });
+    }, []);
+
+    const handleDepartmentChange = (selectedDept) => {
+        setSelectedDepartmentFilter(selectedDept);
+        if (!selectedDept) {
+            setCurriculumOptions(allCurriculums);
+        } else {
+            setCurriculumOptions(
+                allCurriculums.filter(opt => opt.dprtmnt_name === selectedDept)
+            );
+        }
+        setSelectedProgramFilter("");
+    };
+
+
+
+
     return (
         <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, p: 2 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h4" fontWeight="bold" color="maroon">
                     ADMISSION PROCESS FOR REGISTRAR
                 </Typography>
-                  <Box sx={{ position: 'absolute', top: 10, right: 24 }}>
-                          <Button
-                            sx={{ width: 65, height: 65, borderRadius: '50%', '&:hover': { backgroundColor: '#E8C999' } }}
-                            onClick={() => setShowNotifications(!showNotifications)}
-                          >
-                            <NotificationsIcon sx={{ fontSize: 50, color: 'white' }} />
-                            {notifications.length > 0 && (
-                              <Box sx={{
+                <Box sx={{ position: 'absolute', top: 10, right: 24 }}>
+                    <Button
+                        sx={{ width: 65, height: 65, borderRadius: '50%', '&:hover': { backgroundColor: '#E8C999' } }}
+                        onClick={() => setShowNotifications(!showNotifications)}
+                    >
+                        <NotificationsIcon sx={{ fontSize: 50, color: 'white' }} />
+                        {notifications.length > 0 && (
+                            <Box sx={{
                                 position: 'absolute', top: 5, right: 5,
                                 background: 'red', color: 'white',
                                 borderRadius: '50%', width: 20, height: 20,
                                 display: 'flex', justifyContent: 'center', alignItems: 'center',
                                 fontSize: '12px'
-                              }}>
-                                {notifications.length}
-                              </Box>
-                            )}
-                          </Button>
-                
-                          {showNotifications && (
-                            <Paper sx={{
-                              position: 'absolute',
-                              top: 70, right: 0,
-                              width: 300, maxHeight: 400,
-                              overflowY: 'auto',
-                              bgcolor: 'white',
-                              boxShadow: 3,
-                              zIndex: 10,
-                              borderRadius: 1
                             }}>
-                              {notifications.length === 0 ? (
+                                {notifications.length}
+                            </Box>
+                        )}
+                    </Button>
+
+                    {showNotifications && (
+                        <Paper sx={{
+                            position: 'absolute',
+                            top: 70, right: 0,
+                            width: 300, maxHeight: 400,
+                            overflowY: 'auto',
+                            bgcolor: 'white',
+                            boxShadow: 3,
+                            zIndex: 10,
+                            borderRadius: 1
+                        }}>
+                            {notifications.length === 0 ? (
                                 <Typography sx={{ p: 2 }}>No notifications</Typography>
-                              ) : (
+                            ) : (
                                 notifications.map((notif, idx) => (
-                                  <Box key={idx} sx={{ p: 1, borderBottom: '1px solid #ccc' }}>
-                                    <Typography sx={{ fontSize: '14px' }}>{notif.message}</Typography>
-                                    <Typography sx={{ fontSize: '10px', color: '#888' }}>
-                                      {new Date(notif.timestamp).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}
-                                    </Typography>
-                                  </Box>
+                                    <Box key={idx} sx={{ p: 1, borderBottom: '1px solid #ccc' }}>
+                                        <Typography sx={{ fontSize: '14px' }}>{notif.message}</Typography>
+                                        <Typography sx={{ fontSize: '10px', color: '#888' }}>
+                                            {new Date(notif.timestamp).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}
+                                        </Typography>
+                                    </Box>
                                 ))
-                              )}
-                            </Paper>
-                          )}
-                        </Box>
+                            )}
+                        </Paper>
+                    )}
+                </Box>
 
                 <Box>
 
@@ -286,6 +387,7 @@ const ApplicantList = () => {
                     {/* Left Side: From and To Date (stacked) */}
                     <Box display="flex" flexDirection="column" gap={2}>
                         {/* From Date */}
+                        {/* From Date */}
                         <FormControl size="small">
                             <Typography fontSize={13} sx={{ mb: 1 }}>From Date:</Typography>
                             <TextField
@@ -293,7 +395,10 @@ const ApplicantList = () => {
                                 size="small"
                                 name="fromDate"
                                 value={person.fromDate || ""}
-
+                                onChange={(e) => setPerson((prev) => ({
+                                    ...prev,
+                                    fromDate: e.target.value
+                                }))}
                                 InputLabelProps={{ shrink: true }}
                             />
                         </FormControl>
@@ -306,10 +411,14 @@ const ApplicantList = () => {
                                 size="small"
                                 name="toDate"
                                 value={person.toDate || ""}
-
+                                onChange={(e) => setPerson((prev) => ({
+                                    ...prev,
+                                    toDate: e.target.value
+                                }))}
                                 InputLabelProps={{ shrink: true }}
                             />
                         </FormControl>
+
                     </Box>
 
                     {/* Right Side: Campus Dropdown with label on top */}
@@ -321,14 +430,18 @@ const ApplicantList = () => {
                                 labelId="campus-label"
                                 id="campus-select"
                                 name="campus"
-                                value={person.campus == null ? "" : String(person.campus)}
+                                value={person.campus === null ? "" : String(person.campus)}
                                 label="Campus (Manila/Cavite)"
-
+                                onChange={(e) => {
+                                    setPerson({ ...person, campus: e.target.value });
+                                    setCurrentPage(1);
+                                }}
                             >
                                 <MenuItem value=""><em>Select Campus</em></MenuItem>
                                 <MenuItem value="0">MANILA</MenuItem>
                                 <MenuItem value="1">CAVITE</MenuItem>
                             </Select>
+
                         </FormControl>
                     </Box>
 
@@ -579,26 +692,38 @@ const ApplicantList = () => {
                     <Box display="flex" flexDirection="column" gap={2}>
                         <Box display="flex" alignItems="center" gap={1}>
                             <Typography fontSize={13} sx={{ minWidth: "100px" }}>School Year:</Typography>
-                            <FormControl size="small" sx={{ minWidth: 180 }}>
-                                <Select value={selectedSY} onChange={(e) => setSelectedSY(e.target.value)} displayEmpty>
-                                    <MenuItem value="">Select SY</MenuItem>
-                                    <MenuItem value="2025-2026">2025 - 2026</MenuItem>
-                                    <MenuItem value="2024-2025">2024 - 2025</MenuItem>
+                            <FormControl size="small" sx={{ width: "200px" }}>
+                                <InputLabel id="school-year-label">School Year</InputLabel>
+                                <Select
+                                    labelId="school-year-label"
+                                    value={selectedSchoolYear}
+                                    onChange={(e) => setSelectedSchoolYear(e.target.value)}
+                                >
+                                    <MenuItem value=""><em>All Years</em></MenuItem>
+                                    {schoolYears.map((y) => (
+                                        <MenuItem key={y.year_id} value={y.year_description}>
+                                            {`${y.year_description}-${parseInt(y.year_description) + 1}`}
+                                        </MenuItem>
+                                    ))}
                                 </Select>
                             </FormControl>
                         </Box>
 
                         <Box display="flex" alignItems="center" gap={1}>
                             <Typography fontSize={13} sx={{ minWidth: "100px" }}>Semester:</Typography>
-                            <FormControl size="small" sx={{ minWidth: 180 }}>
+                            <FormControl size="small" sx={{ width: "200px" }}>
+                                <InputLabel id="semester-label">Semester</InputLabel>
                                 <Select
+                                    labelId="semester-label"
                                     value={selectedSemester}
                                     onChange={(e) => setSelectedSemester(e.target.value)}
-                                    displayEmpty
                                 >
-                                    <MenuItem value="">Select Semester</MenuItem>
-                                    <MenuItem value="First">First</MenuItem>
-                                    <MenuItem value="Second">Second</MenuItem>
+                                    <MenuItem value=""><em>All Semesters</em></MenuItem>
+                                    {semesters.map((s) => (
+                                        <MenuItem key={s.semester_id} value={s.semester_description}>
+                                            {s.semester_description}
+                                        </MenuItem>
+                                    ))}
                                 </Select>
                             </FormControl>
                         </Box>
@@ -608,12 +733,17 @@ const ApplicantList = () => {
                     <Box display="flex" flexDirection="column" gap={2}>
                         <Box display="flex" alignItems="center" gap={1}>
                             <Typography fontSize={13} sx={{ minWidth: "100px" }}>Department:</Typography>
-                            <FormControl size="small" sx={{ minWidth: 250 }}>
+                            <FormControl size="small" sx={{ width: "400px" }}>
                                 <Select
                                     value={selectedDepartmentFilter}
-                                    onChange={(e) => setSelectedDepartmentFilter(e.target.value)}
+                                    onChange={(e) => {
+                                        const selectedDept = e.target.value;
+                                        setSelectedDepartmentFilter(selectedDept);
+                                        handleDepartmentChange(selectedDept); // 🔥 This is the missing piece
+                                    }}
                                     displayEmpty
                                 >
+
                                     <MenuItem value="">All Departments</MenuItem>
                                     {department.map((dep) => (
                                         <MenuItem key={dep.dprtmnt_id} value={dep.dprtmnt_name}>
@@ -621,12 +751,13 @@ const ApplicantList = () => {
                                         </MenuItem>
                                     ))}
                                 </Select>
+
                             </FormControl>
                         </Box>
 
                         <Box display="flex" alignItems="center" gap={1}>
                             <Typography fontSize={13} sx={{ minWidth: "100px" }}>Program:</Typography>
-                            <FormControl size="small" sx={{ minWidth: 250 }}>
+                            <FormControl size="small" sx={{ width: "350px" }}>
                                 <Select
                                     value={selectedProgramFilter}
                                     onChange={(e) => setSelectedProgramFilter(e.target.value)}
@@ -635,7 +766,7 @@ const ApplicantList = () => {
                                     <MenuItem value="">All Programs</MenuItem>
                                     {curriculumOptions.map((prog) => (
                                         <MenuItem key={prog.curriculum_id} value={prog.program_code}>
-                                            {prog.program_code}
+                                            {prog.program_code} - {prog.program_description}
                                         </MenuItem>
                                     ))}
                                 </Select>
@@ -665,7 +796,7 @@ const ApplicantList = () => {
                     </TableHead>
 
                     <TableBody>
-                        {persons.map((person, index) => (
+                        {currentPersons.map((person, index) => (
                             <TableRow key={person.person_id} sx={{ height: '10px' }}>
                                 <TableCell sx={{ color: 'black', textAlign: "center", border: "2px solid maroon", py: 0.5, fontSize: '12px' }}>{index + 1}</TableCell>
                                 <TableCell sx={{ textAlign: "center", border: "2px solid maroon", py: 0.5 }}>

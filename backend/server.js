@@ -938,6 +938,65 @@ app.get("/api/person_with_applicant/:id", async (req, res) => {
 });
 
 
+// Count how many applicants are enrolled
+app.get("/api/enrolled-count", async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      "SELECT COUNT(*) AS total FROM person_table WHERE classifiedAs = 'Freshman (First Year)' OR classifiedAs = 'Transferee' OR classifiedAs = 'Returnee'"
+    );
+    res.json({ total: rows[0].total });
+  } catch (error) {
+    console.error("Error fetching enrolled count:", error);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+app.post("/api/notify-submission", async (req, res) => {
+  const { person_id } = req.body;
+
+  if (!person_id) {
+    return res.status(400).json({ message: "Missing person_id" });
+  }
+
+  try {
+    const [[appInfo]] = await db.query(`
+      SELECT 
+        ant.applicant_number,
+        pt.last_name,
+        pt.first_name,
+        pt.middle_name
+      FROM applicant_numbering_table ant
+      JOIN person_table pt ON ant.person_id = pt.person_id
+      WHERE ant.person_id = ?
+    `, [person_id]);
+
+    const applicant_number = appInfo?.applicant_number || 'Unknown';
+    const fullName = `${appInfo?.last_name || ''}, ${appInfo?.first_name || ''} ${appInfo?.middle_name?.charAt(0) || ''}.`;
+
+    const message = `✅ Applicant #${applicant_number} - ${fullName} submitted their form.`;
+
+    // Save to notifications table
+    await db.query(
+      "INSERT INTO notifications (type, message, applicant_number) VALUES (?, ?, ?)",
+      ['submit', message, applicant_number]
+    );
+
+    // Emit notification
+    io.emit("notification", {
+      type: "submit",
+      message,
+      applicant_number,
+      timestamp: new Date().toISOString()
+    });
+
+    res.json({ message: "Submission notification sent." });
+  } catch (err) {
+    console.error("Notification error:", err);
+    res.status(500).json({ message: "Failed to notify", error: err.message });
+  }
+});
+
+
 // GET person details by person_id
 app.get("/api/person/:id", async (req, res) => {
   const { id } = req.params;
@@ -955,20 +1014,6 @@ app.get("/api/person/:id", async (req, res) => {
     res.status(500).json({ error: "Database error" });
   }
 });
-
-// Count how many applicants are enrolled
-app.get("/api/enrolled-count", async (req, res) => {
-  try {
-    const [rows] = await db.execute(
-      "SELECT COUNT(*) AS total FROM person_table WHERE classifiedAs = 'Freshman (First Year)' OR classifiedAs = 'Transferee' OR classifiedAs = 'Returnee'"
-    );
-    res.json({ total: rows[0].total });
-  } catch (error) {
-    console.error("Error fetching enrolled count:", error);
-    res.status(500).json({ error: "Database error" });
-  }
-});
-
 
 
 // PUT update person details by person_id
@@ -995,6 +1040,8 @@ app.put("/api/person/:id", async (req, res) => {
     vaccine2Brand, vaccine2Date, booster1Brand, booster1Date, booster2Brand, booster2Date,
     chestXray, cbc, urinalysis, otherworkups, symptomsToday, remarks, termsOfAgreement, created_at
   } = req.body;
+
+  
 
   try {
     const [result] = await db.execute(`UPDATE person_table SET
@@ -1158,27 +1205,74 @@ app.post("/api/person/:id/upload-profile", upload.single("profile_img"), async (
 });
 
 // ✅ 5. Get applied programs list (sample, adjust db name/table)
+// server.js
 app.get("/api/applied_program", async (req, res) => {
   try {
     const [rows] = await db3.execute(`
-  SELECT 
-    ct.curriculum_id, 
-    pt.program_description,
-    pt.program_code,
-    pt.major
-  FROM curriculum_table AS ct
-  INNER JOIN program_table AS pt ON pt.program_id = ct.program_id
-`);
-
+      SELECT 
+        ct.curriculum_id,
+        pt.program_id,
+        pt.program_code,
+        pt.program_description,
+        pt.major,
+        d.dprtmnt_id,
+        d.dprtmnt_name
+      FROM curriculum_table AS ct
+      INNER JOIN program_table AS pt ON pt.program_id = ct.program_id
+      INNER JOIN dprtmnt_curriculum_table AS dc ON ct.curriculum_id = dc.curriculum_id
+      INNER JOIN dprtmnt_table AS d ON dc.dprtmnt_id = d.dprtmnt_id
+    `);
 
     if (rows.length === 0) {
       return res.status(404).json({ error: "No curriculum data found" });
     }
 
-    res.json(rows); // [{ curriculum_id: "BSIT" }, { curriculum_id: "BSCS" }, ...]
+    res.json(rows);
   } catch (error) {
     console.error("Error fetching curriculum data:", error);
     res.status(500).json({ error: "Database error" });
+  }
+});
+
+// ✅ Get all saved school years with semester info
+app.get("/api/school_years", async (req, res) => {
+  try {
+    const [rows] = await db3.query(`
+      SELECT 
+        yt.year_description,
+        st.semester_description,
+        sy.astatus
+      FROM school_year_table sy
+      JOIN year_table yt ON sy.year_id = yt.year_id
+      JOIN semester_table st ON sy.semester_id = st.semester_id
+      ORDER BY yt.year_description DESC, st.semester_id ASC
+    `);
+    res.json(rows);
+  } catch (error) {
+    console.error("Error fetching school years:", error);
+    res.status(500).json({ message: "Database error" });
+  }
+});
+
+// ✅ Get year list only
+app.get("/api/year_table", async (req, res) => {
+  try {
+    const [rows] = await db3.query(`SELECT * FROM year_table ORDER BY year_description DESC`);
+    res.json(rows);
+  } catch (error) {
+    console.error("Error fetching year_table:", error);
+    res.status(500).json({ message: "Database error" });
+  }
+});
+
+// ✅ Get semester list only
+app.get("/api/semester_table", async (req, res) => {
+  try {
+    const [rows] = await db3.query(`SELECT * FROM semester_table`);
+    res.json(rows);
+  } catch (error) {
+    console.error("Error fetching semester_table:", error);
+    res.status(500).json({ message: "Database error" });
   }
 });
 

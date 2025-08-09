@@ -380,24 +380,32 @@ const Dashboard5 = () => {
               {/* Next Step (Submit) Button */}
               <Button
                 variant="contained"
-                onClick={(e) => {
+                onClick={async (e) => {
                   handleUpdate(); // Save data
 
                   if (isFormValid()) {
-                    setSnack({
-                      open: true,
-                      message: "Your account has been successfully registered! Wait for further announcement. Please upload your documents.",
-                      severity: "success",
-                    });
+                    try {
+                      await axios.post("http://localhost:5000/api/notify-submission", {
+                        person_id: userID,
+                      });
 
-                    // ✅ Delay navigation by 5 seconds to allow Snackbar to show
-                    setTimeout(() => {
-                      navigate("/requirements_uploader");
-                    }, 2000);
+                      setSnack({
+                        open: true,
+                        message: "Your account has been successfully registered! Wait for further announcement. Please upload your documents.",
+                        severity: "success",
+                      });
+
+                      setTimeout(() => {
+                        navigate("/requirements_uploader");
+                      }, 2000);
+                    } catch (error) {
+                      console.error("Notification failed:", error);
+                    }
                   } else {
                     alert("Please complete all required fields before submitting.");
                   }
                 }}
+
 
                 endIcon={
                   <FolderIcon
