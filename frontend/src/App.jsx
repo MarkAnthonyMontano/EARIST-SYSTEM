@@ -43,7 +43,7 @@ import CourseTagging from './components/CourseTagging';
 import ChangeGradingPeriod from './components/ChangeYearGradPer';
 import AccountDashboard from './pages/AccountDashboard';
 import ScheduleChecker from './components/ScheduleChecker';
-import SearchStudentCOR from './components/SearchCertificateOfGrades';
+import SearchCertificateOfRegistration from './components/SearchCertificateOfRegistration';
 import RoomRegistration from './components/RoomRegistration';
 import ScheduleFilterer from './pages/SchedulePlottingFilter';
 
@@ -178,7 +178,7 @@ function App() {
               <Route path="/schedule_checker/:dprtmnt_id" element={<ProtectedRoute><ScheduleChecker /></ProtectedRoute>} />
               <Route path="/change_grade_period" element={<ProtectedRoute><ChangeGradingPeriod /></ProtectedRoute>} />
               <Route path="/department_room" element={<ProtectedRoute><DepartmentRoom /></ProtectedRoute>} />
-              <Route path="/search_cor" element={<ProtectedRoute><SearchStudentCOR /></ProtectedRoute>} />
+              <Route path="/search_cor" element={<ProtectedRoute><SearchCertificateOfRegistration /></ProtectedRoute>} />
               <Route path="/select_college" element={<ProtectedRoute><ScheduleFilterer /></ProtectedRoute>} />
               <Route path="/examination_profile" element={<ProtectedRoute><ExaminationProfile /></ProtectedRoute>} />
 

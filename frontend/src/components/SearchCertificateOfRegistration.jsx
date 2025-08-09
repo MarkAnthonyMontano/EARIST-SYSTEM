@@ -7,10 +7,7 @@ import '../styles/Print.css'
 import { Search } from "@mui/icons-material";
 import { FcPrint } from "react-icons/fc";
 
-const SearchCertificateOfGrades = () => {
-
-
-
+const SearchCertificateOfRegistration = () => {
   const [data, setData] = useState([]);
 
   const [profilePicture, setProfilePicture] = useState(null);
@@ -3195,4 +3192,4 @@ const SearchCertificateOfGrades = () => {
   );
 };
 
-export default SearchCertificateOfGrades;
+export default SearchCertificateOfRegistration;
