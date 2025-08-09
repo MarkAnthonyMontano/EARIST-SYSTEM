@@ -371,9 +371,9 @@ const StudentRequirements = () => {
 
     return (
       <TableRow key={doc.key}>
-        <TableCell sx={{ fontWeight: 'bold', width: '20%' }}>{doc.label}</TableCell>
+        <TableCell sx={{ fontWeight: 'bold', width: '20%', border: "1px solid maroon" }}>{doc.label}</TableCell>
 
-        <TableCell sx={{ width: '20%' }}>
+        <TableCell sx={{ width: '20%', border: "1px solid maroon" }}>
           {editingRemarkId === uploaded?.upload_id ? (
             <TextField
               size="small"
@@ -425,7 +425,7 @@ const StudentRequirements = () => {
 
 
 
-        <TableCell align="center" sx={{ width: '15%' }}>
+        <TableCell align="center" sx={{ width: '15%', border: "1px solid maroon" }}>
           {uploaded ? (
             uploaded.status === 1 ? (
               <Box
@@ -480,7 +480,7 @@ const StudentRequirements = () => {
           ) : null}
         </TableCell>
 
-        <TableCell>
+        <TableCell style={{ border: "1px solid maroon" }}>
           {uploaded?.created_at &&
             new Date(uploaded.created_at).toLocaleString('en-PH', {
               dateStyle: 'medium',
@@ -489,13 +489,13 @@ const StudentRequirements = () => {
             })}
         </TableCell>
 
-        <TableCell>
+        <TableCell style={{ border: "1px solid maroon" }}>
           {selectedPerson
             ? `[${selectedPerson.applicant_number}] ${selectedPerson.last_name?.toUpperCase()}, ${selectedPerson.first_name?.toUpperCase()} ${selectedPerson.middle_name?.toUpperCase() || ''} ${selectedPerson.extension?.toUpperCase() || ''}`
             : ''}
         </TableCell>
 
-        <TableCell>
+        <TableCell style={{ border: "1px solid maroon" }}>
           <Box display="flex" justifyContent="center" gap={1}>
             {uploaded ? (
               <>
@@ -640,9 +640,9 @@ const StudentRequirements = () => {
 
         <br />
         {/* Applicant ID and Name */}
-        <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroonx`" }}>
+        <TableContainer component={Paper} sx={{ width: '100%', border: "1px solid maroon" }}>
           <Table>
-            <TableHead sx={{ backgroundColor: '#6D2323',  }}>
+            <TableHead sx={{ backgroundColor: '#6D2323', }}>
               <TableRow>
                 {/* Left cell: Applicant ID */}
                 <TableCell sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}>
@@ -668,274 +668,274 @@ const StudentRequirements = () => {
           </Table>
         </TableContainer>
 
-    <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon" }}>
-        {/* SHS GWA and Height row below Applicant Name */}
-        <Box sx={{ px: 2, mb: 2,mt: 2   }}>
-          {/* SHS GWA Field */}
-          <Box sx={{ display: "flex", alignItems: "center", mb: 1, }}>
-            <Typography
-              sx={{
-                fontSize: "14px",
-                fontFamily: "Arial Black",
-                minWidth: "100px",
-                mr: 1,
-              }}
-            >
-              SHS GWA:
-            </Typography>
-            <TextField
-              size="small"
-              name="generalAverage1"
-              placeholder="Enter SHS GWA"
-              value={person.generalAverage1 || ""}
-              sx={{ width: "300px" }}
-              InputProps={{
-                sx: {
-                  height: 30, // control outer height
-                },
-              }}
-              inputProps={{
-                style: {
-                  padding: "4px 8px", // control inner padding
-                  fontSize: "12px",
-                },
-              }}
-            />
-          </Box>
-
-          <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-            <Typography
-              sx={{
-                fontSize: "14px",
-                fontFamily: "Arial Black",
-                minWidth: "100px",
-                mr: 1,
-              }}
-            >
-              Height:
-            </Typography>
-            <TextField
-              size="small"
-              name="height"
-
-              value={person.height || ""}
-              sx={{ width: "100px" }}
-              InputProps={{
-                sx: {
-                  height: 30,
-                },
-              }}
-              inputProps={{
-                style: {
-                  padding: "4px 8px",
-                  fontSize: "12px",
-                },
-              }}
-            />
-            <div style={{ fontSize: "12px", marginLeft: "10px" }}>cm.</div>
-          </Box>
-        </Box>
-
-
-        <br />
-        <br />
-
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 2,
-            px: 2,
-          }}
-        >
-          {/* Left side: Applying As and Strand */}
-          <Box>
-            {/* Applying As */}
-            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+        <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon" }}>
+          {/* SHS GWA and Height row below Applicant Name */}
+          <Box sx={{ px: 2, mb: 2, mt: 2 }}>
+            {/* SHS GWA Field */}
+            <Box sx={{ display: "flex", alignItems: "center", mb: 1, }}>
               <Typography
                 sx={{
                   fontSize: "14px",
                   fontFamily: "Arial Black",
-                  minWidth: "120px",
-
-                  mr: 4.8,
+                  minWidth: "100px",
+                  mr: 1,
                 }}
               >
-                Applying As:
+                SHS GWA:
               </Typography>
               <TextField
-                select
                 size="small"
-                name="applyingAs"
-                value={person.applyingAs || ""}
-                placeholder="Select applyingAs"
+                name="generalAverage1"
+                placeholder="Enter SHS GWA"
+                value={person.generalAverage1 || ""}
                 sx={{ width: "300px" }}
-                InputProps={{ sx: { height: 30 } }}
-                inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
-              >
-
-                <MenuItem value=""><em>Select Applying</em></MenuItem>
-                <MenuItem value="Senior High School Graduate">Senior High School Graduate</MenuItem>
-                <MenuItem value="Senior High School Graduating Student">Senior High School Graduating Student</MenuItem>
-                <MenuItem value="ALS Passer">ALS (Alternative Learning System) Passer</MenuItem>
-                <MenuItem value="Transferee">Transferee from other University/College</MenuItem>
-                <MenuItem value="Cross Enrolee">Cross Enrolee Student</MenuItem>
-                <MenuItem value="Foreign Applicant">Foreign Applicant/Student</MenuItem>
-                <MenuItem value="Baccalaureate Graduate">Baccalaureate Graduate</MenuItem>
-                <MenuItem value="Master Degree Graduate">Master Degree Graduate</MenuItem>
-              </TextField>
+                InputProps={{
+                  sx: {
+                    height: 30, // control outer height
+                  },
+                }}
+                inputProps={{
+                  style: {
+                    padding: "4px 8px", // control inner padding
+                    fontSize: "12px",
+                  },
+                }}
+              />
             </Box>
 
-            {/* Document Status */}
-            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
               <Typography
                 sx={{
                   fontSize: "14px",
                   fontFamily: "Arial Black",
-                  minWidth: "140px",
-                  mr: 2.3,
+                  minWidth: "100px",
+                  mr: 1,
                 }}
               >
-                Document Status:
+                Height:
               </Typography>
               <TextField
-                select
                 size="small"
-                name="document_status"
-                value={person.document_status || ""}
-                onChange={handleChange} // ✅ this stays
-                sx={{ width: "300px" }}
-                InputProps={{ sx: { height: 30 } }}
-                inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
-              >
-                <MenuItem value=""><em>Select Document Status</em></MenuItem>
-                <MenuItem value="On process">On process</MenuItem>
-                <MenuItem value="Documents Verified & ECAT">Documents Verified & ECAT</MenuItem>
-                <MenuItem value="Disapproved">Disapproved</MenuItem>
-                <MenuItem value="Program Closed">Program Closed</MenuItem>
-              </TextField>
+                name="height"
+
+                value={person.height || ""}
+                sx={{ width: "100px" }}
+                InputProps={{
+                  sx: {
+                    height: 30,
+                  },
+                }}
+                inputProps={{
+                  style: {
+                    padding: "4px 8px",
+                    fontSize: "12px",
+                  },
+                }}
+              />
+              <div style={{ fontSize: "12px", marginLeft: "10px" }}>cm.</div>
             </Box>
+          </Box>
 
 
-            {/* Document Type & File Upload */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, mb: 2 }}>
-              {/* Document Type */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography sx={{ fontSize: "14px", fontFamily: "Arial Black", width: "150px" }}>
-                  Document Type:
+          <br />
+          <br />
+
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 2,
+              px: 2,
+            }}
+          >
+            {/* Left side: Applying As and Strand */}
+            <Box>
+              {/* Applying As */}
+              <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                <Typography
+                  sx={{
+                    fontSize: "14px",
+                    fontFamily: "Arial Black",
+                    minWidth: "120px",
+
+                    mr: 4.8,
+                  }}
+                >
+                  Applying As:
                 </Typography>
                 <TextField
                   select
                   size="small"
-                  placeholder="Select Documents"
-                  value={selectedFiles.requirements_id || ''}
-                  onChange={(e) =>
-                    setSelectedFiles(prev => ({
-                      ...prev,
-                      requirements_id: e.target.value,
-                    }))
-                  }
-                  sx={{ width: 300 }}
+                  name="applyingAs"
+                  value={person.applyingAs || ""}
+                  placeholder="Select applyingAs"
+                  sx={{ width: "300px" }}
                   InputProps={{ sx: { height: 30 } }}
                   inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
                 >
-                  <MenuItem value="">
-                    <em>Select Documents</em>
-                  </MenuItem>
-                  <MenuItem value={1}>PSA Birth Certificate</MenuItem>
-                  <MenuItem value={2}>Form 138 (With at least 3rd Quarter posting / No failing grade)</MenuItem>
-                  <MenuItem value={3}>Certificate of Good Moral Character</MenuItem>
-                  <MenuItem value={4}>Certificate Belonging to Graduating Class</MenuItem>
+
+                  <MenuItem value=""><em>Select Applying</em></MenuItem>
+                  <MenuItem value="Senior High School Graduate">Senior High School Graduate</MenuItem>
+                  <MenuItem value="Senior High School Graduating Student">Senior High School Graduating Student</MenuItem>
+                  <MenuItem value="ALS Passer">ALS (Alternative Learning System) Passer</MenuItem>
+                  <MenuItem value="Transferee">Transferee from other University/College</MenuItem>
+                  <MenuItem value="Cross Enrolee">Cross Enrolee Student</MenuItem>
+                  <MenuItem value="Foreign Applicant">Foreign Applicant/Student</MenuItem>
+                  <MenuItem value="Baccalaureate Graduate">Baccalaureate Graduate</MenuItem>
+                  <MenuItem value="Master Degree Graduate">Master Degree Graduate</MenuItem>
                 </TextField>
               </Box>
 
-              {/* Document File */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography sx={{ fontSize: "14px", fontFamily: "Arial Black", width: "150px" }}>
-                  Document File:
+              {/* Document Status */}
+              <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+                <Typography
+                  sx={{
+                    fontSize: "14px",
+                    fontFamily: "Arial Black",
+                    minWidth: "140px",
+                    mr: 2.3,
+                  }}
+                >
+                  Document Status:
                 </Typography>
                 <TextField
+                  select
                   size="small"
-                  placeholder="Select File"
-                  value={selectedFiles.file?.name || ''}
-                  InputProps={{
-                    readOnly: true,
-                    sx: { height: 30 },
-                  }}
+                  name="document_status"
+                  value={person.document_status || ""}
+                  onChange={handleChange} // ✅ this stays
+                  sx={{ width: "300px" }}
+                  InputProps={{ sx: { height: 30 } }}
                   inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
-                  sx={{ width: 300 }}
-                  onClick={() => document.getElementById("fileInput").click()}
-                />
-                <input
-                  id="fileInput"
-                  type="file"
-                  hidden
-                  accept=".jpg,.jpeg,.png,.pdf"
-                  onChange={(e) =>
-                    setSelectedFiles(prev => ({
-                      ...prev,
-                      file: e.target.files[0],
-                    }))
-                  }
+                >
+                  <MenuItem value=""><em>Select Document Status</em></MenuItem>
+                  <MenuItem value="On process">On process</MenuItem>
+                  <MenuItem value="Documents Verified & ECAT">Documents Verified & ECAT</MenuItem>
+                  <MenuItem value="Disapproved">Disapproved</MenuItem>
+                  <MenuItem value="Program Closed">Program Closed</MenuItem>
+                </TextField>
+              </Box>
+
+
+              {/* Document Type & File Upload */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, mb: 2 }}>
+                {/* Document Type */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography sx={{ fontSize: "14px", fontFamily: "Arial Black", width: "150px" }}>
+                    Document Type:
+                  </Typography>
+                  <TextField
+                    select
+                    size="small"
+                    placeholder="Select Documents"
+                    value={selectedFiles.requirements_id || ''}
+                    onChange={(e) =>
+                      setSelectedFiles(prev => ({
+                        ...prev,
+                        requirements_id: e.target.value,
+                      }))
+                    }
+                    sx={{ width: 300 }}
+                    InputProps={{ sx: { height: 30 } }}
+                    inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
+                  >
+                    <MenuItem value="">
+                      <em>Select Documents</em>
+                    </MenuItem>
+                    <MenuItem value={1}>PSA Birth Certificate</MenuItem>
+                    <MenuItem value={2}>Form 138 (With at least 3rd Quarter posting / No failing grade)</MenuItem>
+                    <MenuItem value={3}>Certificate of Good Moral Character</MenuItem>
+                    <MenuItem value={4}>Certificate Belonging to Graduating Class</MenuItem>
+                  </TextField>
+                </Box>
+
+                {/* Document File */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography sx={{ fontSize: "14px", fontFamily: "Arial Black", width: "150px" }}>
+                    Document File:
+                  </Typography>
+                  <TextField
+                    size="small"
+                    placeholder="Select File"
+                    value={selectedFiles.file?.name || ''}
+                    InputProps={{
+                      readOnly: true,
+                      sx: { height: 30 },
+                    }}
+                    inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
+                    sx={{ width: 300 }}
+                    onClick={() => document.getElementById("fileInput").click()}
+                  />
+                  <input
+                    id="fileInput"
+                    type="file"
+                    hidden
+                    accept=".jpg,.jpeg,.png,.pdf"
+                    onChange={(e) =>
+                      setSelectedFiles(prev => ({
+                        ...prev,
+                        file: e.target.files[0],
+                      }))
+                    }
+                  />
+                </Box>
+              </Box>
+
+
+              <Button
+                variant="contained"
+                color="success"
+                sx={{
+                  ml: 2,
+                  textTransform: "none",
+                  fontWeight: "bold",
+                  height: "35px",
+                  width: "200px"
+                }}
+                onClick={handleUploadSubmit}
+                disabled={!selectedFiles.requirements_id || !selectedFiles.file}
+              >
+                Submit Documents
+              </Button>
+            </Box>
+
+            {/* Right side: ID Photo */}
+            {person.profile_img && (
+              <Box
+                sx={{
+                  width: "2in", // standard 2×2 size
+                  height: "2in",
+                  border: "1px solid #ccc",
+                  overflow: "hidden",
+                  marginTop: "-220px",
+                  borderRadius: "4px",
+                }}
+              >
+                <img
+                  src={`http://localhost:5000/uploads/${person.profile_img}`}
+                  alt="Profile"
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />
               </Box>
-            </Box>
-
-
-            <Button
-              variant="contained"
-              color="success"
-              sx={{
-                ml: 2,
-                textTransform: "none",
-                fontWeight: "bold",
-                height: "35px",
-                width: "200px"
-              }}
-              onClick={handleUploadSubmit}
-              disabled={!selectedFiles.requirements_id || !selectedFiles.file}
-            >
-              Submit Documents
-            </Button>
+            )}
           </Box>
-
-          {/* Right side: ID Photo */}
-          {person.profile_img && (
-            <Box
-              sx={{
-                width: "2in", // standard 2×2 size
-                height: "2in",
-                border: "1px solid #ccc",
-                overflow: "hidden",
-                marginTop: "-220px",
-                borderRadius: "4px",
-              }}
-            >
-              <img
-                src={`http://localhost:5000/uploads/${person.profile_img}`}
-                alt="Profile"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            </Box>
-          )}
-        </Box>
         </TableContainer>
-        
+
 
 
 
         <>
-          <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon" }}>
+          <TableContainer component={Paper} sx={{ width: '100%', border: "1px solid maroon" }}>
             <Table>
-              <TableHead sx={{ backgroundColor: '#6D2323',  }}>
+              <TableHead sx={{ backgroundColor: '#6D2323', }}>
                 <TableRow>
-                  <TableCell sx={{ color: 'white', textAlign: "Center" }}>Document Type</TableCell>
-                  <TableCell sx={{ color: 'white', textAlign: "Center" }}>Remarks</TableCell>
-                  <TableCell sx={{ color: 'white', textAlign: "Center" }}>Status</TableCell>
-                  <TableCell sx={{ color: 'white', textAlign: "Center" }}>Date and Time Submitted</TableCell>
-                  <TableCell sx={{ color: 'white', textAlign: "Center" }}>User</TableCell>
-                  <TableCell sx={{ color: 'white', textAlign: "Center" }}>Action</TableCell>
+                  <TableCell sx={{ color: 'white', textAlign: "Center", border: "1px solid maroon" }}>Document Type</TableCell>
+                  <TableCell sx={{ color: 'white', textAlign: "Center", border: "1px solid maroon" }}>Remarks</TableCell>
+                  <TableCell sx={{ color: 'white', textAlign: "Center", border: "1px solid maroon" }}>Status</TableCell>
+                  <TableCell sx={{ color: 'white', textAlign: "Center", border: "1px solid maroon" }}>Date and Time Submitted</TableCell>
+                  <TableCell sx={{ color: 'white', textAlign: "Center", border: "1px solid maroon" }}>User</TableCell>
+                  <TableCell sx={{ color: 'white', textAlign: "Center", border: "1px solid maroon" }}>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

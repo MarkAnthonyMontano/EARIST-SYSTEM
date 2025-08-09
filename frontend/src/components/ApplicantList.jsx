@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import {
     Box,
@@ -23,6 +23,8 @@ import { io } from "socket.io-client";
 import { Snackbar, Alert } from '@mui/material';
 import { useNavigate } from "react-router-dom";
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import { FcPrint } from "react-icons/fc";
+import EaristLogo from "../assets/EaristLogo.png";
 
 const socket = io("http://localhost:5000");
 
@@ -31,6 +33,35 @@ const ApplicantList = () => {
     const [persons, setPersons] = useState([]);
     const [selectedPerson, setSelectedPerson] = useState(null);
     const [assignedNumber, setAssignedNumber] = useState('');
+    const [userID, setUserID] = useState("");
+    const [user, setUser] = useState("");
+    const [userRole, setUserRole] = useState("");
+
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem("email");
+        const storedRole = localStorage.getItem("role");
+        const storedID = localStorage.getItem("person_id");
+
+        if (storedUser && storedRole && storedID) {
+            setUser(storedUser);
+            setUserRole(storedRole);
+            setUserID(storedID);
+
+            if (storedRole === "registrar") {
+
+                if (storedID !== "undefined") {
+
+                } else {
+                    console.warn("Stored person_id is invalid:", storedID);
+                }
+            } else {
+                window.location.href = "/login";
+            }
+        } else {
+            window.location.href = "/login";
+        }
+    }, []);
 
     const [error, setError] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
@@ -101,96 +132,96 @@ const ApplicantList = () => {
     }, []);
 
 
-const filteredPersons = persons
-  .filter((personData) => {
-    const fullText = `${personData.first_name} ${personData.middle_name} ${personData.last_name} ${personData.emailAddress ?? ''} ${personData.applicant_number ?? ''}`.toLowerCase();
-    const matchesSearch = fullText.includes(searchQuery.toLowerCase());
+    const filteredPersons = persons
+        .filter((personData) => {
+            const fullText = `${personData.first_name} ${personData.middle_name} ${personData.last_name} ${personData.emailAddress ?? ''} ${personData.applicant_number ?? ''}`.toLowerCase();
+            const matchesSearch = fullText.includes(searchQuery.toLowerCase());
 
-    const matchesCampus =
-      person.campus === "" || String(personData.campus) === String(person.campus);
+            const matchesCampus =
+                person.campus === "" || String(personData.campus) === String(person.campus);
 
-    const matchesApplicantStatus =
-      selectedApplicantStatus === "" ||
-      personData.applicant_status === selectedApplicantStatus;
+            const matchesApplicantStatus =
+                selectedApplicantStatus === "" ||
+                personData.applicant_status === selectedApplicantStatus;
 
-    const matchesRegistrarStatus =
-      selectedRegistrarStatus === "" ||
-      personData.registrar_status === selectedRegistrarStatus;
+            const matchesRegistrarStatus =
+                selectedRegistrarStatus === "" ||
+                personData.registrar_status === selectedRegistrarStatus;
 
-    const programInfo = allCurriculums.find(
-      (opt) => opt.curriculum_id?.toString() === personData.program?.toString()
-    );
+            const programInfo = allCurriculums.find(
+                (opt) => opt.curriculum_id?.toString() === personData.program?.toString()
+            );
 
-    const matchesProgram =
-      selectedProgramFilter === "" ||
-      programInfo?.program_code === selectedProgramFilter;
+            const matchesProgram =
+                selectedProgramFilter === "" ||
+                programInfo?.program_code === selectedProgramFilter;
 
-    const matchesDepartment =
-      selectedDepartmentFilter === "" ||
-      programInfo?.dprtmnt_name === selectedDepartmentFilter;
+            const matchesDepartment =
+                selectedDepartmentFilter === "" ||
+                programInfo?.dprtmnt_name === selectedDepartmentFilter;
 
-    const matchesSchoolYear =
-      selectedSchoolYear === "" ||
-      String(personData.school_year) === String(selectedSchoolYear);
+            const matchesSchoolYear =
+                selectedSchoolYear === "" ||
+                String(personData.school_year) === String(selectedSchoolYear);
 
-    const matchesSemester =
-      selectedSemester === "" ||
-      String(personData.semester) === String(selectedSemester);
+            const matchesSemester =
+                selectedSemester === "" ||
+                String(personData.semester) === String(selectedSemester);
 
-    // ✅ Match by Date Applied range
-    let matchesDateRange = true;
-    if (person.fromDate && person.toDate) {
-      const appliedDate = new Date(personData.created_at);
-      const from = new Date(person.fromDate);
-      const to = new Date(person.toDate);
-      matchesDateRange = appliedDate >= from && appliedDate <= to;
-    } else if (person.fromDate) {
-      const appliedDate = new Date(personData.created_at);
-      const from = new Date(person.fromDate);
-      matchesDateRange = appliedDate >= from;
-    } else if (person.toDate) {
-      const appliedDate = new Date(personData.created_at);
-      const to = new Date(person.toDate);
-      matchesDateRange = appliedDate <= to;
-    }
+            // ✅ Match by Date Applied range
+            let matchesDateRange = true;
+            if (person.fromDate && person.toDate) {
+                const appliedDate = new Date(personData.created_at);
+                const from = new Date(person.fromDate);
+                const to = new Date(person.toDate);
+                matchesDateRange = appliedDate >= from && appliedDate <= to;
+            } else if (person.fromDate) {
+                const appliedDate = new Date(personData.created_at);
+                const from = new Date(person.fromDate);
+                matchesDateRange = appliedDate >= from;
+            } else if (person.toDate) {
+                const appliedDate = new Date(personData.created_at);
+                const to = new Date(person.toDate);
+                matchesDateRange = appliedDate <= to;
+            }
 
-    return (
-      matchesSearch &&
-      matchesCampus &&
-      matchesApplicantStatus &&
-      matchesRegistrarStatus &&
-      matchesDepartment &&
-      matchesProgram &&
-      matchesSchoolYear &&
-      matchesSemester &&
-      matchesDateRange
-    );
-  })
-  // ✅ Sorting logic
-  .sort((a, b) => {
-    let fieldA, fieldB;
+            return (
+                matchesSearch &&
+                matchesCampus &&
+                matchesApplicantStatus &&
+                matchesRegistrarStatus &&
+                matchesDepartment &&
+                matchesProgram &&
+                matchesSchoolYear &&
+                matchesSemester &&
+                matchesDateRange
+            );
+        })
+        // ✅ Sorting logic
+        .sort((a, b) => {
+            let fieldA, fieldB;
 
-    if (sortBy === "name") {
-      fieldA = `${a.last_name} ${a.first_name} ${a.middle_name || ''}`.toLowerCase();
-      fieldB = `${b.last_name} ${b.first_name} ${b.middle_name || ''}`.toLowerCase();
-    } else if (sortBy === "id") {
-      fieldA = a.applicant_number || "";
-      fieldB = b.applicant_number || "";
-    } else if (sortBy === "email") {
-      fieldA = a.emailAddress?.toLowerCase() || "";
-      fieldB = b.emailAddress?.toLowerCase() || "";
-    } else {
-      return 0; // no sorting if no sortBy
-    }
+            if (sortBy === "name") {
+                fieldA = `${a.last_name} ${a.first_name} ${a.middle_name || ''}`.toLowerCase();
+                fieldB = `${b.last_name} ${b.first_name} ${b.middle_name || ''}`.toLowerCase();
+            } else if (sortBy === "id") {
+                fieldA = a.applicant_number || "";
+                fieldB = b.applicant_number || "";
+            } else if (sortBy === "email") {
+                fieldA = a.emailAddress?.toLowerCase() || "";
+                fieldB = b.emailAddress?.toLowerCase() || "";
+            } else {
+                return 0; // no sorting if no sortBy
+            }
 
-    if (fieldA < fieldB) return sortOrder === "asc" ? -1 : 1;
-    if (fieldA > fieldB) return sortOrder === "asc" ? 1 : -1;
-    return 0;
-  });
+            if (fieldA < fieldB) return sortOrder === "asc" ? -1 : 1;
+            if (fieldA > fieldB) return sortOrder === "asc" ? 1 : -1;
+            return 0;
+        });
 
 
 
-    const [itemsPerPage, setItemsPerPage] = useState(50);
+    const [itemsPerPage, setItemsPerPage] = useState(100);
 
     const totalPages = Math.ceil(filteredPersons.length / itemsPerPage);
     const indexOfLastItem = currentPage * itemsPerPage;
@@ -294,6 +325,125 @@ const filteredPersons = persons
     };
 
 
+    const [applicants, setApplicants] = useState([]);
+    const divToPrintRef = useRef();
+
+
+
+    const printDiv = () => {
+        const newWin = window.open("", "Print-Window");
+        newWin.document.open();
+        newWin.document.write(`
+    <html>
+      <head>
+        <title>Applicant List</title>
+        <style>
+          @page {
+            size: A4;
+            margin: 10mm;
+          }
+          body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+          }
+          .print-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+          }
+          .print-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            width: 100%;
+          }
+          .print-header img {
+            position: absolute;
+            left: 0;
+            margin-left: 10px;
+            width: 120px;
+            height: 120px;
+          }
+          table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+          }
+          th, td {
+            border: 0.5px solid black;
+            padding: 4px 6px;
+            font-size: 12px;
+            text-align: center;
+          }
+          th {
+            background-color: #800000;
+            color: white;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+        </style>
+      </head>
+      <body onload="window.print(); setTimeout(() => window.close(), 100);">
+        <div class="print-container">
+
+          <!-- Header -->
+          <div class="print-header">
+            <img src="${EaristLogo}" alt="Earist Logo" />
+            <div>
+              <div>Republic of the Philippines</div>
+              <b style="letter-spacing: 1px; font-size: 20px;">
+                Eulogio "Amang" Rodriguez
+              </b>
+              <div style="letter-spacing: 1px; font-size: 20px;">
+                <b>Institute of Science and Technology</b>
+              </div>
+              <div>Nagtahan St. Sampaloc, Manila</div>
+              <div style="margin-top: 30px;">
+                <b style="font-size: 24px; letter-spacing: 1px;">
+                  Applicant List
+                </b>
+              </div>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <table>
+            <thead>
+              <tr>
+                <th>Applicant ID</th>
+                <th>Applicant Name</th>
+                <th>Program</th>
+                <th>SHS GWA</th>
+                <th>Date Applied</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filteredPersons.map(person => `
+                <tr>
+                  <td>${person.applicant_number ?? "N/A"}</td>
+                  <td>${person.last_name}, ${person.first_name} ${person.middle_name ?? ""} ${person.extension ?? ""}</td>
+                  <td>${curriculumOptions.find(
+            item => item.curriculum_id?.toString() === person.program?.toString()
+        )?.program_code ?? "N/A"
+            }</td>
+                  <td>${person.generalAverage1 ?? ""}</td>
+                  <td>${new Date(person.created_at).toLocaleDateString("en-PH")}</td>
+                  <td>${person.registrar_status ?? ""}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+
+        </div>
+      </body>
+    </html>
+  `);
+        newWin.document.close();
+    };
 
 
     return (
@@ -367,62 +517,87 @@ const filteredPersons = persons
                     />
                 </Box>
             </Box>
-            <hr style={{ border: "1px solid #ccc", width: "100%" }} />
-            <br />
-            <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon" }}>
-                <Table>
-                    <TableHead sx={{ backgroundColor: '#6D2323', }}>
-                        <TableRow>
-                            <TableCell sx={{ color: 'white', textAlign: "Center" }}>Applicantion Date  </TableCell>
 
+            <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+            <div style={{ height: "20px" }}></div>
+            <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon",  }}>
+                <Table>
+                    <TableHead sx={{ backgroundColor: '#6D2323' }}>
+                        <TableRow>
+                            <TableCell sx={{ color: 'white', textAlign: "Center" }}>Application Date</TableCell>
                         </TableRow>
                     </TableHead>
-
                 </Table>
             </TableContainer>
 
             <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", p: 2 }}>
                 <Box display="flex" justifyContent="space-between" flexWrap="wrap" rowGap={2}>
 
-                    {/* Left Side: From and To Date (stacked) */}
+                    {/* Left Side: From and To Date */}
                     <Box display="flex" flexDirection="column" gap={2}>
-                        {/* From Date */}
-                        {/* From Date */}
-                        <FormControl size="small">
-                            <Typography fontSize={13} sx={{ mb: 1 }}>From Date:</Typography>
-                            <TextField
-                                type="date"
-                                size="small"
-                                name="fromDate"
-                                value={person.fromDate || ""}
-                                onChange={(e) => setPerson((prev) => ({
-                                    ...prev,
-                                    fromDate: e.target.value
-                                }))}
-                                InputLabelProps={{ shrink: true }}
-                            />
-                        </FormControl>
+
+                        {/* From Date + Print Button */}
+                        <Box display="flex" alignItems="flex-end" gap={2}>
+
+                            <FormControl size="small" sx={{ width: 200 }}>
+                                <InputLabel shrink htmlFor="from-date">From Date</InputLabel>
+                                <TextField
+                                    id="from-date"
+                                    type="date"
+                                    size="small"
+                                    name="fromDate"
+                                    value={person.fromDate || ""}
+                                    onChange={(e) => setPerson(prev => ({ ...prev, fromDate: e.target.value }))}
+                                    InputLabelProps={{ shrink: true }}
+                                />
+                            </FormControl>
+
+                            <button
+                                onClick={printDiv}
+                                style={{
+                                    padding: "5px 20px",
+                                    border: "2px solid black",
+                                    backgroundColor: "#f0f0f0",
+                                    color: "black",
+                                    borderRadius: "5px",
+                                    cursor: "pointer",
+                                    fontSize: "14px",
+                                    fontWeight: "bold",
+                                    transition: "background-color 0.3s, transform 0.2s",
+                                    height: "40px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "8px",
+                                    userSelect: "none",
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#d3d3d3"}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#f0f0f0"}
+                                onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.95)"}
+                                onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
+                                type="button"
+                            >
+                                <FcPrint size={20} />
+                                Print Applicant List
+                            </button>
+                        </Box>
 
                         {/* To Date */}
-                        <FormControl size="small">
-                            <Typography fontSize={13} sx={{ mb: 1 }}>To Date:</Typography>
+                        <FormControl size="small" sx={{ width: 200 }}>
+                            <InputLabel shrink htmlFor="to-date">To Date</InputLabel>
                             <TextField
+                                id="to-date"
                                 type="date"
                                 size="small"
                                 name="toDate"
                                 value={person.toDate || ""}
-                                onChange={(e) => setPerson((prev) => ({
-                                    ...prev,
-                                    toDate: e.target.value
-                                }))}
+                                onChange={(e) => setPerson(prev => ({ ...prev, toDate: e.target.value }))}
                                 InputLabelProps={{ shrink: true }}
                             />
                         </FormControl>
-
                     </Box>
 
-                    {/* Right Side: Campus Dropdown with label on top */}
-                    <Box display="flex" flexDirection="column" gap={1}>
+                    {/* Right Side: Campus Dropdown */}
+                    <Box display="flex" flexDirection="column" gap={1} sx={{ minWidth: 200 }}>
                         <Typography fontSize={13} sx={{ mb: 1 }}>Campus:</Typography>
                         <FormControl size="small" sx={{ width: "200px" }}>
                             <InputLabel id="campus-label">-Campus-</InputLabel>
@@ -430,10 +605,10 @@ const filteredPersons = persons
                                 labelId="campus-label"
                                 id="campus-select"
                                 name="campus"
-                                value={person.campus === null ? "" : String(person.campus)}
-                                label="Campus (Manila/Cavite)"
+                                value={person.campus ?? ""}
+                                label="-Campus-"
                                 onChange={(e) => {
-                                    setPerson({ ...person, campus: e.target.value });
+                                    setPerson(prev => ({ ...prev, campus: e.target.value }));
                                     setCurrentPage(1);
                                 }}
                             >
@@ -441,13 +616,11 @@ const filteredPersons = persons
                                 <MenuItem value="0">MANILA</MenuItem>
                                 <MenuItem value="1">CAVITE</MenuItem>
                             </Select>
-
                         </FormControl>
                     </Box>
 
                 </Box>
             </TableContainer>
-
 
             <TableContainer component={Paper} sx={{ width: '100%', }}>
                 <Table size="small">
@@ -776,30 +949,54 @@ const filteredPersons = persons
                 </Box>
             </TableContainer>
 
+            <div ref={divToPrintRef}>
+
+            </div>
 
 
-            <TableContainer component={Paper} sx={{ width: '100%' }}>
-                <Table size="small"> {/* size="small" reduces default padding */}
-                    <TableHead sx={{ backgroundColor: '#6D2323' }}>
+            <TableContainer component={Paper} sx={{ width: "100%" }}>
+                <Table size="small">
+                    <TableHead sx={{ backgroundColor: "#6D2323" }}>
                         <TableRow>
-                            <TableCell sx={{ color: 'white', textAlign: "center", width: "2%", py: 0.5, fontSize: '12px', border: "2px solid maroon", }}>#</TableCell>
-                            <TableCell sx={{ color: 'white', textAlign: "center", width: "3%", py: 0.5, fontSize: '12px', border: "2px solid maroon", }}>Submitted Orig Documents</TableCell>
-                            <TableCell sx={{ color: 'white', textAlign: "center", width: "10%", py: 0.5, fontSize: '12px', border: "2px solid maroon", }}>Applicant ID</TableCell>
-                            <TableCell sx={{ color: 'white', textAlign: "center", width: "30%", py: 0.5, fontSize: '12px', border: "2px solid maroon", }}>Name</TableCell>
-                            <TableCell sx={{ color: 'white', textAlign: "center", width: "10%", py: 0.5, fontSize: '12px', border: "2px solid maroon", }}>Program</TableCell>
-                            <TableCell sx={{ color: 'white', textAlign: "center", width: "6%", py: 0.5, fontSize: '12px', border: "2px solid maroon", }}>SHS GWA</TableCell>
-                            <TableCell sx={{ color: 'white', textAlign: "center", width: "9%", py: 0.5, fontSize: '12px', border: "2px solid maroon", }}>Date Applied</TableCell>
-                            <TableCell sx={{ color: 'white', textAlign: "center", width: "9%", py: 0.5, fontSize: '12px', border: "2px solid maroon", }}>Date Last Updated</TableCell>
-                            <TableCell sx={{ color: 'white', textAlign: "center", width: "10%", py: 0.5, fontSize: '12px', border: "2px solid maroon", }}>Applicant Status</TableCell>
-                            <TableCell sx={{ color: 'white', textAlign: "center", width: "9%", py: 0.5, fontSize: '12px', border: "2px solid maroon", }}>Registrar Status</TableCell>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "2%", py: 0.5, fontSize: "12px", border: "1px solid maroon", borderLeft: "2px solid maroon" }}>
+                                #
+                            </TableCell>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "3%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
+                                Submitted Orig Documents
+                            </TableCell>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
+                                Applicant ID
+                            </TableCell>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "30%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
+                                Name
+                            </TableCell>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
+                                Program
+                            </TableCell>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "6%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
+                                SHS GWA
+                            </TableCell>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "9%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
+                                Date Applied
+                            </TableCell>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "9%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
+                                Date Last Updated
+                            </TableCell>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
+                                Applicant Status
+                            </TableCell>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "9%", py: 0.5, fontSize: "12px", border: "1px solid maroon", borderRight: "2px solid maroon" }}>
+                                Registrar Status
+                            </TableCell>
                         </TableRow>
                     </TableHead>
-
                     <TableBody>
                         {currentPersons.map((person, index) => (
-                            <TableRow key={person.person_id} sx={{ height: '10px' }}>
-                                <TableCell sx={{ color: 'black', textAlign: "center", border: "2px solid maroon", py: 0.5, fontSize: '12px' }}>{index + 1}</TableCell>
-                                <TableCell sx={{ textAlign: "center", border: "2px solid maroon", py: 0.5 }}>
+                            <TableRow key={person.person_id} sx={{ height: "10px" }}>
+                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", borderLeft: "2px solid maroon", py: 0.5, fontSize: "12px" }}>
+                                    {index + 1}
+                                </TableCell>
+                                <TableCell sx={{ textAlign: "center", border: "1px solid maroon", py: 0.5 }}>
                                     <input
                                         type="checkbox"
                                         disabled
@@ -807,39 +1004,45 @@ const filteredPersons = persons
                                         style={{ transform: "scale(1.2)", cursor: "default" }}
                                     />
                                 </TableCell>
-
                                 <TableCell
-                                    sx={{ color: 'blue', textAlign: "center", border: "2px solid maroon", py: 0.5, fontSize: '12px', cursor: 'pointer' }}
+                                    sx={{ color: "blue", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px", cursor: "pointer" }}
                                     onClick={() => navigate(`/admin_dashboard1?person_id=${person.person_id}`)}
                                 >
                                     {person.applicant_number ?? "N/A"}
                                 </TableCell>
-
                                 <TableCell
-                                    sx={{ color: 'blue', textAlign: "left", border: "2px solid maroon", py: 0.5, fontSize: '12px', cursor: 'pointer' }}
+                                    sx={{ color: "blue", textAlign: "left", border: "1px solid maroon", py: 0.5, fontSize: "12px", cursor: "pointer" }}
                                     onClick={() => navigate(`/admin_dashboard1?person_id=${person.person_id}`)}
                                 >
-                                    {`${person.last_name}, ${person.first_name} ${person.middle_name ?? ''} ${person.extension ?? ''}`}
+                                    {`${person.last_name}, ${person.first_name} ${person.middle_name ?? ""} ${person.extension ?? ""}`}
                                 </TableCell>
-
-                                <TableCell sx={{ color: 'black', textAlign: "center", border: "2px solid maroon", py: 0.5, fontSize: '12px' }}>
+                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px" }}>
                                     {
                                         curriculumOptions.find(
                                             (item) => item.curriculum_id?.toString() === person.program?.toString()
                                         )?.program_code ?? "N/A"
                                     }
                                 </TableCell>
-                                <TableCell sx={{ color: 'black', textAlign: "center", border: "2px solid maroon", py: 0.5, fontSize: '12px' }}>{person.generalAverage1}</TableCell>
-                                <TableCell sx={{ color: 'black', textAlign: "center", border: "2px solid maroon", py: 0.5, fontSize: '12px' }}>{person.created_at}</TableCell>
-                                <TableCell sx={{ color: 'black', textAlign: "center", border: "2px solid maroon", py: 0.5, fontSize: '12px' }}>{person.last_updated}</TableCell>
-                                <TableCell sx={{ color: 'black', textAlign: "center", border: "2px solid maroon", py: 0.5, fontSize: '12px' }}>{person.applicant_status}</TableCell>
-                                <TableCell sx={{ color: 'black', textAlign: "center", border: "2px solid maroon", py: 0.5, fontSize: '12px' }}>{person.registrar_status}</TableCell>
+                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px" }}>
+                                    {person.generalAverage1}
+                                </TableCell>
+                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px" }}>
+                                    {person.created_at}
+                                </TableCell>
+                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px" }}>
+                                    {person.last_updated}
+                                </TableCell>
+                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px" }}>
+                                    {person.applicant_status}
+                                </TableCell>
+                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", borderRight: "2px solid maroon", py: 0.5, fontSize: "12px" }}>
+                                    {person.registrar_status}
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
                 </Table>
             </TableContainer>
-
 
             <Snackbar
                 open={snack.open}

@@ -2,7 +2,13 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { FcPrint } from "react-icons/fc";
+import EaristLogo from "../assets/EaristLogo.png";
+import {
+  Box,
 
+  Typography,
+
+} from '@mui/material';
 const StudentList = () => {
   const { curriculum_id, dstID, courseID, professorID } = useParams();
   const [studentList, setStudent] = useState([]);
@@ -95,8 +101,8 @@ const StudentList = () => {
           </head>
           <body onload="window.print(); setTimeout(() => window.close(), 100);">
             <div class="print-container">
-              ${divToPrint.innerHTML}
-            </div>
+  ${divToPrint.innerHTML}
+</div>
           </body>
         </html>
         `);
@@ -106,8 +112,9 @@ const StudentList = () => {
       console.error("divToPrintRef is not set.");
     }
   };
+
   return (
-    <div className="mr-[1rem] mt-4">
+    <div>
       <style>
         {`
         @media print {
@@ -117,6 +124,31 @@ const StudentList = () => {
         }
       `}
       </style>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          mt: 2,
+
+          px: 2,
+        }}
+      >
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 'bold',
+            color: 'maroon',
+            fontSize: '36px',
+          }}
+        >
+          CLASS LIST
+        </Typography>
+
+        <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+        <br />
+      </Box>
       <button
         onClick={printDiv}
         style={{
@@ -153,6 +185,12 @@ const StudentList = () => {
               .top-row {
                 display: flex;
               }
+                .print-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
               .top-box {
                 border: 0.5px solid black;
                 padding: 4px 6px;
@@ -162,7 +200,7 @@ const StudentList = () => {
                 flex: 1;
               }
               table, th, td {
-                border: 0.5px solid black;
+             
                 border-collapse: collapse;
               }
               th, td {
@@ -178,9 +216,67 @@ const StudentList = () => {
                 width: 100%;         /* stretch to fill */
                 max-width: none;     /* remove fixed max-width */
               }
+                
             `}
             </style>
+            <table
+              className="student-table"
+              width="100%" style={{ borderCollapse: "collapse" }}>
+              <tbody>
+                <tr>
 
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      position: "relative",
+                      width: "100%",
+                    }}
+                  >
+                    {/* Logo on left */}
+                    <img
+                      src={EaristLogo}
+                      alt="Earist Logo"
+                      style={{
+                        position: "absolute",
+                        left: 0,
+                        marginLeft: "-10px",
+                        width: "120px",
+                        height: "120px",
+                      }}
+                    />
+
+                    {/* Centered School Information */}
+                    <div style={{ textAlign: "center", lineHeight: "1" }}>
+                      <div>Republic of the Philippines</div>
+                      <b
+                        style={{
+                          letterSpacing: "1px",
+                          fontSize: "20px",
+                        }}
+                      >
+                        Eulogio "Amang" Rodriguez
+                      </b>
+                      <div style={{ letterSpacing: "1px", fontSize: "20px" }}>
+                        <b>Institute of Science and Technology</b>
+                      </div>
+                      <div>Nagtahan St. Sampaloc, Manila</div>
+
+                      <div style={{ marginTop: "30px" }}>
+                        <b style={{ fontSize: "24px", letterSpacing: "1px", fontWeight: "bold" }}>
+                          Class List
+                        </b>
+                      </div>
+                    </div>
+                  </div>
+
+                </tr>
+              </tbody>
+            </table>
+
+            <div style={{ height: "20px" }}></div>
             {/* First row: Section | Course | Year Level | Unit */}
             <div className="top-row">
               <div className="top-box">
@@ -214,35 +310,44 @@ const StudentList = () => {
 
             </div>
             <div style={{ height: "20px" }}></div>
-            <table className="mt-2 w-full">
+
+            <table
+              style={{
+                border: "0.5px solid black",
+                borderCollapse: "collapse",
+                width: "100%",
+              }}
+              className="mt-2 w-full"
+            >
               <thead>
                 <tr
                   style={{
                     backgroundColor: '#800000',
                     color: 'white',
                     WebkitPrintColorAdjust: 'exact',
-                    printColorAdjust: 'exact'
+                    printColorAdjust: 'exact',
                   }}
                 >
-                  <th>Student Number</th>
-                  <th>Student Name</th>
-                  <th>Course</th>
-                  <th>Year Level</th>
-                  <th>Status</th>
+                  <th style={{ border: "0.5px solid black" }}>Student Number</th>
+                  <th style={{ border: "0.5px solid black" }}>Student Name</th>
+                  <th style={{ border: "0.5px solid black" }}>Course</th>
+                  <th style={{ border: "0.5px solid black" }}>Year Level</th>
+                  <th style={{ border: "0.5px solid black" }}>Status</th>
                 </tr>
               </thead>
-
 
               <tbody>
                 {studentList.map((student, index) => (
                   <tr key={index}>
-                    <td>{student.student_number}</td>
-                    <td>{student.first_name} {student.middle_name} {student.last_name}</td>
-                    <td className="text-blue-500">
+                    <td style={{ border: "0.5px solid black" }}>{student.student_number}</td>
+                    <td style={{ border: "0.5px solid black" }}>
+                      {student.first_name} {student.middle_name} {student.last_name}
+                    </td>
+                    <td style={{ border: "0.5px solid black" }}>
                       {student.program_description} ({student.program_code})
                     </td>
-                    <td>{classInfo.year_level_description}</td>
-                    <td>ENROLLED</td>
+                    <td style={{ border: "0.5px solid black" }}>{classInfo.year_level_description}</td>
+                    <td style={{ border: "0.5px solid black" }}>ENROLLED</td>
                   </tr>
                 ))}
               </tbody>

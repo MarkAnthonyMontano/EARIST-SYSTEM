@@ -257,6 +257,29 @@ const ExaminationProfile = () => {
     )
 
 
+    const [showPrintView, setShowPrintView] = useState(false);
+
+    const handlePrintClick = async () => {
+        if (!selectedPerson?.person_id) {
+            alert("Please select a person first.");
+            return;
+        }
+
+        // Fetch fresh person data before printing
+        await fetchPersonData(selectedPerson.person_id);
+
+        // Show print layout (hidden in normal view)
+        setShowPrintView(true);
+
+        // Wait a moment to ensure rendering is complete
+        setTimeout(() => {
+            printDiv();
+            setShowPrintView(false); // hide it again after printing
+        }, 200);
+    };
+
+
+
 
     return (
         <Box sx={{ height: 'calc(100vh - 120px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
@@ -333,7 +356,7 @@ const ExaminationProfile = () => {
 
 
                 <button
-                    onClick={printDiv}
+                    onClick={handlePrintClick}
                     style={{
                         marginBottom: "1rem",
                         padding: "10px 20px",
@@ -357,8 +380,8 @@ const ExaminationProfile = () => {
                         Print Examination Permit
                     </span>
                 </button>
-
-                <div ref={divToPrintRef}>
+{showPrintView && (
+                <div ref={divToPrintRef} style={{ display: "none" }}>
                     <div>
                         <style>
                             {`
@@ -753,7 +776,7 @@ const ExaminationProfile = () => {
                     </div>
                 </div>
 
-
+)}
             </div>
 
 

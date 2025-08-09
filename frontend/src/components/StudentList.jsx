@@ -144,7 +144,7 @@ const StudentList = () => {
         `}
       </style>
       <button onClick={printDiv}>
-          Print
+        Print
       </button>
       {studentList.length === 0 ? (
         <p>No students enrolled in this section and course.</p>
@@ -167,7 +167,7 @@ const StudentList = () => {
             cellSpacing="0"
             className="table-auto mt-[1rem] w-full border-collapse max-w-max border border-black"
           >
-            <thead>            
+            <thead>
               <tr className="bg-gray-100">
                 <th className="border border-black px-4 py-2">Student Number</th>
                 <th className="border border-black px-4 py-2">Student Name</th>

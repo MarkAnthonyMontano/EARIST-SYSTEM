@@ -167,7 +167,16 @@ const Dashboard3 = () => {
     }
   });
 
-
+const handleStepClick = (index) => {
+    if (isFormValid()) {
+      setActiveStep(index);
+      const newClickedSteps = [...clickedSteps];
+      newClickedSteps[index] = true;
+      setClickedSteps(newClickedSteps);
+    } else {
+      alert("Please fill all required fields before proceeding.");
+    }
+  };
 
   return (
     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
@@ -247,65 +256,58 @@ const Dashboard3 = () => {
         </Container>
         <br />
 
-        <Box sx={{ display: "flex", justifyContent: "center", width: "100%", px: 4 }}>
-          {steps.map((step, index) => (
-            <React.Fragment key={index}>
-              {/* Wrap the step with Link for routing */}
-              <Link to={step.path} style={{ textDecoration: "none" }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    cursor: "pointer",
-                  }}
-
-                >
-                  {/* Step Icon */}
-                  <Box
-                    sx={{
-                      width: 50,
-                      height: 50,
-                      borderRadius: "50%",
-                      backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
-                      color: activeStep === index ? "#fff" : "#000",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {step.icon}
-                  </Box>
-
-                  {/* Step Label */}
-                  <Typography
-                    sx={{
-                      mt: 1,
-                      color: activeStep === index ? "#6D2323" : "#000",
-                      fontWeight: activeStep === index ? "bold" : "normal",
-                      fontSize: 14,
-                    }}
-                  >
-                    {step.label}
-                  </Typography>
-                </Box>
-              </Link>
-
-              {/* Connector Line */}
-              {index < steps.length - 1 && (
-                <Box
-                  sx={{
-                    height: "2px",
-                    backgroundColor: "#6D2323",
-                    flex: 1,
-                    alignSelf: "center",
-                    mx: 2,
-                  }}
-                />
-              )}
-            </React.Fragment>
-          ))}
+       <Box sx={{ display: "flex", justifyContent: "center", width: "100%", px: 4 }}>
+  {steps.map((step, index) => (
+    <React.Fragment key={index}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          cursor: "pointer",
+        }}
+        onClick={() => handleStepClick(index)}
+      >
+        <Box
+          sx={{
+            width: 50,
+            height: 50,
+            borderRadius: "50%",
+            backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+            color: activeStep === index ? "#fff" : "#000",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {step.icon}
         </Box>
+        <Typography
+          sx={{
+            mt: 1,
+            color: activeStep === index ? "#6D2323" : "#000",
+            fontWeight: activeStep === index ? "bold" : "normal",
+            fontSize: 14,
+          }}
+        >
+          {step.label}
+        </Typography>
+      </Box>
+      {index < steps.length - 1 && (
+        <Box
+          sx={{
+            height: "2px",
+            backgroundColor: "#6D2323",
+            flex: 1,
+            alignSelf: "center",
+            mx: 2,
+          }}
+        />
+      )}
+    </React.Fragment>
+  ))}
+</Box>
+
         <br />
 
         <form>
