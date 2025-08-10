@@ -836,7 +836,36 @@ const StudentRequirements = () => {
                         requirements_id: e.target.value,
                       }))
                     }
-                    sx={{ width: 300 }}
+                    sx={{ width: 200 }}
+                    InputProps={{ sx: { height: 30 } }}
+                    inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
+                  >
+                    <MenuItem value="">
+                      <em>Select Documents</em>
+                    </MenuItem>
+                    <MenuItem value={1}>PSA Birth Certificate</MenuItem>
+                    <MenuItem value={2}>Form 138 (With at least 3rd Quarter posting / No failing grade)</MenuItem>
+                    <MenuItem value={3}>Certificate of Good Moral Character</MenuItem>
+                    <MenuItem value={4}>Certificate Belonging to Graduating Class</MenuItem>
+                  </TextField>
+                </Box>
+
+                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography sx={{ fontSize: "14px", fontFamily: "Arial Black", width: "100px" }}>
+                    Remarks
+                  </Typography>
+                  <TextField
+                    select
+                    size="small"
+                    placeholder="Select Documents"
+                    value={selectedFiles.requirements_id || ''}
+                    onChange={(e) =>
+                      setSelectedFiles(prev => ({
+                        ...prev,
+                        requirements_id: e.target.value,
+                      }))
+                    }
+                    sx={{ width: 150 }}
                     InputProps={{ sx: { height: 30 } }}
                     inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
                   >
@@ -864,7 +893,7 @@ const StudentRequirements = () => {
                       sx: { height: 30 },
                     }}
                     inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
-                    sx={{ width: 300 }}
+                    sx={{ width: 150 }}
                     onClick={() => document.getElementById("fileInput").click()}
                   />
                   <input
@@ -880,6 +909,8 @@ const StudentRequirements = () => {
                     }
                   />
                 </Box>
+
+                 
               </Box>
 
 

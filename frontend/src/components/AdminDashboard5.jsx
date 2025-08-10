@@ -18,61 +18,61 @@ const AdminDashboard5 = () => {
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
   const [userRole, setUserRole] = useState("");
-   const [selectedPerson, setSelectedPerson] = useState(null);
-  
+  const [selectedPerson, setSelectedPerson] = useState(null);
+
   const [person, setPerson] = useState({
     termsOfAgreement: "",
   });
 
-  
-const location = useLocation();
-const queryParams = new URLSearchParams(location.search);
-const queryPersonId = queryParams.get("person_id");
 
-useEffect(() => {
-  const storedUser = localStorage.getItem("email");
-  const storedRole = localStorage.getItem("role");
-  const storedID = localStorage.getItem("person_id");
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const queryPersonId = queryParams.get("person_id");
 
-  if (storedUser && storedRole && storedID) {
-    setUser(storedUser);
-    setUserRole(storedRole);
-    setUserID(storedID);
+  useEffect(() => {
+    const storedUser = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
+    const storedID = localStorage.getItem("person_id");
 
-    // 👇 If accessed with ?person_id=, treat that person as selected
-    if (queryPersonId) {
-      fetchPersonData(queryPersonId);
-      setSelectedPerson({ person_id: queryPersonId });
+    if (storedUser && storedRole && storedID) {
+      setUser(storedUser);
+      setUserRole(storedRole);
+      setUserID(storedID);
+
+      // 👇 If accessed with ?person_id=, treat that person as selected
+      if (queryPersonId) {
+        fetchPersonData(queryPersonId);
+        setSelectedPerson({ person_id: queryPersonId });
+      } else {
+        fetchPersonData(storedID);
+      }
+
+      if (storedRole !== "registrar") {
+        window.location.href = "/login";
+      }
     } else {
-      fetchPersonData(storedID);
-    }
-
-    if (storedRole !== "registrar") {
       window.location.href = "/login";
     }
-  } else {
-    window.location.href = "/login";
-  }
-}, [queryPersonId]);
+  }, [queryPersonId]);
 
 
 
 
 
-const steps = person.person_id
-  ? [
+  const steps = person.person_id
+    ? [
       { label: "Personal Information", icon: <PersonIcon />, path: `/admin_dashboard1?person_id=${person.person_id}` },
       { label: "Family Background", icon: <FamilyRestroomIcon />, path: `/admin_dashboard2?person_id=${person.person_id}` },
       { label: "Educational Attainment", icon: <SchoolIcon />, path: `/admin_dashboard3?person_id=${person.person_id}` },
       { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: `/admin_dashboard4?person_id=${person.person_id}` },
       { label: "Other Information", icon: <InfoIcon />, path: `/admin_dashboard5?person_id=${person.person_id}` },
     ]
-  : [];
+    : [];
 
   const [activeStep, setActiveStep] = useState(4);
 
   // Do not alter
-const fetchPersonData = async (id) => {
+  const fetchPersonData = async (id) => {
     try {
       const res = await axios.get(`http://localhost:5000/api/person/${id}`);
       setPerson(res.data);
@@ -80,15 +80,15 @@ const fetchPersonData = async (id) => {
   };
   // Do not alter
   const handleUpdate = async (updatedData) => {
-  if (!person || !person.person_id) return;
+    if (!person || !person.person_id) return;
 
-  try {
-    await axios.put(`http://localhost:5000/api/person/${person.person_id}`, updatedData);
-    console.log("✅ Auto-saved successfully");
-  } catch (error) {
-    console.error("❌ Auto-save failed:", error);
-  }
-};
+    try {
+      await axios.put(`http://localhost:5000/api/person/${person.person_id}`, updatedData);
+      console.log("✅ Auto-saved successfully");
+    } catch (error) {
+      console.error("❌ Auto-save failed:", error);
+    }
+  };
   // Real-time save on every character typed
   const handleChange = (e) => {
     const { name, type, checked, value } = e.target;
@@ -142,7 +142,14 @@ const fetchPersonData = async (id) => {
     }
   });
 
+  const [clickedSteps, setClickedSteps] = useState(Array(steps.length).fill(false));
 
+  const handleStepClick = (index) => {
+    setActiveStep(index);
+    const newClickedSteps = [...clickedSteps];
+    newClickedSteps[index] = true;
+    setClickedSteps(newClickedSteps);
+  };
 
 
   // dot not alter
@@ -195,26 +202,43 @@ const fetchPersonData = async (id) => {
               </Typography>
             </Box>
           </Box>
-
           <Box sx={{ width: "25%", padding: "10px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-
-            <Link to="/ecat_application_form" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+            <Link
+              to={`/ecat_application_form?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               ECAT Application Form
             </Link>
-            <Link to="/admission_form_process" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+
+            <Link
+              to={`/admission_form_process?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               Admission Form Process
             </Link>
-            <Link to="/personal_data_form" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+
+            <Link
+              to={`/personal_data_form?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               Personal Data Form
             </Link>
 
-            <Link to="/office_of_the_registrar" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+            <Link
+              to={`/office_of_the_registrar?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               Application For EARIST College Admission
             </Link>
-            <Link to="/admission_services" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+
+            <Link
+              to={`/admission_services?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               Application/Student Satisfactory Survey
             </Link>
           </Box>
+
         </Box>
 
         <Container>
@@ -226,67 +250,67 @@ const fetchPersonData = async (id) => {
           </div>
         </Container>
         <br />
-            {person.person_id && (
-         <Box sx={{ display: "flex", justifyContent: "center", width: "100%", px: 4 }}>
-           {steps.map((step, index) => (
-             <React.Fragment key={index}>
-               {/* Wrap the step with Link for routing */}
-               <Link to={step.path} style={{ textDecoration: "none" }}>
-                 <Box
-                   sx={{
-                     display: "flex",
-                     flexDirection: "column",
-                     alignItems: "center",
-                     cursor: "pointer",
-                   }}
-                   onClick={() => handleStepClick(index)}
-                 >
-                   {/* Step Icon */}
-                   <Box
-                     sx={{
-                       width: 50,
-                       height: 50,
-                       borderRadius: "50%",
-                       backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
-                       color: activeStep === index ? "#fff" : "#000",
-                       display: "flex",
-                       alignItems: "center",
-                       justifyContent: "center",
-                     }}
-                   >
-                     {step.icon}
-                   </Box>
-       
-                   {/* Step Label */}
-                   <Typography
-                     sx={{
-                       mt: 1,
-                       color: activeStep === index ? "#6D2323" : "#000",
-                       fontWeight: activeStep === index ? "bold" : "normal",
-                       fontSize: 14,
-                     }}
-                   >
-                     {step.label}
-                   </Typography>
-                 </Box>
-               </Link>
-       
-               {/* Connector Line */}
-               {index < steps.length - 1 && (
-                 <Box
-                   sx={{
-                     height: "2px",
-                     backgroundColor: "#6D2323",
-                     flex: 1,
-                     alignSelf: "center",
-                     mx: 2,
-                   }}
-                 />
-               )}
-             </React.Fragment>
-           ))}
-         </Box>
-       )}
+        {person.person_id && (
+          <Box sx={{ display: "flex", justifyContent: "center", width: "100%", px: 4 }}>
+            {steps.map((step, index) => (
+              <React.Fragment key={index}>
+                {/* Wrap the step with Link for routing */}
+                <Link to={step.path} style={{ textDecoration: "none" }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => handleStepClick(index)}
+                  >
+                    {/* Step Icon */}
+                    <Box
+                      sx={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: "50%",
+                        backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                        color: activeStep === index ? "#fff" : "#000",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {step.icon}
+                    </Box>
+
+                    {/* Step Label */}
+                    <Typography
+                      sx={{
+                        mt: 1,
+                        color: activeStep === index ? "#6D2323" : "#000",
+                        fontWeight: activeStep === index ? "bold" : "normal",
+                        fontSize: 14,
+                      }}
+                    >
+                      {step.label}
+                    </Typography>
+                  </Box>
+                </Link>
+
+                {/* Connector Line */}
+                {index < steps.length - 1 && (
+                  <Box
+                    sx={{
+                      height: "2px",
+                      backgroundColor: "#6D2323",
+                      flex: 1,
+                      alignSelf: "center",
+                      mx: 2,
+                    }}
+                  />
+                )}
+              </React.Fragment>
+            ))}
+          </Box>
+        )}
         <br />
         <form>
           <Container maxWidth="100%" sx={{ backgroundColor: "#6D2323", border: "2px solid black", color: "white", borderRadius: 2, boxShadow: 3, padding: "4px" }}>

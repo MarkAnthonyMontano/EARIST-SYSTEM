@@ -17,7 +17,7 @@ import cities from "../data/city.json";
 import barangays from "../data/barangay.json";
 import { useNavigate } from 'react-router-dom';
 
-const Dashboard1 = () => {
+const Dashboard1 = (props) => {
   const navigate = useNavigate();
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
@@ -72,25 +72,36 @@ const Dashboard1 = () => {
   });
 
   // do not alter
-  useEffect(() => {
-    const storedUser = localStorage.getItem("email");
-    const storedRole = localStorage.getItem("role");
-    const storedID = localStorage.getItem("person_id");
+useEffect(() => {
+  const storedUser = localStorage.getItem("email");
+  const storedRole = localStorage.getItem("role");
+  const storedID = localStorage.getItem("person_id");
 
-    if (storedUser && storedRole && storedID) {
-      setUser(storedUser);
-      setUserRole(storedRole);
-      setUserID(storedID);
+  const overrideId = props?.adminOverridePersonId; // new
 
-      if (storedRole === "applicant") {
-        fetchPersonData(storedID);
-      } else {
-        window.location.href = "/login";
-      }
+  if (overrideId) {
+    // Admin editing other person
+    setUserRole("superadmin");
+    setUserID(overrideId);
+    fetchPersonData(overrideId);
+    return;
+  }
+
+  if (storedUser && storedRole && storedID) {
+    setUser(storedUser);
+    setUserRole(storedRole);
+    setUserID(storedID);
+
+    if (storedRole === "applicant") {
+      fetchPersonData(storedID);
     } else {
       window.location.href = "/login";
     }
-  }, []);
+  } else {
+    window.location.href = "/login";
+  }
+}, []);
+
 
 
   const steps = [

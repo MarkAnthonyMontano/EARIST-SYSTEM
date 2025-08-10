@@ -26,8 +26,8 @@ const AdmissionServices = () => {
             setUserRole(storedRole);
             setUserID(storedID);
 
-            if (storedRole === "applicant") {
-
+            if (storedRole === "applicant" || storedRole === "registrar") {
+                // ✅ allowed roles
             } else {
                 window.location.href = "/login";
             }
@@ -35,6 +35,7 @@ const AdmissionServices = () => {
             window.location.href = "/login";
         }
     }, []);
+
 
 
 

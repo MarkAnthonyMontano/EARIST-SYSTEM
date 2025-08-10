@@ -12,7 +12,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useNavigate } from 'react-router-dom';
 
-const Dashboard4 = () => {
+const Dashboard4 = (props) => {
   const navigate = useNavigate();
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
@@ -28,26 +28,35 @@ const Dashboard4 = () => {
   });
 
   // do not alter
-  useEffect(() => {
-    const storedUser = localStorage.getItem("email");
-    const storedRole = localStorage.getItem("role");
-    const storedID = localStorage.getItem("person_id");
+useEffect(() => {
+  const storedUser = localStorage.getItem("email");
+  const storedRole = localStorage.getItem("role");
+  const storedID = localStorage.getItem("person_id");
 
-    if (storedUser && storedRole && storedID) {
-      setUser(storedUser);
-      setUserRole(storedRole);
-      setUserID(storedID);
+  const overrideId = props?.adminOverridePersonId; // new
 
-      if (storedRole === "applicant") {
-        fetchPersonData(storedID);
-      } else {
-        window.location.href = "/login";
-      }
+  if (overrideId) {
+    // Admin editing other person
+    setUserRole("superadmin");
+    setUserID(overrideId);
+    fetchPersonData(overrideId);
+    return;
+  }
+
+  if (storedUser && storedRole && storedID) {
+    setUser(storedUser);
+    setUserRole(storedRole);
+    setUserID(storedID);
+
+    if (storedRole === "applicant") {
+      fetchPersonData(storedID);
     } else {
       window.location.href = "/login";
     }
-  }, []);
-
+  } else {
+    window.location.href = "/login";
+  }
+}, []);
 
 
   // Do not alter

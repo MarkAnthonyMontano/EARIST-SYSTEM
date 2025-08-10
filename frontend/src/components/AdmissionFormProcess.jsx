@@ -11,25 +11,26 @@ const AdmissionFormProcess = () => {
   const [userRole, setUserRole] = useState("");
 
   // do not alter
-  useEffect(() => {
-    const storedUser = localStorage.getItem("email");
-    const storedRole = localStorage.getItem("role");
-    const storedID = localStorage.getItem("person_id");
+useEffect(() => {
+  const storedUser = localStorage.getItem("email");
+  const storedRole = localStorage.getItem("role");
+  const storedID = localStorage.getItem("person_id");
 
-    if (storedUser && storedRole && storedID) {
-      setUser(storedUser);
-      setUserRole(storedRole);
-      setUserID(storedID);
+  if (storedUser && storedRole && storedID) {
+    setUser(storedUser);
+    setUserRole(storedRole);
+    setUserID(storedID);
 
-      if (storedRole === "applicant") {
-
-      } else {
-        window.location.href = "/login";
-      }
+    if (storedRole === "applicant" || storedRole === "registrar") {
+      // ✅ allowed roles
     } else {
       window.location.href = "/login";
     }
-  }, []);
+  } else {
+    window.location.href = "/login";
+  }
+}, []);
+
 
 
   const divToPrintRef = useRef();

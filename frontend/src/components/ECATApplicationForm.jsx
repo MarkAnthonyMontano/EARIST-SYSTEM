@@ -3,6 +3,7 @@ import { Box, Container, } from "@mui/material";
 import EaristLogo from "../assets/EaristLogo.png";
 import axios from "axios";
 import { FcPrint } from "react-icons/fc";
+import { useLocation } from "react-router-dom";
 
 const ECATApplicationForm = () => {
   const [userID, setUserID] = useState("");
@@ -71,28 +72,34 @@ const ECATApplicationForm = () => {
     }
   };
 
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const queryPersonId = queryParams.get("person_id");
 
   // do not alter
   useEffect(() => {
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
-    const storedID = localStorage.getItem("person_id");
+    const loggedInPersonId = localStorage.getItem("person_id");
+    const searchedPersonId = sessionStorage.getItem("admin_edit_person_id");
 
-    if (storedUser && storedRole && storedID) {
-      setUser(storedUser);
-      setUserRole(storedRole);
-      setUserID(storedID);
-
-      if (storedRole === "applicant") {
-       fetchPersonData(storedID);
-      } else {
-        window.location.href = "/login";
-      }
-    } else {
+    if (!storedUser || !storedRole || !loggedInPersonId) {
       window.location.href = "/login";
+      return;
     }
-  }, []);
 
+    setUser(storedUser);
+    setUserRole(storedRole);
+
+    if (storedRole === "registrar" || storedRole === "applicant") {
+      const targetId = searchedPersonId || loggedInPersonId;
+      setUserID(targetId);
+      fetchPersonData(targetId);
+      return;
+    }
+
+    window.location.href = "/login";
+  }, []);
 
 
   const [shortDate, setShortDate] = useState("");
@@ -446,7 +453,7 @@ const ECATApplicationForm = () => {
                 }}
               >
                 <div>Course & Major:</div>
-                <div style={{fontFamily: "Times New Roman", fontSize: "14px", paddingTop: "2px", fontWeight: "Normal"}}>
+                <div style={{ fontFamily: "Times New Roman", fontSize: "14px", paddingTop: "2px", fontWeight: "Normal" }}>
                   {curriculumOptions.length > 0
                     ? curriculumOptions.find(
                       (item) =>

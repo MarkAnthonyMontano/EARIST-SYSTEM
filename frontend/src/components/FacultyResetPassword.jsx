@@ -119,7 +119,7 @@ const FacultyResetPassword = () => {
     <Box
       sx={{
         height: '100vh',
-        backgroundColor: '#f5f5f5',
+
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',

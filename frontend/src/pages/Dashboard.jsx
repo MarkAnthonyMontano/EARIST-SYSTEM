@@ -106,7 +106,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <Box sx={{ p: 4, backgroundColor: "#F5F7FA", minHeight: "100vh" }}>
+    <Box sx={{ p: 4, minHeight: "100vh" }}>
       <Box sx={{ mb: 4, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <Typography variant="h4" fontWeight="bold" mb={2}>
           Welcome, Admin {user.split("@")[0]}!

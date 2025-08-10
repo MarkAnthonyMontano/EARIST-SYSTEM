@@ -128,15 +128,15 @@ const AdminDashboard1 = () => {
 
 
 
-const steps = person.person_id
-  ? [
+  const steps = person.person_id
+    ? [
       { label: "Personal Information", icon: <PersonIcon />, path: `/admin_dashboard1?person_id=${person.person_id}` },
       { label: "Family Background", icon: <FamilyRestroomIcon />, path: `/admin_dashboard2?person_id=${person.person_id}` },
       { label: "Educational Attainment", icon: <SchoolIcon />, path: `/admin_dashboard3?person_id=${person.person_id}` },
       { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: `/admin_dashboard4?person_id=${person.person_id}` },
       { label: "Other Information", icon: <InfoIcon />, path: `/admin_dashboard5?person_id=${person.person_id}` },
     ]
-  : [];
+    : [];
 
 
   const [activeStep, setActiveStep] = useState(0);
@@ -154,8 +154,13 @@ const steps = person.person_id
   const fetchPersonData = async (id) => {
     try {
       const res = await axios.get(`http://localhost:5000/api/person/${id}`);
-      setPerson(res.data);
-    } catch (error) { }
+      const sanitizedData = Object.fromEntries(
+        Object.entries(res.data).map(([key, value]) => [key, value ?? ""])
+      );
+      setPerson(sanitizedData);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
 
@@ -562,24 +567,42 @@ const steps = person.person_id
 
           {/* Right: Links (25%) */}
           <Box sx={{ width: "25%", padding: "10px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-
-            <Link to="/ecat_application_form" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+            <Link
+              to={`/ecat_application_form?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               ECAT Application Form
             </Link>
-            <Link to="/admission_form_process" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+
+            <Link
+              to={`/admission_form_process?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               Admission Form Process
             </Link>
-            <Link to="/personal_data_form" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+
+            <Link
+              to={`/personal_data_form?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               Personal Data Form
             </Link>
 
-            <Link to="/office_of_the_registrar" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+            <Link
+              to={`/office_of_the_registrar?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               Application For EARIST College Admission
             </Link>
-            <Link to="/admission_services" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+
+            <Link
+              to={`/admission_services?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               Application/Student Satisfactory Survey
             </Link>
           </Box>
+
         </Box>
 
 
@@ -592,66 +615,66 @@ const steps = person.person_id
         <br />
 
         {person.person_id && (
-  <Box sx={{ display: "flex", justifyContent: "center", width: "100%", px: 4 }}>
-    {steps.map((step, index) => (
-      <React.Fragment key={index}>
-        {/* Wrap the step with Link for routing */}
-        <Link to={step.path} style={{ textDecoration: "none" }}>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              cursor: "pointer",
-            }}
-            onClick={() => handleStepClick(index)}
-          >
-            {/* Step Icon */}
-            <Box
-              sx={{
-                width: 50,
-                height: 50,
-                borderRadius: "50%",
-                backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
-                color: activeStep === index ? "#fff" : "#000",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {step.icon}
-            </Box>
+          <Box sx={{ display: "flex", justifyContent: "center", width: "100%", px: 4 }}>
+            {steps.map((step, index) => (
+              <React.Fragment key={index}>
+                {/* Wrap the step with Link for routing */}
+                <Link to={step.path} style={{ textDecoration: "none" }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => handleStepClick(index)}
+                  >
+                    {/* Step Icon */}
+                    <Box
+                      sx={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: "50%",
+                        backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                        color: activeStep === index ? "#fff" : "#000",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {step.icon}
+                    </Box>
 
-            {/* Step Label */}
-            <Typography
-              sx={{
-                mt: 1,
-                color: activeStep === index ? "#6D2323" : "#000",
-                fontWeight: activeStep === index ? "bold" : "normal",
-                fontSize: 14,
-              }}
-            >
-              {step.label}
-            </Typography>
+                    {/* Step Label */}
+                    <Typography
+                      sx={{
+                        mt: 1,
+                        color: activeStep === index ? "#6D2323" : "#000",
+                        fontWeight: activeStep === index ? "bold" : "normal",
+                        fontSize: 14,
+                      }}
+                    >
+                      {step.label}
+                    </Typography>
+                  </Box>
+                </Link>
+
+                {/* Connector Line */}
+                {index < steps.length - 1 && (
+                  <Box
+                    sx={{
+                      height: "2px",
+                      backgroundColor: "#6D2323",
+                      flex: 1,
+                      alignSelf: "center",
+                      mx: 2,
+                    }}
+                  />
+                )}
+              </React.Fragment>
+            ))}
           </Box>
-        </Link>
-
-        {/* Connector Line */}
-        {index < steps.length - 1 && (
-          <Box
-            sx={{
-              height: "2px",
-              backgroundColor: "#6D2323",
-              flex: 1,
-              alignSelf: "center",
-              mx: 2,
-            }}
-          />
         )}
-      </React.Fragment>
-    ))}
-  </Box>
-)}
 
         <br />
 
@@ -721,7 +744,7 @@ const steps = person.person_id
                   labelId="academic-program-label"
                   id="academic-program-select"
                   name="academicProgram"
-                   readOnly
+                  readOnly
                   value={person.academicProgram || ""}
                   label="Academic Program"
                   onChange={handleChange}
@@ -746,7 +769,7 @@ const steps = person.person_id
                   labelId="classified-as-label"
                   id="classified-as-select"
                   name="classifiedAs"
-                   readOnly
+                  readOnly
                   value={person.classifiedAs || ""}
                   label="Classified As"
                   onChange={handleChange}
@@ -774,7 +797,7 @@ const steps = person.person_id
                   labelId="applying-as-label"
                   id="applying-as-select"
                   name="applyingAs"
-                   readOnly
+                  readOnly
                   value={person.applyingAs || ""}
                   label="Applying As"
                   onChange={handleChange}
@@ -895,7 +918,7 @@ const steps = person.person_id
                   width: "5.08cm",
                   height: "5.08cm",
                   display: "flex",
-                  
+
                   justifyContent: "center",
                   alignItems: "center",
                   flexDirection: "column",
@@ -908,7 +931,7 @@ const steps = person.person_id
                     alt="Profile"
                     style={{
                       width: "100%",
-                       
+
                       height: "100%",
                       objectFit: "cover",
                     }}
@@ -939,7 +962,7 @@ const steps = person.person_id
                   labelId="year-level-label"
                   id="year-level-select"
                   name="yearLevel"
-                   readOnly
+                  readOnly
                   value={person.yearLevel || ""}
                   label="Year Level"
                   onChange={handleChange}
@@ -971,7 +994,7 @@ const steps = person.person_id
                   size="small"
                   name="last_name"
                   required
-                 InputProps={{ readOnly: true }}
+                  InputProps={{ readOnly: true }}
 
                   value={person.last_name}
                   onChange={handleChange}
@@ -991,7 +1014,7 @@ const steps = person.person_id
                   size="small"
                   name="first_name"
                   required
-                   InputProps={{ readOnly: true }}
+                  InputProps={{ readOnly: true }}
 
                   value={person.first_name}
                   onChange={handleChange}
@@ -1010,7 +1033,7 @@ const steps = person.person_id
                   size="small"
                   name="middle_name"
                   required
-                InputProps={{ readOnly: true }}
+                  InputProps={{ readOnly: true }}
 
                   value={person.middle_name}
                   onChange={handleChange}
@@ -1029,7 +1052,7 @@ const steps = person.person_id
                   <Select
                     labelId="extension-label"
                     id="extension-select"
-                     readOnly
+                    readOnly
                     name="extension"
                     value={person.extension || ""}
                     label="Extension"
@@ -1058,11 +1081,11 @@ const steps = person.person_id
                   fullWidth
                   size="small"
                   name="nickname"
-                InputProps={{ readOnly: true }}
+                  InputProps={{ readOnly: true }}
 
                   value={person.nickname}
                   onChange={handleChange}
-                   readOnly
+                  readOnly
                   onBlur={handleBlur}
                   placeholder="Enter your Nickname"
                   error={errors.nickname}
@@ -1081,7 +1104,7 @@ const steps = person.person_id
                     size="small"
                     name="height"
                     value={person.height}
-                 InputProps={{ readOnly: true }}
+                    InputProps={{ readOnly: true }}
 
                     onChange={handleChange}
                     onBlur={handleBlur}
@@ -1140,12 +1163,12 @@ const steps = person.person_id
                 label="Enter your LRN Number"
                 value={person.lrnNumber === "No LRN Number" ? "" : person.lrnNumber || ""}
                 onChange={handleChange}
-                 readOnly
+                readOnly
                 onBlur={handleBlur}
                 disabled={person.lrnNumber === "No LRN Number"}
                 size="small"
                 sx={{ width: 220 }}
-                InputProps={{ sx: { height: 40, readOnly: true  } }}
+                InputProps={{ sx: { height: 40, readOnly: true } }}
                 inputProps={{ style: { height: 40, padding: "10.5px 14px" } }}
                 error={errors.lrnNumber}
                 helperText={errors.lrnNumber ? "This field is required." : ""}
@@ -1183,7 +1206,7 @@ const steps = person.person_id
                 size="small"
                 label="Gender"
                 name="gender"
-                 readOnly
+                readOnly
                 required
                 value={person.gender == null ? "" : String(person.gender)}
                 onChange={(e) => {
@@ -1233,7 +1256,7 @@ const steps = person.person_id
                     select
                     size="small"
                     label="PWD Type"
-                     readOnly
+                    readOnly
                     name="pwdType"
                     value={person.pwdType || ""}
                     onChange={handleChange}
@@ -1303,7 +1326,7 @@ const steps = person.person_id
                 <Typography mb={1} fontWeight="medium">
                   Birth of Date
                 </Typography>
-                <TextField fullWidth size="small" type="date" name="birthOfDate"  disabled required onBlur={handleBlur} value={person.birthOfDate} onChange={handleChange} error={!!errors.birthOfDate}
+                <TextField fullWidth size="small" type="date" name="birthOfDate" disabled required onBlur={handleBlur} value={person.birthOfDate} onChange={handleChange} error={!!errors.birthOfDate}
                   helperText={errors.birthOfDate ? "This field is required." : ""} />
               </Box>
               <Box flex={1}>
@@ -1330,8 +1353,8 @@ const steps = person.person_id
                 <Typography mb={1} fontWeight="medium">
                   Birth Place
                 </Typography>
-                <TextField fullWidth size="small" name="birthPlace"  InputProps={{ readOnly: true }}
- placeholder="Enter your Birth Place" value={person.birthPlace} required onBlur={handleBlur} onChange={handleChange} error={!!errors.birthPlace}
+                <TextField fullWidth size="small" name="birthPlace" InputProps={{ readOnly: true }}
+                  placeholder="Enter your Birth Place" value={person.birthPlace} required onBlur={handleBlur} onChange={handleChange} error={!!errors.birthPlace}
                   helperText={errors.birthPlace ? "This field is required." : ""} />
               </Box>
               <Box flex={1} >
@@ -1339,7 +1362,7 @@ const steps = person.person_id
                   Language/Dialect Spoken
                 </Typography>
                 <TextField fullWidth size="small" InputProps={{ readOnly: true }}
- name="languageDialectSpoken" placeholder="Enter your Language Spoken" value={person.languageDialectSpoken || ""} required onBlur={handleBlur} onChange={handleChange} error={!!errors.languageDialectSpoken}
+                  name="languageDialectSpoken" placeholder="Enter your Language Spoken" value={person.languageDialectSpoken || ""} required onBlur={handleBlur} onChange={handleChange} error={!!errors.languageDialectSpoken}
                   helperText={errors.languageDialectSpoken ? "This field is required." : ""}
                 />
               </Box>
@@ -1359,7 +1382,7 @@ const steps = person.person_id
                     labelId="citizenship-label"
                     id="citizenship"
                     name="citizenship"
-                     readOnly
+                    readOnly
                     value={person.citizenship || ""}
                     onChange={handleChange}
                     onBlur={handleBlur}
@@ -1500,7 +1523,7 @@ const steps = person.person_id
                   <Select
                     labelId="religion-label"
                     id="religion"
-                     readOnly
+                    readOnly
                     name="religion"
                     value={person.religion || ""}
                     onChange={handleChange}
@@ -1549,7 +1572,7 @@ const steps = person.person_id
                   <Select
                     labelId="civil-status-label"
                     id="civilStatus"
-                     readOnly
+                    readOnly
                     name="civilStatus"
                     value={person.civilStatus || ""}
                     onChange={handleChange}
@@ -1580,7 +1603,7 @@ const steps = person.person_id
                   <Select
                     labelId="tribe-label"
                     id="tribeEthnicGroup"
-                     readOnly
+                    readOnly
                     name="tribeEthnicGroup"
                     value={person.tribeEthnicGroup || ""}
                     onChange={handleChange}
@@ -1662,7 +1685,7 @@ const steps = person.person_id
                   name="cellphoneNumber"
                   placeholder="Enter your Cellphone Number +63"
                   required
-                InputProps={{ readOnly: true }}
+                  InputProps={{ readOnly: true }}
 
                   value={person.cellphoneNumber}
                   onBlur={handleBlur}
@@ -1681,7 +1704,7 @@ const steps = person.person_id
                   fullWidth
                   size="small"
                   name="emailAddress"
-                   InputProps={{ readOnly: true }}
+                  InputProps={{ readOnly: true }}
 
                   required
                   value={person.emailAddress}
@@ -1725,7 +1748,7 @@ const steps = person.person_id
                 <TextField
                   fullWidth
                   size="small"
-                   InputProps={{ readOnly: true }}
+                  InputProps={{ readOnly: true }}
 
                   name="presentZipCode"
                   placeholder="Enter your Zip Code"
@@ -1746,7 +1769,7 @@ const steps = person.person_id
                 <Select
                   labelId="present-region-label"
                   name="presentRegion"
-                   readOnly
+                  readOnly
                   value={person.presentRegion || ""}
                   onBlur={handleBlur}
                   onChange={(e) => {
@@ -1782,7 +1805,7 @@ const steps = person.person_id
                 <Select
                   labelId="present-province-label"
                   name="presentProvince"
-                   readOnly
+                  readOnly
                   value={person.presentProvince || ""}
                   onBlur={handleBlur}
                   onChange={(e) => {
@@ -1820,7 +1843,7 @@ const steps = person.person_id
                 <Select
                   labelId="present-municipality-label"
                   name="presentMunicipality"
-                   readOnly
+                  readOnly
                   value={person.presentMunicipality || ""}
                   onBlur={handleBlur}
                   onChange={(e) => {
@@ -1853,7 +1876,7 @@ const steps = person.person_id
                 <Select
                   labelId="present-barangay-label"
                   name="presentBarangay"
-                   readOnly
+                  readOnly
                   value={person.presentBarangay || ""}
                   onBlur={handleBlur}
                   onChange={(e) => {
@@ -1887,7 +1910,7 @@ const steps = person.person_id
                 fullWidth
                 size="small"
                 name="presentDswdHouseholdNumber"
-                 InputProps={{ readOnly: true }}
+                InputProps={{ readOnly: true }}
 
                 value={person.presentDswdHouseholdNumber}
                 onBlur={handleBlur}
@@ -1948,7 +1971,7 @@ const steps = person.person_id
                   fullWidth
                   size="small"
                   name="permanentStreet"
-            InputProps={{ readOnly: true }}
+                  InputProps={{ readOnly: true }}
 
                   placeholder="Enter your Permanent Street"
                   value={person.permanentStreet}
@@ -1965,7 +1988,7 @@ const steps = person.person_id
                   fullWidth
                   size="small"
                   name="permanentZipCode"
-                InputProps={{ readOnly: true }}
+                  InputProps={{ readOnly: true }}
 
                   placeholder="Enter your Permanent Zip Code"
                   value={person.permanentZipCode}
@@ -1986,7 +2009,7 @@ const steps = person.person_id
                   <Select
                     labelId="permanent-region-label"
                     id="permanentRegion"
-                     readOnly
+                    readOnly
                     name="permanentRegion"
                     value={person.permanentRegion || ""}
                     label="Select Region"
@@ -2026,7 +2049,7 @@ const steps = person.person_id
                   <Select
                     labelId="permanent-province-label"
                     id="permanentProvince"
-                     readOnly
+                    readOnly
                     name="permanentProvince"
                     value={person.permanentProvince || ""}
                     label="Select Province"
@@ -2068,7 +2091,7 @@ const steps = person.person_id
                   <Select
                     labelId="permanent-municipality-label"
                     id="permanentMunicipality"
-                     readOnly
+                    readOnly
                     name="permanentMunicipality"
                     value={person.permanentMunicipality || ""}
                     label="Select Municipality"
@@ -2105,7 +2128,7 @@ const steps = person.person_id
                   <Select
                     labelId="permanent-barangay-label"
                     id="permanentBarangay"
-                     readOnly
+                    readOnly
                     name="permanentBarangay"
                     value={person.permanentBarangay || ""}
                     label="Select Barangay"
@@ -2143,7 +2166,7 @@ const steps = person.person_id
                 variant="outlined"
                 placeholder="Enter your Permanent DSWD Household Number"
                 name="permanentDswdHouseholdNumber"
-              InputProps={{ readOnly: true }}
+                InputProps={{ readOnly: true }}
 
                 value={person.permanentDswdHouseholdNumber || ""}
                 onBlur={handleBlur}

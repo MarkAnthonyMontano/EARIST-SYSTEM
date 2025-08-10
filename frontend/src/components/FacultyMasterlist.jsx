@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import '../styles/TempStyles.css';
 import SortingIcon from "../components/SortingIcon";
 import {Link} from "react-router-dom";
-import { Table, TableBody, TableCell, TableHead, TableRow, TextField } from "@mui/material";
+import { Typography, Table, TableBody, TableCell, TableHead, TableRow, TextField, FormControl, Select, InputLabel, MenuItem } from "@mui/material";
 import axios from "axios";
 
 const FacultyMasterList = () => {
@@ -11,18 +11,19 @@ const FacultyMasterList = () => {
   const [userRole, setUserRole] = useState("");
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
-  const [sectionData, setSectionData] = useState([]);
   const [profData, setPerson] = useState({
     prof_id: '',
     fname: '',
     mname: '',
-    lname: '',
-    department_section_id: '',
-    subject_id: '',
-    active_school_year_id: '',
-    year_description: '',
-    mappings: [] 
+    lname: ''
   });
+  const [schoolYears, setSchoolYears] = useState([]);
+  const [schoolSemester, setSchoolSemester] = useState([]);
+  const [selectedSchoolYear, setSelectedSchoolYear] = useState('');
+  const [selectedSchoolSemester, setSelectedSchoolSemester] = useState('');
+  const [selectedActiveSchoolYear, setSelectedActiveSchoolYear] = useState('');
+  const [classListAndDetails, setClassListAndDetails] = useState([]);
+
     
   useEffect(() => {
     const storedUser = localStorage.getItem("email");
@@ -47,156 +48,181 @@ const FacultyMasterList = () => {
   const fetchPersonData = async (id) => {
     try{
       const res = await axios.get(`http://localhost:5000/get_prof_data/${id}`)
-      if (res.data.length > 0) {
-        const first = res.data[0];
-  
-        const profInfo = {
-          prof_id: first.prof_id,
-          fname: first.fname,
-          mname: first.mname,
-          lname: first.lname,
-          department_section_id: first.department_section_id,
-          subject_id: first.subject_id,
-          active_school_year_id: first.school_year_id,
-          year_description: first.year_description,
-          mappings: res.data.map(row => ({
-            subject_id: row.course_id,
-            department_section_id: row.department_section_id
-          }))
-        };
-        setPerson(profInfo);
-        setLoading(false);
-      }
+      const first = res.data[0];
+
+      const profInfo = {
+        prof_id: first.prof_id,
+        fname: first.fname,
+        mname: first.mname,
+        lname: first.lname,
+      };
+
+      setPerson(profInfo);
     } catch (err) {
       setLoading(false);
-      setMessage("Failed to get the information");
+      setMessage("Error Fetching Professor Personal Data");
     }
   }
 
-  const fetchSectionDetails = async (subject_id, department_section_id, active_school_year_id) => {
-    try {
-      const response = await fetch(`http://localhost:5000/get_subject_info/${subject_id}/${department_section_id}/${active_school_year_id}`);
-      const data = await response.json();
-      
-      if (response.ok) {
-        
-        const newEntry = {
-          ...data.sectionInfo,
-          subject_id,
-          department_section_id,
-        };
-        
-        setSectionData(prev => {
-          const alreadyExists = prev.some(entry =>
-            entry.subject_id === newEntry.subject_id &&
-            entry.department_section_id === newEntry.department_section_id
-          );
-          return alreadyExists ? prev : [...prev, newEntry];
-        });
-      
-      } else {
-        setMessage("Fetch Error");
-        setMessage("No data");
-      }
-
-    } catch (error) {
-      setLoading(false)
-      setMessage("Fetch error");
-    }
-  };
+  useEffect(() => {
+    axios
+      .get(`http://localhost:5000/get_school_year/`)
+      .then((res) => setSchoolYears(res.data))
+      .catch((err) => console.error(err));
+  }, [])
 
   useEffect(() => {
-    if (profData?.mappings?.length > 0) {
-      profData.mappings.forEach(mapping => {
-        fetchSectionDetails(
-          mapping.subject_id,
-          mapping.department_section_id,
-          profData.active_school_year_id
-        );
-      });
+    axios
+      .get(`http://localhost:5000/get_school_semester/`)
+      .then((res) => setSchoolSemester(res.data))
+      .catch((err) => console.error(err));
+  }, [])
+
+  useEffect(() => {
+  
+      axios
+        .get(`http://localhost:5000/active_school_year`)
+        .then((res) => {
+          if (res.data.length > 0) {
+            setSelectedSchoolYear(res.data[0].year_id);
+            setSelectedSchoolSemester(res.data[0].semester_id);
+          }
+        })
+        .catch((err) => console.error(err));
+    
+  }, []);
+
+  useEffect(() => {
+    if (selectedSchoolYear && selectedSchoolSemester) {
+      axios
+        .get(`http://localhost:5000/get_selecterd_year/${selectedSchoolYear}/${selectedSchoolSemester}`)
+        .then((res) => {
+          if (res.data.length > 0) {
+            setSelectedActiveSchoolYear(res.data[0].school_year_id);
+          }
+        })
+        .catch((err) => console.error(err));
     }
-  }, [profData]);
+  }, [selectedSchoolYear, selectedSchoolSemester]);
 
+  useEffect(() => {
+    if (selectedActiveSchoolYear && profData.prof_id) {
+      axios
+        .get(`http://localhost:5000/get_class_details/${selectedActiveSchoolYear}/${profData.prof_id}`)
+        .then((res) => setClassListAndDetails(res.data))
+        .catch((err) => console.error(err));
+    }
+  }, [selectedActiveSchoolYear, profData.prof_id]);
+
+  const handleSchoolYearChange = (event) => {
+    setSelectedSchoolYear(event.target.value);
+  };
+  
+  const handleSchoolSemesterChange = (event) => {
+    setSelectedSchoolSemester(event.target.value);
+  };
+  
   return (
-    <div>
-      <div>
-        <div>Name: {profData.lname}, {profData.fname} {profData.mname}</div>
-        <div>Employee ID: {profData.prof_id}</div>
-        <div>School Year: {profData.year_description}</div>
+    <div className='mr-[4rem]'>
+        <Typography variant="h4" sx={{marginTop: '1.5rem'}} color="maroon" fontWeight="bold" gutterBottom>
+          Class List
+        </Typography>
+      <div className="flex items-center">
+        <div className="course-list my-[1rem] mr-[1rem]">
+            <FormControl fullWidth>
+                <InputLabel id="demo-simple-select-label">School Years</InputLabel>
+                <Select
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  value={selectedSchoolYear}
+                  label="School Years"
+                  sx={{minWidth: '200px'}}
+                  onChange={handleSchoolYearChange}
+                >   
+                  {schoolYears.length > 0 ? (
+                    schoolYears.map((sy) => (
+                      <MenuItem value={sy.year_id} key={sy.year_id}>
+                        {sy.current_year} - {sy.next_year}
+                      </MenuItem> 
+                    ))
+                  ) : (
+                    <MenuItem disabled>School Year is not found</MenuItem>
+                    )
+                  }
+                </Select>
+            </FormControl>
+          </div>
+          <div className="course-list my-[1rem]">
+            <FormControl fullWidth>
+                <InputLabel id="demo-simple-select-label">School Semester</InputLabel>
+                <Select
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  value={selectedSchoolSemester}
+                  label="School Semester"
+                  sx={{minWidth: '200px'}}
+                  onChange={handleSchoolSemesterChange}
+                >   
+                  {schoolSemester.length > 0 ? (
+                    schoolSemester.map((sem) => (
+                      <MenuItem value={sem.semester_id} key={sem.semester_id}>
+                        {sem.semester_description}
+                      </MenuItem> 
+                    ))
+                  ) : (
+                    <MenuItem disabled>School Semester is not found</MenuItem>
+                    )
+                  }
+                </Select>
+            </FormControl>
+          </div>
       </div>
-
-      <Table style={{maxWidth: '100%', marginLeft: '-1rem', transform: 'scale(0.9)'}}>
-        <TableHead style={{height: '50px'}}>
-          <TableRow style={{height: '50px'}}>
-            <TableCell style={{borderColor: 'gray', borderStyle: 'solid', borderWidth: '1px 1px 1px 1px', padding: '0rem 1rem'}}>
-              <div style={{display: 'flex', alignItems: 'center'}}>
-                <p style={{width: '100%'}}>#</p>
-                <div><SortingIcon /></div>
-              </div>
-            </TableCell>
-
-            <TableCell style={{borderColor: 'gray', borderStyle: 'solid', borderWidth: '1px 1px 1px 0px', padding: '0rem 1rem'}}>
-              <div style={{display: 'flex', alignItems: 'center'}}>
-                <p style={{width: '100%'}}>Section</p>
-                <div><SortingIcon /></div>
-              </div>
-            </TableCell>
-
-            <TableCell style={{borderColor: 'gray', borderStyle: 'solid', borderWidth: '1px 1px 1px 0px', padding: '0rem 1rem'}}>
-              <div style={{display: 'flex', alignItems: 'center'}}>
-                <p style={{width: '100%'}}>Course Code</p>
-                <div><SortingIcon /></div>
-              </div>
-            </TableCell>
-
-            <TableCell style={{borderColor: 'gray', borderStyle: 'solid', borderWidth: '1px 1px 1px 0px', padding: '0rem 1rem'}}>
-              <div style={{display: 'flex', alignItems: 'center'}}>
-                <p style={{width: '100%'}}>Description</p>
-                <div><SortingIcon /></div>
-              </div>
-            </TableCell>
-            <TableCell style={{borderColor: 'gray', borderStyle: 'solid', borderWidth: '1px 1px 1px 0px', padding: '0rem 1rem'}}>
-              <div style={{display: 'flex', alignItems: 'center'}}>
-                <p style={{width: '100%'}}>Schedule</p>
-                <div><SortingIcon /></div>
-              </div>
-            </TableCell>
-          </TableRow>
-        </TableHead>
-
-        <TableBody>
-          {sectionData.map((section, index) => (
-            <TableRow key={index}>
-              <TableCell style={{ padding: '0.5rem', textAlign: 'center' }}>
-                {index + 1}
-              </TableCell>
-
-              <TableCell style={{ padding: '0.5rem', textAlign: 'center' }}>
-                <Link to={`/subject_masterlist/${section.subject_id}/${section.department_section_id}/${profData.active_school_year_id}`} style={{ textDecoration: 'none', color: 'blue' }}>
-                  {section.program_code}{section.year_level_id}-{section.program_code}{section.section_description}
+    <Table sx={{ marginTop: 3 }}>
+      <TableHead>
+        <TableRow>
+          <TableCell><strong>No.</strong></TableCell>
+          <TableCell><strong>Section</strong></TableCell>
+          <TableCell><strong>Course Code</strong></TableCell>
+          <TableCell><strong>Course Description</strong></TableCell>
+          <TableCell sx={{textAlign: 'center'}}><strong>Number of Student</strong></TableCell>
+          <TableCell><strong>Class Schedule</strong></TableCell>
+          <TableCell><strong>Room</strong></TableCell>
+          <TableCell align="center"><strong>Actions</strong></TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {classListAndDetails.length > 0 ? (
+          classListAndDetails.map((course, index) => (
+            <TableRow key={course.course_id}>
+              <TableCell>{index + 1}</TableCell>
+              <TableCell>{course.program_code}-{course.section_description}</TableCell>
+              <TableCell>{course.course_code}</TableCell>
+              <TableCell>{course.course_description}</TableCell>
+              <TableCell sx={{textAlign: 'center'}} >{course.enrolled_students}</TableCell>
+              <TableCell>{course.day}   {course.school_time_start} - {course.school_time_end} </TableCell>
+              <TableCell>{course.room_description}</TableCell>
+              <TableCell align="center">
+                <Link to={`/class_list/${course.course_id}/${course.department_section_id}/${course.school_year_id}`} style={{ textDecoration: "none", color: '#1DA1F2' }}>
+                  View Class
                 </Link>
               </TableCell>
-
-              <TableCell style={{ padding: '0.5rem' }}>
-                  {section.course_code}
-              </TableCell>
-
-              <TableCell style={{ padding: '0.5rem' }}>
-                {section.course_description}
-              </TableCell>
-              
-               <TableCell style={{ padding: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div className="w-[2.5rem] text-center">{section.day_description}</div> |  
-                <div className="w-[10rem] text-center">{section.school_time_start} - {section.school_time_end}</div> |
-                <div className="w-[10rem] text-center">{section.room_description}</div>
-              </TableCell>
             </TableRow>
-          ))}
-        </TableBody>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell colSpan={8} align="center">
+              No class details available
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
 
-      </Table>
+      
     </div>
   );
 };
 
 export default FacultyMasterList;
+
+

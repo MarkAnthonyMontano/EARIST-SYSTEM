@@ -19,7 +19,7 @@ const AdmissionDashboardPanel = () => {
                 </div>
 
                 <div className="relative">
-                    <Link to={'/admin_dashboard1'}>
+                    <Link to={'/super_admin_dashboard1'}>
                         <div className="bg-white p-4 border-4 rounded-lg border-solid border-maroon-500 absolute left-16 top-8 w-enough">
                             <CollectionsBookmark className="text-maroon-500 text-2xl" />
                         </div>

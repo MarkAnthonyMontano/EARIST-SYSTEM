@@ -43,7 +43,7 @@ const ScheduleChecker = () => {
 
   const fetchSchoolYearList = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/school_years');
+      const response = await axios.get('http://localhost:5000/get_active_school_years');
       setSchoolYearList(response.data)
     } catch (error) {
       console.log(error);

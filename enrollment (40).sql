@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 09, 2025 at 09:43 PM
+-- Generation Time: Aug 10, 2025 at 07:47 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -172,7 +172,7 @@ CREATE TABLE `curriculum_table` (
 --
 
 INSERT INTO `curriculum_table` (`curriculum_id`, `year_id`, `program_id`, `lock_status`) VALUES
-(1, 1, 1, 0),
+(1, 1, 3, 0),
 (2, 2, 2, 0),
 (3, 3, 3, 0),
 (4, 4, 4, 0),
@@ -978,7 +978,18 @@ INSERT INTO `enrolled_subject` (`id`, `student_number`, `curriculum_id`, `course
 (535, 202500001, 1, 8, 12, 0, 0, 0, 0, 3, 1),
 (536, 202500001, 1, 9, 12, 0, 0, 0, 0, 3, 1),
 (537, 202500001, 1, 10, 12, 0, 0, 0, 0, 3, 1),
-(538, 202500001, 1, 11, 12, 0, 0, 0, 0, 3, 1);
+(538, 202500001, 1, 11, 12, 0, 0, 0, 0, 3, 1),
+(539, 202500002, 1, 1, 12, 0, 0, 0, 0, 1, 1),
+(540, 202500002, 1, 4, 12, 0, 0, 0, 0, 1, 1),
+(541, 202500002, 1, 6, 12, 0, 0, 0, 0, 1, 1),
+(542, 202500002, 1, 5, 12, 0, 0, 0, 0, 1, 1),
+(543, 202500002, 1, 9, 12, 0, 0, 0, 0, 1, 1),
+(544, 202500002, 1, 7, 12, 0, 0, 0, 0, 1, 1),
+(545, 202500002, 1, 8, 12, 0, 0, 0, 0, 1, 1),
+(546, 202500002, 1, 10, 12, 0, 0, 0, 0, 1, 1),
+(547, 202500002, 1, 11, 12, 0, 0, 0, 0, 1, 1),
+(548, 202500002, 1, 3, 12, 0, 0, 0, 0, 1, 1),
+(549, 202500002, 1, 2, 12, 0, 0, 0, 0, 1, 1);
 
 -- --------------------------------------------------------
 
@@ -1377,7 +1388,7 @@ INSERT INTO `prof_table` (`prof_id`, `person_id`, `profile_image`, `fname`, `mna
 (36, NULL, '', 'Jefferson', NULL, 'Costales', 'jefferson.costales@earist.edu.ph', 'COSTALES', 0, 'faculty'),
 (37, NULL, '', 'Arjo', NULL, 'Ladia', 'arjo.ladia@earist.edu.ph', 'LADIA', 0, 'faculty'),
 (38, 38, '', 'Mark Anthony', 'Placido', 'Montano', 'markmontano999@gmail.com', '$2b$10$FR.08E3pPApsIbU0uQ3H9.IbjjWvc70cwRk4Bu2BwBwSFLGCp0o4.', 1, 'faculty'),
-(62, 78, '78_ProfessorProfile_2025.png', 'George', 'Bush', 'Garden', 'mecasio.a.bsinfotech@gmail.com', '$2b$10$oihLV09MXVFb9el910u1UuczRkanRnppd1lItVd/wG96UDBCu8ope', 1, 'faculty');
+(62, 78, '78_ProfessorProfile_2025.png', 'George', 'Bush', 'Garden', 'markmontano999@gmail.com', '$2b$10$1z0TPyKFo6qtCrVAaA1D4e3qANATLI.pyTLqZinmmT8sF2zMALkDu', 1, 'faculty');
 
 -- --------------------------------------------------------
 
@@ -1912,7 +1923,6 @@ INSERT INTO `user_accounts` (`id`, `person_id`, `role`, `email`, `password`) VAL
 (13, 14, 'student', 'montano.ma.bsinfotech@gmail.com', '$2b$10$22emRbSCyIjPpe7zr2jGD.ThJz18wZ5lHyFTvhmN6Aa1iZnX9tG4W'),
 (14, 15, 'student', 'james@gmail.com', '$2b$10$Co4BlhU8i0/a4lLQ/cp7u.9ZdIuWgkZJkVbMmi/aqVpUhTd/akjtG'),
 (15, 18, 'student', 'markmontano522@gmail.com', '$2b$10$LpZY2sIonsckF6ysaHwDHu0FoNxM2XMwZZCnP.snpGd4.hSlZIv8G'),
-(16, 19, 'student', 'markmontano522@gmail.com', '$2b$10$lp8LqfLvbPXlcR52yINT/um5jAFXU3b5uoJ8S43BED5WbrFncbhUK'),
 (17, 92, 'student', 'mecasio123@gmail.com', '$2b$10$CHRiC06CY6QQS4ZpiBlJYePp1TjQti.BlwIXJkc83ojxPM3H11vG.'),
 (18, 1, 'student', 'markmontano062612@gmail.com', '$2b$10$TjYekgXIRZbIau.fHxRseO44zSREQeJUHoRizlJpPKh1W7JkBZ9NC'),
 (19, 2, 'student', 'markmontano0626@gmail.com', '$2b$10$V8F7mMR2iYtSmRq/al/KOOqT.vXOEL9eaRUTSaDLJxLRq52WgZRZ2');
@@ -2222,7 +2232,7 @@ ALTER TABLE `dprtmnt_table`
 -- AUTO_INCREMENT for table `enrolled_subject`
 --
 ALTER TABLE `enrolled_subject`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=539;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=550;
 
 --
 -- AUTO_INCREMENT for table `period_status`

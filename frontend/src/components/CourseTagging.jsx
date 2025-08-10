@@ -403,7 +403,7 @@ const CourseTagging = () => {
               {first_name} {middle_name} {last_name}
               <br />
               Department/Course/Section: &emsp;
-              {courseCode} - {courseDescription} - {sectionDescription}
+              {courseCode} {courseDescription} {sectionDescription}
             </Typography>
 
             <TextField

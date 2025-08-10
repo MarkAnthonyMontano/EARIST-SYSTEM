@@ -69,9 +69,16 @@ const AdminDashboard3 = () => {
   const fetchPersonData = async (id) => {
     try {
       const res = await axios.get(`http://localhost:5000/api/person/${id}`);
-      setPerson(res.data);
-    } catch (error) { }
+      const sanitizedData = Object.fromEntries(
+        Object.entries(res.data).map(([key, value]) => [key, value ?? ""])
+      );
+      setPerson(sanitizedData);
+    } catch (error) {
+      console.error(error);
+    }
   };
+
+
 
 
   // Do not alter
@@ -133,7 +140,14 @@ const AdminDashboard3 = () => {
     return isValid;
   };
 
+  const [clickedSteps, setClickedSteps] = useState(Array(steps.length).fill(false));
 
+  const handleStepClick = (index) => {
+    setActiveStep(index);
+    const newClickedSteps = [...clickedSteps];
+    newClickedSteps[index] = true;
+    setClickedSteps(newClickedSteps);
+  };
 
 
 
@@ -191,24 +205,42 @@ const AdminDashboard3 = () => {
           {/* Right: Links (25%) */}
 
           <Box sx={{ width: "25%", padding: "10px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-
-            <Link to="/ecat_application_form" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+            <Link
+              to={`/ecat_application_form?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               ECAT Application Form
             </Link>
-            <Link to="/admission_form_process" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+
+            <Link
+              to={`/admission_form_process?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               Admission Form Process
             </Link>
-            <Link to="/personal_data_form" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+
+            <Link
+              to={`/personal_data_form?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               Personal Data Form
             </Link>
 
-            <Link to="/office_of_the_registrar" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+            <Link
+              to={`/office_of_the_registrar?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               Application For EARIST College Admission
             </Link>
-            <Link to="/admission_services" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+
+            <Link
+              to={`/admission_services?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               Application/Student Satisfactory Survey
             </Link>
           </Box>
+
         </Box>
         <Container>
           <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>APPLICANT FORM</h1>

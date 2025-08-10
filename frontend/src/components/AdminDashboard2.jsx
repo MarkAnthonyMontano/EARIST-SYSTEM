@@ -24,46 +24,46 @@ const AdminDashboard2 = () => {
     mother_year_graduated: "", mother_school_address: "", mother_contact: "", mother_occupation: "", mother_employer: "", mother_income: "", mother_email: "", guardian: "", guardian_family_name: "", guardian_given_name: "",
     guardian_middle_name: "", guardian_ext: "", guardian_nickname: "", guardian_address: "", guardian_contact: "", guardian_email: "", annual_income: "",
   });
- const [selectedPerson, setSelectedPerson] = useState(null);
+  const [selectedPerson, setSelectedPerson] = useState(null);
 
 
   // do not alter
-const location = useLocation();
-const queryParams = new URLSearchParams(location.search);
-const queryPersonId = queryParams.get("person_id");
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const queryPersonId = queryParams.get("person_id");
 
-useEffect(() => {
-  const storedUser = localStorage.getItem("email");
-  const storedRole = localStorage.getItem("role");
-  const storedID = localStorage.getItem("person_id");
+  useEffect(() => {
+    const storedUser = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
+    const storedID = localStorage.getItem("person_id");
 
-  if (storedUser && storedRole && (storedID || queryPersonId)) {
-    setUser(storedUser);
-    setUserRole(storedRole);
+    if (storedUser && storedRole && (storedID || queryPersonId)) {
+      setUser(storedUser);
+      setUserRole(storedRole);
 
-    const resolvedID = queryPersonId || storedID;
-    setUserID(resolvedID); // 🛠️ Fix here
+      const resolvedID = queryPersonId || storedID;
+      setUserID(resolvedID); // 🛠️ Fix here
 
-    if (storedRole === "registrar") {
-      fetchPersonData(resolvedID);
+      if (storedRole === "registrar") {
+        fetchPersonData(resolvedID);
+      } else {
+        window.location.href = "/login";
+      }
     } else {
       window.location.href = "/login";
     }
-  } else {
-    window.location.href = "/login";
-  }
-}, [queryPersonId]);
+  }, [queryPersonId]);
 
 
-const steps = person.person_id
-  ? [
+  const steps = person.person_id
+    ? [
       { label: "Personal Information", icon: <PersonIcon />, path: `/admin_dashboard1?person_id=${person.person_id}` },
       { label: "Family Background", icon: <FamilyRestroomIcon />, path: `/admin_dashboard2?person_id=${person.person_id}` },
       { label: "Educational Attainment", icon: <SchoolIcon />, path: `/admin_dashboard3?person_id=${person.person_id}` },
       { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: `/admin_dashboard4?person_id=${person.person_id}` },
       { label: "Other Information", icon: <InfoIcon />, path: `/admin_dashboard5?person_id=${person.person_id}` },
     ]
-  : [];
+    : [];
 
 
 
@@ -191,7 +191,14 @@ const steps = person.person_id
 
 
   const [soloParentChoice, setSoloParentChoice] = useState("");
+  const [clickedSteps, setClickedSteps] = useState(Array(steps.length).fill(false));
 
+  const handleStepClick = (index) => {
+    setActiveStep(index);
+    const newClickedSteps = [...clickedSteps];
+    newClickedSteps[index] = true;
+    setClickedSteps(newClickedSteps);
+  };
 
 
   // dot not alter
@@ -248,24 +255,42 @@ const steps = person.person_id
 
           {/* Right: Links (25%) */}
           <Box sx={{ width: "25%", padding: "10px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-
-            <Link to="/ecat_application_form" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+            <Link
+              to={`/ecat_application_form?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               ECAT Application Form
             </Link>
-            <Link to="/admission_form_process" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+
+            <Link
+              to={`/admission_form_process?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               Admission Form Process
             </Link>
-            <Link to="/personal_data_form" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+
+            <Link
+              to={`/personal_data_form?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               Personal Data Form
             </Link>
 
-            <Link to="/office_of_the_registrar" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+            <Link
+              to={`/office_of_the_registrar?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               Application For EARIST College Admission
             </Link>
-            <Link to="/admission_services" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
+
+            <Link
+              to={`/admission_services?person_id=${person.person_id}`}
+              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
+            >
               Application/Student Satisfactory Survey
             </Link>
           </Box>
+
         </Box>
 
         <Container>
@@ -274,67 +299,67 @@ const steps = person.person_id
         </Container>
         <br />
 
-         {person.person_id && (
-      <Box sx={{ display: "flex", justifyContent: "center", width: "100%", px: 4 }}>
-        {steps.map((step, index) => (
-          <React.Fragment key={index}>
-            {/* Wrap the step with Link for routing */}
-            <Link to={step.path} style={{ textDecoration: "none" }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  cursor: "pointer",
-                }}
-                onClick={() => handleStepClick(index)}
-              >
-                {/* Step Icon */}
-                <Box
-                  sx={{
-                    width: 50,
-                    height: 50,
-                    borderRadius: "50%",
-                    backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
-                    color: activeStep === index ? "#fff" : "#000",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {step.icon}
-                </Box>
-    
-                {/* Step Label */}
-                <Typography
-                  sx={{
-                    mt: 1,
-                    color: activeStep === index ? "#6D2323" : "#000",
-                    fontWeight: activeStep === index ? "bold" : "normal",
-                    fontSize: 14,
-                  }}
-                >
-                  {step.label}
-                </Typography>
-              </Box>
-            </Link>
-    
-            {/* Connector Line */}
-            {index < steps.length - 1 && (
-              <Box
-                sx={{
-                  height: "2px",
-                  backgroundColor: "#6D2323",
-                  flex: 1,
-                  alignSelf: "center",
-                  mx: 2,
-                }}
-              />
-            )}
-          </React.Fragment>
-        ))}
-      </Box>
-    )}
+        {person.person_id && (
+          <Box sx={{ display: "flex", justifyContent: "center", width: "100%", px: 4 }}>
+            {steps.map((step, index) => (
+              <React.Fragment key={index}>
+                {/* Wrap the step with Link for routing */}
+                <Link to={step.path} style={{ textDecoration: "none" }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }}
+                    onClick={() => handleStepClick(index)}
+                  >
+                    {/* Step Icon */}
+                    <Box
+                      sx={{
+                        width: 50,
+                        height: 50,
+                        borderRadius: "50%",
+                        backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                        color: activeStep === index ? "#fff" : "#000",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {step.icon}
+                    </Box>
+
+                    {/* Step Label */}
+                    <Typography
+                      sx={{
+                        mt: 1,
+                        color: activeStep === index ? "#6D2323" : "#000",
+                        fontWeight: activeStep === index ? "bold" : "normal",
+                        fontSize: 14,
+                      }}
+                    >
+                      {step.label}
+                    </Typography>
+                  </Box>
+                </Link>
+
+                {/* Connector Line */}
+                {index < steps.length - 1 && (
+                  <Box
+                    sx={{
+                      height: "2px",
+                      backgroundColor: "#6D2323",
+                      flex: 1,
+                      alignSelf: "center",
+                      mx: 2,
+                    }}
+                  />
+                )}
+              </React.Fragment>
+            ))}
+          </Box>
+        )}
 
         <br />
 
@@ -372,8 +397,8 @@ const steps = person.person_id
                 <Checkbox
                   name="solo_parent"
                   checked={person.solo_parent === 1}
-                  InputProps={{ readOnly: true }}
                   disabled
+
                   onChange={(e) => {
                     const checked = e.target.checked;
 
@@ -387,7 +412,7 @@ const steps = person.person_id
                     setPerson(newPerson);
                     handleUpdate(newPerson); // Save immediately
                   }}
-             
+
                   sx={{ width: 25, height: 25 }}
                 />
                 <label style={{ fontFamily: "Arial" }}>Solo Parent</label>
@@ -445,7 +470,7 @@ const steps = person.person_id
                       const checked = e.target.checked;
 
                       // Call your form handler
-                    
+
 
                       // Update local state
                       setPerson((prev) => ({
@@ -453,7 +478,7 @@ const steps = person.person_id
                         father_deceased: checked ? 1 : 0,
                       }));
                     }}
-              
+
                   />
                 }
                 label="Father Deceased"
@@ -470,12 +495,12 @@ const steps = person.person_id
                         fullWidth
                         size="small"
                         required
-                        InputProps={{ readOnly: true }}
+                        disabled
 
                         placeholder="Enter Father Last Name"
                         name="father_family_name"
                         value={person.father_family_name}
-                        
+
                         error={errors.father_family_name} helperText={errors.father_family_name ? "This field is required." : ""}
                       />
                     </Box>
@@ -486,11 +511,11 @@ const steps = person.person_id
                         size="small"
                         required
                         name="father_given_name"
-                        InputProps={{ readOnly: true }}
+                        disabled
 
                         placeholder="Enter Father First Name"
                         value={person.father_given_name}
-                      
+
                         error={errors.father_given_name} helperText={errors.father_given_name ? "This field is required." : ""}
                       />
                     </Box>
@@ -500,12 +525,12 @@ const steps = person.person_id
                         fullWidth
                         size="small"
                         required
-                        InputProps={{ readOnly: true }}
+                        disabled
 
                         name="father_middle_name"
                         placeholder="Enter Father Middle Name"
                         value={person.father_middle_name}
-                    
+
                         error={errors.father_middle_name} helperText={errors.father_middle_name ? "This field is required." : ""}
                       />
                     </Box>
@@ -520,7 +545,7 @@ const steps = person.person_id
                           name="father_ext"
                           value={person.father_ext || ""}
                           label="Extension"
-                          
+
                         >
                           <MenuItem value=""><em>Select Extension</em></MenuItem>
                           <MenuItem value="Jr.">Jr.</MenuItem>
@@ -543,12 +568,12 @@ const steps = person.person_id
                         fullWidth
                         size="small"
                         required
-                        InputProps={{ readOnly: true }}
+                        disabled
 
                         name="father_nickname"
                         placeholder="Enter Father Nickname"
                         value={person.father_nickname}
-                        
+
                         error={errors.father_nickname} helperText={errors.father_nickname ? "This field is required." : ""}
                       />
                     </Box>
@@ -585,7 +610,7 @@ const steps = person.person_id
                         setPerson(updatedPerson);
                         handleUpdate(updatedPerson); // Immediate update (optional)
                       }}
-                     
+
                       sx={{ width: 25, height: 25 }}
                     />
                     <label style={{ fontFamily: "Arial" }}>Father's education not applicable</label>
@@ -602,11 +627,11 @@ const steps = person.person_id
                         <TextField
                           fullWidth
                           size="small"
-                          InputProps={{ readOnly: true }}
+                          disabled
                           placeholder="Enter Father Education Level"
                           name="father_education_level"
                           value={person.father_education_level}
-                     
+
                           error={errors.father_education_level}
                           helperText={errors.father_education_level ? "This field is required." : ""}
                         />
@@ -618,11 +643,11 @@ const steps = person.person_id
                           fullWidth
                           size="small"
                           name="father_last_school"
-                          InputProps={{ readOnly: true }}
+                          disabled
 
                           placeholder="Enter Father Last School"
                           value={person.father_last_school}
-                          
+
                           error={errors.father_last_school}
                           helperText={errors.father_last_school ? "This field is required." : ""}
                         />
@@ -634,11 +659,11 @@ const steps = person.person_id
                           fullWidth
                           size="small"
                           name="father_course"
-                          InputProps={{ readOnly: true }}
+                          disabled
 
                           placeholder="Enter Father Course"
                           value={person.father_course}
-                        
+
                           error={errors.father_course}
                           helperText={errors.father_course ? "This field is required." : ""}
                         />
@@ -650,11 +675,11 @@ const steps = person.person_id
                           fullWidth
                           size="small"
                           name="father_year_graduated"
-                          InputProps={{ readOnly: true }}
+                          disabled
 
                           placeholder="Enter Father Year Graduated"
                           value={person.father_year_graduated}
-                         
+
                           error={errors.father_year_graduated}
                           helperText={errors.father_year_graduated ? "This field is required." : ""}
                         />
@@ -665,12 +690,12 @@ const steps = person.person_id
                         <TextField
                           fullWidth
                           size="small"
-                          InputProps={{ readOnly: true }}
+                          disabled
 
                           name="father_school_address"
                           placeholder="Enter Father School Address"
                           value={person.father_school_address}
-                        
+
                           error={errors.father_school_address}
                           helperText={errors.father_school_address ? "This field is required." : ""}
                         />
@@ -692,12 +717,12 @@ const steps = person.person_id
                         fullWidth
                         size="small"
                         required
-                        InputProps={{ readOnly: true }}
+                        disabled
 
                         name="father_contact"
                         placeholder="Enter Father Contact"
                         value={person.father_contact}
-                     
+
                         error={errors.father_contact} helperText={errors.father_contact ? "This field is required." : ""}
                       />
                     </Box>
@@ -707,12 +732,12 @@ const steps = person.person_id
                         fullWidth
                         size="small"
                         required
-                        InputProps={{ readOnly: true }}
+                        disabled
 
                         name="father_occupation"
                         value={person.father_occupation}
                         placeholder="Enter Father Occupation"
-                       
+
                         error={errors.father_occupation} helperText={errors.father_occupation ? "This field is required." : ""}
                       />
                     </Box>
@@ -722,12 +747,12 @@ const steps = person.person_id
                         fullWidth
                         size="small"
                         required
-                        InputProps={{ readOnly: true }}
+                        disabled
 
                         name="father_employer"
                         placeholder="Enter Father Employer"
                         value={person.father_employer}
-                      
+
                         error={errors.father_employer} helperText={errors.father_employer ? "This field is required." : ""}
                       />
                     </Box>
@@ -739,11 +764,11 @@ const steps = person.person_id
                         size="small"
                         required
                         name="father_income"
-                        InputProps={{ readOnly: true }}
+                        disabled
 
                         placeholder="Enter Father Income"
                         value={person.father_income}
-                      
+
                         error={errors.father_income}
                         helperText={errors.father_income ? "This field is required." : ""}
                       />
@@ -756,12 +781,12 @@ const steps = person.person_id
                       fullWidth
                       size="small"
                       required
-                      InputProps={{ readOnly: true }}
+                      disabled
 
                       name="father_email"
                       placeholder="Enter your Father Email Address (e.g., username@gmail.com)"
                       value={person.father_email}
-                     
+
 
                     />
                   </Box>
@@ -786,14 +811,14 @@ const steps = person.person_id
                     onChange={(e) => {
                       const checked = e.target.checked;
 
-                
+
                       // Update local state
                       setPerson((prev) => ({
                         ...prev,
                         mother_deceased: checked ? 1 : 0,
                       }));
                     }}
-                    
+
                   />
                 }
                 label="Mother Deceased"
@@ -811,12 +836,12 @@ const steps = person.person_id
                         size="small"
                         required
 
-                        InputProps={{ readOnly: true }}
+                        disabled
 
                         name="mother_family_name"
                         placeholder="Enter your Mother Last Name"
                         value={person.mother_family_name}
-                    
+
                         error={errors.mother_family_name}
                         helperText={errors.mother_family_name ? "This field is required." : ""}
                       />
@@ -828,12 +853,12 @@ const steps = person.person_id
                         fullWidth
                         size="small"
                         required
-                        InputProps={{ readOnly: true }}
+                        disabled
 
                         name="mother_given_name"
                         placeholder="Enter your Mother First Name"
                         value={person.mother_given_name}
-                        
+
                         error={errors.mother_given_name}
                         helperText={errors.mother_given_name ? "This field is required." : ""}
                       />
@@ -845,12 +870,12 @@ const steps = person.person_id
                         fullWidth
                         size="small"
                         required
-                        InputProps={{ readOnly: true }}
+                        disabled
 
                         name="mother_middle_name"
                         placeholder="Enter your Mother Middle Name"
                         value={person.mother_middle_name}
-                    
+
                         error={errors.mother_middle_name}
                         helperText={errors.mother_middle_name ? "This field is required." : ""}
                       />
@@ -868,7 +893,7 @@ const steps = person.person_id
                           readOnly
                           value={person.mother_ext || ""}
                           label="Extension"
-                    
+
                         >
                           <MenuItem value=""><em>Select Extension</em></MenuItem>
                           <MenuItem value="Jr.">Jr.</MenuItem>
@@ -890,12 +915,12 @@ const steps = person.person_id
                         fullWidth
                         size="small"
                         required
-                        InputProps={{ readOnly: true }}
+                        disabled
 
                         name="mother_nickname"
                         placeholder="Enter your Mother Nickname"
                         value={person.mother_nickname}
-                     
+
                         error={errors.mother_nickname}
                         helperText={errors.mother_nickname ? "This field is required." : ""}
                       />
@@ -935,7 +960,7 @@ const steps = person.person_id
                         setPerson(updatedPerson);
                         handleUpdate(updatedPerson); // Optional: Immediate save
                       }}
-                     
+
                       sx={{ width: 25, height: 25 }}
                     />
                     <label style={{ fontFamily: "Arial" }}>Mother's education not applicable</label>
@@ -949,11 +974,11 @@ const steps = person.person_id
                         <TextField
                           fullWidth
                           size="small"
-                          InputProps={{ readOnly: true }}
+                          disabled
                           name="mother_education_level"
                           placeholder="Enter your Mother Education Level"
                           value={person.mother_education_level}
-                     
+
                           error={errors.mother_education_level}
                           helperText={errors.mother_education_level ? "This field is required." : ""}
                         />
@@ -965,10 +990,10 @@ const steps = person.person_id
                           fullWidth
                           size="small"
                           name="mother_last_school"
-                          InputProps={{ readOnly: true }}
+                          disabled
                           placeholder="Enter your Mother Last School Attended"
                           value={person.mother_last_school}
-                        
+
                           error={errors.mother_last_school}
                           helperText={errors.mother_last_school ? "This field is required." : ""}
                         />
@@ -980,11 +1005,11 @@ const steps = person.person_id
                           fullWidth
                           size="small"
                           name="mother_course"
-                          InputProps={{ readOnly: true }}
+                          disabled
 
                           placeholder="Enter your Mother Course"
                           value={person.mother_course}
-                          
+
                           error={errors.mother_course}
                           helperText={errors.mother_course ? "This field is required." : ""}
                         />
@@ -996,11 +1021,11 @@ const steps = person.person_id
                           fullWidth
                           size="small"
                           name="mother_year_graduated"
-                          InputProps={{ readOnly: true }}
+                          disabled
 
                           placeholder="Enter your Mother Year Graduated"
                           value={person.mother_year_graduated}
-                         
+
                           error={errors.mother_year_graduated}
                           helperText={errors.mother_year_graduated ? "This field is required." : ""}
                         />
@@ -1012,11 +1037,11 @@ const steps = person.person_id
                           fullWidth
                           size="small"
                           name="mother_school_address"
-                          InputProps={{ readOnly: true }}
+                          disabled
 
                           placeholder="Enter your Mother School Address"
                           value={person.mother_school_address}
-                      
+
                           error={errors.mother_school_address}
                           helperText={errors.mother_school_address ? "This field is required." : ""}
                         />
@@ -1036,13 +1061,13 @@ const steps = person.person_id
                       <TextField
                         fullWidth
                         size="small"
-                        InputProps={{ readOnly: true }}
+                        disabled
 
                         required
                         name="mother_contact"
                         placeholder="Enter your Mother Contact"
                         value={person.mother_contact}
-                    
+
                         error={errors.mother_contact} helperText={errors.mother_contact ? "This field is required." : ""}
                       />
                     </Box>
@@ -1052,12 +1077,12 @@ const steps = person.person_id
                         fullWidth
                         size="small"
                         required
-                        InputProps={{ readOnly: true }}
+                        disabled
 
                         name="mother_occupation"
                         placeholder="Enter your Mother Occupation"
                         value={person.mother_occupation}
-                        
+
                         error={errors.mother_occupation} helperText={errors.mother_occupation ? "This field is required." : ""}
                       />
                     </Box>
@@ -1067,12 +1092,12 @@ const steps = person.person_id
                         fullWidth
                         size="small"
                         required
-                        InputProps={{ readOnly: true }}
+                        disabled
 
                         name="mother_employer"
                         placeholder="Enter your Mother Employer"
                         value={person.mother_employer}
-                    
+
                         error={errors.mother_employer} helperText={errors.mother_employer ? "This field is required." : ""}
                       />
                     </Box>
@@ -1084,12 +1109,12 @@ const steps = person.person_id
                         fullWidth
                         size="small"
                         required
-                        InputProps={{ readOnly: true }}
+                        disabled
 
                         name="mother_income"
                         placeholder="Enter your Mother Income"
                         value={person.mother_income}
-                
+
                         error={errors.mother_income}
                         helperText={errors.mother_income ? "This field is required." : ""}
                       />
@@ -1102,12 +1127,12 @@ const steps = person.person_id
                       fullWidth
                       size="small"
                       required
-                      InputProps={{ readOnly: true }}
+                      disabled
 
                       name="mother_email"
                       placeholder="Enter your Mother Email Address (e.g., username@gmail.com)"
                       value={person.mother_email}
-                     
+
 
                     />
                   </Box>
@@ -1131,7 +1156,7 @@ const steps = person.person_id
                   name="guardian"
                   value={person.guardian || ""}
                   label="Guardian"
-               
+
                 >
                   <MenuItem value=""><em>Select Guardian</em></MenuItem>
                   <MenuItem value="Father">Father</MenuItem>
@@ -1160,13 +1185,13 @@ const steps = person.person_id
                 <TextField
                   fullWidth
                   size="small"
-                  InputProps={{ readOnly: true }}
+                  disabled
 
                   required
                   name="guardian_family_name"
                   placeholder="Enter your Guardian Family Name"
                   value={person.guardian_family_name}
-               
+
                   error={!!errors.guardian_family_name}
                   helperText={errors.guardian_family_name ? "This field is required." : ""}
                 />
@@ -1179,12 +1204,12 @@ const steps = person.person_id
                   fullWidth
                   size="small"
                   required
-                  InputProps={{ readOnly: true }}
+                  disabled
 
                   name="guardian_given_name"
                   placeholder="Enter your Guardian First Name"
                   value={person.guardian_given_name}
-               
+
                   error={!!errors.guardian_given_name}
                   helperText={errors.guardian_given_name ? "This field is required." : ""}
                 />
@@ -1197,12 +1222,12 @@ const steps = person.person_id
                   fullWidth
                   size="small"
                   required
-                  InputProps={{ readOnly: true }}
+                  disabled
 
                   name="guardian_middle_name"
                   placeholder="Enter your Guardian Middle Name"
                   value={person.guardian_middle_name}
-          
+
                   error={!!errors.guardian_middle_name}
                   helperText={errors.guardian_middle_name ? "This field is required." : ""}
                 />
@@ -1220,7 +1245,7 @@ const steps = person.person_id
                     readOnly
                     value={person.guardian_ext || ""}
                     label="Extension"
-              
+
                   >
                     <MenuItem value=""><em>Select Extension</em></MenuItem>
                     <MenuItem value="Jr.">Jr.</MenuItem>
@@ -1244,12 +1269,12 @@ const steps = person.person_id
                   fullWidth
                   size="small"
                   required
-                  InputProps={{ readOnly: true }}
+                  disabled
 
                   name="guardian_nickname"
                   placeholder="Enter your Guardian Nickname"
                   value={person.guardian_nickname}
-             
+
                   error={!!errors.guardian_nickname}
                   helperText={errors.guardian_nickname ? "This field is required." : ""}
                 />
@@ -1266,12 +1291,12 @@ const steps = person.person_id
                 fullWidth
                 size="small"
                 required
-                InputProps={{ readOnly: true }}
+                disabled
 
                 name="guardian_address"
                 placeholder="Enter your Guardian Address"
                 value={person.guardian_address}
-       
+
                 error={errors.guardian_address}
                 helperText={errors.guardian_address ? "This field is required." : ""}
               />
@@ -1285,11 +1310,11 @@ const steps = person.person_id
                   size="small"
                   required
                   name="guardian_contact"
-                  InputProps={{ readOnly: true }}
+                  disabled
 
                   placeholder="Enter your Guardian Contact Number"
                   value={person.guardian_contact}
-                 
+
                   error={errors.guardian_contact} helperText={errors.guardian_contact ? "This field is required." : ""}
                 />
               </Box>
@@ -1301,12 +1326,12 @@ const steps = person.person_id
                   size="small"
                   required
                   name="guardian_email"
-                  InputProps={{ readOnly: true }}
+                  disabled
 
                   placeholder="Enter your Guardian Email Address (e.g., username@gmail.com)"
                   value={person.guardian_email}
-               
-               
+
+
                 />
               </Box>
             </Box>
@@ -1326,7 +1351,7 @@ const steps = person.person_id
                   readOnly
                   value={person.annual_income || ""}
                   label="Annual Income"
-               
+
                 >
                   <MenuItem value=""><em>Select Annual Income</em></MenuItem>
                   <MenuItem value="80,000 and below">80,000 and below</MenuItem>
