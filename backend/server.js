@@ -3312,7 +3312,6 @@ app.get('/get_student_list/:course_id/:department_section_id/:school_year_id', a
   }
 });
 
-
 // PROFESSOR LIST (UPDATED!)
 app.get("/get_prof", async (req, res) => {
   const { department_id } = req.query;
@@ -4116,7 +4115,6 @@ app.get("/api/department-sections", async (req, res) => {
   }
 });
 
-
 app.put("/api/update-active-curriculum", async (req, res) => {
   const { studentId, departmentSectionId } = req.body;
 
@@ -4157,8 +4155,6 @@ app.put("/api/update-active-curriculum", async (req, res) => {
   }
 });
 
-
-
 app.get('/api/search-student/:sectionId', async (req, res) => {
   const {sectionId} = req.params
   try{
@@ -4176,6 +4172,7 @@ app.get('/api/search-student/:sectionId', async (req, res) => {
     res.status(500).json({ error: "Database error", details: err.message });
   }
 });
+
 
 
 
@@ -4311,6 +4308,29 @@ app.get('/course_assigned_to/:userID', async (req, res) => {
   }
 });
 
+app.get('/handle_section_of/:userID/:selectedCourse/:selectedActiveSchoolYear', async (req, res) => {
+  const {userID, selectedCourse, selectedActiveSchoolYear} = req.params;
+  
+
+  try{
+    const sql = `
+    SELECT tt.department_section_id, ptbl.program_code, st.description AS section_description FROM time_table AS tt
+      INNER JOIN prof_table AS pt ON tt.professor_id = pt.prof_id
+      INNER JOIN dprtmnt_section_table AS dst ON tt.department_section_id = dst.id
+      INNER JOIN curriculum_table AS ct ON dst.curriculum_id = ct.curriculum_id
+      INNER JOIN section_table AS st ON dst.section_id = st.id
+      INNER JOIN program_table AS ptbl ON ct.program_id = ptbl.program_id
+      INNER JOIN active_school_year_table AS sy ON tt.school_year_id = sy.id
+      INNER JOIN year_table AS yt ON sy.year_id = yt.year_id
+    WHERE pt.person_id = ? AND tt.course_id = ? AND sy.id = ? ORDER BY section_description
+    `
+    const [result] = await db3.query(sql, [userID, selectedCourse, selectedActiveSchoolYear]);
+    res.json(result);
+  }catch(err){
+    console.error("Server Error: ", err);
+    res.status(500).send({message: "Internal Error", err});
+  }
+});
 
 app.get('/get_school_year', async (req, res) => {
   try{
@@ -4370,7 +4390,6 @@ app.get('/active_school_year', async (req, res) => {
   }
 });
 
-
 app.get('/get_selecterd_year/:selectedSchoolYear/:selectedSchoolSemester', async (req, res) => {
   const {selectedSchoolYear, selectedSchoolSemester} = req.params;
   try{
@@ -4391,12 +4410,13 @@ app.get('/get_selecterd_year/:selectedSchoolYear/:selectedSchoolSemester', async
   }
 });
 
+
 app.get('/enrolled_student_list/:userID/:selectedCourse/:department_section_id', async (req, res) => {
   const {userID,selectedCourse, department_section_id} = req.params;
 
   try{
     const sql = `
-    SELECT 
+    SELECT DISTINCT
       es.student_number, 
       ptbl.last_name, 
       ptbl.first_name, 
@@ -4425,6 +4445,7 @@ app.get('/enrolled_student_list/:userID/:selectedCourse/:department_section_id',
     res.status(500).send({message: "Internal Error", err});
   }
 });
+
 
 
 // API ROOM SCHEDULE
@@ -4471,7 +4492,6 @@ app.delete("/upload/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to delete requirement" });
   }
 });
-
 
 app.get("/api/professor-schedule/:profId", async (req, res) => {
   const profId = req.params.profId;
@@ -4693,8 +4713,6 @@ app.get("/api/person/:id", async (req, res) => {
   }
 });
 
-
-
 // Program Display
 app.get('/class_roster/ccs/:id', async (req, res) => {
   const { id } = req.params;
@@ -4913,6 +4931,24 @@ app.get('/statistics/student_count/department/:dprtmnt_id/by_year_level', async 
   } catch (err) {
     console.error("Error fetching year-level counts:", err);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+app.get("/get_active_school_years", async (req, res) => {
+  const query = `
+    SELECT sy.*, yt.year_description, s.semester_description 
+    FROM active_school_year_table sy
+    JOIN year_table yt ON sy.year_id = yt.year_id
+    JOIN semester_table s ON sy.semester_id = s.semester_id
+    WHERE sy.astatus = 1
+  `;
+
+  try {
+    const [result] = await db3.query(query);
+    res.status(200).json(result);
+  } catch (err) {
+    console.error("Fetch error:", err);
+    res.status(500).json({ error: "Failed to fetch school years", details: err.message });
   }
 });
 

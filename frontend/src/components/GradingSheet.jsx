@@ -246,7 +246,7 @@ const GradingSheet = () => {
         <div>
             <h1> Professor: {profData.fname} {profData.mname} {profData.lname}</h1>
         </div> 
-        <div className="flex">
+        <div className="flex items-center">
             <div className="course-list min-w-[35%] my-[1rem] mr-[1rem]">
                 <FormControl fullWidth>
                     <InputLabel id="demo-simple-select-label">Course</InputLabel>
@@ -318,6 +318,9 @@ const GradingSheet = () => {
                 </Select>
               </FormControl>
             </div>
+            <Button variant="contained" sx={{height: '3.4rem', background: 'maroon'}}>
+                  Upload XLSX FILE
+            </Button>
         </div>  
         <div className="temp-container">
                         
