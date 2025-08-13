@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 10, 2025 at 07:47 PM
+-- Generation Time: Aug 13, 2025 at 09:06 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -172,7 +172,7 @@ CREATE TABLE `curriculum_table` (
 --
 
 INSERT INTO `curriculum_table` (`curriculum_id`, `year_id`, `program_id`, `lock_status`) VALUES
-(1, 1, 3, 0),
+(1, 1, 1, 0),
 (2, 2, 2, 0),
 (3, 3, 3, 0),
 (4, 4, 4, 0),
@@ -366,7 +366,9 @@ INSERT INTO `dprtmnt_profs_table` (`dprtmnt_profs_id`, `dprtmnt_id`, `prof_id`) 
 (46, 5, 33),
 (47, 5, 35),
 (48, 5, 61),
-(49, 1, 62);
+(49, 1, 62),
+(50, 1, 38),
+(51, 1, 63);
 
 -- --------------------------------------------------------
 
@@ -968,17 +970,6 @@ CREATE TABLE `enrolled_subject` (
 --
 
 INSERT INTO `enrolled_subject` (`id`, `student_number`, `curriculum_id`, `course_id`, `active_school_year_id`, `midterm`, `finals`, `final_grade`, `en_remarks`, `department_section_id`, `status`) VALUES
-(528, 202500001, 1, 1, 12, 0, 0, 0, 0, 1, 1),
-(529, 202500001, 1, 2, 12, 0, 0, 0, 0, 3, 1),
-(530, 202500001, 1, 3, 12, 0, 0, 0, 0, 3, 1),
-(531, 202500001, 1, 4, 12, 0, 0, 0, 0, 3, 1),
-(532, 202500001, 1, 5, 12, 0, 0, 0, 0, 3, 1),
-(533, 202500001, 1, 6, 12, 0, 0, 0, 0, 3, 1),
-(534, 202500001, 1, 7, 12, 0, 0, 0, 0, 3, 1),
-(535, 202500001, 1, 8, 12, 0, 0, 0, 0, 3, 1),
-(536, 202500001, 1, 9, 12, 0, 0, 0, 0, 3, 1),
-(537, 202500001, 1, 10, 12, 0, 0, 0, 0, 3, 1),
-(538, 202500001, 1, 11, 12, 0, 0, 0, 0, 3, 1),
 (539, 202500002, 1, 1, 12, 0, 0, 0, 0, 1, 1),
 (540, 202500002, 1, 4, 12, 0, 0, 0, 0, 1, 1),
 (541, 202500002, 1, 6, 12, 0, 0, 0, 0, 1, 1),
@@ -1053,8 +1044,9 @@ CREATE TABLE `person_status_table` (
 --
 
 INSERT INTO `person_status_table` (`id`, `person_id`, `exam_status`, `requirements`, `residency`, `student_registration_status`, `exam_result`, `hs_ave`) VALUES
-(1, 1, 1, 1, 1, 1, 1, 1),
-(2, 2, 1, 1, 1, 1, 1, 1);
+(1, 3, 1, 1, 1, 1, 1, 1),
+(2, 2, 1, 1, 1, 1, 1, 1),
+(3, 204, 0, 0, 0, 1, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -1324,7 +1316,8 @@ INSERT INTO `person_table` (`person_id`, `profile_img`, `campus`, `academicProgr
 INSERT INTO `person_table` (`person_id`, `profile_img`, `campus`, `academicProgram`, `classifiedAs`, `applyingAs`, `program`, `program2`, `program3`, `yearLevel`, `last_name`, `first_name`, `middle_name`, `extension`, `nickname`, `height`, `weight`, `lrnNumber`, `nolrnNumber`, `gender`, `pwdMember`, `pwdType`, `pwdId`, `birthOfDate`, `age`, `birthPlace`, `languageDialectSpoken`, `citizenship`, `religion`, `civilStatus`, `tribeEthnicGroup`, `cellphoneNumber`, `emailAddress`, `presentStreet`, `presentBarangay`, `presentZipCode`, `presentRegion`, `presentProvince`, `presentMunicipality`, `presentDswdHouseholdNumber`, `sameAsPresentAddress`, `permanentStreet`, `permanentBarangay`, `permanentZipCode`, `permanentRegion`, `permanentProvince`, `permanentMunicipality`, `permanentDswdHouseholdNumber`, `solo_parent`, `father_deceased`, `father_family_name`, `father_given_name`, `father_middle_name`, `father_ext`, `father_nickname`, `father_education`, `father_education_level`, `father_last_school`, `father_course`, `father_year_graduated`, `father_school_address`, `father_contact`, `father_occupation`, `father_employer`, `father_income`, `father_email`, `mother_deceased`, `mother_family_name`, `mother_given_name`, `mother_middle_name`, `mother_ext`, `mother_nickname`, `mother_education`, `mother_education_level`, `mother_last_school`, `mother_course`, `mother_year_graduated`, `mother_school_address`, `mother_contact`, `mother_occupation`, `mother_employer`, `mother_income`, `mother_email`, `guardian`, `guardian_family_name`, `guardian_given_name`, `guardian_middle_name`, `guardian_ext`, `guardian_nickname`, `guardian_address`, `guardian_contact`, `guardian_email`, `annual_income`, `schoolLevel`, `schoolLastAttended`, `schoolAddress`, `courseProgram`, `honor`, `generalAverage`, `yearGraduated`, `schoolLevel1`, `schoolLastAttended1`, `schoolAddress1`, `courseProgram1`, `honor1`, `generalAverage1`, `yearGraduated1`, `strand`, `cough`, `colds`, `fever`, `asthma`, `faintingSpells`, `heartDisease`, `tuberculosis`, `frequentHeadaches`, `hernia`, `chronicCough`, `headNeckInjury`, `hiv`, `highBloodPressure`, `diabetesMellitus`, `allergies`, `cancer`, `smokingCigarette`, `alcoholDrinking`, `hospitalized`, `hospitalizationDetails`, `medications`, `hadCovid`, `covidDate`, `vaccine1Brand`, `vaccine1Date`, `vaccine2Brand`, `vaccine2Date`, `booster1Brand`, `booster1Date`, `booster2Brand`, `booster2Date`, `chestXray`, `cbc`, `urinalysis`, `otherworkups`, `symptomsToday`, `remarks`, `termsOfAgreement`, `created_at`) VALUES
 (302, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Ximenes', 'Felisa', 'Mendoza', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'felisa.ximenes@example.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (303, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Yulo', 'Octavio', 'Torres', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'octavio.yulo@example.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(304, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Zabala', 'Esperanza', 'Ramos', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'esperanza.zabala@example.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+(304, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Zabala', 'Esperanza', 'Ramos', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'esperanza.zabala@example.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(305, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Montano', 'Mark Anthony', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'markmontano0626@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1388,7 +1381,8 @@ INSERT INTO `prof_table` (`prof_id`, `person_id`, `profile_image`, `fname`, `mna
 (36, NULL, '', 'Jefferson', NULL, 'Costales', 'jefferson.costales@earist.edu.ph', 'COSTALES', 0, 'faculty'),
 (37, NULL, '', 'Arjo', NULL, 'Ladia', 'arjo.ladia@earist.edu.ph', 'LADIA', 0, 'faculty'),
 (38, 38, '', 'Mark Anthony', 'Placido', 'Montano', 'markmontano999@gmail.com', '$2b$10$FR.08E3pPApsIbU0uQ3H9.IbjjWvc70cwRk4Bu2BwBwSFLGCp0o4.', 1, 'faculty'),
-(62, 78, '78_ProfessorProfile_2025.png', 'George', 'Bush', 'Garden', 'markmontano999@gmail.com', '$2b$10$1z0TPyKFo6qtCrVAaA1D4e3qANATLI.pyTLqZinmmT8sF2zMALkDu', 1, 'faculty');
+(62, 78, '78_ProfessorProfile_2025.png', 'George', 'Bush', 'Garden', 'markmontano999@gmail.com', '$2b$10$1z0TPyKFo6qtCrVAaA1D4e3qANATLI.pyTLqZinmmT8sF2zMALkDu', 1, 'faculty'),
+(63, 98, '98_ProfessorProfile_2025.png', 'Dhani', 'San', 'Jose', 'disanjose@earist.edu.ph', '$2b$10$/XhdvzV/4rugRbZH5gWafenpXBkbuJT2pjsopS85Mj27vDI2ZjFxm', 1, 'faculty');
 
 -- --------------------------------------------------------
 
@@ -1835,8 +1829,9 @@ CREATE TABLE `student_numbering_table` (
 --
 
 INSERT INTO `student_numbering_table` (`student_number`, `person_id`) VALUES
-(202500001, 1),
-(202500002, 2);
+(202500001, 3),
+(202500002, 2),
+(202500204, 204);
 
 -- --------------------------------------------------------
 
@@ -1859,8 +1854,9 @@ CREATE TABLE `student_status_table` (
 --
 
 INSERT INTO `student_status_table` (`id`, `student_number`, `active_curriculum`, `enrolled_status`, `year_level_id`, `active_school_year_id`, `control_status`) VALUES
-(27, 202500001, 1, '1', 1, 1, 0),
-(28, 202500002, 1, '1', 1, 1, 0);
+(27, 202500001, 1, '1', 1, 1, 1),
+(28, 202500002, 1, '1', 1, 1, 1),
+(29, 202500204, 0, '1', 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -1896,7 +1892,10 @@ INSERT INTO `time_table` (`id`, `room_day`, `school_time_start`, `school_time_en
 (17, 3, '10:00 AM', '12:00 PM', 1, 1, 62, 21, 12),
 (18, 2, '8:00 AM', '11:00 AM', 3, 1, 62, 21, 12),
 (19, 2, '5:00 PM', '8:00 PM', 1, 6, 62, 21, 12),
-(20, 5, '5:29 PM', '9:29 PM', 1, 9, 62, 21, 12);
+(20, 5, '5:29 PM', '9:29 PM', 1, 9, 62, 21, 12),
+(21, 2, '1:00 PM', '2:00 PM', 1, 1, 38, 21, 12),
+(22, 2, '5:00 PM', '8:00 PM', 1, 1, 63, 21, 12),
+(23, 3, '6:00 PM', '9:00 PM', 1, 7, 63, 21, 12);
 
 -- --------------------------------------------------------
 
@@ -1925,7 +1924,8 @@ INSERT INTO `user_accounts` (`id`, `person_id`, `role`, `email`, `password`) VAL
 (15, 18, 'student', 'markmontano522@gmail.com', '$2b$10$LpZY2sIonsckF6ysaHwDHu0FoNxM2XMwZZCnP.snpGd4.hSlZIv8G'),
 (17, 92, 'student', 'mecasio123@gmail.com', '$2b$10$CHRiC06CY6QQS4ZpiBlJYePp1TjQti.BlwIXJkc83ojxPM3H11vG.'),
 (18, 1, 'student', 'markmontano062612@gmail.com', '$2b$10$TjYekgXIRZbIau.fHxRseO44zSREQeJUHoRizlJpPKh1W7JkBZ9NC'),
-(19, 2, 'student', 'markmontano0626@gmail.com', '$2b$10$V8F7mMR2iYtSmRq/al/KOOqT.vXOEL9eaRUTSaDLJxLRq52WgZRZ2');
+(19, 2, 'student', 'markmontano0626@gmail.com', '$2b$10$V8F7mMR2iYtSmRq/al/KOOqT.vXOEL9eaRUTSaDLJxLRq52WgZRZ2'),
+(20, 204, 'student', 'markmontano0626@gmail.com', '$2b$10$lDL/0s7dOdohXxChj2EegOXYTKi2FV1IAIKqso4xT7ymlP52Dm5om');
 
 -- --------------------------------------------------------
 
@@ -2208,7 +2208,7 @@ ALTER TABLE `dprtmnt_curriculum_table`
 -- AUTO_INCREMENT for table `dprtmnt_profs_table`
 --
 ALTER TABLE `dprtmnt_profs_table`
-  MODIFY `dprtmnt_profs_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
+  MODIFY `dprtmnt_profs_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
 
 --
 -- AUTO_INCREMENT for table `dprtmnt_room_table`
@@ -2232,7 +2232,7 @@ ALTER TABLE `dprtmnt_table`
 -- AUTO_INCREMENT for table `enrolled_subject`
 --
 ALTER TABLE `enrolled_subject`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=550;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=583;
 
 --
 -- AUTO_INCREMENT for table `period_status`
@@ -2250,19 +2250,19 @@ ALTER TABLE `person_prof_table`
 -- AUTO_INCREMENT for table `person_status_table`
 --
 ALTER TABLE `person_status_table`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `person_table`
 --
 ALTER TABLE `person_table`
-  MODIFY `person_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=305;
+  MODIFY `person_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=306;
 
 --
 -- AUTO_INCREMENT for table `prof_table`
 --
 ALTER TABLE `prof_table`
-  MODIFY `prof_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
+  MODIFY `prof_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT for table `program_table`
@@ -2346,19 +2346,19 @@ ALTER TABLE `student_numbering_table`
 -- AUTO_INCREMENT for table `student_status_table`
 --
 ALTER TABLE `student_status_table`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT for table `time_table`
 --
 ALTER TABLE `time_table`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `user_accounts`
 --
 ALTER TABLE `user_accounts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `year_level_table`

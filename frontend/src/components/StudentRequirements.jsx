@@ -17,6 +17,7 @@ import {
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import Search from '@mui/icons-material/Search';
 
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import io from 'socket.io-client';
 
 
@@ -26,6 +27,95 @@ const requiredDocs = [
   { label: 'Certificate of Good Moral Character', key: 'GoodMoralCharacter' },
   { label: 'Certificate Belonging to Graduating Class', key: 'CertificateOfGraduatingClass' }
 ];
+
+const remarksOptions = [
+  "75% OF ATTENDANCE IS NEEDED FOR TRANSFEREE",
+  "Attachments were blurry",
+  "Birth Certificate with Sarical Surname",
+  "Card No Name/Details of the Applicant",
+  "Conflict of Lastname with birth certificate",
+  "Conflict of Lastname with birth certificate. Please Check",
+  "Conflict of name on the document submitted",
+  "Did not meet the requirements",
+  "Documents did not match with the Requirement",
+  "Duplicate Application",
+  "FORM 138 IS NOT COMPLETE",
+  "Good Moral is outdated must be 2022",
+  "GWA did not meet the Requirements",
+  "Have failed and incomplete grades",
+  "Have failing Grades",
+  "Kindly submit your vaccine card and good moral certificate to complete your evaluation",
+  "Kindly wait for verification of your credentials (ALS)",
+  "Multiple Accounts",
+  "NO COURSE APPLIED AND NO DOCUMENTS UPLOADED",
+  "NO DOCUMENT UPLOADED",
+  "NO FORM 138 UPLOADED",
+  "NO TOR UPLOADED",
+  "NOT QUALIFIED BASE ON YOUR STRAND",
+  "Please post your form 138 for approval",
+  "Please prepare your birth certificate reflecting the serrano surname",
+  "Please re-submit documents",
+  "Please resolve the lastname (conflict) appeared in your birth certificate",
+  "Please resubmit all documents. They are not clear",
+  "Please resubmit clear copy",
+  "Please resubmit the complete view of your document",
+  "Please submit clear copy of form 138",
+  "Please submit complete documents",
+  "Please submit first page of your TOR",
+  "Please submit full copy of report card with (front page, 1st, 2nd semester)",
+  "Please submit letter of intent or permit to study",
+  "Please submit NSO or PSA Birth certificate",
+  "Please submit NSO/PSA Birth certificate and vaccine card.",
+  "Please submit PSA, form 138, Vaccine card and Good moral",
+  "Please submit the full view of your f138 1st and 2nd semester front and back with name on both for verification",
+  "Please submit the required documents",
+  "Please submit vaccination card with name",
+  "Please upload Form 138, NSO/PSA Birth certificate and good moral",
+  "Please upload official Transcript of Records",
+  "Please upload the whole picture of your form 138",
+  "Please upload your form 138, NSO/PSA Birth certificate and vaccine card",
+  "Please upload your NSO/PSA",
+  "Please upload your photo",
+  "Please submit clear copy",
+  "Re-submit all copy of TOR w/ remarks: Graduated with a Degree of.... signed by key officials of the school and the registrar",
+  "Re-submit photo",
+  "REQUIRED TO SUBMIT COMPLETE GRADES FOR TRANSFEREE",
+  "Re-submit clear copy",
+  "Re-submit clear fill image of form 138",
+  "Re-submit form 138 for 2nd semester",
+  "Re-submit with complete name",
+  "SUBJECTS WERE ALL DROPPED FROM PREVIOUS SCHOOL",
+  "Submit good moral year 2022",
+  "Submit 1st and 2nd semester report card grade 12",
+  "Submit 1st and 2nd semester report card, together with front page",
+  "Submit form 138",
+  "Submit form 138 with name",
+  "Submit form 138 with name and submit photo",
+  "Submit Good Moral",
+  "Submit Good Moral and Vaccine Card",
+  "Submit Goof Moral year 2022",
+  "Submit the course descriptions of all the subjects taken from another school to the EARIST registrar for crediting.",
+  "Submit updated copy of your good moral",
+  "Submit updated Vaccine Card (1st and 2nd dose)",
+  "Submit your document",
+  "Teacher Certificate Program is a Graduate Program",
+  "Temporarily accepted. Please Submit PSA copy of birth certificate",
+  "Temporarily accepted. Submit original document upon enrollment.",
+  "The file cannot be opened",
+  "The form 138 document did not contain the name of the applicant",
+  "The uploaded did not match the name and gender of the applicant (Abela, Mary Jane)",
+  "The uploaded file did not match with the name of applicant (Shane Bamba)",
+  "The uploaded file did not match with the required document",
+  "The Vaccine Card you uploaded does not show your name.",
+  "TOR should be based in the new curriculum for transferee",
+  "Upload clear copy of PSA Birth Certificate in PDF. JPEG. format in full image",
+  "Upload your NSO/PSA Birth Certificate",
+  "Upload your Photo",
+  "You did not meet the grade required for the course",
+  "You have a lower grade"
+];
+
+
 
 const StudentRequirements = () => {
   const [uploads, setUploads] = useState([]);
@@ -160,12 +250,6 @@ const StudentRequirements = () => {
 
 
 
-  useEffect(() => {
-    if (selectedPerson?.person_id) {
-      fetchPersonData(selectedPerson.person_id);
-    }
-  }, [selectedPerson]);
-
 
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -252,35 +336,38 @@ const StudentRequirements = () => {
 
 
   const handleUploadSubmit = async () => {
-    if (!selectedFiles.requirements_id || !selectedFiles.file || !selectedPerson?.person_id) {
-      alert("Please select both document type and file.");
+    if (!selectedFiles.requirements_id || !selectedPerson?.person_id) {
+      alert("Please select a document type.");
+      return;
+    }
+
+    // If remarks is chosen but no file selected
+    if (selectedFiles.remarks && !selectedFiles.file) {
+      alert("Please select a file for the chosen remarks.");
       return;
     }
 
     try {
       const formData = new FormData();
-      formData.append("file", selectedFiles.file);
+      if (selectedFiles.file) formData.append("file", selectedFiles.file);
       formData.append("requirements_id", selectedFiles.requirements_id);
       formData.append("person_id", selectedPerson.person_id);
+      formData.append("remarks", selectedFiles.remarks || "");
 
-      const response = await axios.post("http://localhost:5000/api/upload", formData, {
+      await axios.post("http://localhost:5000/api/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       alert("✅ Upload successful!");
-      setSelectedFiles({}); // Clear selected file and dropdown
-
-      // Refresh uploaded docs
+      setSelectedFiles({});
       if (selectedPerson?.applicant_number) {
         fetchUploadsByApplicantNumber(selectedPerson.applicant_number);
       }
-
     } catch (error) {
       console.error("Upload failed:", error);
       alert("❌ Upload failed.");
     }
   };
-
 
 
   const handleDelete = async (uploadId) => {
@@ -326,13 +413,12 @@ const StudentRequirements = () => {
     setPerson((prev) => ({ ...prev, [name]: value }));
 
     if (name === "document_status") {
-      if (uploads.length === 0) {
-        console.warn("No uploads found for selected person.");
-        return;
-      }
+      const value = e.target.value || "On process"; // default if empty
+      setPerson((prev) => ({ ...prev, document_status: value }));
+
+      if (uploads.length === 0) return;
 
       try {
-        // Update document_status for all uploaded documents
         await Promise.all(
           uploads.map((upload) =>
             axios.put(`http://localhost:5000/uploads/document-status/${upload.upload_id}`, {
@@ -341,18 +427,20 @@ const StudentRequirements = () => {
           )
         );
 
-        console.log("✅ Document status updated for all uploads");
+        // 🔹 Emit a socket event so ApplicantList can refresh instantly
+        socket.emit("document_status_updated");
 
         if (selectedPerson?.applicant_number) {
           await fetchUploadsByApplicantNumber(selectedPerson.applicant_number);
         }
-
       } catch (err) {
         console.error("❌ Failed to update document statuses:", err);
       }
     }
 
+
   };
+
 
 
 
@@ -369,6 +457,7 @@ const StudentRequirements = () => {
       textTransform: 'none',
     };
 
+
     return (
       <TableRow key={doc.key}>
         <TableCell sx={{ fontWeight: 'bold', width: '20%', border: "1px solid maroon" }}>{doc.label}</TableCell>
@@ -376,7 +465,9 @@ const StudentRequirements = () => {
         <TableCell sx={{ width: '20%', border: "1px solid maroon" }}>
           {editingRemarkId === uploaded?.upload_id ? (
             <TextField
+              select
               size="small"
+
               fullWidth
               autoFocus
               value={remarksMap[uploaded.upload_id] || ""}
@@ -396,7 +487,23 @@ const StudentRequirements = () => {
                   handleSaveRemarks(uploaded.upload_id);
                 }
               }}
-            />
+              SelectProps={{
+                MenuProps: {
+                  PaperProps: {
+                    style: { maxHeight: 200 } // optional max height for dropdown
+                  }
+                }
+              }}
+            >
+              <MenuItem value="">
+                <em>Select Remarks</em>
+              </MenuItem>
+              {remarksOptions.map((option, index) => (
+                <MenuItem key={index} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
+            </TextField>
           ) : (
             <Box
               onClick={() => {
@@ -407,20 +514,20 @@ const StudentRequirements = () => {
                 }));
               }}
               sx={{
-                cursor: 'text',
+                cursor: 'pointer',
                 fontStyle: uploaded?.remarks ? 'normal' : 'italic',
                 color: uploaded?.remarks ? 'inherit' : '#888',
                 minHeight: '40px',
                 display: 'flex',
                 alignItems: 'center',
-
-                px: 1
+                px: 1,
               }}
             >
               {uploaded?.remarks || "Click to add remarks"}
             </Box>
           )}
         </TableCell>
+
 
 
 
@@ -441,7 +548,7 @@ const StudentRequirements = () => {
                   margin: '0 auto',
                 }}
               >
-                <Typography sx={{ fontWeight: 'bold' }}>Approved</Typography>
+                <Typography sx={{ fontWeight: 'bold' }}>Verified</Typography>
               </Box>
             ) : uploaded.status === 2 ? (
               <Box
@@ -457,7 +564,7 @@ const StudentRequirements = () => {
                   margin: '0 auto',
                 }}
               >
-                <Typography sx={{ fontWeight: 'bold' }}>Disapproved</Typography>
+                <Typography sx={{ fontWeight: 'bold' }}>Rejected</Typography>
               </Box>
             ) : (
               <Box display="flex" justifyContent="center" gap={1}>
@@ -466,14 +573,14 @@ const StudentRequirements = () => {
                   onClick={() => handleStatusChange(uploaded.upload_id, '1')}
                   sx={{ ...buttonStyle, backgroundColor: 'green', color: 'white' }}
                 >
-                  Approve
+                  Verified
                 </Button>
                 <Button
                   variant="contained"
                   onClick={() => handleStatusChange(uploaded.upload_id, '2')}
                   sx={{ ...buttonStyle, backgroundColor: 'red', color: 'white' }}
                 >
-                  Disapprove
+                  Rejected
                 </Button>
               </Box>
             )
@@ -818,11 +925,12 @@ const StudentRequirements = () => {
               </Box>
 
 
-              {/* Document Type & File Upload */}
+              {/* Document Type, Remarks, and Document File */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, mb: 2 }}>
+
                 {/* Document Type */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography sx={{ fontSize: "14px", fontFamily: "Arial Black", width: "150px" }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, }}>
+                  <Typography sx={{ fontSize: "14px", fontFamily: "Arial Black", width: "90px" }}>
                     Document Type:
                   </Typography>
                   <TextField
@@ -836,8 +944,8 @@ const StudentRequirements = () => {
                         requirements_id: e.target.value,
                       }))
                     }
-                    sx={{ width: 200 }}
-                    InputProps={{ sx: { height: 30 } }}
+                    sx={{ width: 200 }} // match width
+                    InputProps={{ sx: { height: 38 } }} // match height
                     inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
                   >
                     <MenuItem value="">
@@ -850,52 +958,61 @@ const StudentRequirements = () => {
                   </TextField>
                 </Box>
 
-                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography sx={{ fontSize: "14px", fontFamily: "Arial Black", width: "100px" }}>
+                {/* Remarks */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography sx={{ fontSize: "14px", fontFamily: "Arial Black", width: "80px" }}>
                     Remarks
                   </Typography>
                   <TextField
                     select
                     size="small"
-                    placeholder="Select Documents"
-                    value={selectedFiles.requirements_id || ''}
+                    placeholder="Select Remarks"
+                    value={selectedFiles.remarks || ''}
                     onChange={(e) =>
                       setSelectedFiles(prev => ({
                         ...prev,
-                        requirements_id: e.target.value,
+                        remarks: e.target.value,
                       }))
                     }
-                    sx={{ width: 150 }}
-                    InputProps={{ sx: { height: 30 } }}
+                    sx={{ width: 250 }}
+                    InputProps={{ sx: { height: 38 } }}
                     inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
                   >
                     <MenuItem value="">
-                      <em>Select Documents</em>
+                      <em>Select Remarks</em>
                     </MenuItem>
-                    <MenuItem value={1}>PSA Birth Certificate</MenuItem>
-                    <MenuItem value={2}>Form 138 (With at least 3rd Quarter posting / No failing grade)</MenuItem>
-                    <MenuItem value={3}>Certificate of Good Moral Character</MenuItem>
-                    <MenuItem value={4}>Certificate Belonging to Graduating Class</MenuItem>
+                    {remarksOptions.map((option, index) => (
+                      <MenuItem key={index} value={option}>
+                        {option}
+                      </MenuItem>
+                    ))}
                   </TextField>
                 </Box>
 
-                {/* Document File */}
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography sx={{ fontSize: "14px", fontFamily: "Arial Black", width: "150px" }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, marginLeft: "-25px" }}>
+                  <Typography sx={{ fontSize: "14px", fontFamily: "Arial Black", width: "100px", textAlign: "center" }}>
                     Document File:
                   </Typography>
-                  <TextField
-                    size="small"
-                    placeholder="Select File"
-                    value={selectedFiles.file?.name || ''}
-                    InputProps={{
-                      readOnly: true,
-                      sx: { height: 30 },
-                    }}
-                    inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
-                    sx={{ width: 150 }}
+                  <Button
+                    variant="contained"
+                    startIcon={<CloudUploadIcon />}
                     onClick={() => document.getElementById("fileInput").click()}
-                  />
+                    sx={{
+                      backgroundColor: '#1976d2',
+                      color: 'white',
+                      textTransform: 'none',
+                      width: 150,
+                      height: 38,
+                      fontSize: "15px",
+                      fontWeight: 'bold',
+                      justifyContent: "center", // center icon and text
+                      '&:hover': {
+                        backgroundColor: '#1565c0'
+                      }
+                    }}
+                  >
+                    {selectedFiles.file ? selectedFiles.file.name : "Select File"}
+                  </Button>
                   <input
                     id="fileInput"
                     type="file"
@@ -910,7 +1027,6 @@ const StudentRequirements = () => {
                   />
                 </Box>
 
-                 
               </Box>
 
 

@@ -20,6 +20,8 @@ import {
 import '../styles/Container.css';
 import Logo from '../assets/Logo.png';
 import SchoolImage from '../assets/image.png';
+import { useRef, useEffect } from "react";
+import CloseIcon from "@mui/icons-material/Close";
 
 const LoginEnrollment = ({ setIsAuthenticated }) => {
   const [email, setEmail] = useState("");
@@ -29,31 +31,66 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
   const [otp, setOtp] = useState("");
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [tempLoginData, setTempLoginData] = useState(null);
+  const [resendTimer, setResendTimer] = useState(60);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
 
   const navigate = useNavigate();
-
   const handleLogin = async () => {
-    if (!email || !password) {
-      return setSnack({ open: true, message: "Please fill in all fields", severity: "warning" });
-    }
+  if (isLoggingIn) return; // 🚫 Prevent multiple clicks
+  setIsLoggingIn(true);
 
-    try {
-      const res = await axios.post("http://localhost:5000/login", { email, password });
+  if (!email || !password) {
+    setSnack({ open: true, message: "Please fill in all fields", severity: "warning" });
+    setIsLoggingIn(false);
+    return;
+  }
 
-      // ❌ REMOVE THIS LINE
-      // await axios.post("http://localhost:5000/request-otp", { email });
+  try {
+    const res = await axios.post("http://localhost:5000/login", { email, password });
+    setTempLoginData(res.data);
 
-      setTempLoginData(res.data);
-      setShowOtpModal(true);
-    } catch (error) {
-      setSnack({
-        open: true,
-        message: error.response?.data?.message || "Login failed",
-        severity: "error"
+    // Show OTP modal right away
+    setShowOtpModal(true);
+    startResendTimer();
+
+    setSnack({ open: true, message: "OTP sent to your email", severity: "success" });
+
+  } catch (error) {
+    setSnack({
+      open: true,
+      message: error.response?.data?.message || "Login failed",
+      severity: "error"
+    });
+  } finally {
+    setIsLoggingIn(false); // ✅ Allow login again if failed
+  }
+};
+
+
+
+  const startResendTimer = () => {
+    setResendTimer(60);
+    const interval = setInterval(() => {
+      setResendTimer(prev => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
       });
-    }
+    }, 1000);
   };
 
+  const resendOtp = async () => {
+    try {
+      await axios.post("http://localhost:5000/request-otp", { email: tempLoginData.email });
+      setSnack({ open: true, message: "OTP resent to your email", severity: "success" });
+      startResendTimer();
+    } catch (err) {
+      setSnack({ open: true, message: err.response?.data?.message || "Failed to resend OTP", severity: "error" });
+    }
+  };
 
 
   const handleClose = (_, reason) => {
@@ -85,6 +122,17 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
       setSnack({ open: true, message: "Invalid OTP", severity: "error" });
     }
   };
+
+  const otpInputRef = useRef(null);
+
+  useEffect(() => {
+    if (showOtpModal) {
+      requestAnimationFrame(() => {
+        otpInputRef.current?.focus();
+      });
+    }
+  }, [showOtpModal]);
+
 
 
   return (
@@ -232,8 +280,32 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
               width: 350,
               boxShadow: 24,
               textAlign: "center",
+              position: "relative" // Needed for X button positioning
             }}
           >
+            {/* ❌ Close button */}
+            <button
+              onClick={() => setShowOtpModal(false)}
+              style={{
+                position: "absolute",
+                top: "8px",
+                right: "8px",
+                backgroundColor: "#6D2323", // maroon
+                color: "white",
+                border: "none",
+                borderRadius: "50%",
+                width: "32px",
+                height: "32px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                fontSize: "18px"
+              }}
+            >
+              <CloseIcon fontSize="small" />
+            </button>
+
             <Typography
               variant="h6"
               sx={{
@@ -256,17 +328,22 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
               We sent a verification code to your Gmail address.
             </Typography>
 
+            {/* OTP Input */}
             <TextField
               fullWidth
+              autoFocus // ✅ instantly focuses
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
               placeholder="Enter OTP"
+              inputRef={otpInputRef}
               inputProps={{
                 maxLength: 6,
                 style: { textAlign: "center", fontSize: "18px" },
               }}
               sx={{ mb: 3 }}
             />
+
+
 
             <Button
               variant="contained"
@@ -285,9 +362,17 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
             >
               Verify OTP
             </Button>
+
+            <Button
+              variant="outlined"
+              onClick={resendOtp}
+              disabled={resendTimer > 0}
+              sx={{ mt: 2, width: "100%", textTransform: "none" }}
+            >
+              {resendTimer > 0 ? `Resend OTP in ${resendTimer}s` : "Resend OTP"}
+            </Button>
           </Box>
         </Modal>
-
 
       </Box>
     </>

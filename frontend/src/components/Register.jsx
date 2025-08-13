@@ -17,8 +17,10 @@ import {
   VisibilityOff
 } from "@mui/icons-material";
 import SchoolImage from '../assets/image.png';
+import ReCAPTCHA from "react-google-recaptcha";
 
 const Register = () => {
+  const [capVal, setCapVal] = useState(null);
   const [usersData, setUserData] = useState({
     email: '',
     password: '',
@@ -26,6 +28,21 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [snack, setSnack] = useState({ open: false, message: '', severity: 'info' });
   const navigate = useNavigate();
+
+  const handleReset = () => {
+    if (!email) {
+      setSnack({ open: true, message: "Please enter your email.", severity: "warning" });
+      return;
+    }
+
+    if (!capVal) {
+      setSnack({ open: true, message: "Please verify you're not a robot.", severity: "warning" });
+      return;
+    }
+
+    socket.emit("forgot-password-applicant", email);
+  };
+
 
   const handleChanges = (e) => {
     const { name, value } = e.target;
@@ -55,6 +72,9 @@ const Register = () => {
       });
     }
   };
+
+    const isButtonDisabled = !email || !capVal;
+
 
   return (
     <>
@@ -154,13 +174,19 @@ const Register = () => {
                 </button>
               </div>
 
+              {/* CAPTCHA */}
+            <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+              <ReCAPTCHA
+                sitekey="6Lfem44rAAAAAEeAexdQxvN0Lpm1V4KPu1bBxaGy"
+                onChange={(val) => setCapVal(val)}
+              />
+            </Box>
+
               <div className="Button" onClick={handleRegister}>
                 <span>Register</span>
               </div>
 
-              <div className="LinkContainer">
-                <span>Forget password?</span>
-              </div>
+             
 
               <div className="LinkContainer RegistrationLink" style={{ margin: '0.1rem 0rem' }}>
                 <p>Already Have an Account?</p>

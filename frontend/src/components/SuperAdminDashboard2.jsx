@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { Button, Box, TextField, Container, Typography, FormControl, FormHelperText, InputLabel, Select, MenuItem, Checkbox, FormControlLabel } from "@mui/material";
+import { Button, Box, TextField, Container, Typography, FormControl, Card, FormHelperText, InputLabel, Select, MenuItem, Checkbox, FormControlLabel } from "@mui/material";
 import { Link } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
 import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
@@ -11,6 +11,9 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ErrorIcon from '@mui/icons-material/Error';
 import { useNavigate } from 'react-router-dom';
+import { motion } from "framer-motion";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+
 
 const Dashboard2 = () => {
     const navigate = useNavigate();
@@ -183,6 +186,17 @@ const Dashboard2 = () => {
 
     const [soloParentChoice, setSoloParentChoice] = useState("");
 
+
+    const links = [
+        { to: "/ecat_application_form", label: "ECAT Application Form" },
+        { to: "/admission_form_process", label: "Admission Form Process" },
+        { to: "/personal_data_form", label: "Personal Data Form" },
+        { to: "/office_of_the_registrar", label: "Application For EARIST College Admission" },
+        { to: "/admission_services", label: "Application/Student Satisfactory Survey" },
+        { to: "/admission_services", label: "Examination Permit" },
+    ];
+
+
     // 🔒 Disable right-click
     document.addEventListener('contextmenu', (e) => e.preventDefault());
 
@@ -205,75 +219,118 @@ const Dashboard2 = () => {
     return (
         <Box sx={{ height: "calc(100vh - 140px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
 
-            <Container>
+            <Box
+                sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: "100%",
+                    mt: 2,
+                }}
+            >
+                <Box
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 2,
+                        p: 2,
+                        borderRadius: "10px",
+                        backgroundColor: "#fffaf5",
+                        border: "1px solid #6D2323",
+                        boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
+                        whiteSpace: "nowrap", // Prevent text wrapping
+                    }}
+                >
+                    {/* Icon */}
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: "#6D2323",
+                            borderRadius: "8px",
+                            width: 40,
+                            height: 40,
+                            flexShrink: 0,
+                        }}
+                    >
+                        <ErrorIcon sx={{ color: "white", fontSize: 28 }} />
+                    </Box>
 
-                <Box sx={{ display: "flex", width: "100%" }}>
-                    {/* Left: Instructions (75%) */}
-                    <Box sx={{ width: "75%", padding: "10px" }}>
-                        <Box
+                    {/* Text in one row */}
+                    <Typography
+                        sx={{
+                            fontSize: "15px",
+                            fontFamily: "Arial",
+                            color: "#3e3e3e",
+                        }}
+                    >
+                        <strong style={{ color: "maroon" }}>Notice:</strong> &nbsp;
+                        <strong>1.</strong> Kindly type <strong>'NA'</strong> in boxes where there are no possible answers to the information being requested. &nbsp; | &nbsp;
+                        <strong>2.</strong> To use the letter <strong>'Ñ'</strong>, press <kbd>ALT</kbd> + <kbd>165</kbd>; for <strong>'ñ'</strong>, press <kbd>ALT</kbd> + <kbd>164</kbd>. &nbsp; | &nbsp;
+                        <strong>3.</strong> This is the list of all printable files.
+                    </Typography>
+                </Box>
+            </Box>
+
+            <Box
+                sx={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 2,
+                    mt: 2,
+                    pb: 1,
+
+                    justifyContent: "center", // Centers all cards horizontally
+                }}
+            >
+                {links.map((lnk, i) => (
+                    <motion.div
+                        key={i}
+                        style={{ flex: "0 0 calc(30% - 16px)" }} // fixed width for consistent centering
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1, duration: 0.4 }}
+                    >
+                        <Card
                             sx={{
+                                minHeight: 60,
+                                borderRadius: 2,
+
+                                border: "2px solid #6D2323",
+                                backgroundColor: "#fff",
                                 display: "flex",
-                                alignItems: "flex-start",
-                                gap: 2,
-                                padding: "16px",
-                                borderRadius: "10px",
-                                backgroundColor: "#fffaf5",
-                                border: "1px solid #6D2323",
-                                boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
-                                mt: 2,
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "center", // Centers content inside each card
+                                textAlign: "center",
+                                p: 1.5,
+                                "&:hover": {
+                                    transform: "scale(1.05)",
+                                    transition: "0.3s ease-in-out",
+                                },
                             }}
                         >
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    backgroundColor: "#6D2323",
-                                    borderRadius: "8px",
-                                    width: "50px",
-                                    height: "50px",
-                                    minWidth: "36px",
-                                }}
-                            >
-                                <ErrorIcon sx={{ color: "white", fontSize: "36px" }} />
-                            </Box>
-
-                            <Typography
-                                sx={{
-                                    fontSize: "14px",
+                            <PictureAsPdfIcon sx={{ fontSize: 35, color: "#6D2323", mr: 1.5 }} />
+                            <Link
+                                to={lnk.to}
+                                style={{
+                                    textDecoration: "none",
+                                    color: "#6D2323",
                                     fontFamily: "Arial",
-                                    color: "#3e3e3e",
-                                    lineHeight: 1.6,
+                                    fontWeight: "bold",
+                                    fontSize: "0.85rem",
                                 }}
                             >
-                                <strong>1.</strong> Kindly type <strong>'NA'</strong> in boxes where there are no possible answers to the information being requested.
-                                <br />
-                                <strong>2.</strong> To use the letter <strong>'Ñ'</strong>, press <kbd>ALT</kbd> + <kbd>165</kbd>; for <strong>'ñ'</strong>, press <kbd>ALT</kbd> + <kbd>164</kbd>.
-                            </Typography>
-                        </Box>
-                    </Box>
+                                {lnk.label}
+                            </Link>
+                        </Card>
+                    </motion.div>
+                ))}
+            </Box>
 
-                    {/* Right: Links (25%) */}
-                    <Box sx={{ width: "25%", padding: "10px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <Container>
 
-                        <Link to="/ecat_application_form" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
-                            ECAT Application Form
-                        </Link>
-                        <Link to="/admission_form_process" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
-                            Admission Form Process
-                        </Link>
-                        <Link to="/personal_data_form" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
-                            Personal Data Form
-                        </Link>
-
-                        <Link to="/office_of_the_registrar" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
-                            Application For EARIST College Admission
-                        </Link>
-                        <Link to="/admission_services" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
-                            Application/Student Satisfactory Survey
-                        </Link>
-                    </Box>
-                </Box>
 
                 <Container>
                     <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>APPLICANT FORM</h1>

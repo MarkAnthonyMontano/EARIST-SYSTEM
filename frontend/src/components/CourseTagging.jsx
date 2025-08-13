@@ -349,7 +349,9 @@ const CourseTagging = () => {
   };
 
   return (
+    
     <Container className="mt-3">
+      
       <Typography
         variant="h4"
         fontWeight="bold"

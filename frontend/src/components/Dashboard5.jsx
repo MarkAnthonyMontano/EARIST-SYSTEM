@@ -1,6 +1,6 @@
 import React, { useState, useEffect, } from "react";
 import axios from "axios";
-import { Button, Box, Container, Typography, Checkbox, FormControl, Alert, Snackbar, FormControlLabel, FormHelperText } from "@mui/material";
+import { Button, Box, Container, Typography, Checkbox, Card, FormControl, Alert, Snackbar, FormControlLabel, FormHelperText } from "@mui/material";
 import { Link } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
 import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
@@ -11,6 +11,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import FolderIcon from '@mui/icons-material/Folder';
 import ErrorIcon from '@mui/icons-material/Error';
 import { useNavigate } from 'react-router-dom';
+import { motion } from "framer-motion";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 
 const Dashboard5 = (props) => {
   const navigate = useNavigate();
@@ -26,47 +28,62 @@ const Dashboard5 = (props) => {
 
   // do not alter
   useEffect(() => {
-  const storedUser = localStorage.getItem("email");
-  const storedRole = localStorage.getItem("role");
-  const storedID = localStorage.getItem("person_id");
+    const storedUser = localStorage.getItem("email");
+    const storedRole = localStorage.getItem("role");
+    const storedID = localStorage.getItem("person_id");
 
-  const overrideId = props?.adminOverridePersonId; // new
+    const overrideId = props?.adminOverridePersonId; // new
 
-  if (overrideId) {
-    // Admin editing other person
-    setUserRole("superadmin");
-    setUserID(overrideId);
-    fetchPersonData(overrideId);
-    return;
-  }
+    if (overrideId) {
+      // Admin editing other person
+      setUserRole("superadmin");
+      setUserID(overrideId);
+      fetchPersonData(overrideId);
+      return;
+    }
 
-  if (storedUser && storedRole && storedID) {
-    setUser(storedUser);
-    setUserRole(storedRole);
-    setUserID(storedID);
+    if (storedUser && storedRole && storedID) {
+      setUser(storedUser);
+      setUserRole(storedRole);
+      setUserID(storedID);
 
-    if (storedRole === "applicant") {
-      fetchPersonData(storedID);
+      if (storedRole === "applicant") {
+        fetchPersonData(storedID);
+      } else {
+        window.location.href = "/login";
+      }
     } else {
       window.location.href = "/login";
     }
-  } else {
-    window.location.href = "/login";
-  }
-}, []);
+  }, []);
+
+
 
 
 
   const steps = [
-    { label: "Personal Information", icon: <PersonIcon />, path: "/dashboard1", onChange: () => handleChange({ label: "Personal Information", path: "/dashboard1" }) },
-    { label: "Family Background", icon: <FamilyRestroomIcon />, path: "/dashboard2", onChange: () => handleChange({ label: "Family Background", path: "/dashboard2" }) },
-    { label: "Educational Attainment", icon: <SchoolIcon />, path: "/dashboard3", onChange: () => handleChange({ label: "Educational Attainment", path: "/dashboard3" }) },
-    { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: "/dashboard4", onChange: () => handleChange({ label: "Health Medical Records", path: "/dashboard4" }) },
-    { label: "Other Information", icon: <InfoIcon />, path: "/dashboard5", onChange: () => handleChange({ label: "Other Information", path: "/dashboard5" }) },
+    { label: "Personal Information", icon: <PersonIcon />, path: "/dashboard1" },
+    { label: "Family Background", icon: <FamilyRestroomIcon />, path: "/dashboard2" },
+    { label: "Educational Attainment", icon: <SchoolIcon />, path: "/dashboard3" },
+    { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: "/dashboard4" },
+    { label: "Other Information", icon: <InfoIcon />, path: "/dashboard5" },
   ];
 
-  const [activeStep, setActiveStep] = useState(4);
 
+  const [activeStep, setActiveStep] = useState(4);
+  const [clickedSteps, setClickedSteps] = useState(Array(steps.length).fill(false));
+
+  const handleStepClick = (index) => {
+    if (isFormValid()) {
+      setActiveStep(index);
+      const newClickedSteps = [...clickedSteps];
+      newClickedSteps[index] = true;
+      setClickedSteps(newClickedSteps);
+      navigate(steps[index].path); // ✅ actually move to step
+    } else {
+      alert("Please fill all required fields before proceeding.");
+    }
+  };
   // Do not alter
   const fetchPersonData = async (id) => {
     try {
@@ -105,16 +122,6 @@ const Dashboard5 = (props) => {
     handleUpdate(updatedPerson); // No delay, real-time save
   };
 
-  const handleStepClick = (index) => {
-    if (isFormValid()) {
-      setActiveStep(index);
-      const newClickedSteps = [...clickedSteps];
-      newClickedSteps[index] = true;
-      setClickedSteps(newClickedSteps);
-    } else {
-      alert("Please fill all required fields before proceeding.");
-    }
-  };
 
   const handleBlur = async () => {
     try {
@@ -145,6 +152,17 @@ const Dashboard5 = (props) => {
   };
 
 
+
+  const links = [
+    { to: "/ecat_application_form", label: "ECAT Application Form" },
+    { to: "/admission_form_process", label: "Admission Form Process" },
+    { to: "/personal_data_form", label: "Personal Data Form" },
+    { to: "/office_of_the_registrar", label: "Application For EARIST College Admission" },
+    { to: "/admission_services", label: "Application/Student Satisfactory Survey" },
+    { to: "/admission_services", label: "Examination Permit" },
+  ];
+
+
   // 🔒 Disable right-click
   document.addEventListener('contextmenu', (e) => e.preventDefault());
 
@@ -169,74 +187,118 @@ const Dashboard5 = (props) => {
   return (
     <Box sx={{ height: 'calc(100vh - 140px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
 
-      <Container maxWidth="lg">
-        <Box sx={{ display: "flex", width: "100%" }}>
-          {/* Left: Instructions (75%) */}
-          <Box sx={{ width: "75%", padding: "10px" }}>
-            <Box
+
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          mt: 2,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            p: 2,
+            borderRadius: "10px",
+            backgroundColor: "#fffaf5",
+            border: "1px solid #6D2323",
+            boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
+            whiteSpace: "nowrap", // Prevent text wrapping
+          }}
+        >
+          {/* Icon */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "#6D2323",
+              borderRadius: "8px",
+              width: 40,
+              height: 40,
+              flexShrink: 0,
+            }}
+          >
+            <ErrorIcon sx={{ color: "white", fontSize: 28 }} />
+          </Box>
+
+          {/* Text in one row */}
+          <Typography
+            sx={{
+              fontSize: "15px",
+              fontFamily: "Arial",
+              color: "#3e3e3e",
+            }}
+          >
+            <strong style={{ color: "maroon" }}>Notice:</strong> &nbsp;
+            <strong>1.</strong> Kindly type <strong>'NA'</strong> in boxes where there are no possible answers to the information being requested. &nbsp; | &nbsp;
+            <strong>2.</strong> To use the letter <strong>'Ñ'</strong>, press <kbd>ALT</kbd> + <kbd>165</kbd>; for <strong>'ñ'</strong>, press <kbd>ALT</kbd> + <kbd>164</kbd>. &nbsp; | &nbsp;
+            <strong>3.</strong> This is the list of all printable files.
+          </Typography>
+        </Box>
+      </Box>
+
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 2,
+          mt: 2,
+          pb: 1,
+
+          justifyContent: "center", // Centers all cards horizontally
+        }}
+      >
+        {links.map((lnk, i) => (
+          <motion.div
+            key={i}
+            style={{ flex: "0 0 calc(30% - 16px)" }} // fixed width for consistent centering
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1, duration: 0.4 }}
+          >
+            <Card
               sx={{
+                minHeight: 60,
+                borderRadius: 2,
+
+                border: "2px solid #6D2323",
+                backgroundColor: "#fff",
                 display: "flex",
-                alignItems: "flex-start",
-                gap: 2,
-                padding: "16px",
-                borderRadius: "10px",
-                backgroundColor: "#fffaf5",
-                border: "1px solid #6D2323",
-                boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
-                mt: 2,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center", // Centers content inside each card
+                textAlign: "center",
+                p: 1.5,
+                "&:hover": {
+                  transform: "scale(1.05)",
+                  transition: "0.3s ease-in-out",
+                },
               }}
             >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "#6D2323",
-                  borderRadius: "8px",
-                  width: "50px",
-                  height: "50px",
-                  minWidth: "36px",
-                }}
-              >
-                <ErrorIcon sx={{ color: "white", fontSize: "36px" }} />
-              </Box>
-
-              <Typography
-                sx={{
-                  fontSize: "14px",
+              <PictureAsPdfIcon sx={{ fontSize: 35, color: "#6D2323", mr: 1.5 }} />
+              <Link
+                to={lnk.to}
+                style={{
+                  textDecoration: "none",
+                  color: "#6D2323",
                   fontFamily: "Arial",
-                  color: "#3e3e3e",
-                  lineHeight: 1.6,
+                  fontWeight: "bold",
+                  fontSize: "0.85rem",
                 }}
               >
-                <strong>1.</strong> Kindly type <strong>'NA'</strong> in boxes where there are no possible answers to the information being requested.
-                <br />
-                <strong>2.</strong> To use the letter <strong>'Ñ'</strong>, press <kbd>ALT</kbd> + <kbd>165</kbd>; for <strong>'ñ'</strong>, press <kbd>ALT</kbd> + <kbd>164</kbd>.
-              </Typography>
-            </Box>
-          </Box>
-
-          <Box sx={{ width: "25%", padding: "10px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-
-            <Link to="/ecat_application_form" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
-              ECAT Application Form
-            </Link>
-            <Link to="/admission_form_process" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
-              Admission Form Process
-            </Link>
-            <Link to="/personal_data_form" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
-              Personal Data Form
-            </Link>
-
-            <Link to="/office_of_the_registrar" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
-              Application For EARIST College Admission
-            </Link>
-            <Link to="/admission_services" style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}>
-              Application/Student Satisfactory Survey
-            </Link>
-          </Box>
-        </Box>
-
+                {lnk.label}
+              </Link>
+            </Card>
+          </motion.div>
+        ))}
+      </Box>
+      <Container maxWidth="lg">
+        
         <Container>
           <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>
             APPLICANT FORM

@@ -167,16 +167,17 @@ const RequirementUploader = () => {
 
       <TableRow key={doc.key}>
         {/* Document label */}
-        <TableCell sx={{ fontWeight: 'bold', width: '25%' }}>{doc.label}</TableCell>
+        <TableCell sx={{ fontWeight: 'bold', width: '25%', border: "2px solid maroon"  }}>{doc.label}</TableCell>
 
-        <TableCell sx={{ width: '30%' }}>
+        <TableCell sx={{ width: '25%', border: "2px solid maroon", textAlign: "Center"  }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
             {/* Fixed wrapper to prevent shifting */}
-            <Box sx={{ width: '180px', flexShrink: 0 }}>
+            <Box sx={{ width: '220px', flexShrink: 0, textAlign:"center" }}>
               {selectedFiles[doc.key] ? (
                 <Box
                   sx={{
                     backgroundColor: '#e0e0e0',
+                   
                     padding: '6px 12px',
                     borderRadius: '4px',
                     fontSize: '14px',
@@ -227,7 +228,7 @@ const RequirementUploader = () => {
         </TableCell>
 
 
-        <TableCell sx={{ width: '15%' }}>
+        <TableCell sx={{ width: "25%", border: "2px solid maroon"  }}>
           {/* Remarks */}
           <Typography
             sx={{
@@ -248,7 +249,7 @@ const RequirementUploader = () => {
                 fontWeight: "bold",
               }}
             >
-              {uploaded?.status == 1 ? "Approved" : "Disapproved"}
+              {uploaded?.status == 1 ? "Verified" : "Rejected"}
             </Typography>
           ) : null}
         </TableCell>
@@ -256,7 +257,7 @@ const RequirementUploader = () => {
 
 
         {/* Preview */}
-        <TableCell sx={{ width: '10%' }}>
+        <TableCell sx={{ width: '10%', border: "2px solid maroon"  }}>
           {uploaded && (
             <Button
               variant="contained"
@@ -277,7 +278,7 @@ const RequirementUploader = () => {
         </TableCell>
 
         {/* Delete */}
-        <TableCell sx={{ width: '10%' }}>
+        <TableCell sx={{ width: '10%', border: "2px solid maroon"  }}>
           {uploaded && (
             <Button
               onClick={() => handleDelete(uploaded.upload_id)}
@@ -326,12 +327,12 @@ const RequirementUploader = () => {
           PLEASE NOTE: ONLY JPG, JPEG, PNG or PDF WITH MAXIMUM OF FILE SIZE OF 4MB ARE ALLOWED
         </Typography>
 
-        <TableContainer component={Paper} sx={{ width: '95%' }}>
+        <TableContainer component={Paper} sx={{ width: '95%', border: "2px solid maroon"  }}>
           <Table>
-            <TableHead sx={{ backgroundColor: '#6D2323' }}>
+            <TableHead sx={{ backgroundColor: '#6D2323', border: "2px solid maroon" }}>
               <TableRow>
-                <TableCell sx={{ color: 'white' }}>Document</TableCell>
-                <TableCell sx={{ color: 'white' }}>Upload</TableCell>
+                <TableCell sx={{ color: 'white', border: "2px solid maroon"}}>Document</TableCell>
+                <TableCell sx={{ color: 'white', border: "2px solid maroon"}}>Upload</TableCell>
                 <TableCell sx={{ color: 'white' }}>Remarks</TableCell>
                 <TableCell sx={{ color: 'white' }}>Preview</TableCell>
                 <TableCell sx={{ color: 'white' }}>Delete</TableCell>
@@ -341,7 +342,7 @@ const RequirementUploader = () => {
           </Table>
         </TableContainer>
 
-        <Typography variant="h6" sx={{ mt: 2, color: '#6D2323' }}>
+        <Typography variant="h6" sx={{ mt: 2, color: '#6D2323',  }}>
           Upload Your Medical Documents
         </Typography>
 
@@ -357,9 +358,9 @@ const RequirementUploader = () => {
           PLEASE NOTE: ONLY JPG, JPEG, PNG or PDF WITH MAXIMUM OF FILE SIZE OF 4MB ARE ALLOWED
         </Typography>
 
-        <TableContainer component={Paper} sx={{ width: '95%', mt: 2 }}>
+        <TableContainer component={Paper} sx={{ width: '95%', mt: 2, border: "2px solid maroon"  }}>
           <Table>
-            <TableHead sx={{ backgroundColor: '#6D2323' }}>
+            <TableHead sx={{ backgroundColor: '#6D2323', border: "2px solid maroon" }}>
               <TableRow>
                 <TableCell sx={{ color: 'white' }}>Document</TableCell>
                 <TableCell sx={{ color: 'white' }}>Upload</TableCell>

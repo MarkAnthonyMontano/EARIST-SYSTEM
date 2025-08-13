@@ -873,18 +873,44 @@ app.get("/api/notifications", async (req, res) => {
 
 // -------------------------------------------- GET APPLICANT ADMISSION DATA ------------------------------------------------//
 
-// GET ALL APPLICANTS WITH APPLICANT NUMBER
+// GET ALL APPLICANTS WITH APPLICANT NUMBER + DOCUMENT STATUS
+// GET ALL APPLICANTS WITH APPLICANT NUMBER + DOCUMENT STATUS + LAST UPDATED
 app.get("/api/all-applicants", async (req, res) => {
   try {
     const [rows] = await db.execute(`
       SELECT 
         p.*, 
-        a.applicant_number 
-      FROM admission.person_table p
-      LEFT JOIN admission.applicant_numbering_table a 
-      ON p.person_id = a.person_id
-      ORDER BY p.person_id ASC
+        a.applicant_number,
+        es.exam_date,
+        yt.year_id AS school_year,
+        yt.year_description,
+        sy.semester_id, 
+        sy.astatus,
+        ru.document_status,
+        ru.registrar_status,
+        ru.created_at AS last_updated
+      FROM admission.person_table AS p
+      LEFT JOIN admission.applicant_numbering_table AS a 
+        ON p.person_id = a.person_id
+      LEFT JOIN admission.exam_applicants AS ea
+        ON a.applicant_number = ea.applicant_id
+      LEFT JOIN admission.exam_schedule AS es
+        ON ea.schedule_id = es.exam_id
+      LEFT JOIN enrollment.year_table AS yt
+        ON YEAR(es.exam_date) = yt.year_description
+      LEFT JOIN enrollment.active_school_year_table AS sy
+        ON yt.year_id = sy.year_id
+      LEFT JOIN admission.requirement_uploads AS ru
+        ON p.person_id = ru.person_id
+        AND ru.upload_id = (
+          SELECT MAX(upload_id) 
+          FROM admission.requirement_uploads
+          WHERE person_id = p.person_id
+        )
+      WHERE sy.astatus = 1
+      ORDER BY p.person_id ASC;
     `);
+
     res.json(rows);
   } catch (err) {
     console.error("❌ Error fetching all applicants:", err);
@@ -1439,19 +1465,33 @@ app.get("/api/search-person", async (req, res) => {
 //     return res.status(500).json({ message: "Server error", error: err.message });
 //   }
 // });
+// OTP storage: otp, expiry, and cooldown
+let otpStore = {}; // { email: { otp, expiresAt, cooldownUntil } }
 
-// Step 1: Add this new route to server.js
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
-
-let otpStore = {}; // temporary in-memory store
 
 app.post("/request-otp", async (req, res) => {
   const { email } = req.body;
-
   if (!email) return res.status(400).json({ message: "Email is required" });
 
+  const now = Date.now();
+  const existing = otpStore[email];
+
+  // ⛔ If already has a valid OTP, block sending a new one until cooldown is over
+  if (existing && existing.cooldownUntil > now) {
+    const secondsLeft = Math.ceil((existing.cooldownUntil - now) / 1000); // ✅ fixed
+    return res.status(429).json({ message: `OTP already sent. Please wait ${secondsLeft}s.` });
+  }
+
+  // Generate OTP
   const otp = generateOTP();
-  otpStore[email] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 }; // 5 min
+
+  // Save immediately to prevent race condition
+  otpStore[email] = {
+    otp,
+    expiresAt: now + 60 * 1000, // OTP valid for 1 minute
+    cooldownUntil: now + 60 * 1000 // 60s cooldown
+  };
 
   try {
     const transporter = nodemailer.createTransport({
@@ -1462,23 +1502,23 @@ app.post("/request-otp", async (req, res) => {
       },
     });
 
-    const mailOptions = {
+    await transporter.sendMail({
       from: `"EARIST OTP Verification" <noreply-earistmis@gmail.com>`,
       to: email,
       subject: "Your EARIST OTP Code",
-      text: `Your OTP is: ${otp}`,
-    };
-
-    await transporter.sendMail(mailOptions);
+      text: `Your OTP is: ${otp} (Valid for 1 minute)`,
+    });
 
     res.json({ message: "OTP sent to email" });
   } catch (err) {
     console.error("OTP email error:", err);
+    // If sending fails, clear so user can retry
+    delete otpStore[email];
     res.status(500).json({ message: "Failed to send OTP" });
   }
 });
 
-app.post("/verify-otp", async (req, res) => {
+app.post("/verify-otp", (req, res) => {
   const { email, otp } = req.body;
   const stored = otpStore[email];
 
@@ -1490,8 +1530,6 @@ app.post("/verify-otp", async (req, res) => {
   res.json({ message: "OTP verified" });
 });
 
-
-// Login For Registra              r
 app.post("/login", async (req, res) => {
   const { email: loginCredentials, password } = req.body;
 
@@ -1553,9 +1591,20 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ message: "The Account is Inactive" });
     }
 
-    // ✅ Generate OTP and send email here
+    // ✅ OTP with cooldown (copied from /request-otp)
+    const now = Date.now();
+    const existing = otpStore[user.email];
+    if (existing && existing.cooldownUntil > now) {
+      const secondsLeft = Math.ceil((existing.cooldownUntil - now) / 1000);
+      return res.status(429).json({ message: `OTP already sent. Please wait ${secondsLeft}s.` });
+    }
+
     const otp = generateOTP();
-    otpStore[user.email] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
+    otpStore[user.email] = {
+      otp,
+      expiresAt: now + 60 * 1000, // valid for 1 minute
+      cooldownUntil: now + 60 * 1000 // 60s cooldown
+    };
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -1565,16 +1614,18 @@ app.post("/login", async (req, res) => {
       },
     });
 
-    const mailOptions = {
+    await transporter.sendMail({
       from: `"EARIST OTP Verification" <noreply-earistmis@gmail.com>`,
       to: user.email,
       subject: "Your EARIST OTP Code",
-      text: `Your OTP is: ${otp}`,
-    };
+      text: `Your OTP is: ${otp} (Valid for 1 minute)`,
+    });
 
-    await transporter.sendMail(mailOptions);
-
-    const token = webtoken.sign({ person_id: user.person_id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = webtoken.sign(
+      { person_id: user.person_id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
 
     res.json({
       message: "OTP sent to registered email",
@@ -1588,6 +1639,7 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ message: "Server error during login" });
   }
 });
+
 
 
 // Applicant Change Password 
@@ -3973,7 +4025,7 @@ app.post("/student-tagging", async (req, res) => {
         extension: student.extension,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "24h" }
     );
 
     console.log("Search response:", {

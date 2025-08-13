@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { Box, Container, Typography, TextField, TableContainer, Paper, Table, TableHead, TableRow, TableCell } from "@mui/material";
-import { jwtDecode } from "jwt-decode";
 import EaristLogo from "../assets/EaristLogo.png";
 import '../styles/Print.css'
 import { FcPrint } from "react-icons/fc";
@@ -9,7 +8,6 @@ import Search from '@mui/icons-material/Search';
 
 
 const ExaminationProfile = () => {
-    const [applicantID, setApplicantID] = useState("");
     const [searchQuery, setSearchQuery] = useState('');
     const [persons, setPersons] = useState([]);
     const [selectedPerson, setSelectedPerson] = useState(null);
@@ -101,14 +99,6 @@ const ExaminationProfile = () => {
             console.error("❌ Failed to fetch person data:", error?.response?.data || error.message);
         }
     };
-
-
-    useEffect(() => {
-        if (selectedPerson?.person_id) {
-            fetchPersonData(selectedPerson.person_id);
-        }
-    }, [selectedPerson]);
-
 
 
     useEffect(() => {
@@ -380,11 +370,11 @@ const ExaminationProfile = () => {
                         Print Examination Permit
                     </span>
                 </button>
-{showPrintView && (
-                <div ref={divToPrintRef} style={{ display: "none" }}>
-                    <div>
-                        <style>
-                            {`
+                {showPrintView && (
+                    <div ref={divToPrintRef} style={{ display: "none" }}>
+                        <div>
+                            <style>
+                                {`
           @media print {
             button {
               display: none;
@@ -392,27 +382,27 @@ const ExaminationProfile = () => {
 
           }
         `}
-                        </style>
+                            </style>
 
 
 
-                    </div>
-                    <div className="section">
+                        </div>
+                        <div className="section">
 
-                        <table
-                            className="student-table"
-                            style={{
+                            <table
+                                className="student-table"
+                                style={{
 
-                                borderCollapse: "collapse",
-                                fontFamily: "Arial, Helvetica, sans-serif",
-                                width: "8in",
-                                margin: "0 auto", // Center the table inside the form
-                                textAlign: "center",
-                                tableLayout: "fixed",
-                            }}
-                        >
-                            <style>
-                                {`
+                                    borderCollapse: "collapse",
+                                    fontFamily: "Arial, Helvetica, sans-serif",
+                                    width: "8in",
+                                    margin: "0 auto", // Center the table inside the form
+                                    textAlign: "center",
+                                    tableLayout: "fixed",
+                                }}
+                            >
+                                <style>
+                                    {`
                   @media print {
                     .Box {
                       display: none;
@@ -420,363 +410,363 @@ const ExaminationProfile = () => {
 
                   }
                 `}
-                            </style>
+                                </style>
 
-                            <tbody>
-                                <tr>
-                                    <td colSpan={2} style={{ height: "0.1in", fontSize: "72.5%" }}>
-                                        <b>
+                                <tbody>
+                                    <tr>
+                                        <td colSpan={2} style={{ height: "0.1in", fontSize: "72.5%" }}>
+                                            <b>
 
-                                        </b>
-                                    </td>
-                                    <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
-                                    <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
-                                    <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
-                                    <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
-                                    <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
-                                    <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
-                                    <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
-                                    <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
-                                    <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
-                                    <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
-                                    <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
-                                    <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
-                                    <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
-                                </tr>
-                                <tr>
-                                    <td colSpan={2} style={{ height: "0.1in", fontSize: "62.5%" }}>
+                                            </b>
+                                        </td>
+                                        <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
+                                        <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
+                                        <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
+                                        <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
+                                        <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
+                                        <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
+                                        <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
+                                        <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
+                                        <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
+                                        <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
+                                        <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
+                                        <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
+                                        <td colSpan={1} style={{ height: "0.1in", fontSize: "72.5%" }}></td>
+                                    </tr>
+                                    <tr>
+                                        <td colSpan={2} style={{ height: "0.1in", fontSize: "62.5%" }}>
 
-                                    </td>
-                                </tr>
-                                <tr>
+                                        </td>
+                                    </tr>
+                                    <tr>
 
-                                    <td colSpan={40} style={{ height: "0.5in", textAlign: "center" }}>
-                                        <table width="100%" style={{ borderCollapse: "collapse" }}>
-                                            <tbody>
-                                                <tr>
+                                        <td colSpan={40} style={{ height: "0.5in", textAlign: "center" }}>
+                                            <table width="100%" style={{ borderCollapse: "collapse" }}>
+                                                <tbody>
+                                                    <tr>
 
 
-                                                    <td style={{ width: "20%", textAlign: "center" }}>
-                                                        <img src={EaristLogo} alt="Earist Logo" style={{ marginLeft: "10px", width: "140px", height: "140px" }} />
-                                                    </td>
+                                                        <td style={{ width: "20%", textAlign: "center" }}>
+                                                            <img src={EaristLogo} alt="Earist Logo" style={{ marginLeft: "10px", width: "140px", height: "140px" }} />
+                                                        </td>
 
-                                                    {/* Center Column - School Information */}
-                                                    <td style={{ width: "60%", textAlign: "center", lineHeight: "1", }}>
-                                                        <div>Republic of the Philippines</div>
-                                                        <b style={{ letterSpacing: '1px', fontSize: "20px" }}>Eulogio "Amang" Rodriguez</b>
-                                                        <div style={{ letterSpacing: '1px', fontSize: "20px" }}><b>Institute of Science and Technology</b></div>
-                                                        <div>Nagtahan St. Sampaloc, Manila</div>
+                                                        {/* Center Column - School Information */}
+                                                        <td style={{ width: "60%", textAlign: "center", lineHeight: "1", }}>
+                                                            <div>Republic of the Philippines</div>
+                                                            <b style={{ letterSpacing: '1px', fontSize: "20px" }}>Eulogio "Amang" Rodriguez</b>
+                                                            <div style={{ letterSpacing: '1px', fontSize: "20px" }}><b>Institute of Science and Technology</b></div>
+                                                            <div>Nagtahan St. Sampaloc, Manila</div>
 
-                                                        {/* Add spacing here */}
-                                                        <div style={{ marginTop: "30px" }}>
-                                                            <b style={{ fontSize: "24px", letterSpacing: '1px', fontWeight: "bold" }}>
-                                                                EXAMINATION PERMIT
-                                                            </b>
-                                                        </div>
-                                                    </td>
+                                                            {/* Add spacing here */}
+                                                            <div style={{ marginTop: "30px" }}>
+                                                                <b style={{ fontSize: "24px", letterSpacing: '1px', fontWeight: "bold" }}>
+                                                                    EXAMINATION PERMIT
+                                                                </b>
+                                                            </div>
+                                                        </td>
 
-                                                    <td
-                                                        colSpan={4}
-                                                        rowSpan={6}
-                                                        style={{
-                                                            textAlign: "center",
-                                                            position: "relative",
-                                                            width: "4.5cm",
-                                                            height: "4.5cm",
-                                                        }}
-                                                    >
-                                                        <div
+                                                        <td
+                                                            colSpan={4}
+                                                            rowSpan={6}
                                                             style={{
-                                                                width: "4.58cm",
-                                                                height: "4.58cm",
-                                                                marginRight: "10px",
-                                                                display: "flex",
-                                                                justifyContent: "center",
-                                                                alignItems: "center",
+                                                                textAlign: "center",
                                                                 position: "relative",
-                                                                border: "1px solid #ccc",
-                                                                overflow: "hidden",
-                                                                borderRadius: "4px",
+                                                                width: "4.5cm",
+                                                                height: "4.5cm",
                                                             }}
                                                         >
-                                                            {person.profile_img ? (
-                                                                <img
-                                                                    src={`http://localhost:5000/uploads/${person.profile_img}`}
-                                                                    alt="Profile"
-                                                                    style={{
-                                                                        width: "100%",
-                                                                        height: "100%",
-                                                                        objectFit: "cover",
-                                                                    }}
-                                                                />
-                                                            ) : (
-                                                                <span style={{ fontSize: "12px", color: "#888" }}>No Image</span>
-                                                            )}
-                                                        </div>
-                                                    </td>
+                                                            <div
+                                                                style={{
+                                                                    width: "4.58cm",
+                                                                    height: "4.58cm",
+                                                                    marginRight: "10px",
+                                                                    display: "flex",
+                                                                    justifyContent: "center",
+                                                                    alignItems: "center",
+                                                                    position: "relative",
+                                                                    border: "1px solid #ccc",
+                                                                    overflow: "hidden",
+                                                                    borderRadius: "4px",
+                                                                }}
+                                                            >
+                                                                {person.profile_img ? (
+                                                                    <img
+                                                                        src={`http://localhost:5000/uploads/${person.profile_img}`}
+                                                                        alt="Profile"
+                                                                        style={{
+                                                                            width: "100%",
+                                                                            height: "100%",
+                                                                            objectFit: "cover",
+                                                                        }}
+                                                                    />
+                                                                ) : (
+                                                                    <span style={{ fontSize: "12px", color: "#888" }}>No Image</span>
+                                                                )}
+                                                            </div>
+                                                        </td>
 
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
 
-                                </tr>
-
-
-                            </tbody>
-                        </table>
-                        <div style={{ height: "30px" }}></div>
-                        <table
-                            className="student-table"
-                            style={{
-                                borderCollapse: "collapse",
-                                fontFamily: "Arial, Helvetica, sans-serif",
-                                width: "8in",
-                                margin: "0 auto",
+                                    </tr>
 
 
-                                textAlign: "center",
-                                tableLayout: "fixed",
-                            }}
-                        >
+                                </tbody>
+                            </table>
+                            <div style={{ height: "30px" }}></div>
+                            <table
+                                className="student-table"
+                                style={{
+                                    borderCollapse: "collapse",
+                                    fontFamily: "Arial, Helvetica, sans-serif",
+                                    width: "8in",
+                                    margin: "0 auto",
 
-                            <tbody>
-                                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
-                                    <td colSpan={40}>
-                                        <div
-                                            style={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "flex-end",
-                                                width: "100%",
-                                                gap: "10px",
-                                            }}
-                                        >
-                                            <label style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
-                                                Applicant No.:
-                                            </label>
+
+                                    textAlign: "center",
+                                    tableLayout: "fixed",
+                                }}
+                            >
+
+                                <tbody>
+                                    <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
+                                        <td colSpan={40}>
                                             <div
                                                 style={{
-                                                    borderBottom: "1px solid black",
-                                                    fontFamily: "Arial",
-                                                    fontWeight: "normal",
-                                                    fontSize: "15px",
-                                                    minWidth: "278px",
-                                                    height: "1.2em",
                                                     display: "flex",
                                                     alignItems: "center",
+                                                    justifyContent: "flex-end",
+                                                    width: "100%",
+                                                    gap: "10px",
                                                 }}
                                             >
-                                                {selectedPerson?.applicant_number}
+                                                <label style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+                                                    Applicant No.:
+                                                </label>
+                                                <div
+                                                    style={{
+                                                        borderBottom: "1px solid black",
+                                                        fontFamily: "Arial",
+                                                        fontWeight: "normal",
+                                                        fontSize: "15px",
+                                                        minWidth: "278px",
+                                                        height: "1.2em",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                    }}
+                                                >
+                                                    {selectedPerson?.applicant_number}
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
+                                        </td>
 
 
-                                </tr>
+                                    </tr>
 
-                                {/* Email & Applicant ID */}
-                                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
-                                    <td colSpan={20}>
-                                        <div
-                                            style={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "flex-start",
-                                                width: "100%",
-                                                gap: "10px",
-                                            }}
-                                        >
-                                            <label style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
-                                                Name:
-                                            </label>
+                                    {/* Email & Applicant ID */}
+                                    <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
+                                        <td colSpan={20}>
                                             <div
                                                 style={{
-                                                    borderBottom: "1px solid black",
-                                                    fontFamily: "Arial",
-                                                    fontWeight: "normal",
-                                                    fontSize: "15px",
-                                                    minWidth: "328px",
-                                                    height: "1.2em",
                                                     display: "flex",
                                                     alignItems: "center",
+                                                    justifyContent: "flex-start",
+                                                    width: "100%",
+                                                    gap: "10px",
                                                 }}
                                             >
-                                                {selectedPerson?.last_name?.toUpperCase()}, {selectedPerson?.first_name?.toUpperCase()}{" "}
-                                                {selectedPerson?.middle_name?.toUpperCase() || ""}{" "}
-                                                {selectedPerson?.extension?.toUpperCase() || ""}
+                                                <label style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+                                                    Name:
+                                                </label>
+                                                <div
+                                                    style={{
+                                                        borderBottom: "1px solid black",
+                                                        fontFamily: "Arial",
+                                                        fontWeight: "normal",
+                                                        fontSize: "15px",
+                                                        minWidth: "328px",
+                                                        height: "1.2em",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                    }}
+                                                >
+                                                    {selectedPerson?.last_name?.toUpperCase()}, {selectedPerson?.first_name?.toUpperCase()}{" "}
+                                                    {selectedPerson?.middle_name?.toUpperCase() || ""}{" "}
+                                                    {selectedPerson?.extension?.toUpperCase() || ""}
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
+                                        </td>
 
 
-                                    <td colSpan={20}>
-                                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                                            <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Permit No.:</label>
-                                            <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.2em" }}></span>
-                                        </div>
-                                    </td>
-                                </tr>
+                                        <td colSpan={20}>
+                                            <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                                                <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Permit No.:</label>
+                                                <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.2em" }}></span>
+                                            </div>
+                                        </td>
+                                    </tr>
 
-                                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
-                                    <td colSpan={20}>
-                                        <div
-                                            style={{
-                                                display: "flex",
-                                                alignItems: "center",
-                                                justifyContent: "flex-start",
-                                                width: "100%",
-                                                gap: "10px",
-                                            }}
-                                        >
-                                            <label style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
-                                                Course Applied:
-                                            </label>
+                                    <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
+                                        <td colSpan={20}>
                                             <div
                                                 style={{
-                                                    borderBottom: "1px solid black",
-                                                    fontFamily: "Arial",
-                                                    fontWeight: "normal",
-                                                    fontSize: "15px",
-                                                    minWidth: "265px",
-                                                    height: "1.2em",
                                                     display: "flex",
                                                     alignItems: "center",
+                                                    justifyContent: "flex-start",
+                                                    width: "100%",
+                                                    gap: "10px",
                                                 }}
                                             >
-                                                {curriculumOptions.length > 0
-                                                    ? curriculumOptions.find(
-                                                        (item) =>
-                                                            item?.curriculum_id?.toString() === (person?.program ?? "").toString()
-                                                    )?.program_description || (person?.program ?? "")
-                                                    : "Loading..."}
+                                                <label style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>
+                                                    Course Applied:
+                                                </label>
+                                                <div
+                                                    style={{
+                                                        borderBottom: "1px solid black",
+                                                        fontFamily: "Arial",
+                                                        fontWeight: "normal",
+                                                        fontSize: "15px",
+                                                        minWidth: "265px",
+                                                        height: "1.2em",
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                    }}
+                                                >
+                                                    {curriculumOptions.length > 0
+                                                        ? curriculumOptions.find(
+                                                            (item) =>
+                                                                item?.curriculum_id?.toString() === (person?.program ?? "").toString()
+                                                        )?.program_description || (person?.program ?? "")
+                                                        : "Loading..."}
+                                                </div>
                                             </div>
-                                        </div>
-                                    </td>
+                                        </td>
 
-                                    <td colSpan={20}>
-                                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                                            <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Major:</label>
-                                            <span
-                                                style={{
-                                                    flexGrow: 1,
-                                                    borderBottom: "1px solid black",
-                                                    height: "1.2em",
-                                                    display: "flex",
-                                                    fontFamily: "Arial",
-                                                    alignItems: "center",
-                                                }}
-                                            >
-                                                {curriculumOptions.length > 0
-                                                    ? curriculumOptions.find(
-                                                        (item) =>
-                                                            item?.curriculum_id?.toString() === (person?.program ?? "").toString()
-                                                    )?.major || ""
-                                                    : "Loading..."}
-                                            </span>
+                                        <td colSpan={20}>
+                                            <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                                                <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Major:</label>
+                                                <span
+                                                    style={{
+                                                        flexGrow: 1,
+                                                        borderBottom: "1px solid black",
+                                                        height: "1.2em",
+                                                        display: "flex",
+                                                        fontFamily: "Arial",
+                                                        alignItems: "center",
+                                                    }}
+                                                >
+                                                    {curriculumOptions.length > 0
+                                                        ? curriculumOptions.find(
+                                                            (item) =>
+                                                                item?.curriculum_id?.toString() === (person?.program ?? "").toString()
+                                                        )?.major || ""
+                                                        : "Loading..."}
+                                                </span>
 
-                                        </div>
-                                    </td>
-                                </tr>
+                                            </div>
+                                        </td>
+                                    </tr>
 
-                                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
-                                    <td colSpan={20}>
-                                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                                            <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Date of Exam:</label>
-                                            <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.2em" }}></span>
-                                        </div>
-                                    </td>
-                                    <td colSpan={20}>
-                                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                                            <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Time :</label>
-                                            <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.2em" }}></span>
-                                        </div>
-                                    </td>
-                                </tr>
+                                    <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
+                                        <td colSpan={20}>
+                                            <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                                                <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Date of Exam:</label>
+                                                <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.2em" }}></span>
+                                            </div>
+                                        </td>
+                                        <td colSpan={20}>
+                                            <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                                                <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Time :</label>
+                                                <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.2em" }}></span>
+                                            </div>
+                                        </td>
+                                    </tr>
 
-                                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
-                                    <td colSpan={20}>
-                                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                                            <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Bldg. :</label>
-                                            <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.2em" }}></span>
-                                        </div>
-                                    </td>
-                                    <td colSpan={20}>
-                                        <div style={{ display: "flex", alignItems: "center", width: "60%" }}>
-                                            <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Room No. :</label>
-                                            <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.2em" }}></span>
-                                        </div>
-                                    </td>
-                                </tr>
+                                    <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
+                                        <td colSpan={20}>
+                                            <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                                                <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Bldg. :</label>
+                                                <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.2em" }}></span>
+                                            </div>
+                                        </td>
+                                        <td colSpan={20}>
+                                            <div style={{ display: "flex", alignItems: "center", width: "60%" }}>
+                                                <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Room No. :</label>
+                                                <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.2em" }}></span>
+                                            </div>
+                                        </td>
+                                    </tr>
 
-                                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
-                                    <td colSpan={20}>
-                                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                                            <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Scheduled by:</label>
-                                            <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.2em" }}></span>
-                                        </div>
-                                    </td>
+                                    <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
+                                        <td colSpan={20}>
+                                            <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                                                <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Scheduled by:</label>
+                                                <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.2em" }}></span>
+                                            </div>
+                                        </td>
 
-                                </tr>
-                                <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
-                                    <td colSpan={20}>
-                                        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                                            <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Date:</label>
-                                            <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.2em" }}></span>
-                                        </div>
-                                    </td>
+                                    </tr>
+                                    <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
+                                        <td colSpan={20}>
+                                            <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+                                                <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Date:</label>
+                                                <span style={{ flexGrow: 1, borderBottom: "1px solid black", height: "1.2em" }}></span>
+                                            </div>
+                                        </td>
 
-                                </tr>
-                            </tbody>
-                        </table>
+                                    </tr>
+                                </tbody>
+                            </table>
 
 
-                        <div style={{ height: "70px" }}></div>
+                            <div style={{ height: "70px" }}></div>
 
-                        <table
-                            className="student-table"
-                            style={{
+                            <table
+                                className="student-table"
+                                style={{
 
-                                borderCollapse: "collapse",
-                                fontFamily: "Arial, Helvetica, sans-serif",
-                                width: "8in",
-                                margin: "0 auto", // Center the table inside the form
-                                textAlign: "center",
-                                tableLayout: "fixed",
-                                border: "1px solid black"
-                            }}
-                        >
-                            <tbody>
-                                <tr>
-                                    <td
-                                        colSpan={40}
-                                        style={{
-                                            textAlign: "justify",
-                                            color: "black",
-                                            padding: "8px",
-                                            lineHeight: "1.5",
-                                            textAlign: "Center",
+                                    borderCollapse: "collapse",
+                                    fontFamily: "Arial, Helvetica, sans-serif",
+                                    width: "8in",
+                                    margin: "0 auto", // Center the table inside the form
+                                    textAlign: "center",
+                                    tableLayout: "fixed",
+                                    border: "1px solid black"
+                                }}
+                            >
+                                <tbody>
+                                    <tr>
+                                        <td
+                                            colSpan={40}
+                                            style={{
+                                                textAlign: "justify",
+                                                color: "black",
+                                                padding: "8px",
+                                                lineHeight: "1.5",
+                                                textAlign: "Center",
 
-                                            fontSize: "14px",
-                                            fontFamily: "Arial, Helvetica, sans-serif",
+                                                fontSize: "14px",
+                                                fontFamily: "Arial, Helvetica, sans-serif",
 
-                                            fontWeight: "200px"
-                                        }}
-                                    >
-                                        <strong>
-                                            <div>NOTE: Please bring this examination permit on the examination day together with</div>
-                                            <div>Two short bond paper, pencil w/ erasers & ballpen. Please come on decent attire</div>
-                                            <div>(no sleeveless or shorts) at least 1 hour before the examination</div>
-                                        </strong>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                                fontWeight: "200px"
+                                            }}
+                                        >
+                                            <strong>
+                                                <div>NOTE: Please bring this examination permit on the examination day together with</div>
+                                                <div>Two short bond paper, pencil w/ erasers & ballpen. Please come on decent attire</div>
+                                                <div>(no sleeveless or shorts) at least 1 hour before the examination</div>
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
 
+                        </div>
                     </div>
-                </div>
 
-)}
+                )}
             </div>
 
 

@@ -31,6 +31,7 @@ const socket = io("http://localhost:5000");
 const ApplicantList = () => {
     const navigate = useNavigate();
     const [persons, setPersons] = useState([]);
+
     const [selectedPerson, setSelectedPerson] = useState(null);
     const [assignedNumber, setAssignedNumber] = useState('');
     const [userID, setUserID] = useState("");
@@ -72,13 +73,13 @@ const ApplicantList = () => {
         last_name: "",
         first_name: "",
         middle_name: "",
+        document_status: "",
         extension: "",
         generalAverage1: "",
         program: "",
         created_at: "",
 
     });
-
 
 
     useEffect(() => {
@@ -88,6 +89,16 @@ const ApplicantList = () => {
             .then((data) => setPersons(data)) // ✅ Correct
 
     }, []);
+
+    useEffect(() => {
+        socket.on("document_status_updated", () => {
+            fetch("http://localhost:5000/api/all-applicants")
+                .then((res) => res.json())
+                .then((data) => setPersons(data));
+        });
+        return () => socket.off("document_status_updated");
+    }, []);
+
 
 
     const [curriculumOptions, setCurriculumOptions] = useState([]);
@@ -117,20 +128,46 @@ const ApplicantList = () => {
     const [department, setDepartment] = useState([]);
     const [allCurriculums, setAllCurriculums] = useState([]);
     const [schoolYears, setSchoolYears] = useState([]);
-    const [semesters, setSemesters] = useState([]);
+    const [semesters, setSchoolSemester] = useState([]);
     const [selectedSchoolYear, setSelectedSchoolYear] = useState("");
-    const [selectedSemester, setSelectedSemester] = useState("");
+    const [selectedSchoolSemester, setSelectedSchoolSemester] = useState('');
+    const [selectedActiveSchoolYear, setSelectedActiveSchoolYear] = useState('');
 
     useEffect(() => {
-        axios.get("http://localhost:5000/api/year_table")
-            .then(res => setSchoolYears(res.data))
-            .catch(err => console.error("Error fetching years:", err));
+        axios
+            .get(`http://localhost:5000/get_school_year/`)
+            .then((res) => setSchoolYears(res.data))
+            .catch((err) => console.error(err));
+    }, [])
 
-        axios.get("http://localhost:5000/api/semester_table")
-            .then(res => setSemesters(res.data))
-            .catch(err => console.error("Error fetching semesters:", err));
+    useEffect(() => {
+        axios
+            .get(`http://localhost:5000/get_school_semester/`)
+            .then((res) => setSchoolSemester(res.data))
+            .catch((err) => console.error(err));
+    }, [])
+
+    useEffect(() => {
+
+        axios
+            .get(`http://localhost:5000/active_school_year`)
+            .then((res) => {
+                if (res.data.length > 0) {
+                    setSelectedSchoolYear(res.data[0].year_id);
+                    setSelectedSchoolSemester(res.data[0].semester_id);
+                }
+            })
+            .catch((err) => console.error(err));
+
     }, []);
 
+    const handleSchoolYearChange = (event) => {
+        setSelectedSchoolYear(event.target.value);
+    };
+
+    const handleSchoolSemesterChange = (event) => {
+        setSelectedSchoolSemester(event.target.value);
+    };
 
     const filteredPersons = persons
         .filter((personData) => {
@@ -161,12 +198,10 @@ const ApplicantList = () => {
                 programInfo?.dprtmnt_name === selectedDepartmentFilter;
 
             const matchesSchoolYear =
-                selectedSchoolYear === "" ||
-                String(personData.school_year) === String(selectedSchoolYear);
+                selectedSchoolYear
 
             const matchesSemester =
-                selectedSemester === "" ||
-                String(personData.semester) === String(selectedSemester);
+                selectedSchoolSemester
 
             // ✅ Match by Date Applied range
             let matchesDateRange = true;
@@ -247,10 +282,6 @@ const ApplicantList = () => {
 
             .catch((err) => console.error("Error fetching applicants:", err));
     }, []);
-
-
-
-
 
     useEffect(() => {
         const fetchDepartments = async () => {
@@ -520,7 +551,7 @@ const ApplicantList = () => {
 
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <div style={{ height: "20px" }}></div>
-            <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon",  }}>
+            <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", }}>
                 <Table>
                     <TableHead sx={{ backgroundColor: '#6D2323' }}>
                         <TableRow>
@@ -865,38 +896,52 @@ const ApplicantList = () => {
                     <Box display="flex" flexDirection="column" gap={2}>
                         <Box display="flex" alignItems="center" gap={1}>
                             <Typography fontSize={13} sx={{ minWidth: "100px" }}>School Year:</Typography>
-                            <FormControl size="small" sx={{ width: "200px" }}>
-                                <InputLabel id="school-year-label">School Year</InputLabel>
+                            <FormControl fullWidth>
+                                <InputLabel id="demo-simple-select-label">School Years</InputLabel>
                                 <Select
-                                    labelId="school-year-label"
+                                    labelId="demo-simple-select-label"
+                                    id="demo-simple-select"
                                     value={selectedSchoolYear}
-                                    onChange={(e) => setSelectedSchoolYear(e.target.value)}
+                                    label="School Years"
+                                    sx={{ minWidth: '200px' }}
+                                    onChange={handleSchoolYearChange}
                                 >
-                                    <MenuItem value=""><em>All Years</em></MenuItem>
-                                    {schoolYears.map((y) => (
-                                        <MenuItem key={y.year_id} value={y.year_description}>
-                                            {`${y.year_description}-${parseInt(y.year_description) + 1}`}
-                                        </MenuItem>
-                                    ))}
+                                    {schoolYears.length > 0 ? (
+                                        schoolYears.map((sy) => (
+                                            <MenuItem value={sy.year_id} key={sy.year_id}>
+                                                {sy.current_year} - {sy.next_year}
+                                            </MenuItem>
+                                        ))
+                                    ) : (
+                                        <MenuItem disabled>School Year is not found</MenuItem>
+                                    )
+                                    }
                                 </Select>
                             </FormControl>
                         </Box>
 
                         <Box display="flex" alignItems="center" gap={1}>
                             <Typography fontSize={13} sx={{ minWidth: "100px" }}>Semester:</Typography>
-                            <FormControl size="small" sx={{ width: "200px" }}>
-                                <InputLabel id="semester-label">Semester</InputLabel>
+                            <FormControl fullWidth>
+                                <InputLabel id="demo-simple-select-label">School Semester</InputLabel>
                                 <Select
-                                    labelId="semester-label"
-                                    value={selectedSemester}
-                                    onChange={(e) => setSelectedSemester(e.target.value)}
+                                    labelId="demo-simple-select-label"
+                                    id="demo-simple-select"
+                                    value={selectedSchoolSemester}
+                                    label="School Semester"
+                                    sx={{ minWidth: '200px' }}
+                                    onChange={handleSchoolSemesterChange}
                                 >
-                                    <MenuItem value=""><em>All Semesters</em></MenuItem>
-                                    {semesters.map((s) => (
-                                        <MenuItem key={s.semester_id} value={s.semester_description}>
-                                            {s.semester_description}
-                                        </MenuItem>
-                                    ))}
+                                    {semesters.length > 0 ? (
+                                        semesters.map((sem) => (
+                                            <MenuItem value={sem.semester_id} key={sem.semester_id}>
+                                                {sem.semester_description}
+                                            </MenuItem>
+                                        ))
+                                    ) : (
+                                        <MenuItem disabled>School Semester is not found</MenuItem>
+                                    )
+                                    }
                                 </Select>
                             </FormControl>
                         </Box>
@@ -976,23 +1021,23 @@ const ApplicantList = () => {
                             <TableCell sx={{ color: "white", textAlign: "center", width: "6%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
                                 SHS GWA
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "9%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "8%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
                                 Date Applied
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "9%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "8%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
                                 Date Last Updated
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "13%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
                                 Applicant Status
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "9%", py: 0.5, fontSize: "12px", border: "1px solid maroon", borderRight: "2px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "8%", py: 0.5, fontSize: "12px", border: "1px solid maroon", borderRight: "2px solid maroon" }}>
                                 Registrar Status
                             </TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {currentPersons.map((person, index) => (
-                            <TableRow key={person.person_id} sx={{ height: "10px" }}>
+                            <TableRow key={person.upload_id}>
                                 <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", borderLeft: "2px solid maroon", py: 0.5, fontSize: "12px" }}>
                                     {index + 1}
                                 </TableCell>
@@ -1007,6 +1052,7 @@ const ApplicantList = () => {
                                 <TableCell
                                     sx={{ color: "blue", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px", cursor: "pointer" }}
                                     onClick={() => navigate(`/admin_dashboard1?person_id=${person.person_id}`)}
+
                                 >
                                     {person.applicant_number ?? "N/A"}
                                 </TableCell>
@@ -1029,11 +1075,34 @@ const ApplicantList = () => {
                                 <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px" }}>
                                     {person.created_at}
                                 </TableCell>
-                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px" }}>
-                                    {person.last_updated}
+                                <TableCell
+                                    sx={{
+                                        color: "black",
+                                        textAlign: "center",
+                                        border: "1px solid maroon",
+                                        py: 0.5,
+                                        fontSize: "12px"
+                                    }}
+                                >
+                                    {person.last_updated
+                                        ? new Date(person.last_updated).toLocaleDateString("en-PH", {
+                                            year: "numeric",
+                                            month: "2-digit",
+                                            day: "2-digit"
+                                        })
+                                        : ""}
                                 </TableCell>
-                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px" }}>
-                                    {person.applicant_status}
+
+                                <TableCell
+                                    sx={{
+                                        color: "black",
+                                        textAlign: "center",
+                                        border: "1px solid maroon",
+                                        py: 0.5,
+                                        fontSize: "12px",
+                                    }}
+                                >
+                                    {person.document_status || "N/A"}
                                 </TableCell>
                                 <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", borderRight: "2px solid maroon", py: 0.5, fontSize: "12px" }}>
                                     {person.registrar_status}

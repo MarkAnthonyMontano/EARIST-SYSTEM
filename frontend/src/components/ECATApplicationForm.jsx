@@ -91,15 +91,17 @@ const ECATApplicationForm = () => {
     setUser(storedUser);
     setUserRole(storedRole);
 
-    if (storedRole === "registrar" || storedRole === "applicant") {
-      const targetId = searchedPersonId || loggedInPersonId;
+    // Allow Applicant, Admin, SuperAdmin to view ECAT
+    const allowedRoles = ["registrar", "applicant", "superadmin"];
+    if (allowedRoles.includes(storedRole)) {
+      const targetId = searchedPersonId || queryPersonId || loggedInPersonId;
       setUserID(targetId);
       fetchPersonData(targetId);
       return;
     }
 
     window.location.href = "/login";
-  }, []);
+  }, [queryPersonId]);
 
 
   const [shortDate, setShortDate] = useState("");
@@ -415,13 +417,13 @@ const ECATApplicationForm = () => {
                   textAlign: "justify",
                   padding: "8px",
                   fontWeight: "bold",
-                  fontSize: "10px",
+                  fontSize: "11px",
                   verticalAlign: "top",
                 }}
               >
                 <div>TO THE APPLICANT</div>
-                <div>Read carefully the ECAT Guidelines and Requirements before accomplishing this form.</div>
-                <div>Please write LEGIBLY and CORRECTLY in PRINT LETTERS without erasures.</div>
+                Read carefully the ECAT Guidelines and Requirements before accomplishing this form.
+                Please write LEGIBLY and CORRECTLY in PRINT LETTERS without erasures.
                 <div>ONLY APPLICATION FORMS ACCOMPLISHED CORRECTLY AND COMPLETELY WILL BE PROCESSED.</div>
               </td>
               <td colSpan={1}></td>
@@ -968,11 +970,6 @@ const ECATApplicationForm = () => {
               </td>
             </tr>
 
-            <tr>
-              <td
-                style={{ height: "10px" }} colSpan={40}>
-              </td>
-            </tr>
 
 
 

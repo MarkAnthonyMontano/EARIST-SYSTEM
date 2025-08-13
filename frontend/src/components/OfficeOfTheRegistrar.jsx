@@ -75,28 +75,29 @@ const OfficeOfTheRegistrar = () => {
   const queryPersonId = queryParams.get("person_id");
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("email");
-    const storedRole = localStorage.getItem("role");
-    const loggedInPersonId = localStorage.getItem("person_id");
-    const searchedPersonId = sessionStorage.getItem("admin_edit_person_id");
-
-    if (!storedUser || !storedRole || !loggedInPersonId) {
+      const storedUser = localStorage.getItem("email");
+      const storedRole = localStorage.getItem("role");
+      const loggedInPersonId = localStorage.getItem("person_id");
+      const searchedPersonId = sessionStorage.getItem("admin_edit_person_id");
+  
+      if (!storedUser || !storedRole || !loggedInPersonId) {
+        window.location.href = "/login";
+        return;
+      }
+  
+      setUser(storedUser);
+      setUserRole(storedRole);
+  
+      if (storedRole === "registrar" || storedRole === "applicant") {
+        const targetId = searchedPersonId || loggedInPersonId;
+        setUserID(targetId);
+        fetchPersonData(targetId);
+        return;
+      }
+  
       window.location.href = "/login";
-      return;
-    }
-
-    setUser(storedUser);
-    setUserRole(storedRole);
-
-    if (storedRole === "registrar" || storedRole === "applicant") {
-      const targetId = searchedPersonId || loggedInPersonId;
-      setUserID(targetId);
-      fetchPersonData(targetId);
-      return;
-    }
-
-    window.location.href = "/login";
-  }, []);
+    }, []);
+  
 
 
 

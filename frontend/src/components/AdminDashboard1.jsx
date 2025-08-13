@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Button, Box, TextField, Container, Typography, TableContainer, Paper, Table, TableHead, TableRow, TableCell, FormHelperText, FormControl, InputLabel, Select, MenuItem, Modal, FormControlLabel, Checkbox, IconButton } from "@mui/material";
+import { Button, Box, TextField, Container, Typography, Card, TableContainer, Paper, Table, TableHead, TableRow, TableCell, FormHelperText, FormControl, InputLabel, Select, MenuItem, Modal, FormControlLabel, Checkbox, IconButton } from "@mui/material";
 import { Link } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
 import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
@@ -17,8 +17,10 @@ import provinces from "../data/province.json";
 import cities from "../data/city.json";
 import barangays from "../data/barangay.json";
 import { useNavigate } from 'react-router-dom';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useLocation } from "react-router-dom";
+import { motion } from "framer-motion";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+
 
 const AdminDashboard1 = () => {
   const navigate = useNavigate();
@@ -81,33 +83,36 @@ const AdminDashboard1 = () => {
     permanentDswdHouseholdNumber: "",
   });
 
-  // do not alter
   useEffect(() => {
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
-    const storedID = localStorage.getItem("person_id");
+    const loggedInPersonId = localStorage.getItem("person_id");
+    const searchedPersonId = sessionStorage.getItem("admin_edit_person_id");
 
-    if (storedUser && storedRole && storedID) {
-      setUser(storedUser);
-      setUserRole(storedRole);
-      setUserID(storedID);
-
-      // 👇 If accessed with ?person_id=, treat that person as selected
-      if (queryPersonId) {
-        fetchPersonData(queryPersonId);
-        setSelectedPerson({ person_id: queryPersonId });
-      } else {
-        fetchPersonData(storedID);
-      }
-
-      if (storedRole !== "registrar") {
-        window.location.href = "/login";
-      }
-    } else {
+    if (!storedUser || !storedRole || !loggedInPersonId) {
       window.location.href = "/login";
+      return;
     }
-  }, [queryPersonId]);
 
+    setUser(storedUser);
+    setUserRole(storedRole);
+
+    // Roles that can access
+    const allowedRoles = ["registrar", "applicant", "superadmin"];
+    if (allowedRoles.includes(storedRole)) {
+      // ✅ Always take URL param first
+      const targetId = queryPersonId || searchedPersonId || loggedInPersonId;
+
+      // Save it so other pages (ECAT, forms) can use it
+      sessionStorage.setItem("admin_edit_person_id", targetId);
+
+      setUserID(targetId);
+      fetchPersonData(targetId);
+      return;
+    }
+
+    window.location.href = "/login";
+  }, [queryPersonId]);
 
 
   useEffect(() => {
@@ -130,11 +135,11 @@ const AdminDashboard1 = () => {
 
   const steps = person.person_id
     ? [
-      { label: "Personal Information", icon: <PersonIcon />, path: `/admin_dashboard1?person_id=${person.person_id}` },
-      { label: "Family Background", icon: <FamilyRestroomIcon />, path: `/admin_dashboard2?person_id=${person.person_id}` },
-      { label: "Educational Attainment", icon: <SchoolIcon />, path: `/admin_dashboard3?person_id=${person.person_id}` },
-      { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: `/admin_dashboard4?person_id=${person.person_id}` },
-      { label: "Other Information", icon: <InfoIcon />, path: `/admin_dashboard5?person_id=${person.person_id}` },
+      { label: "Personal Information", icon: <PersonIcon />, path: `/admin_dashboard1?person_id=${userID}` },
+      { label: "Family Background", icon: <FamilyRestroomIcon />, path: `/admin_dashboard2?person_id=${userID}` },
+      { label: "Educational Attainment", icon: <SchoolIcon />, path: `/admin_dashboard3?person_id=${userID}` },
+      { label: "Health Medical Records", icon: <HealthAndSafetyIcon />, path: `/admin_dashboard4?person_id=${userID}` },
+      { label: "Other Information", icon: <InfoIcon />, path: `/admin_dashboard5?person_id=${userID}` },
     ]
     : [];
 
@@ -509,6 +514,54 @@ const AdminDashboard1 = () => {
     return isValid;
   };
 
+  const links = [
+    { to: `/ecat_application_form?person_id=${userID}`, label: "ECAT Application Form" },
+    { to: `/admission_form_process?person_id=${userID}`, label: "Admission Form Process" },
+    { to: `/personal_data_form?person_id=${userID}`, label: "Personal Data Form" },
+    { to: `/office_of_the_registrar?person_id=${userID}`, label: "Application For EARIST College Admission" },
+    { to: `/admission_services?person_id=${userID}`, label: "Application/Student Satisfactory Survey" },
+    { to: `/admission_services?person_id=${userID}`, label: "Examination Permit" },
+  ];
+
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchError, setSearchError] = useState("");
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(async () => {
+      if (searchQuery.trim() === "") return; // Don't search empty
+
+      try {
+        const res = await axios.get("http://localhost:5000/api/search-person", {
+          params: { query: searchQuery }
+        });
+
+        console.log("Search result data:", res.data); // See what the backend returns
+
+        setPerson(res.data);
+
+        // ✅ Adjust key based on backend response
+        const idToStore = res.data.person_id || res.data.id;
+        if (!idToStore) {
+          console.error("No valid person ID found in search result");
+          setSearchError("Invalid search result");
+          return;
+        }
+
+        // Store globally for ECAT and other dashboards
+        sessionStorage.setItem("admin_edit_person_id", idToStore);
+        setUserID(idToStore);
+
+        setSearchError("");
+      } catch (err) {
+        console.error("Search failed:", err);
+        setSearchError("Applicant not found");
+      }
+    }, 500); // debounce so it doesn't search on every keystroke instantly
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchQuery]);
+
 
 
   // dot not alter
@@ -516,96 +569,181 @@ const AdminDashboard1 = () => {
     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
 
 
+      {/* Top header: DOCUMENTS SUBMITTED + Search */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          mt: 3,
+          mb: 2,
+          px: 2,
+        }}
+      >
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 'bold',
+            color: 'maroon',
+            fontSize: '36px',
+          }}
+        >
+          ADMISSION SHIFTING FORM
+        </Typography>
 
-      <Container>
+        <TextField
+          size="small"
+          label="Search Applicant"
+          placeholder="Enter applicant number, name, or email"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          InputProps={{ startAdornment: <Search sx={{ mr: 1 }} /> }}
+          sx={{ width: { xs: '100%', sm: '425px' }, mt: { xs: 2, sm: 0 } }}
+        />
+      </Box>
+      {searchError && <Typography color="error">{searchError}</Typography>}
+      <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+      <br />
 
-        <Box sx={{ display: "flex", width: "100%" }}>
 
-          <Box sx={{ width: "75%", padding: "10px" }}>
+      <TableContainer component={Paper} sx={{ width: '100%', mb: 1, }}>
+        <Table>
+          <TableHead sx={{ backgroundColor: '#6D2323' }}>
+            <TableRow>
+              {/* Left cell: Applicant ID */}
+              <TableCell sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}>
+                Applicant ID:&nbsp;
+                <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
+                  {selectedPerson?.applicant_number || "N/A"}
+                </span>
+              </TableCell>
+
+              {/* Right cell: Applicant Name, right-aligned */}
+              <TableCell
+                align="right"
+                sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}
+              >
+                Applicant Name:&nbsp;
+                <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
+                  {selectedPerson?.last_name?.toUpperCase()}, {selectedPerson?.first_name?.toUpperCase()}{" "}
+                  {selectedPerson?.middle_name?.toUpperCase()} {selectedPerson?.extension_name?.toUpperCase() || ""}
+                </span>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+        </Table>
+      </TableContainer>
+
+      <Box sx={{ display: "flex", width: "100%" }}>
+        {/* Left side: Notice */}
+        <Box sx={{ width: "100%", padding: "10px" }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              p: 2,
+              borderRadius: "10px",
+              backgroundColor: "#fffaf5",
+              border: "1px solid #6D2323",
+              boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
+              whiteSpace: "nowrap", // Keep all in one row
+            }}
+          >
+            {/* Icon */}
             <Box
               sx={{
                 display: "flex",
-                alignItems: "flex-start",
-                gap: 2,
-                padding: "16px",
-                borderRadius: "10px",
-                backgroundColor: "#fffaf5",
-                border: "1px solid #6D2323",
-                boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
-                mt: 2,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#6D2323",
+                borderRadius: "8px",
+                width: 40,
+                height: 40,
+                flexShrink: 0,
               }}
             >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  backgroundColor: "#6D2323",
-                  borderRadius: "8px",
-                  width: "50px",
-                  height: "50px",
-                  minWidth: "36px",
-                }}
-              >
-                <ErrorIcon sx={{ color: "white", fontSize: "36px" }} />
-              </Box>
-
-              <Typography
-                sx={{
-                  fontSize: "14px",
-                  fontFamily: "Arial",
-                  color: "#3e3e3e",
-                  lineHeight: 1.6,
-                }}
-              >
-                <strong>1.</strong> Kindly type <strong>'NA'</strong> in boxes where there are no possible answers to the information being requested.
-                <br />
-                <strong>2.</strong> To use the letter <strong>'Ñ'</strong>, press <kbd>ALT</kbd> + <kbd>165</kbd>; for <strong>'ñ'</strong>, press <kbd>ALT</kbd> + <kbd>164</kbd>.
-              </Typography>
+              <ErrorIcon sx={{ color: "white", fontSize: 28 }} />
             </Box>
+
+            {/* Notice Text */}
+            <Typography
+              sx={{
+                fontSize: "15px",
+                fontFamily: "Arial",
+                color: "#3e3e3e",
+              }}
+            >
+              <strong style={{ color: "maroon" }}>Notice:</strong> &nbsp;
+              <strong>1.</strong> Kindly type <strong>'NA'</strong> in boxes where there are no possible answers to the information being requested. &nbsp; | &nbsp;
+              <strong>2.</strong> To use the letter <strong>'Ñ'</strong>, press <kbd>ALT</kbd> + <kbd>165</kbd>; for <strong>'ñ'</strong>, press <kbd>ALT</kbd> + <kbd>164</kbd>. &nbsp; | &nbsp;
+              <strong>3.</strong> This is the list of all printable files.
+            </Typography>
           </Box>
-
-          {/* Right: Links (25%) */}
-          <Box sx={{ width: "25%", padding: "10px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-            <Link
-              to={`/ecat_application_form?person_id=${person.person_id}`}
-              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
-            >
-              ECAT Application Form
-            </Link>
-
-            <Link
-              to={`/admission_form_process?person_id=${person.person_id}`}
-              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
-            >
-              Admission Form Process
-            </Link>
-
-            <Link
-              to={`/personal_data_form?person_id=${person.person_id}`}
-              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
-            >
-              Personal Data Form
-            </Link>
-
-            <Link
-              to={`/office_of_the_registrar?person_id=${person.person_id}`}
-              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
-            >
-              Application For EARIST College Admission
-            </Link>
-
-            <Link
-              to={`/admission_services?person_id=${person.person_id}`}
-              style={{ fontSize: "12px", marginBottom: "8px", color: "#6D2323", textDecoration: "none", fontFamily: "Arial", textAlign: "Left" }}
-            >
-              Application/Student Satisfactory Survey
-            </Link>
-          </Box>
-
         </Box>
 
 
+      </Box>
+
+      {/* PDF Cards Section */}
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 2,
+          mt: 2,
+          pb: 1,
+          justifyContent: "center",
+        }}
+      >
+        {links.map((lnk, i) => (
+          <motion.div
+            key={i}
+            style={{ flex: "0 0 calc(30% - 16px)" }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1, duration: 0.4 }}
+          >
+            <Card
+              sx={{
+                minHeight: 60,
+                borderRadius: 2,
+                border: "2px solid #6D2323",
+                backgroundColor: "#fff",
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                p: 1.5,
+                "&:hover": {
+                  transform: "scale(1.05)",
+                  transition: "0.3s ease-in-out",
+                },
+              }}
+            >
+              <PictureAsPdfIcon sx={{ fontSize: 35, color: "#6D2323", mr: 1.5 }} />
+              <Link
+                to={lnk.to}
+                style={{
+                  textDecoration: "none",
+                  color: "#6D2323",
+                  fontFamily: "Arial",
+                  fontWeight: "bold",
+                  fontSize: "0.85rem",
+                }}
+              >
+                {lnk.label}
+              </Link>
+            </Card>
+          </motion.div>
+        ))}
+      </Box>
+
+
+
+      <Container>
 
         <Container>
           <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}>APPLICANT FORM</h1>
