@@ -445,7 +445,7 @@ const SuperAdminDashboard1 = () => {
         { to: "/admission_services", label: "Examination Permit" },
     ];
 
-  const [selectedPerson, setSelectedPerson] = useState(null);
+    const [selectedPerson, setSelectedPerson] = useState(null);
 
 
     // dot not alter
@@ -490,7 +490,7 @@ const SuperAdminDashboard1 = () => {
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <br />
 
-           
+
             <Container>
 
                 <Box
@@ -523,15 +523,15 @@ const SuperAdminDashboard1 = () => {
                                 justifyContent: "center",
                                 backgroundColor: "#6D2323",
                                 borderRadius: "8px",
-                                width: 40,
-                                height: 40,
+                                width: 50,
+                                height: 50,
                                 flexShrink: 0,
                             }}
                         >
-                            <ErrorIcon sx={{ color: "white", fontSize: 28 }} />
+                            <ErrorIcon sx={{ color: "white", fontSize: 40 }} />
                         </Box>
 
-                        {/* Text in one row */}
+                        {/* Text */}
                         <Typography
                             sx={{
                                 fontSize: "15px",
@@ -540,9 +540,10 @@ const SuperAdminDashboard1 = () => {
                             }}
                         >
                             <strong style={{ color: "maroon" }}>Notice:</strong> &nbsp;
+
                             <strong>1.</strong> Kindly type <strong>'NA'</strong> in boxes where there are no possible answers to the information being requested. &nbsp; | &nbsp;
                             <strong>2.</strong> To use the letter <strong>'Ñ'</strong>, press <kbd>ALT</kbd> + <kbd>165</kbd>; for <strong>'ñ'</strong>, press <kbd>ALT</kbd> + <kbd>164</kbd>. &nbsp; | &nbsp;
-                            <strong>3.</strong> This is the list of all printable files.
+                            <strong>3.</strong> List of all printable files
                         </Typography>
                     </Box>
                 </Box>

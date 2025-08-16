@@ -547,12 +547,12 @@ const Dashboard1 = (props) => {
               justifyContent: "center",
               backgroundColor: "#6D2323",
               borderRadius: "8px",
-              width: 40,
-              height: 40,
+              width: 50,
+              height: 50,
               flexShrink: 0,
             }}
           >
-            <ErrorIcon sx={{ color: "white", fontSize: 28 }} />
+            <ErrorIcon sx={{ color: "white", fontSize: 40 }} />
           </Box>
 
           {/* Text */}
@@ -564,9 +564,10 @@ const Dashboard1 = (props) => {
             }}
           >
             <strong style={{ color: "maroon" }}>Notice:</strong> &nbsp;
+         
             <strong>1.</strong> Kindly type <strong>'NA'</strong> in boxes where there are no possible answers to the information being requested. &nbsp; | &nbsp;
             <strong>2.</strong> To use the letter <strong>'Ñ'</strong>, press <kbd>ALT</kbd> + <kbd>165</kbd>; for <strong>'ñ'</strong>, press <kbd>ALT</kbd> + <kbd>164</kbd>. &nbsp; | &nbsp;
-            <strong>3.</strong> This is the list of all printable files.
+            <strong>3.</strong> List of all printable files
           </Typography>
         </Box>
       </Box>

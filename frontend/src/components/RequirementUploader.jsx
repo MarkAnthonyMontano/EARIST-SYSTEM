@@ -16,6 +16,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import axios from 'axios';
+import ErrorIcon from "@mui/icons-material/Error";
 
 const requiredDocs = [
   { label: 'PSA Birth Certificate', key: 'BirthCertificate' },
@@ -167,17 +168,17 @@ const RequirementUploader = () => {
 
       <TableRow key={doc.key}>
         {/* Document label */}
-        <TableCell sx={{ fontWeight: 'bold', width: '25%', border: "2px solid maroon"  }}>{doc.label}</TableCell>
+        <TableCell sx={{ fontWeight: 'bold', width: '25%', border: "2px solid maroon" }}>{doc.label}</TableCell>
 
-        <TableCell sx={{ width: '25%', border: "2px solid maroon", textAlign: "Center"  }}>
+        <TableCell sx={{ width: '25%', border: "2px solid maroon", textAlign: "Center" }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
             {/* Fixed wrapper to prevent shifting */}
-            <Box sx={{ width: '220px', flexShrink: 0, textAlign:"center" }}>
+            <Box sx={{ width: '220px', flexShrink: 0, textAlign: "center" }}>
               {selectedFiles[doc.key] ? (
                 <Box
                   sx={{
                     backgroundColor: '#e0e0e0',
-                   
+
                     padding: '6px 12px',
                     borderRadius: '4px',
                     fontSize: '14px',
@@ -228,7 +229,7 @@ const RequirementUploader = () => {
         </TableCell>
 
 
-        <TableCell sx={{ width: "25%", border: "2px solid maroon"  }}>
+        <TableCell sx={{ width: "25%", border: "2px solid maroon" }}>
           {/* Remarks */}
           <Typography
             sx={{
@@ -257,7 +258,7 @@ const RequirementUploader = () => {
 
 
         {/* Preview */}
-        <TableCell sx={{ width: '10%', border: "2px solid maroon"  }}>
+        <TableCell sx={{ width: '10%', border: "2px solid maroon" }}>
           {uploaded && (
             <Button
               variant="contained"
@@ -278,7 +279,7 @@ const RequirementUploader = () => {
         </TableCell>
 
         {/* Delete */}
-        <TableCell sx={{ width: '10%', border: "2px solid maroon"  }}>
+        <TableCell sx={{ width: '10%', border: "2px solid maroon" }}>
           {uploaded && (
             <Button
               onClick={() => handleDelete(uploaded.upload_id)}
@@ -306,6 +307,64 @@ const RequirementUploader = () => {
   return (
     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
 
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center", // ✅ Center horizontally
+          width: "100%",
+          mt: 2,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center", // ✅ Center content inside full-width box
+            gap: 2,
+            width: "100%", // ✅ Still takes full width
+            textAlign: "center",
+            p: 2,
+            borderRadius: "10px",
+            backgroundColor: "#fffaf5",
+            border: "1px solid #6D2323",
+            boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {/* Icon */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "#6D2323",
+              borderRadius: "8px",
+              width: 50,
+              height: 50,
+              flexShrink: 0,
+            }}
+          >
+            <ErrorIcon sx={{ color: "white", fontSize: 40 }} />
+          </Box>
+
+          {/* Text */}
+          <Typography
+            sx={{
+              fontSize: "15px",
+              fontFamily: "Arial",
+              color: "#3e3e3e",
+              textAlign: "center",
+            }}
+          >
+            <strong style={{ color: "maroon" }}>Notice:</strong> &nbsp;
+            <strong>
+              PLEASE NOTE: ONLY JPG, JPEG, PNG or PDF WITH MAXIMUM OF FILE SIZE OF 4MB ARE ALLOWED
+            </strong>
+          </Typography>
+        </Box>
+      </Box>
+
 
       <Box sx={{ mt: 2, px: 2, marginLeft: "-10px" }}>
         <Container>
@@ -315,24 +374,14 @@ const RequirementUploader = () => {
 
         <div style={{ height: "25px" }}></div>
 
-        <Typography
-          style={{
-            fontSize: '15px',
-            color: 'black',
-            fontFamily: 'Arial',
-            textAlign: 'left',
-            marginBottom: '5px'
-          }}
-        >
-          PLEASE NOTE: ONLY JPG, JPEG, PNG or PDF WITH MAXIMUM OF FILE SIZE OF 4MB ARE ALLOWED
-        </Typography>
 
-        <TableContainer component={Paper} sx={{ width: '95%', border: "2px solid maroon"  }}>
+
+        <TableContainer component={Paper} sx={{ width: '95%', border: "2px solid maroon" }}>
           <Table>
             <TableHead sx={{ backgroundColor: '#6D2323', border: "2px solid maroon" }}>
               <TableRow>
-                <TableCell sx={{ color: 'white', border: "2px solid maroon"}}>Document</TableCell>
-                <TableCell sx={{ color: 'white', border: "2px solid maroon"}}>Upload</TableCell>
+                <TableCell sx={{ color: 'white', border: "2px solid maroon" }}>Document</TableCell>
+                <TableCell sx={{ color: 'white', border: "2px solid maroon" }}>Upload</TableCell>
                 <TableCell sx={{ color: 'white' }}>Remarks</TableCell>
                 <TableCell sx={{ color: 'white' }}>Preview</TableCell>
                 <TableCell sx={{ color: 'white' }}>Delete</TableCell>
@@ -342,23 +391,14 @@ const RequirementUploader = () => {
           </Table>
         </TableContainer>
 
-        <Typography variant="h6" sx={{ mt: 2, color: '#6D2323',  }}>
-          Upload Your Medical Documents
-        </Typography>
+        <Container>
+          <h1 style={{ fontSize: "50px", fontWeight: "bold", textAlign: "center", color: "maroon", marginTop: "25px" }}> UPLOAD MEDICAL DOCUMENTS</h1>
 
-        <Typography
-          style={{
-            fontSize: '15px',
-            color: 'black',
-            fontFamily: 'Arial',
-            textAlign: 'left',
-            marginBottom: '5px'
-          }}
-        >
-          PLEASE NOTE: ONLY JPG, JPEG, PNG or PDF WITH MAXIMUM OF FILE SIZE OF 4MB ARE ALLOWED
-        </Typography>
+        </Container>
 
-        <TableContainer component={Paper} sx={{ width: '95%', mt: 2, border: "2px solid maroon"  }}>
+
+
+        <TableContainer component={Paper} sx={{ width: '95%', mt: 2, border: "2px solid maroon" }}>
           <Table>
             <TableHead sx={{ backgroundColor: '#6D2323', border: "2px solid maroon" }}>
               <TableRow>

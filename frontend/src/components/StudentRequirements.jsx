@@ -305,23 +305,24 @@ const StudentRequirements = () => {
     }
   };
 
-  const handleStatusChange = async (uploadId, remarkValue) => {
-    const remarks = remarksMap[uploadId] || ""; // get remarks for this upload ID
+const handleStatusChange = async (uploadId, remarkValue) => {
+  const remarks = remarksMap[uploadId] || ""; // get remarks for this upload ID
 
-    try {
-      await axios.put(`http://localhost:5000/uploads/remarks/${uploadId}`, {
-        status: remarkValue,
-        remarks: remarks,
-      });
+  try {
+    await axios.put(`http://localhost:5000/uploads/remarks/${uploadId}`, {
+      status: remarkValue,   // keep it as number now
+      remarks: remarks,
+    });
 
-      if (selectedPerson?.applicant_number) {
-        await fetchUploadsByApplicantNumber(selectedPerson.applicant_number);
-        setEditingRemarkId(null);
-      }
-    } catch (err) {
-      console.error('Error updating Status:', err);
+    if (selectedPerson?.applicant_number) {
+      await fetchUploadsByApplicantNumber(selectedPerson.applicant_number);
+      setEditingRemarkId(null);
     }
-  };
+  } catch (err) {
+    console.error('Error updating Status:', err);
+  }
+};
+
 
   const fetchApplicantNumber = async (personID) => {
     try {

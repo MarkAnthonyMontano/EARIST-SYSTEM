@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 13, 2025 at 09:06 PM
+-- Generation Time: Aug 16, 2025 at 11:23 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -164,7 +164,13 @@ INSERT INTO `notifications` (`id`, `type`, `message`, `applicant_number`, `times
 (86, 'update', '✏️ Updated document status (Applicant #2025100003 - Montaño, Mark Anthony P.)', '2025100003', '2025-08-14 01:34:23'),
 (87, 'update', '✏️ Updated document status (Applicant #2025100003 - Montaño, Mark Anthony P.)', '2025100003', '2025-08-14 01:34:24'),
 (88, 'submit', '✅ Applicant #2025100008 - Montano, Mark Anthony f. submitted their form.', '2025100008', '2025-08-14 02:27:23'),
-(89, 'update', '✏️ Updated document status (Applicant #2025100003 - Montaño, Mark Anthony P.)', '2025100003', '2025-08-14 02:52:13');
+(89, 'update', '✏️ Updated document status (Applicant #2025100003 - Montaño, Mark Anthony P.)', '2025100003', '2025-08-14 02:52:13'),
+(90, 'update', '✏️ Updated document status (Applicant #2025100005 - ghngfds, fasfsafnhgm g.)', '2025100005', '2025-08-14 03:37:12'),
+(91, 'update', '✏️ Updated document status (Applicant #2025100005 - ghngfds, fasfsafnhgm g.)', '2025100005', '2025-08-15 02:42:42'),
+(92, 'delete', '🗑️ Deleted document (Applicant #2025100003 - Montaño, Mark Anthony P.)', '2025100003', '2025-08-15 02:44:27'),
+(93, 'upload', '📥 Uploaded new document by Applicant #2025100002 - luh, anlala p.', '2025100002', '2025-08-17 04:09:59'),
+(94, 'upload', '📥 Uploaded new document by Applicant #2025100002 - luh, anlala p.', '2025100002', '2025-08-17 04:09:59'),
+(95, 'submit', '✅ Applicant #2025100005 - ghngfds, fasfsafnhgm g. submitted their form.', '2025100005', '2025-08-17 04:10:26');
 
 -- --------------------------------------------------------
 
@@ -518,21 +524,22 @@ CREATE TABLE `requirement_uploads` (
 --
 
 INSERT INTO `requirement_uploads` (`upload_id`, `requirements_id`, `person_id`, `submitted_documents`, `file_path`, `original_name`, `remarks`, `status`, `document_status`, `registrar_status`, `created_at`) VALUES
-(86, 1, 5, NULL, '/uploads/1_BirthCertificate_2025.pdf', 'Mark.pdf', NULL, NULL, NULL, NULL, '2025-07-30 14:10:06'),
-(98, 1, 204, NULL, '/uploads/2025100005_BirthCertificate_2025.pdf', 'Recommendation-MIS-new-SA-7-2025.pdf', 'Please resubmit the complete view of your document', 1, 'On process', NULL, '2025-08-01 02:40:02'),
-(105, 1, 305, NULL, '2025100008_BirthCertificate_2025.pdf', 'Certifate_of_registration (1).pdf', NULL, NULL, NULL, NULL, '2025-08-11 16:39:20'),
-(106, 2, 305, NULL, '2025100008_Form138_2025.pdf', 'Certifate_of_registration.pdf', NULL, NULL, NULL, NULL, '2025-08-11 16:39:22'),
-(107, 4, 305, NULL, '2025100008_CertificateOfGraduatingClass_2025.png', 'MONTANO.png', NULL, NULL, NULL, NULL, '2025-08-11 16:39:28'),
-(108, 3, 305, NULL, '2025100008_GoodMoralCharacter_2025.png', 'Untitled design.png', NULL, NULL, NULL, NULL, '2025-08-11 16:39:32'),
-(109, 5, 305, NULL, '2025100008_VaccineCard_2025.pdf', 'Certifate_of_registration (1).pdf', NULL, NULL, NULL, NULL, '2025-08-11 16:39:35'),
-(110, 2, 204, NULL, '2025100005_Form138_2025.pdf', 'National_Skill_Registration_Program_Jobseeker_Registration_Form.pdf', 'Submit good moral year 2022', 1, 'On process', NULL, '2025-08-11 16:51:18'),
-(113, 4, 204, NULL, '2025100005_CertificateOfGraduatingClass_2025.pdf', 'Certifate_of_registration.pdf', 'Conflict of Lastname with birth certificate', 2, 'On process', NULL, '2025-08-13 01:28:33'),
-(114, 3, 204, NULL, '2025100005_GoodMoralCharacter_2025.pdf', 'Certifate_of_registration (1).pdf', 'Attachments were blurry', 1, 'On process', NULL, '2025-08-13 01:45:22'),
-(115, 5, 204, NULL, '2025100005_VaccineCard_2025.png', 'Untitled design.png', NULL, NULL, 'On process', NULL, '2025-08-14 01:18:11'),
-(116, 1, 3, NULL, '2025100003_BirthCertificate_2025.pdf', 'Certifate_of_registration.pdf', 'Attachments were blurry', 1, 'Documents Verified & ECAT', NULL, '2025-08-14 02:53:13'),
-(117, 2, 3, NULL, '2025100003_Form138_2025.pdf', 'MONTAÃ?O, MARK ANTHONY.pdf', NULL, 1, 'Documents Verified & ECAT', NULL, '2025-08-14 02:53:13'),
-(118, 3, 3, NULL, '2025100003_GoodMoralCharacter_2025.pdf', 'Mark.pdf', NULL, 1, 'Documents Verified & ECAT', NULL, '2025-08-14 02:53:13'),
-(119, 4, 3, NULL, '2025100003_CertificateOfGraduatingClass_2025.pdf', 'MONTAÃ?O, MARK ANTHONY.pdf', NULL, 1, 'Documents Verified & ECAT', NULL, '2025-08-14 02:53:13');
+(86, 1, 5, NULL, '/uploads/1_BirthCertificate_2025.pdf', 'Mark.pdf', NULL, NULL, NULL, NULL, '2025-08-17 04:24:11'),
+(98, 1, 204, NULL, '/uploads/2025100005_BirthCertificate_2025.pdf', 'Recommendation-MIS-new-SA-7-2025.pdf', 'Please resubmit the complete view of your document', 0, 'Program Closed', NULL, '2025-08-17 04:54:20'),
+(105, 1, 305, NULL, '2025100008_BirthCertificate_2025.pdf', 'Certifate_of_registration (1).pdf', NULL, NULL, NULL, NULL, '2025-08-17 04:24:05'),
+(106, 2, 305, NULL, '2025100008_Form138_2025.pdf', 'Certifate_of_registration.pdf', NULL, NULL, NULL, NULL, '2025-08-17 04:24:03'),
+(107, 4, 305, NULL, '2025100008_CertificateOfGraduatingClass_2025.png', 'MONTANO.png', NULL, NULL, NULL, NULL, '2025-08-17 04:24:02'),
+(108, 3, 305, NULL, '2025100008_GoodMoralCharacter_2025.png', 'Untitled design.png', NULL, NULL, NULL, NULL, '2025-08-17 04:24:00'),
+(109, 5, 305, NULL, '2025100008_VaccineCard_2025.pdf', 'Certifate_of_registration (1).pdf', NULL, NULL, NULL, NULL, '2025-08-17 04:23:57'),
+(110, 2, 204, NULL, '2025100005_Form138_2025.pdf', 'National_Skill_Registration_Program_Jobseeker_Registration_Form.pdf', 'Submit good moral year 2022', 1, 'Program Closed', NULL, '2025-08-17 04:54:24'),
+(113, 4, 204, NULL, '2025100005_CertificateOfGraduatingClass_2025.pdf', 'Certifate_of_registration.pdf', 'Conflict of Lastname with birth certificate', 2, 'Program Closed', NULL, '2025-08-17 04:55:36'),
+(114, 3, 204, NULL, '2025100005_GoodMoralCharacter_2025.pdf', 'Certifate_of_registration (1).pdf', 'Attachments were blurry', 2, NULL, NULL, '2025-08-17 04:55:38'),
+(115, 5, 204, 0, '2025100005_VaccineCard_2025.png', 'Untitled design.png', NULL, 0, 'Program Closed', 0, '2025-08-17 05:23:22'),
+(116, 1, 3, NULL, '2025100003_BirthCertificate_2025.pdf', 'Certifate_of_registration.pdf', 'Attachments were blurry', 1, 'Documents Verified & ECAT', 1, '2025-08-17 04:31:23'),
+(118, 3, 3, NULL, '2025100003_GoodMoralCharacter_2025.pdf', 'Mark.pdf', NULL, 1, 'Documents Verified & ECAT', 1, '2025-08-17 04:31:23'),
+(119, 4, 3, 0, '2025100003_CertificateOfGraduatingClass_2025.pdf', 'MONTAÃ?O, MARK ANTHONY.pdf', NULL, 0, 'Documents Verified & ECAT', 0, '2025-08-17 05:22:05'),
+(120, 1, 2, NULL, '2025100002_BirthCertificate_2025.pdf', 'National_Skill_Registration_Program_Jobseeker_Registration_Form.pdf', 'Good Moral is outdated must be 2022', 0, 'On process', NULL, '2025-08-17 04:24:14'),
+(121, 1, 2, 0, '2025100002_BirthCertificate_2025.pdf', 'National_Skill_Registration_Program_Jobseeker_Registration_Form.pdf', 'Good Moral is outdated must be 2022', 0, 'On process', 0, '2025-08-17 05:22:08');
 
 -- --------------------------------------------------------
 
@@ -640,7 +647,7 @@ ALTER TABLE `exam_schedule`
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=96;
 
 --
 -- AUTO_INCREMENT for table `person_status_table`
@@ -664,7 +671,7 @@ ALTER TABLE `requirements_table`
 -- AUTO_INCREMENT for table `requirement_uploads`
 --
 ALTER TABLE `requirement_uploads`
-  MODIFY `upload_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=120;
+  MODIFY `upload_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=122;
 
 --
 -- AUTO_INCREMENT for table `user_accounts`

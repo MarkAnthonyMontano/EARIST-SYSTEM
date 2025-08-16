@@ -15,6 +15,7 @@ import {
     TextField,
     MenuItem,
     InputLabel,
+    Checkbox,
     TableBody,
 
 } from '@mui/material';
@@ -80,6 +81,49 @@ const ApplicantList = () => {
         created_at: "",
 
     });
+
+    // ⬇️ Add this inside ApplicantList component, before useEffect
+    const fetchApplicants = async () => {
+        try {
+            const res = await fetch("http://localhost:5000/api/all-applicants");
+            const data = await res.json();
+            setPersons(data);
+        } catch (err) {
+            console.error("Error fetching applicants:", err);
+        }
+    };
+
+    // ✅ Auto-updates registrar_status when submitted_documents changes
+    const handleSubmittedDocumentsChange = async (upload_id, checked) => {
+        try {
+            const submittedValue = checked ? 1 : 0;
+            const registrarValue = checked ? 1 : 0; // ✅ Auto-sync registrar_status
+
+            await axios.put(`http://localhost:5000/api/submitted-documents/${upload_id}`, {
+                submitted_documents: submittedValue,
+                registrar_status: registrarValue, // ✅ update registrar too
+            });
+
+            // Refresh applicants after update
+            fetchApplicants();
+        } catch (err) {
+            console.error("❌ Failed to update submitted documents:", err);
+        }
+    };
+
+
+    // ✅ Manual registrar override
+    const handleRegistrarStatusChange = async (person_id, status) => {
+        try {
+            await axios.put(`http://localhost:5000/api/registrar-status/${person_id}`, {
+                registrar_status: status,
+            });
+            fetchApplicants(); // refresh
+        } catch (err) {
+            console.error("❌ Failed to update registrar status:", err);
+        }
+    };
+
 
 
     useEffect(() => {
@@ -169,6 +213,9 @@ const ApplicantList = () => {
         setSelectedSchoolSemester(event.target.value);
     };
 
+    // helper to make string comparisons robust
+    const normalize = (s) => (s ?? "").toString().trim().toLowerCase();
+
     const filteredPersons = persons
         .filter((personData) => {
             const fullText = `${personData.first_name} ${personData.middle_name} ${personData.last_name} ${personData.emailAddress ?? ''} ${personData.applicant_number ?? ''}`.toLowerCase();
@@ -177,13 +224,16 @@ const ApplicantList = () => {
             const matchesCampus =
                 person.campus === "" || String(personData.campus) === String(person.campus);
 
+            // ✅ FIX: use document_status and normalize both sides
             const matchesApplicantStatus =
                 selectedApplicantStatus === "" ||
-                personData.applicant_status === selectedApplicantStatus;
+                normalize(personData.document_status) === normalize(selectedApplicantStatus);
 
+            // (keep your registrar filter; shown here with the earlier mapping)
             const matchesRegistrarStatus =
                 selectedRegistrarStatus === "" ||
-                personData.registrar_status === selectedRegistrarStatus;
+                (selectedRegistrarStatus === "Enrolled" && personData.registrar_status === 1) ||
+                (selectedRegistrarStatus === "Unenrolled" && personData.registrar_status === 0);
 
             const programInfo = allCurriculums.find(
                 (opt) => opt.curriculum_id?.toString() === personData.program?.toString()
@@ -197,13 +247,11 @@ const ApplicantList = () => {
                 selectedDepartmentFilter === "" ||
                 programInfo?.dprtmnt_name === selectedDepartmentFilter;
 
-            const matchesSchoolYear =
-                selectedSchoolYear
+            // (Your year/semester checks look off; leaving as-is since you didn’t ask to change them.)
+            const matchesSchoolYear = selectedSchoolYear;
+            const matchesSemester = selectedSchoolSemester;
 
-            const matchesSemester =
-                selectedSchoolSemester
-
-            // ✅ Match by Date Applied range
+            // date range (unchanged)
             let matchesDateRange = true;
             if (person.fromDate && person.toDate) {
                 const appliedDate = new Date(personData.created_at);
@@ -232,10 +280,8 @@ const ApplicantList = () => {
                 matchesDateRange
             );
         })
-        // ✅ Sorting logic
         .sort((a, b) => {
             let fieldA, fieldB;
-
             if (sortBy === "name") {
                 fieldA = `${a.last_name} ${a.first_name} ${a.middle_name || ''}`.toLowerCase();
                 fieldB = `${b.last_name} ${b.first_name} ${b.middle_name || ''}`.toLowerCase();
@@ -246,9 +292,8 @@ const ApplicantList = () => {
                 fieldA = a.emailAddress?.toLowerCase() || "";
                 fieldB = b.emailAddress?.toLowerCase() || "";
             } else {
-                return 0; // no sorting if no sortBy
+                return 0;
             }
-
             if (fieldA < fieldB) return sortOrder === "asc" ? -1 : 1;
             if (fieldA > fieldB) return sortOrder === "asc" ? 1 : -1;
             return 0;
@@ -421,9 +466,10 @@ const ApplicantList = () => {
         <div class="print-container">
 
           <!-- Header -->
-          <div class="print-header">
-            <img src="${EaristLogo}" alt="Earist Logo" />
-            <div>
+         <div class="print-header">
+  <img src="${EaristLogo}" alt="Earist Logo" 
+       style="width: 125px; height: 125px;" />
+  <div>
               <div>Republic of the Philippines</div>
               <b style="letter-spacing: 1px; font-size: 20px;">
                 Eulogio "Amang" Rodriguez
@@ -452,21 +498,26 @@ const ApplicantList = () => {
                 <th>Status</th>
               </tr>
             </thead>
-            <tbody>
-              ${filteredPersons.map(person => `
-                <tr>
-                  <td>${person.applicant_number ?? "N/A"}</td>
-                  <td>${person.last_name}, ${person.first_name} ${person.middle_name ?? ""} ${person.extension ?? ""}</td>
-                  <td>${curriculumOptions.find(
+        <tbody>
+  ${filteredPersons.map(person => `
+    <tr>
+      <td>${person.applicant_number ?? "N/A"}</td>
+      <td>${person.last_name}, ${person.first_name} ${person.middle_name ?? ""} ${person.extension ?? ""}</td>
+      <td>${curriculumOptions.find(
             item => item.curriculum_id?.toString() === person.program?.toString()
-        )?.program_code ?? "N/A"
+        )?.program_code ?? "N/A"}</td>
+      <td>${person.generalAverage1 ?? ""}</td>
+      <td>${new Date(person.created_at).toLocaleDateString("en-PH")}</td>
+      <td>${person.registrar_status === 1
+                ? "ENROLLED"
+                : person.registrar_status === 0
+                    ? "UNENROLLED"
+                    : ""
             }</td>
-                  <td>${person.generalAverage1 ?? ""}</td>
-                  <td>${new Date(person.created_at).toLocaleDateString("en-PH")}</td>
-                  <td>${person.registrar_status ?? ""}</td>
-                </tr>
-              `).join("")}
-            </tbody>
+    </tr>
+  `).join("")}
+</tbody>
+
           </table>
 
         </div>
@@ -886,9 +937,9 @@ const ApplicantList = () => {
                                     <MenuItem value="">Select status</MenuItem>
                                     <MenuItem value="Enrolled">Enrolled</MenuItem>
                                     <MenuItem value="Unenrolled">Unenrolled</MenuItem>
-
                                 </Select>
                             </FormControl>
+
                         </Box>
                     </Box>
 
@@ -1037,37 +1088,63 @@ const ApplicantList = () => {
                     </TableHead>
                     <TableBody>
                         {currentPersons.map((person, index) => (
-                            <TableRow key={person.upload_id}>
-                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", borderLeft: "2px solid maroon", py: 0.5, fontSize: "12px" }}>
+                            <TableRow key={person.person_id}>
+                                <TableCell
+                                    sx={{
+                                        color: "black",
+                                        textAlign: "center",
+                                        border: "1px solid maroon",
+                                        borderLeft: "2px solid maroon",
+                                        py: 0.5,
+                                        fontSize: "12px",
+                                    }}
+                                >
                                     {index + 1}
                                 </TableCell>
                                 <TableCell sx={{ textAlign: "center", border: "1px solid maroon", py: 0.5 }}>
-                                    <input
-                                        type="checkbox"
-                                        disabled
+                                    <Checkbox
                                         checked={person.submitted_documents === 1}
-                                        style={{ transform: "scale(1.2)", cursor: "default" }}
+                                        onChange={(e) =>
+                                            handleSubmittedDocumentsChange(person.upload_id, e.target.checked)
+                                        }
+                                        sx={{
+                                            color: "maroon",
+                                            "&.Mui-checked": { color: "maroon" },
+                                            transform: "scale(1.1)",
+                                            p: 0,
+                                        }}
                                     />
                                 </TableCell>
                                 <TableCell
-                                    sx={{ color: "blue", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px", cursor: "pointer" }}
+                                    sx={{
+                                        color: "blue",
+                                        textAlign: "center",
+                                        border: "1px solid maroon",
+                                        py: 0.5,
+                                        fontSize: "12px",
+                                        cursor: "pointer",
+                                    }}
                                     onClick={() => navigate(`/admin_dashboard1?person_id=${person.person_id}`)}
-
                                 >
                                     {person.applicant_number ?? "N/A"}
                                 </TableCell>
                                 <TableCell
-                                    sx={{ color: "blue", textAlign: "left", border: "1px solid maroon", py: 0.5, fontSize: "12px", cursor: "pointer" }}
+                                    sx={{
+                                        color: "blue",
+                                        textAlign: "left",
+                                        border: "1px solid maroon",
+                                        py: 0.5,
+                                        fontSize: "12px",
+                                        cursor: "pointer",
+                                    }}
                                     onClick={() => navigate(`/admin_dashboard1?person_id=${person.person_id}`)}
                                 >
                                     {`${person.last_name}, ${person.first_name} ${person.middle_name ?? ""} ${person.extension ?? ""}`}
                                 </TableCell>
                                 <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px" }}>
-                                    {
-                                        curriculumOptions.find(
-                                            (item) => item.curriculum_id?.toString() === person.program?.toString()
-                                        )?.program_code ?? "N/A"
-                                    }
+                                    {curriculumOptions.find(
+                                        (item) => item.curriculum_id?.toString() === person.program?.toString()
+                                    )?.program_code ?? "N/A"}
                                 </TableCell>
                                 <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px" }}>
                                     {person.generalAverage1}
@@ -1081,35 +1158,87 @@ const ApplicantList = () => {
                                         textAlign: "center",
                                         border: "1px solid maroon",
                                         py: 0.5,
-                                        fontSize: "12px"
+                                        fontSize: "12px",
                                     }}
                                 >
                                     {person.last_updated
                                         ? new Date(person.last_updated).toLocaleDateString("en-PH", {
                                             year: "numeric",
                                             month: "2-digit",
-                                            day: "2-digit"
+                                            day: "2-digit",
                                         })
                                         : ""}
                                 </TableCell>
-
+                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px" }}>
+                                    {person.document_status || "N/A"}
+                                </TableCell>
                                 <TableCell
                                     sx={{
-                                        color: "black",
                                         textAlign: "center",
                                         border: "1px solid maroon",
+                                        borderRight: "2px solid maroon",
                                         py: 0.5,
                                         fontSize: "12px",
                                     }}
                                 >
-                                    {person.document_status || "N/A"}
-                                </TableCell>
-                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", borderRight: "2px solid maroon", py: 0.5, fontSize: "12px" }}>
-                                    {person.registrar_status}
+                                    {person.registrar_status === 1 ? (
+                                        <Box
+                                            sx={{
+                                                backgroundColor: "#4CAF50",
+                                                color: "white",
+                                                borderRadius: 1,
+                                                width: 140,
+                                                height: 40,
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                margin: "0 auto",
+                                            }}
+                                        >
+                                            <Typography sx={{ fontWeight: "bold" }}>ENROLLED</Typography>
+                                        </Box>
+                                    ) : person.registrar_status === 0 ? (
+                                        <Box
+                                            sx={{
+                                                backgroundColor: "#F44336",
+                                                color: "white",
+                                                borderRadius: 1,
+                                                width: 140,
+                                                height: 40,
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                margin: "0 auto",
+                                            }}
+                                        >
+                                            <Typography sx={{ fontWeight: "bold" }}>UNENROLLED</Typography>
+                                        </Box>
+                                    ) : (
+                                        <Box display="flex" justifyContent="center" gap={1}>
+                                            <Button
+                                                key={`enrolled-${person.person_id}`}
+                                                variant="contained"
+                                                onClick={() => handleRegistrarStatusChange(person.person_id, 1)}
+                                                sx={{ backgroundColor: "green", color: "white" }}
+                                            >
+                                                ENROLLED
+                                            </Button>
+                                            <Button
+                                                key={`unenrolled-${person.person_id}`}
+                                                variant="contained"
+                                                onClick={() => handleRegistrarStatusChange(person.person_id, 0)}
+                                                sx={{ backgroundColor: "red", color: "white" }}
+                                            >
+                                                UNENROLLED
+                                            </Button>
+                                        </Box>
+                                    )}
                                 </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
+
+
                 </Table>
             </TableContainer>
 

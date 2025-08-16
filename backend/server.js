@@ -680,6 +680,54 @@ app.put("/uploads/remarks/:upload_id", async (req, res) => {
   }
 });
 
+// ✅ Manual override registrar_status by person_id
+app.put("/api/registrar-status/:person_id", async (req, res) => {
+  const { person_id } = req.params;
+  const { registrar_status } = req.body;
+
+  try {
+    const [result] = await db.query(
+      "UPDATE admission.requirement_uploads SET registrar_status = ? WHERE person_id = ?",
+      [registrar_status, person_id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Applicant not found" });
+    }
+
+    res.json({ message: "✅ Registrar status manually updated", registrar_status });
+  } catch (error) {
+    console.error("❌ Error updating registrar_status:", error);
+    res.status(500).json({ error: "Failed to update registrar_status" });
+  }
+});
+
+// ✅ Update submitted_documents by upload_id
+// ✅ Update submitted_documents + registrar_status by upload_id
+app.put("/api/submitted-documents/:upload_id", async (req, res) => {
+  const { upload_id } = req.params;
+  const { submitted_documents, registrar_status } = req.body;
+
+  try {
+    const [result] = await db.query(
+      "UPDATE requirement_uploads SET submitted_documents = ?, registrar_status = ? WHERE upload_id = ?",
+      [submitted_documents, registrar_status, upload_id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Upload not found" });
+    }
+
+    res.json({ message: "Submitted documents + registrar status updated successfully" });
+  } catch (error) {
+    console.error("Error updating submitted_documents:", error);
+    res.status(500).json({ error: "Failed to update submitted_documents" });
+  }
+});
+
+
+
+
 app.put("/uploads/document-status/:upload_id", async (req, res) => {
   const { upload_id } = req.params;
   const { document_status } = req.body;
@@ -872,8 +920,6 @@ app.get("/api/notifications", async (req, res) => {
 
 
 // -------------------------------------------- GET APPLICANT ADMISSION DATA ------------------------------------------------//
-
-// GET ALL APPLICANTS WITH APPLICANT NUMBER + DOCUMENT STATUS
 // GET ALL APPLICANTS WITH APPLICANT NUMBER + DOCUMENT STATUS + LAST UPDATED
 app.get("/api/all-applicants", async (req, res) => {
   try {
@@ -886,7 +932,9 @@ app.get("/api/all-applicants", async (req, res) => {
         yt.year_description,
         sy.semester_id, 
         sy.astatus,
+        ru.upload_id,              -- ✅ Add this
         ru.document_status,
+        ru.submitted_documents,
         ru.registrar_status,
         ru.created_at AS last_updated
       FROM admission.person_table AS p
@@ -917,6 +965,7 @@ app.get("/api/all-applicants", async (req, res) => {
     res.status(500).send("Server error");
   }
 });
+
 
 // GET ONLY APPLICANTS WITH AN APPLICANT NUMBER
 app.get("/api/applicants-with-number", async (req, res) => {
@@ -1624,7 +1673,7 @@ app.post("/login", async (req, res) => {
     const token = webtoken.sign(
       { person_id: user.person_id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "24h" }
     );
 
     res.json({
@@ -1639,7 +1688,7 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ message: "Server error during login" });
   }
 });
-
+  
 
 
 // Applicant Change Password 
@@ -2128,7 +2177,7 @@ app.post("/login_applicant", async (req, res) => {
     const token = webtoken.sign(
       { person_id: user.person_id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "24h" }
     );
 
     res.json({

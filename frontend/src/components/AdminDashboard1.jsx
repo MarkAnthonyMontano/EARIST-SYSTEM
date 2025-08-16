@@ -637,52 +637,60 @@ const AdminDashboard1 = () => {
 
       <Box sx={{ display: "flex", width: "100%" }}>
         {/* Left side: Notice */}
-        <Box sx={{ width: "100%", padding: "10px" }}>
+           <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          mt: 2,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            p: 2,
+            borderRadius: "10px",
+            backgroundColor: "#fffaf5",
+            border: "1px solid #6D2323",
+            boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
+            whiteSpace: "nowrap", // Prevent text wrapping
+          }}
+        >
+          {/* Icon */}
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: 2,
-              p: 2,
-              borderRadius: "10px",
-              backgroundColor: "#fffaf5",
-              border: "1px solid #6D2323",
-              boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
-              whiteSpace: "nowrap", // Keep all in one row
+              justifyContent: "center",
+              backgroundColor: "#6D2323",
+              borderRadius: "8px",
+              width: 50,
+              height: 50,
+              flexShrink: 0,
             }}
           >
-            {/* Icon */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: "#6D2323",
-                borderRadius: "8px",
-                width: 40,
-                height: 40,
-                flexShrink: 0,
-              }}
-            >
-              <ErrorIcon sx={{ color: "white", fontSize: 28 }} />
-            </Box>
-
-            {/* Notice Text */}
-            <Typography
-              sx={{
-                fontSize: "15px",
-                fontFamily: "Arial",
-                color: "#3e3e3e",
-              }}
-            >
-              <strong style={{ color: "maroon" }}>Notice:</strong> &nbsp;
-              <strong>1.</strong> Kindly type <strong>'NA'</strong> in boxes where there are no possible answers to the information being requested. &nbsp; | &nbsp;
-              <strong>2.</strong> To use the letter <strong>'Ñ'</strong>, press <kbd>ALT</kbd> + <kbd>165</kbd>; for <strong>'ñ'</strong>, press <kbd>ALT</kbd> + <kbd>164</kbd>. &nbsp; | &nbsp;
-              <strong>3.</strong> This is the list of all printable files.
-            </Typography>
+            <ErrorIcon sx={{ color: "white", fontSize: 40 }} />
           </Box>
-        </Box>
 
+          {/* Text */}
+          <Typography
+            sx={{
+              fontSize: "15px",
+              fontFamily: "Arial",
+              color: "#3e3e3e",
+            }}
+          >
+            <strong style={{ color: "maroon" }}>Notice:</strong> &nbsp;
+         
+            <strong>1.</strong> Kindly type <strong>'NA'</strong> in boxes where there are no possible answers to the information being requested. &nbsp; | &nbsp;
+            <strong>2.</strong> To use the letter <strong>'Ñ'</strong>, press <kbd>ALT</kbd> + <kbd>165</kbd>; for <strong>'ñ'</strong>, press <kbd>ALT</kbd> + <kbd>164</kbd>. &nbsp; | &nbsp;
+            <strong>3.</strong> List of all printable files
+          </Typography>
+        </Box>
+      </Box>
 
       </Box>
 
