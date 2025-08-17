@@ -11,6 +11,8 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
+  Paper,
   TableHead,
   TableRow,
   Avatar,
@@ -78,6 +80,10 @@ const RegisterProf = () => {
   const [selectedDepartmentFilter, setSelectedDepartmentFilter] = useState("");
 
 
+  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [sortOrder, setSortOrder] = useState("");
+
+
   const filteredProfessors = professors
     .filter((p) => {
       const fullText = `${p.fname || ""} ${p.mname || ""} ${p.lname || ""} ${p.email || ""}`.toLowerCase();
@@ -89,11 +95,13 @@ const RegisterProf = () => {
     .sort((a, b) => {
       const nameA = `${a.fname} ${a.lname}`.toLowerCase();
       const nameB = `${b.fname} ${b.lname}`.toLowerCase();
-      return sortAsc ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+
+      if (sortOrder === "asc") return nameA.localeCompare(nameB);
+      if (sortOrder === "desc") return nameB.localeCompare(nameA);
+      return 0; // no sorting if not selected
     });
 
 
-  const itemsPerPage = 20;
   const totalPages = Math.ceil(filteredProfessors.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -111,6 +119,7 @@ const RegisterProf = () => {
   for (let i = startPage; i <= endPage; i++) {
     visiblePages.push(i);
   }
+
 
 
   const handleExportCSV = () => {
@@ -223,276 +232,542 @@ const RegisterProf = () => {
 
   return (
     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", pr: 1 }}>
-      <div style={{ height: "30px" }}></div>
-      <Typography variant="h4" color="maroon" fontWeight="bold" gutterBottom>
-        Professor Account's
-      </Typography>
+      <div style={{ height: "10px" }}></div>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        {/* Left: Header */}
+        <Typography variant="h4" fontWeight="bold" color="maroon">
+          Professor Account's
+        </Typography>
 
-      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", mb: 2 }}>
-        <form autoComplete="off">
-          <TextField
-            variant="outlined"
-            placeholder="Search by name or email"
-            size="small"
-            style={{ width: "400px" }}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value.toLowerCase())}
-            autoComplete="off"
-            InputProps={{
-              startAdornment: <Search sx={{ mr: 1 }} />,
-            }}
-          />
-        </form>
-
-        <Box sx={{ display: "flex", gap: 2 }}>
-          <Button
-            startIcon={<Add />}
-            variant="contained"
-            onClick={() => {
-              setEditData(null);
-              setForm({
-                person_id: "",
-                fname: "",
-                mname: "",
-                lname: "",
-                email: "",
-                password: "",
-                role: "faculty",
-                dprtmnt_id: "",
-                profileImage: null,
-              });
-              setOpenDialog(true);
-            }}
-            sx={{ backgroundColor: "maroon", color: "white", textTransform: "none" }}
-          >
-            Add Professor
-          </Button>
-          <FormControl sx={{ minWidth: 300, mr: 2 }} size="small">
-            <InputLabel id="filter-department-label">Filter by Department</InputLabel>
-            <Select
-              labelId="filter-department-label"
-              value={selectedDepartmentFilter}
-              onChange={(e) => setSelectedDepartmentFilter(e.target.value)}
-              label="Filter by Department"
-            >
-              <MenuItem value="">All Departments</MenuItem>
-              {department.map((dep) => (
-                <MenuItem key={dep.dprtmnt_id} value={dep.dprtmnt_name}>
-                  {dep.dprtmnt_name} ({dep.dprtmnt_code})
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-
-          <Button
-            variant="outlined"
-            startIcon={<SortByAlpha />}
-            onClick={() => setSortAsc(!sortAsc)}
-            sx={{ borderColor: "maroon", color: "maroon" }}
-          >
-            Sort {sortAsc ? "Z–A" : "A–Z"}
-          </Button>
-
-          <Button
-            variant="outlined"
-            startIcon={<FileDownload />}
-            onClick={handleExportCSV}
-            sx={{ borderColor: "maroon", color: "maroon" }}
-          >
-            Export CSV
-          </Button>
-        </Box>
+        {/* Right: Search */}
+        <TextField
+          variant="outlined"
+          placeholder="Search by name or email"
+          size="small"
+          style={{ width: '400px', marginRight: "25px" }}
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value.toLowerCase());
+            setCurrentPage(1); // reset to page 1 when searching
+          }}
+          InputProps={{
+            startAdornment: <Search sx={{ mr: 1 }} />,
+          }}
+        />
       </Box>
 
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>EMPLOYEE ID</TableCell>
-            <TableCell>Image</TableCell>
-            <TableCell>Full Name</TableCell>
-            <TableCell>Email</TableCell>
-            <TableCell>Department</TableCell>
-            <TableCell>Position</TableCell>
-            <TableCell>Status</TableCell>
-            <TableCell>Actions</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
+      <hr style={{ border: "1px solid #ccc", width: "100%" }} />
 
-          {currentProfessors.map((prof) => (
-            <TableRow key={prof.prof_id}>
-              <TableCell>{prof.person_id ?? "N/A"}</TableCell>
-              <TableCell>
-                <Avatar
-                  src={
-                    prof.profile_image
-                      ? `http://localhost:5000/uploads/${prof.profile_image}`
-                      : undefined
-                  }
-                  alt={prof.fname}
-                  sx={{ width: 60, height: 60, borderRadius: 1 }}
-                >
-                  {prof.fname?.[0]}
-                </Avatar>
-              </TableCell>
-              <TableCell>{`${prof.fname} ${prof.mname || ""} ${prof.lname}`}</TableCell>
-              <TableCell>{prof.email}</TableCell>
-              <TableCell>{prof.dprtmnt_name} ({prof.dprtmnt_code})</TableCell>
-              <TableCell>{prof.role}</TableCell>
-              <TableCell>
-                <Button
-                  onClick={() => handleToggleStatus(prof.prof_id, prof.status)}
+
+      <br />
+
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", mb: 2 }}>
+
+
+        <TableContainer component={Paper} sx={{ width: '100%' }}>
+          <Table size="small">
+            <TableHead sx={{ backgroundColor: '#6D2323', color: "white" }}>
+              <TableRow>
+                <TableCell
+                  colSpan={10}
                   sx={{
-                    backgroundColor: prof.status === 1 ? "green" : "maroon",
-                    color: "white",
-                    textTransform: "none",
+                    border: "2px solid maroon",
+                    py: 0.5,
+                    backgroundColor: '#6D2323',
+                    color: "white"
                   }}
-                  variant="contained"
                 >
-                  {prof.status === 1 ? "Active" : "Inactive"}
-                </Button>
+                  <Box display="flex" justifyContent="space-between" alignItems="center" >
+                    {/* Left: Applicant List Count */}
+                    <Typography fontSize="14px" fontWeight="bold" color="white" >
+                      Professor's List:
+                    </Typography>
+
+                    {/* Right: Pagination Controls */}
+                    <Box display="flex" alignItems="center" gap={1}>
+                      {/* First & Prev */}
+                      <Button
+                        onClick={() => setCurrentPage(1)}
+                        disabled={currentPage === 1}
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                          minWidth: 80,
+                          color: "white",
+                          borderColor: "white",
+                          backgroundColor: "transparent",
+                          '&:hover': {
+                            borderColor: 'white',
+                            backgroundColor: 'rgba(255,255,255,0.1)',
+                          },
+                          '&.Mui-disabled': {
+                            color: "white",
+                            borderColor: "white",
+                            backgroundColor: "transparent",
+                            opacity: 1,
+                          },
+                        }}
+                      >
+                        First
+                      </Button>
+
+                      <Button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                          minWidth: 80,
+                          color: "white",
+                          borderColor: "white",
+                          backgroundColor: "transparent",
+                          '&:hover': {
+                            borderColor: 'white',
+                            backgroundColor: 'rgba(255,255,255,0.1)',
+                          },
+                          '&.Mui-disabled': {
+                            color: "white",
+                            borderColor: "white",
+                            backgroundColor: "transparent",
+                            opacity: 1,
+                          },
+                        }}
+                      >
+                        Prev
+                      </Button>
+
+                      {/* Page Dropdown */}
+                      <FormControl size="small" sx={{ minWidth: 80 }}>
+                        <Select
+                          value={currentPage}
+                          onChange={(e) => setCurrentPage(Number(e.target.value))}
+                          displayEmpty
+                          sx={{
+                            fontSize: '12px',
+                            height: 36,
+                            color: 'white',
+                            border: '1px solid white',
+                            backgroundColor: 'transparent',
+                            '.MuiOutlinedInput-notchedOutline': {
+                              borderColor: 'white',
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                              borderColor: 'white',
+                            },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                              borderColor: 'white',
+                            },
+                            '& svg': {
+                              color: 'white',
+                            }
+                          }}
+                          MenuProps={{
+                            PaperProps: {
+                              sx: {
+                                maxHeight: 200,
+                                backgroundColor: '#fff',
+                              }
+                            }
+                          }}
+                        >
+                          {Array.from({ length: totalPages }, (_, i) => (
+                            <MenuItem key={i + 1} value={i + 1}>
+                              Page {i + 1}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+
+                      <Typography fontSize="11px" color="white">
+                        of {totalPages} page{totalPages > 1 ? 's' : ''}
+                      </Typography>
+
+                      {/* Next & Last */}
+                      <Button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                          minWidth: 80,
+                          color: "white",
+                          borderColor: "white",
+                          backgroundColor: "transparent",
+                          '&:hover': {
+                            borderColor: 'white',
+                            backgroundColor: 'rgba(255,255,255,0.1)',
+                          },
+                          '&.Mui-disabled': {
+                            color: "white",
+                            borderColor: "white",
+                            backgroundColor: "transparent",
+                            opacity: 1,
+                          },
+                        }}
+                      >
+                        Next
+                      </Button>
+
+                      <Button
+                        onClick={() => setCurrentPage(totalPages)}
+                        disabled={currentPage === totalPages}
+                        variant="outlined"
+                        size="small"
+                        sx={{
+                          minWidth: 80,
+                          color: "white",
+                          borderColor: "white",
+                          backgroundColor: "transparent",
+                          '&:hover': {
+                            borderColor: 'white',
+                            backgroundColor: 'rgba(255,255,255,0.1)',
+                          },
+                          '&.Mui-disabled': {
+                            color: "white",
+                            borderColor: "white",
+                            backgroundColor: "transparent",
+                            opacity: 1,
+                          },
+                        }}
+                      >
+                        Last
+                      </Button>
+                    </Box>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+          </Table>
+        </TableContainer>
+
+        <TableContainer
+          component={Paper}
+          sx={{
+            width: "100%",
+            border: "2px solid #800000",
+            mb: -2,
+          }}
+        >
+          <Table>
+            <TableBody>
+              <TableRow>
+                <TableCell>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between", // left vs right
+                      alignItems: "center",
+                      flexWrap: "wrap",
+                      gap: 2,
+                    }}
+                  >
+                    {/* Left: Add Professor */}
+                    <Button
+                      startIcon={<Add />}
+                      variant="contained"
+                      onClick={() => {
+                        setEditData(null);
+                        setForm({
+                          person_id: "",
+                          fname: "",
+                          mname: "",
+                          lname: "",
+                          email: "",
+                          password: "",
+                          role: "faculty",
+                          dprtmnt_id: "",
+                          profileImage: null,
+                        });
+                        setOpenDialog(true);
+                      }}
+                      sx={{
+                        backgroundColor: "#800000",
+                        color: "white",
+                        textTransform: "none",
+                        fontWeight: "bold",
+                        width: "350px",
+                        "&:hover": { backgroundColor: "#6D2323" },
+                      }}
+                    >
+                      Add Professor
+                    </Button>
+
+                    {/* Right: Filter, Sort, Export */}
+                    <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+                      {/* Department Filter */}
+                      <FormControl sx={{ width: "350px" }} size="small">
+                        <InputLabel id="filter-department-label">
+                          Filter by Department
+                        </InputLabel>
+                        <Select
+                          labelId="filter-department-label"
+                          value={selectedDepartmentFilter}
+                          onChange={(e) => setSelectedDepartmentFilter(e.target.value)}
+                          label="Filter by Department"
+                        >
+                          <MenuItem value="">All Departments</MenuItem>
+                          {department.map((dep) => (
+                            <MenuItem key={dep.dprtmnt_id} value={dep.dprtmnt_name}>
+                            {dep.dprtmnt_name} ({dep.dprtmnt_code})
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+
+                      <FormControl size="small" sx={{ width: "200px" }}>
+                        <Select
+                          value={sortOrder}
+                          onChange={(e) => setSortOrder(e.target.value)}
+                          displayEmpty
+                        >
+                          <MenuItem value="">Select Order</MenuItem>
+                          <MenuItem value="asc">Ascending</MenuItem>
+                          <MenuItem value="desc">Descending</MenuItem>
+                        </Select>
+                      </FormControl>
+
+
+                      {/* Export */}
+                      <Button
+                        variant="outlined"
+                        startIcon={<FileDownload />}
+                        onClick={handleExportCSV}
+                        sx={{
+                          borderColor: "#800000",
+                          color: "#800000",
+                          textTransform: "none",
+                          fontWeight: "bold",
+                          "&:hover": { borderColor: "#a52a2a", color: "#a52a2a" },
+                        }}
+                      >
+                        Export CSV
+                      </Button>
+                    </Box>
+                  </Box>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+
+      </Box>
+      <TableContainer component={Paper} sx={{ width: "100%", border: "2px solid maroon" }}>
+        <Table>
+          <TableHead sx={{ backgroundColor: "#6D2323" }}>
+            <TableRow>
+              <TableCell
+                sx={{
+                  color: "white",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  border: "1px solid maroon",
+                  borderLeft: "2px solid maroon",
+                }}
+              >
+                EMPLOYEE ID
               </TableCell>
-              <TableCell>
-                <Button
-                  onClick={() => handleEdit(prof)}
-                  sx={{
-                    backgroundColor: "#FEF9E1",
-                    color: "maroon",
-                    textTransform: "none",
-                    fontWeight: "bold",
-                    "&:hover": { backgroundColor: "#f5f1cf" },
-                  }}
-                  variant="contained"
-                >
-                  EDIT
-                </Button>
+              <TableCell
+                sx={{
+                  color: "white",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  border: "1px solid maroon",
+                }}
+              >
+                Image
+              </TableCell>
+              <TableCell
+                sx={{
+                  color: "white",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  border: "1px solid maroon",
+                }}
+              >
+                Full Name
+              </TableCell>
+              <TableCell
+                sx={{
+                  color: "white",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  border: "1px solid maroon",
+                }}
+              >
+                Email
+              </TableCell>
+              <TableCell
+                sx={{
+                  color: "white",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  border: "1px solid maroon",
+                }}
+              >
+                Department
+              </TableCell>
+              <TableCell
+                sx={{
+                  color: "white",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  border: "1px solid maroon",
+                }}
+              >
+                Position
+              </TableCell>
+              <TableCell
+                sx={{
+                  color: "white",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  border: "1px solid maroon",
+                }}
+              >
+                Status
+              </TableCell>
+              <TableCell
+                sx={{
+                  color: "white",
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  border: "1px solid maroon",
+                  borderRight: "2px solid maroon",
+                }}
+              >
+                Actions
               </TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHead>
 
-      {/* Dialog */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth>
+          <TableBody>
+
+
+            {currentProfessors.map((prof) => (
+              <TableRow key={prof.prof_id}>
+                <TableCell sx={{ border: "1px solid maroon", borderLeft: "2px solid maroon" }}>{prof.person_id ?? "N/A"}</TableCell>
+                <TableCell sx={{ border: "1px solid maroon" }}>
+                  <Avatar
+                    src={
+                      prof.profile_image
+                        ? `http://localhost:5000/uploads/${prof.profile_image}`
+                        : undefined
+                    }
+                    alt={prof.fname}
+                    sx={{ width: 60, height: 60 }}
+                  >
+                    {prof.fname?.[0]}
+                  </Avatar>
+                </TableCell>
+                <TableCell sx={{ border: "1px solid maroon" }}>{`${prof.fname} ${prof.mname || ""} ${prof.lname}`}</TableCell>
+                <TableCell sx={{ border: "1px solid maroon" }}>{prof.email}</TableCell>
+                <TableCell sx={{ border: "1px solid maroon" }}>{prof.dprtmnt_name} ({prof.dprtmnt_code})</TableCell>
+                <TableCell sx={{ border: "1px solid maroon" }}>{prof.role}</TableCell>
+                <TableCell sx={{ border: "1px solid maroon" }}>
+                  <Button
+                    onClick={() => handleToggleStatus(prof.prof_id, prof.status)}
+                    sx={{
+                      backgroundColor: prof.status === 1 ? "green" : "maroon",
+                      color: "white",
+                      textTransform: "none",
+                    }}
+                    variant="contained"
+                  >
+                    {prof.status === 1 ? "Active" : "Inactive"}
+                  </Button>
+                </TableCell>
+                <TableCell sx={{ border: "1px solid maroon", borderRight: "2px solid maroon" }}>
+                  <Button
+                    onClick={() => handleEdit(prof)}
+                    sx={{
+                      backgroundColor: "#FEF9E1",
+                      color: "maroon",
+                      textTransform: "none",
+                      fontWeight: "bold",
+                      "&:hover": { backgroundColor: "#f5f1cf" },
+                    }}
+                    variant="contained"
+                  >
+                    EDIT
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <Dialog open={openDialog} onClose={handleCloseDialog} fullWidth maxWidth="lg">
         <DialogTitle sx={{ color: "maroon" }}>
           {editData ? "Edit Professor" : "Add New Professor"}
         </DialogTitle>
         <hr style={{ border: "1px solid #ccc", width: "100%" }} />
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}>
-          {editData?.profile_image && (
-            <Box sx={{ textAlign: "center" }}>
-              <Typography variant="subtitle2">Current Profile Image</Typography>
-              <Avatar
-                src={`http://localhost:5000/uploads/${editData.profile_image}`}
-                sx={{ width: 100, height: 100, mx: "auto", mb: 2 }}
+
+        {/* Two-column layout */}
+        <DialogContent sx={{ display: "flex", gap: 3, mt: 2 }}>
+          {/* LEFT: Register Account Form */}
+          <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 2 }}>
+            {editData?.profile_image && (
+              <Box sx={{ textAlign: "center" }}>
+                <Typography variant="subtitle2">Current Profile Image</Typography>
+                <Avatar
+                  src={`http://localhost:5000/uploads/${editData.profile_image}`}
+                  sx={{ width: 100, height: 100, mx: "auto", mb: 2 }}
+                />
+              </Box>
+            )}
+            <TextField label="Person ID" name="person_id" value={form.person_id} onChange={handleChange} />
+            <TextField label="First Name" name="fname" value={form.fname} onChange={handleChange} required />
+            <TextField label="Middle Name" name="mname" value={form.mname} onChange={handleChange} />
+            <TextField label="Last Name" name="lname" value={form.lname} onChange={handleChange} required />
+            <TextField label="Email" name="email" value={form.email} onChange={handleChange} required />
+            {!editData && (
+              <TextField
+                label="Password"
+                name="password"
+                type="password"
+                value={form.password}
+                onChange={handleChange}
+                required
               />
-            </Box>
-          )}
-          <TextField label="Person ID" name="person_id" value={form.person_id} onChange={handleChange} />
-          <TextField label="First Name" name="fname" value={form.fname} onChange={handleChange} required />
-          <TextField label="Middle Name" name="mname" value={form.mname} onChange={handleChange} />
-          <TextField label="Last Name" name="lname" value={form.lname} onChange={handleChange} required />
-          <TextField label="Email" name="email" value={form.email} onChange={handleChange} required />
-          {!editData && (
-            <TextField
-              label="Password"
-              name="password"
-              type="password"
-              value={form.password}
-              onChange={handleChange}
-              required
-            />
-          )}
-          <FormControl fullWidth>
-            <InputLabel id="department-label">Department</InputLabel>
-            <Select
-              labelId="department-label"
-              name="dprtmnt_id"
-              value={form.dprtmnt_id || ""}
-              label="Department"
-              onChange={handleSelect}
-            >
-              {department.map((dep) => (
-                <MenuItem key={dep.dprtmnt_id} value={dep.dprtmnt_id}>
-                  {dep.dprtmnt_name} ({dep.dprtmnt_code})
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <input type="file" name="profileImage" accept="image/*" onChange={handleChange} />
+            )}
+            <FormControl fullWidth>
+              <InputLabel id="department-label">Department</InputLabel>
+              <Select
+                labelId="department-label"
+                name="dprtmnt_id"
+                value={form.dprtmnt_id || ""}
+                label="Department"
+                onChange={handleSelect}
+              >
+                {department.map((dep) => (
+                  <MenuItem key={dep.dprtmnt_id} value={dep.dprtmnt_id}>
+                    {dep.dprtmnt_name} ({dep.dprtmnt_code})
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <input type="file" name="profileImage" accept="image/*" onChange={handleChange} />
+          </Box>
+
+
         </DialogContent>
+
         <DialogActions>
           <Button onClick={handleCloseDialog}>Cancel</Button>
           <Button
             variant="contained"
             onClick={handleSubmit}
             disabled={
-              !form.fname || !form.lname || !form.email || (!editData && (!form.password || !form.profileImage || !form.person_id))
+              !form.fname || !form.lname || !form.email ||
+              (!editData && (!form.password || !form.profileImage || !form.person_id))
             }
           >
             {editData ? "Update" : "Register"}
           </Button>
         </DialogActions>
       </Dialog>
-      <Box sx={{ display: "flex", justifyContent: "right", mt: 3, flexWrap: "wrap", gap: 1 }}>
-        {/* When on Page 2 or higher, show First & Prev */}
-        {currentPage >= 2 && (
-          <>
-            <Button
-              onClick={() => setCurrentPage(1)}
-              variant="outlined"
-              sx={{ borderColor: "maroon", color: "maroon" }}
-            >
-              First
-            </Button>
-
-            <Button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              variant="outlined"
-              sx={{ borderColor: "maroon", color: "maroon" }}
-            >
-              Prev
-            </Button>
-          </>
-        )}
-
-        {/* Always show Page 1 and 2 */}
-        {visiblePages.map((num) => (
-          <Button
-            key={num}
-            onClick={() => setCurrentPage(num)}
-            variant={currentPage === num ? "contained" : "outlined"}
-            sx={{
-              backgroundColor: currentPage === num ? "maroon" : "transparent",
-              color: currentPage === num ? "white" : "maroon",
-              borderColor: "maroon",
-              minWidth: "36px",
-            }}
-          >
-            {num}
-          </Button>
-        ))}
-
-        {/* Always show Next and Last */}
-        <Button
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-          variant="outlined"
-          sx={{ borderColor: "maroon", color: "maroon" }}
-        >
-          Next
-        </Button>
-
-        <Button
-          onClick={() => setCurrentPage(totalPages)}
-          disabled={currentPage === totalPages}
-          variant="outlined"
-          sx={{ borderColor: "maroon", color: "maroon" }}
-        >
-          Last
-        </Button>
-      </Box>
 
 
     </Box>

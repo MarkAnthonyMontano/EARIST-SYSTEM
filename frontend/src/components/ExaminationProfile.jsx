@@ -42,7 +42,7 @@ const ExaminationProfile = () => {
             setUserID(storedID);
 
             if (storedRole === "registrar") {
-                fetchApplicantNumber(storedID);  // ✅ safe to fetch here
+             
             } else {
                 window.location.href = "/login";
             }
@@ -52,17 +52,6 @@ const ExaminationProfile = () => {
         }
     }, []);
 
-    const fetchApplicantNumber = async (applicant_number) => {
-        if (!applicant_number) return;
-        try {
-            const res = await axios.get(`http://localhost:5000/uploads/by-applicant/${applicant_number}`);
-
-        } catch (err) {
-            console.error('Fetch uploads failed:', err);
-            console.log("Fetching for applicant number:", applicant_number);
-
-        }
-    };
 
 
 
@@ -303,7 +292,7 @@ const ExaminationProfile = () => {
 
                     <TextField
                         variant="outlined"
-                        placeholder="Search  Applicant ID / Applicant Name / Email "
+                        placeholder="Search Applicant Name / Email / Applicant ID"
                         size="small"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}

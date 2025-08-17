@@ -586,7 +586,7 @@ const ApplicantList = () => {
                         variant="outlined"
                         placeholder="Search Applicant Name / Email / Applicant ID"
                         size="small"
-                        style={{ width: '500px' }}
+                        style={{ width: '450px' }}
                         value={searchQuery}
                         onChange={(e) => {
                             setSearchQuery(e.target.value);
@@ -680,7 +680,7 @@ const ApplicantList = () => {
 
                     {/* Right Side: Campus Dropdown */}
                     <Box display="flex" flexDirection="column" gap={1} sx={{ minWidth: 200 }}>
-                        <Typography fontSize={13} sx={{ mb: 1 }}>Campus:</Typography>
+                        <Typography fontSize={13} >Campus:</Typography>
                         <FormControl size="small" sx={{ width: "200px" }}>
                             <InputLabel id="campus-label">-Campus-</InputLabel>
                             <Select
@@ -947,15 +947,13 @@ const ApplicantList = () => {
                     <Box display="flex" flexDirection="column" gap={2}>
                         <Box display="flex" alignItems="center" gap={1}>
                             <Typography fontSize={13} sx={{ minWidth: "100px" }}>School Year:</Typography>
-                            <FormControl fullWidth>
-                                <InputLabel id="demo-simple-select-label">School Years</InputLabel>
+                            <FormControl size="small" sx={{ width: "200px" }}>
+                                <InputLabel id="school-year-label">School Years</InputLabel>
                                 <Select
-                                    labelId="demo-simple-select-label"
-                                    id="demo-simple-select"
+                                    labelId="school-year-label"
                                     value={selectedSchoolYear}
-                                    label="School Years"
-                                    sx={{ minWidth: '200px' }}
                                     onChange={handleSchoolYearChange}
+                                    displayEmpty
                                 >
                                     {schoolYears.length > 0 ? (
                                         schoolYears.map((sy) => (
@@ -965,23 +963,20 @@ const ApplicantList = () => {
                                         ))
                                     ) : (
                                         <MenuItem disabled>School Year is not found</MenuItem>
-                                    )
-                                    }
+                                    )}
                                 </Select>
                             </FormControl>
                         </Box>
 
                         <Box display="flex" alignItems="center" gap={1}>
                             <Typography fontSize={13} sx={{ minWidth: "100px" }}>Semester:</Typography>
-                            <FormControl fullWidth>
-                                <InputLabel id="demo-simple-select-label">School Semester</InputLabel>
+                            <FormControl size="small" sx={{ width: "200px" }}>
+                                <InputLabel id="semester-label">School Semester</InputLabel>
                                 <Select
-                                    labelId="demo-simple-select-label"
-                                    id="demo-simple-select"
+                                    labelId="semester-label"
                                     value={selectedSchoolSemester}
-                                    label="School Semester"
-                                    sx={{ minWidth: '200px' }}
                                     onChange={handleSchoolSemesterChange}
+                                    displayEmpty
                                 >
                                     {semesters.length > 0 ? (
                                         semesters.map((sem) => (
@@ -991,8 +986,7 @@ const ApplicantList = () => {
                                         ))
                                     ) : (
                                         <MenuItem disabled>School Semester is not found</MenuItem>
-                                    )
-                                    }
+                                    )}
                                 </Select>
                             </FormControl>
                         </Box>
@@ -1008,11 +1002,10 @@ const ApplicantList = () => {
                                     onChange={(e) => {
                                         const selectedDept = e.target.value;
                                         setSelectedDepartmentFilter(selectedDept);
-                                        handleDepartmentChange(selectedDept); // 🔥 This is the missing piece
+                                        handleDepartmentChange(selectedDept);
                                     }}
                                     displayEmpty
                                 >
-
                                     <MenuItem value="">All Departments</MenuItem>
                                     {department.map((dep) => (
                                         <MenuItem key={dep.dprtmnt_id} value={dep.dprtmnt_name}>
@@ -1020,7 +1013,6 @@ const ApplicantList = () => {
                                         </MenuItem>
                                     ))}
                                 </Select>
-
                             </FormControl>
                         </Box>
 
@@ -1052,7 +1044,7 @@ const ApplicantList = () => {
 
             <TableContainer component={Paper} sx={{ width: "100%" }}>
                 <Table size="small">
-                    <TableHead sx={{ backgroundColor: "#6D2323" }}>
+                    <TableHead sx={{ backgroundColor: "#6D2323", }}>
                         <TableRow>
                             <TableCell sx={{ color: "white", textAlign: "center", width: "2%", py: 0.5, fontSize: "12px", border: "1px solid maroon", borderLeft: "2px solid maroon" }}>
                                 #
@@ -1072,13 +1064,13 @@ const ApplicantList = () => {
                             <TableCell sx={{ color: "white", textAlign: "center", width: "6%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
                                 SHS GWA
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "8%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "5%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
                                 Date Applied
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "8%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "5%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
                                 Date Last Updated
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "13%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "16%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
                                 Applicant Status
                             </TableCell>
                             <TableCell sx={{ color: "white", textAlign: "center", width: "8%", py: 0.5, fontSize: "12px", border: "1px solid maroon", borderRight: "2px solid maroon" }}>
@@ -1178,6 +1170,7 @@ const ApplicantList = () => {
                                         border: "1px solid maroon",
                                         borderRight: "2px solid maroon",
                                         py: 0.5,
+
                                         fontSize: "12px",
                                     }}
                                 >
@@ -1187,8 +1180,8 @@ const ApplicantList = () => {
                                                 backgroundColor: "#4CAF50",
                                                 color: "white",
                                                 borderRadius: 1,
-                                                width: 140,
-                                                height: 40,
+                                                width: 120,
+                                                height: 30,
                                                 display: "flex",
                                                 alignItems: "center",
                                                 justifyContent: "center",
@@ -1203,8 +1196,8 @@ const ApplicantList = () => {
                                                 backgroundColor: "#F44336",
                                                 color: "white",
                                                 borderRadius: 1,
-                                                width: 140,
-                                                height: 40,
+                                                width: 120,
+                                                height: 30,
                                                 display: "flex",
                                                 alignItems: "center",
                                                 justifyContent: "center",
@@ -1219,7 +1212,7 @@ const ApplicantList = () => {
                                                 key={`enrolled-${person.person_id}`}
                                                 variant="contained"
                                                 onClick={() => handleRegistrarStatusChange(person.person_id, 1)}
-                                                sx={{ backgroundColor: "green", color: "white" }}
+                                                sx={{ backgroundColor: "green", color: "white", width: 120, height: 30, }}
                                             >
                                                 ENROLLED
                                             </Button>
@@ -1227,7 +1220,7 @@ const ApplicantList = () => {
                                                 key={`unenrolled-${person.person_id}`}
                                                 variant="contained"
                                                 onClick={() => handleRegistrarStatusChange(person.person_id, 0)}
-                                                sx={{ backgroundColor: "red", color: "white" }}
+                                                sx={{ backgroundColor: "red", color: "white", width: 120, height: 30, }}
                                             >
                                                 UNENROLLED
                                             </Button>

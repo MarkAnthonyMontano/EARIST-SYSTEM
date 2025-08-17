@@ -124,7 +124,7 @@ const DepartmentSection = () => {
             >
               <MenuItem value="">Select Curriculum</MenuItem>
               {curriculumList.map((curr) => (
-                <MenuItem key={curr.curriculum_id} value={curr.curriculum_id}>
+                <MenuItem key={`curr-${curr.curriculum_id}`} value={curr.curriculum_id}>
                   {curr.year_description} - {curr.program_description} | {curr.curriculum_id}
                 </MenuItem>
               ))}
@@ -188,8 +188,8 @@ const DepartmentSection = () => {
                 </tr>
               </thead>
               <tbody>
-                {departmentSections.map((section) => (
-                  <tr key={section.id}>
+                {departmentSections.map((section, index) => (
+                  <tr key={`dept-${section.ds_id || section.id || index}`}>
                     <td style={styles.tableCell}>
                       {section.program_code}-{section.year_description}
                     </td>

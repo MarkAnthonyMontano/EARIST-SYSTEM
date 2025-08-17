@@ -188,7 +188,7 @@ const StudentRequirements = () => {
       if (storedRole === "registrar") {
 
         if (storedID !== "undefined") {
-          fetchApplicantNumber(storedID);
+         
         } else {
           console.warn("Stored person_id is invalid:", storedID);
         }
@@ -324,16 +324,6 @@ const handleStatusChange = async (uploadId, remarkValue) => {
 };
 
 
-  const fetchApplicantNumber = async (personID) => {
-    try {
-      const res = await axios.get(`http://localhost:5000/api/applicant_number/${personID}`);
-      if (res.data && res.data.applicant_number) {
-
-      }
-    } catch (error) {
-      console.error("Failed to fetch applicant number:", error);
-    }
-  };
 
 
   const handleUploadSubmit = async () => {
@@ -717,7 +707,7 @@ const handleStatusChange = async (uploadId, remarkValue) => {
             justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
-            mt: 3,
+        
             mb: 2,
             px: 2,
           }}
@@ -735,7 +725,7 @@ const handleStatusChange = async (uploadId, remarkValue) => {
 
           <TextField
             variant="outlined"
-            placeholder="Search  Applicant ID / Applicant Name / Email "
+            placeholder="Search Applicant Name / Email / Applicant ID"
             size="small"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}

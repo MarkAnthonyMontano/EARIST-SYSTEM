@@ -47,13 +47,13 @@ const ProgramPanel = () => {
         textAlign="center"
         gutterBottom
       >
-      Program Panel Form
+        Program Panel Form
       </Typography>
 
       <div style={styles.container}>
         {/* Left: Form */}
         <div style={styles.formSection}>
-   
+
 
           <div style={styles.formGroup}>
             <label htmlFor="program_name" style={styles.label}>
@@ -106,12 +106,13 @@ const ProgramPanel = () => {
               </thead>
               <tbody>
                 {programs.map((prog) => (
-                  <tr key={prog.id}>
+                  <tr key={prog.program_id}>
                     <td style={styles.td}>{prog.program_id}</td>
                     <td style={styles.td}>{prog.program_description}</td>
                     <td style={styles.td}>{prog.program_code}</td>
                   </tr>
                 ))}
+
               </tbody>
             </table>
             {programs.length === 0 && <p>No programs available.</p>}

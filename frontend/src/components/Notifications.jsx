@@ -1,103 +1,70 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
     Box,
-    Button,
     Typography,
-    Paper,
     TextField,
-    TableContainer,
-    Table,
+    Button,
     FormControl,
     Select,
     MenuItem,
-    TableHead,
+    TableContainer,
+    Table,
+    TableBody,
     TableRow,
     TableCell,
-} from '@mui/material';
-import { Search } from '@mui/icons-material';
-import { io } from "socket.io-client";
-import { Snackbar, Alert } from '@mui/material';
+    TableHead,
+    Paper,
+} from "@mui/material";
+import { Search } from "@mui/icons-material";
 
-const socket = io("http://localhost:5000");
-
-const StudentNumbering = () => {
-    const [persons, setPersons] = useState([]);
-    const [selectedPerson, setSelectedPerson] = useState(null);
-    const [assignedNumber, setAssignedNumber] = useState('');
-    const [error, setError] = useState('');
-    const [snack, setSnack] = useState({ open: false, message: '', severity: 'info' });
-
+const Notifications = () => {
+    const [notifications, setNotifications] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 10; // 🔧 adjustable
+    const itemsPerPage = 100;
 
-    // ✅ Filtering persons by search
-    const filteredPersons = persons.filter((p) =>
-        [p.first_name, p.middle_name, p.last_name, p.emailAddress, p.applicant_number]
+    // ✅ Fetch notifications from backend
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await axios.get("http://localhost:5000/api/notifications");
+                setNotifications(res.data);
+            } catch (err) {
+                console.error("❌ Failed to fetch notifications:", err);
+            }
+        };
+        fetchData();
+    }, []);
+
+    // ✅ Filtering
+    const filtered = notifications.filter((n) =>
+        [n.message, n.applicant_number, n.type]
             .join(" ")
             .toLowerCase()
             .includes(searchQuery.toLowerCase())
     );
 
     // ✅ Pagination logic
-    const totalPages = Math.ceil(filteredPersons.length / itemsPerPage) || 1;
+    const totalPages = Math.ceil(filtered.length / itemsPerPage) || 1;
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentPersons = filteredPersons.slice(startIndex, startIndex + itemsPerPage);
-
-    const fetchPersons = async () => {
-        try {
-            const res = await axios.get('http://localhost:5000/api/persons');
-            setPersons(res.data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    useEffect(() => {
-        fetchPersons();
-    }, []);
-
-    const handlePersonClick = (person) => {
-        setSelectedPerson(person);
-        setAssignedNumber('');
-        setError('');
-    };
-
-    const handleAssignNumber = () => {
-        if (!selectedPerson) return;
-
-        socket.emit("assign-student-number", selectedPerson.person_id);
-
-        socket.once("assign-student-number-result", (data) => {
-            if (data.success) {
-                setAssignedNumber(data.student_number);
-                setSnack({ open: true, message: "Student number assigned and email sent.", severity: "success" });
-                fetchPersons();
-                setSelectedPerson(null);
-            } else {
-                setSnack({ open: true, message: data.message || "❌ Failed to assign student number.", severity: "error" });
-            }
-        });
-    };
-
-    const handleSnackClose = (_, reason) => {
-        if (reason === 'clickaway') return;
-        setSnack(prev => ({ ...prev, open: false }));
-    };
+    const currentData = filtered.slice(startIndex, startIndex + itemsPerPage);
 
     return (
         <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, p: 2 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                {/* Left: Header */}
                 <Typography variant="h4" fontWeight="bold" color="maroon">
-                    ASSIGN STUDENT NUMBER
+                    Notifications
                 </Typography>
 
+                {/* Right: Search */}
                 <TextField
                     variant="outlined"
-                    placeholder="Search Applicant Name / Email / Applicant ID"
+                    placeholder="Search by Applicant / Message / Type"
                     size="small"
-                    style={{ width: '425px' }}
+
+                    style={{ width: '500px', marginRight: "25px" }}
                     value={searchQuery}
                     onChange={(e) => {
                         setSearchQuery(e.target.value);
@@ -108,9 +75,11 @@ const StudentNumbering = () => {
                     }}
                 />
             </Box>
-            <hr style={{ border: "1px solid #ccc", width: "100%" }} />
-            <br/>
 
+            <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+            <div style={{ height: "20px" }}></div>
+
+            <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <TableContainer component={Paper} sx={{ width: '100%' }}>
                 <Table size="small">
                     <TableHead sx={{ backgroundColor: '#6D2323', color: "white" }}>
@@ -127,7 +96,7 @@ const StudentNumbering = () => {
                                 <Box display="flex" justifyContent="space-between" alignItems="center" >
                                     {/* Left: Applicant List Count */}
                                     <Typography fontSize="14px" fontWeight="bold" color="white" >
-                                        Applicant List:
+                                        Applicant List: 
                                     </Typography>
 
                                     {/* Right: Pagination Controls */}
@@ -287,93 +256,53 @@ const StudentNumbering = () => {
                 </Table>
             </TableContainer>
 
-            {/* ✅ Applicant List */}
-            <Box sx={{ display: 'flex', gap: 4, mt: 2, }}>
-                <Box flex={1}>
-                    {currentPersons.length === 0 && <Typography>No matching students.</Typography>}
-                    {currentPersons.map((person, index) => (
-                        <Paper
-                            key={person.person_id}
-                            onClick={() => handlePersonClick(person)}
-                            elevation={2}
-                            sx={{
-                                p: 1,
-                                mb: 0.5,
+            <TableContainer component={Paper} sx={{ width: "100%" }}>
+                <Table size="small">
+                    <TableBody>
+                        {currentData.length > 0 ? (
+                            currentData.map((n, idx) => (
+                                <TableRow key={idx}>
+                                    <TableCell
+                                        colSpan={10} // ✅ span across the same width as Applicants table
+                                        sx={{
+                                            border: "1px solid maroon",
+                                            py: 0.5,
+                                            fontSize: "12px",
+                                            textAlign: "left",
+                                        }}
+                                    >
+                                        <Typography sx={{ fontWeight: "bold", fontSize: "12px", lineHeight: "1.2" }}>
+                                            {n.message}
+                                        </Typography>
+                                        <Typography sx={{ fontSize: "11px", color: "gray", lineHeight: "1.2" }}>
+                                            Applicant #: {n.applicant_number} | Type: {n.type} |{" "}
+                                            {new Date(n.timestamp).toLocaleString()}
+                                        </Typography>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={10}
+                                    sx={{
+                                        textAlign: "center",
+                                        border: "1px solid maroon",
+                                        fontSize: "12px",
+                                        py: 0.5,
+                                    }}
+                                >
+                                    No notifications found.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
 
-                                border: '2px solid #800000',
-                                cursor: 'pointer',
-                                backgroundColor:
-                                    selectedPerson?.person_id === person.person_id ? '#800000' : 'white',
-                                color:
-                                    selectedPerson?.person_id === person.person_id ? 'white' : '#800000',
-                                '&:hover': {
-                                    backgroundColor: '#800000',
-                                    color: 'white',
-                                },
-                            }}
-                        >
-                            <Box sx={{ display: "flex", gap: "10px", px: 2, fontSize: "14px" }}>
-                                <span>{startIndex + index + 1}.</span>
-                                <span>{person.applicant_number || "N/A"}</span> |
-                                <span>{person.first_name} {person.middle_name} {person.last_name}</span> |
-                                <span>{person.emailAddress}</span>
-                            </Box>
-                        </Paper>
-                    ))}
-                </Box>
 
-                {/* Selected Person + Assignment */}
-                <Box flex={1}>
-                    <Typography fontSize={16} fontWeight="bold" gutterBottom color="#800000">
-                        Selected Person:
-                    </Typography>
-
-
-                    {selectedPerson ? (
-                        <Box>
-                            <Typography style={{ fontSize: "16px" }}>
-                                <strong>Applicant ID:</strong> {selectedPerson.applicant_number || "N/A"} <br />
-                                <strong>Name:</strong> {selectedPerson.first_name} {selectedPerson.middle_name} {selectedPerson.last_name}<br />
-                                <strong>Email Address:</strong> {selectedPerson.emailAddress}
-                            </Typography>
-
-                            <Button
-                                variant="contained"
-                                sx={{ mt: 2, backgroundColor: '#800000', color: 'white' }}
-                                onClick={handleAssignNumber}
-                            >
-                                Assign Student Number
-                            </Button>
-                        </Box>
-                    ) : (
-                        <Typography>No person selected.</Typography>
-                    )}
-
-                    {assignedNumber && (
-                        <Typography mt={2} color="green">
-                            <strong>Assigned Student Number:</strong> {assignedNumber}
-                        </Typography>
-                    )}
-
-                    {error && (
-                        <Typography mt={2} color="error">
-                            {error}
-                        </Typography>
-                    )}
-                </Box>
-            </Box>
-
-            <Snackbar
-                open={snack.open}
-                onClose={handleSnackClose}
-                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-            >
-                <Alert onClose={handleSnackClose} severity={snack.severity} sx={{ width: '100%' }}>
-                    {snack.message}
-                </Alert>
-            </Snackbar>
         </Box>
     );
 };
 
-export default StudentNumbering;
+export default Notifications;

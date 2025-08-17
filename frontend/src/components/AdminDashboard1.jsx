@@ -107,7 +107,7 @@ const AdminDashboard1 = () => {
       sessionStorage.setItem("admin_edit_person_id", targetId);
 
       setUserID(targetId);
-      fetchPersonData(targetId);
+
       return;
     }
 
@@ -156,17 +156,7 @@ const AdminDashboard1 = () => {
 
   // dot not alter
 
-  const fetchPersonData = async (id) => {
-    try {
-      const res = await axios.get(`http://localhost:5000/api/person/${id}`);
-      const sanitizedData = Object.fromEntries(
-        Object.entries(res.data).map(([key, value]) => [key, value ?? ""])
-      );
-      setPerson(sanitizedData);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+
 
 
   // Do not alter
@@ -594,8 +584,8 @@ const AdminDashboard1 = () => {
 
         <TextField
           size="small"
-          label="Search Applicant"
-          placeholder="Enter applicant number, name, or email"
+
+          placeholder="Search Applicant Name / Email / Applicant ID"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           InputProps={{ startAdornment: <Search sx={{ mr: 1 }} /> }}
@@ -607,7 +597,7 @@ const AdminDashboard1 = () => {
       <br />
 
 
-      <TableContainer component={Paper} sx={{ width: '100%', mb: 1, }}>
+      <TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>
         <Table>
           <TableHead sx={{ backgroundColor: '#6D2323' }}>
             <TableRow>
@@ -615,19 +605,19 @@ const AdminDashboard1 = () => {
               <TableCell sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}>
                 Applicant ID:&nbsp;
                 <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
-                  {selectedPerson?.applicant_number || "N/A"}
+                  {person?.applicant_number || person?.person_id || "N/A"}
                 </span>
               </TableCell>
 
-              {/* Right cell: Applicant Name, right-aligned */}
+              {/* Right cell: Applicant Name */}
               <TableCell
                 align="right"
                 sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}
               >
                 Applicant Name:&nbsp;
                 <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
-                  {selectedPerson?.last_name?.toUpperCase()}, {selectedPerson?.first_name?.toUpperCase()}{" "}
-                  {selectedPerson?.middle_name?.toUpperCase()} {selectedPerson?.extension_name?.toUpperCase() || ""}
+                  {person?.last_name?.toUpperCase()}, {person?.first_name?.toUpperCase()}{" "}
+                  {person?.middle_name?.toUpperCase()} {person?.extension?.toUpperCase() || ""}
                 </span>
               </TableCell>
             </TableRow>
@@ -635,62 +625,63 @@ const AdminDashboard1 = () => {
         </Table>
       </TableContainer>
 
+
       <Box sx={{ display: "flex", width: "100%" }}>
         {/* Left side: Notice */}
-           <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-          mt: 2,
-        }}
-      >
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
-            gap: 2,
-            p: 2,
-            borderRadius: "10px",
-            backgroundColor: "#fffaf5",
-            border: "1px solid #6D2323",
-            boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
-            whiteSpace: "nowrap", // Prevent text wrapping
+            justifyContent: "center",
+            width: "100%",
+            mt: 2,
           }}
         >
-          {/* Icon */}
           <Box
             sx={{
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "#6D2323",
-              borderRadius: "8px",
-              width: 50,
-              height: 50,
-              flexShrink: 0,
+              gap: 2,
+              p: 2,
+              borderRadius: "10px",
+              backgroundColor: "#fffaf5",
+              border: "1px solid #6D2323",
+              boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.05)",
+              whiteSpace: "nowrap", // Prevent text wrapping
             }}
           >
-            <ErrorIcon sx={{ color: "white", fontSize: 40 }} />
-          </Box>
+            {/* Icon */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: "#6D2323",
+                borderRadius: "8px",
+                width: 50,
+                height: 50,
+                flexShrink: 0,
+              }}
+            >
+              <ErrorIcon sx={{ color: "white", fontSize: 40 }} />
+            </Box>
 
-          {/* Text */}
-          <Typography
-            sx={{
-              fontSize: "15px",
-              fontFamily: "Arial",
-              color: "#3e3e3e",
-            }}
-          >
-            <strong style={{ color: "maroon" }}>Notice:</strong> &nbsp;
-         
-            <strong>1.</strong> Kindly type <strong>'NA'</strong> in boxes where there are no possible answers to the information being requested. &nbsp; | &nbsp;
-            <strong>2.</strong> To use the letter <strong>'Ñ'</strong>, press <kbd>ALT</kbd> + <kbd>165</kbd>; for <strong>'ñ'</strong>, press <kbd>ALT</kbd> + <kbd>164</kbd>. &nbsp; | &nbsp;
-            <strong>3.</strong> List of all printable files
-          </Typography>
+            {/* Text */}
+            <Typography
+              sx={{
+                fontSize: "15px",
+                fontFamily: "Arial",
+                color: "#3e3e3e",
+              }}
+            >
+              <strong style={{ color: "maroon" }}>Notice:</strong> &nbsp;
+
+              <strong>1.</strong> Kindly type <strong>'NA'</strong> in boxes where there are no possible answers to the information being requested. &nbsp; | &nbsp;
+              <strong>2.</strong> To use the letter <strong>'Ñ'</strong>, press <kbd>ALT</kbd> + <kbd>165</kbd>; for <strong>'ñ'</strong>, press <kbd>ALT</kbd> + <kbd>164</kbd>. &nbsp; | &nbsp;
+              <strong>3.</strong> List of all printable files
+            </Typography>
+          </Box>
         </Box>
-      </Box>
 
       </Box>
 

@@ -63,6 +63,7 @@ import FacultySchedule from './components/FacultySchedule';
 import StudentDashboard from './pages/StudentDashboard';
 
 import ApplicantList from './components/ApplicantList';
+import Notifications from './components/Notifications';
 
 import AdminDashboard1 from './components/AdminDashboard1';
 import AdminDashboard2 from './components/AdminDashboard2';
@@ -205,6 +206,7 @@ function App() {
               <Route path="/unauthorized" element={<Unauthorized />} />
 
               <Route path="/applicant_list" element={<ProtectedRoute><ApplicantList /></ProtectedRoute>} />
+              <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
 
               <Route path="/admin_dashboard1" element={<ProtectedRoute><AdminDashboard1 /></ProtectedRoute>} />
               <Route path="/admin_dashboard2" element={<ProtectedRoute><AdminDashboard2 /></ProtectedRoute>} />

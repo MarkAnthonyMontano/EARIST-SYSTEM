@@ -446,6 +446,53 @@ const SuperAdminDashboard1 = () => {
     ];
 
     const [selectedPerson, setSelectedPerson] = useState(null);
+    const [persons, setPersons] = useState([]);
+
+    useEffect(() => {
+        if (!searchQuery.trim()) {
+            // 🔹 If search is empty, clear everything
+            setSelectedPerson(null);
+            setPerson({
+                profile_img: "",
+                generalAverage1: "",
+                height: "",
+                applyingAs: "",
+                document_status: "",
+                last_name: "",
+                first_name: "",
+                middle_name: "",
+                extension: "",
+            });
+            return;
+        }
+
+        // 🔹 Try to find a matching applicant from the list
+        const match = persons.find((p) =>
+            `${p.first_name} ${p.middle_name} ${p.last_name} ${p.emailAddress} ${p.applicant_number || ''}`
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase())
+        );
+
+        if (match) {
+            // ✅ If found, set this as the "selectedPerson"
+            setSelectedPerson(match);
+        } else {
+            // ❌ If not found, clear again
+            setSelectedPerson(null);
+            setPerson({
+                profile_img: "",
+                generalAverage1: "",
+                height: "",
+                applyingAs: "",
+                document_status: "",
+                last_name: "",
+                first_name: "",
+                middle_name: "",
+                extension: "",
+            });
+        }
+    }, [searchQuery, persons]);
+
 
 
     // dot not alter
@@ -477,8 +524,8 @@ const SuperAdminDashboard1 = () => {
 
                 <TextField
                     size="small"
-                    label="Search Applicant"
-                    placeholder="Enter applicant number, name, or email"
+
+                    placeholder="Search Applicant Name / Email / Applicant ID"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     InputProps={{ startAdornment: <Search sx={{ mr: 1 }} /> }}
@@ -489,6 +536,34 @@ const SuperAdminDashboard1 = () => {
 
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <br />
+
+            <TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>
+                <Table>
+                    <TableHead sx={{ backgroundColor: '#6D2323' }}>
+                        <TableRow>
+                            {/* Left cell: Applicant ID */}
+                            <TableCell sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}>
+                                Applicant ID:&nbsp;
+                                <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
+                                    {person?.applicant_number || person?.person_id || "N/A"}
+                                </span>
+                            </TableCell>
+
+                            {/* Right cell: Applicant Name */}
+                            <TableCell
+                                align="right"
+                                sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}
+                            >
+                                Applicant Name:&nbsp;
+                                <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
+                                    {person?.last_name?.toUpperCase()}, {person?.first_name?.toUpperCase()}{" "}
+                                    {person?.middle_name?.toUpperCase()} {person?.extension?.toUpperCase() || ""}
+                                </span>
+                            </TableCell>
+                        </TableRow>
+                    </TableHead>
+                </Table>
+            </TableContainer>
 
 
             <Container>
