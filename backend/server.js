@@ -954,7 +954,10 @@ app.get("/api/all-applicants", async (req, res) => {
         p.first_name,
         p.middle_name,
         p.extension,
+        p.program,
         p.emailAddress,
+        p.generalAverage1,         -- ✅ Add this back
+        p.created_at,              -- ✅ Add this back
         a.applicant_number,
         ea.schedule_id,                 -- 🔥 Always include this
         es.exam_date,
@@ -2349,6 +2352,38 @@ app.get("/exam_schedules", async (req, res) => {
   }
 });
 
+app.get("/applicants", async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT 
+        an.applicant_number,
+        CONCAT(
+          p.last_name, ', ', p.first_name,
+          CASE 
+            WHEN p.middle_name IS NOT NULL AND p.middle_name <> '' 
+              THEN CONCAT(' ', p.middle_name) 
+            ELSE '' 
+          END,
+          CASE 
+            WHEN p.extension IS NOT NULL AND p.extension <> '' 
+              THEN CONCAT(' ', p.extension) 
+            ELSE '' 
+          END
+        ) AS applicant_name,
+        ea.schedule_id
+      FROM admission.applicant_numbering_table an
+      JOIN admission.person_table p
+        ON an.person_id = p.person_id
+      LEFT JOIN admission.exam_applicants ea
+        ON ea.applicant_id = an.applicant_number
+      ORDER BY p.last_name ASC, p.first_name ASC
+    `);
+    res.json(rows);
+  } catch (err) {
+    console.error("Error fetching applicants:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
 
 io.on("connection", (socket) => {
   console.log("✅ Socket.IO client connected");
@@ -2397,50 +2432,49 @@ io.on("connection", (socket) => {
 
 
 // === SEND SCHEDULE EMAILS ===
-socket.on("send_schedule_emails", async ({ schedule_id }) => {
-  try {
-    const [rows] = await db.query(
-      `SELECT 
-         ea.schedule_id,
-         s.day_description,
-         s.room_description,
-         s.start_time,
-         s.end_time,
-         an.applicant_number,
-         p.person_id,
-         p.first_name,
-         p.last_name,
-         p.emailAddress
-       FROM exam_applicants ea
-       JOIN entrance_exam_schedule s 
-         ON ea.schedule_id = s.schedule_id
-       JOIN applicant_numbering_table an 
-         ON ea.applicant_id = an.applicant_number
-       JOIN person_table p 
-         ON an.person_id = p.person_id
-       WHERE ea.schedule_id = ?`,
-      [schedule_id]
-    );
+  socket.on("send_schedule_emails", async ({ schedule_id }) => {
+    try {
+      const [rows] = await db.query(
+        `SELECT 
+           ea.schedule_id,
+           s.day_description,
+           s.room_description,
+           s.start_time,
+           s.end_time,
+           an.applicant_number,
+           p.first_name,
+           p.last_name,
+           p.emailAddress
+         FROM exam_applicants ea
+         JOIN entrance_exam_schedule s 
+           ON ea.schedule_id = s.schedule_id
+         JOIN applicant_numbering_table an 
+           ON ea.applicant_id = an.applicant_number
+         JOIN person_table p 
+           ON an.person_id = p.person_id
+         WHERE ea.schedule_id = ?`,
+        [schedule_id]
+      );
 
-    if (rows.length === 0) {
-      socket.emit("send_schedule_emails_result", {
-        success: false,
-        error: "No applicants found for this schedule.",
-      });
-      return;
-    }
-
-    for (const row of rows) {
-      if (!row.emailAddress) {
-        console.warn(`⚠️ Applicant ${row.applicant_number} has no email`);
-        continue;
+      if (rows.length === 0) {
+        socket.emit("send_schedule_emails_result", {
+          success: false,
+          error: "No applicants found for this schedule.",
+        });
+        return;
       }
 
-      const mailOptions = {
-        from: `"EARIST MIS" <${process.env.EMAIL_USER}>`,
-        to: row.emailAddress,
-        subject: "Your Entrance Exam Schedule",
-        text: `Hello ${row.first_name} ${row.last_name},
+      for (const row of rows) {
+        if (!row.emailAddress) {
+          console.warn(`⚠️ Applicant ${row.applicant_number} has no email`);
+          continue;
+        }
+
+        const mailOptions = {
+          from: `"EARIST MIS" <${process.env.EMAIL_USER}>`,
+          to: row.emailAddress,
+          subject: "Your Entrance Exam Schedule",
+          text: `Hello ${row.first_name} ${row.last_name},
 
 You have been assigned to the following entrance exam schedule:
 
@@ -2458,39 +2492,28 @@ Please arrive on time and bring your requirements.
 👕 𝐀𝐓𝐓𝐈𝐑𝐄: 𝐒𝐭𝐫𝐢𝐜𝐭𝐥𝐲 𝐰𝐞𝐚𝐫 𝐖𝐇𝐈𝐓𝐄 𝐬𝐡𝐢𝐫𝐭 𝐚𝐧𝐝 𝐩𝐚𝐧𝐭𝐬.
 
 - Eulogio "Amang" Rodriguez Institute of Science and Technology`,
-      };
+        };
 
-      try {
-        // Send email
-        await transporter.sendMail(mailOptions);
-        console.log(`✅ Email sent to ${row.emailAddress}`);
-
-        // 🔥 Mark applicant as emailed in person_status_table
-        await db.query(
-          `UPDATE person_status_table 
-           SET exam_status = 1 
-           WHERE applicant_id = ?`,
-          [row.applicant_number]
-        );
-
-      } catch (err) {
-        console.error(`❌ Failed to send email to ${row.emailAddress}:`, err.message);
+        try {
+          await transporter.sendMail(mailOptions);
+          console.log(`✅ Email sent to ${row.emailAddress}`);
+        } catch (err) {
+          console.error(`❌ Failed to send email to ${row.emailAddress}:`, err.message);
+        }
       }
+
+      socket.emit("send_schedule_emails_result", {
+        success: true,
+        message: `Emails sent to ${rows.length} applicants.`,
+      });
+    } catch (err) {
+      console.error("Error in send_schedule_emails:", err);
+      socket.emit("send_schedule_emails_result", {
+        success: false,
+        error: "Server error sending emails.",
+      });
     }
-
-    socket.emit("send_schedule_emails_result", {
-      success: true,
-      message: `Emails sent to ${rows.length} applicants and status updated.`,
-    });
-  } catch (err) {
-    console.error("Error in send_schedule_emails:", err);
-    socket.emit("send_schedule_emails_result", {
-      success: false,
-      error: "Server error sending emails.",
-    });
-  }
-});
-
+  });
 });
 
 
