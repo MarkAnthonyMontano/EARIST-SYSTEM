@@ -40,13 +40,37 @@ const AccountDashboard = () => {
           </Link>
         </div>
 
-            <div className="relative">
-          <Link to={'/notifications'}>
+  
+
+          <div className="relative">
+          <Link to={'/superadmin_applicant_reset_password'}>
             <div className="bg-white p-4 border-4 rounded-lg border-maroon-500 absolute left-16 top-12 w-enough">
               <LockReset className="text-maroon-500 text-2xl" />
             </div>
             <button className="bg-white text-maroon-500 border-4 rounded-lg border-maroon-500 p-4 w-80 h-32 font-medium mt-20 ml-8 flex items-end justify-center">
-              NOTIFICATIONS
+              APPLICANT RESET PASSWORD
+            </button>
+          </Link>
+        </div>
+
+          <div className="relative">
+          <Link to={'/superadmin_student_reset_password'}>
+            <div className="bg-white p-4 border-4 rounded-lg border-maroon-500 absolute left-16 top-12 w-enough">
+              <LockReset className="text-maroon-500 text-2xl" />
+            </div>
+            <button className="bg-white text-maroon-500 border-4 rounded-lg border-maroon-500 p-4 w-80 h-32 font-medium mt-20 ml-8 flex items-end justify-center">
+              STUDENT RESET PASSWORD
+            </button>
+          </Link>
+        </div>
+
+          <div className="relative">
+          <Link to={'/superadmin_faculty_reset_password'}>
+            <div className="bg-white p-4 border-4 rounded-lg border-maroon-500 absolute left-16 top-12 w-enough">
+              <LockReset className="text-maroon-500 text-2xl" />
+            </div>
+            <button className="bg-white text-maroon-500 border-4 rounded-lg border-maroon-500 p-4 w-80 h-32 font-medium mt-20 ml-8 flex items-end justify-center">
+              FACULTY RESET PASSWORD
             </button>
           </Link>
         </div>

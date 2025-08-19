@@ -79,10 +79,9 @@ const Notifications = () => {
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <div style={{ height: "20px" }}></div>
 
-            <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <TableContainer component={Paper} sx={{ width: '100%' }}>
                 <Table size="small">
-                    <TableHead sx={{ backgroundColor: '#6D2323', color: "white" }}>
+                    <TableHead sx={{ backgroundColor: '#6D2323', color: "white",  border: "2px solid maroon", }}>
                         <TableRow>
                             <TableCell
                                 colSpan={10}
@@ -265,7 +264,7 @@ const Notifications = () => {
                                     <TableCell
                                         colSpan={10} // ✅ span across the same width as Applicants table
                                         sx={{
-                                            border: "1px solid maroon",
+                                            border: "2px solid maroon",
                                             py: 0.5,
                                             fontSize: "12px",
                                             textAlign: "left",

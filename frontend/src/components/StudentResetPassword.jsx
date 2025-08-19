@@ -119,7 +119,7 @@ const StudentResetPassword = () => {
     <Box
       sx={{
         height: '100vh',
-       
+
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
@@ -133,13 +133,14 @@ const StudentResetPassword = () => {
             boxShadow: 3,
             p: 3,
             mt: 1,
+            border: "3px solid maroon",
             backgroundColor: '#fff',
           }}
         >
           <Typography variant="h5" fontWeight="bold" color="maroon" textAlign="center" gutterBottom>
             Reset your password
           </Typography>
-          <Typography fontSize={12} mt={-1}  color="black" textAlign="center" gutterBottom>
+          <Typography fontSize={12} mt={-1} color="black" textAlign="center" gutterBottom>
             Enter a new password for your account
           </Typography>
 

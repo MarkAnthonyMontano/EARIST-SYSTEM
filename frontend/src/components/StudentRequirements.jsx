@@ -188,7 +188,7 @@ const StudentRequirements = () => {
       if (storedRole === "registrar") {
 
         if (storedID !== "undefined") {
-         
+
         } else {
           console.warn("Stored person_id is invalid:", storedID);
         }
@@ -305,23 +305,23 @@ const StudentRequirements = () => {
     }
   };
 
-const handleStatusChange = async (uploadId, remarkValue) => {
-  const remarks = remarksMap[uploadId] || ""; // get remarks for this upload ID
+  const handleStatusChange = async (uploadId, remarkValue) => {
+    const remarks = remarksMap[uploadId] || ""; // get remarks for this upload ID
 
-  try {
-    await axios.put(`http://localhost:5000/uploads/remarks/${uploadId}`, {
-      status: remarkValue,   // keep it as number now
-      remarks: remarks,
-    });
+    try {
+      await axios.put(`http://localhost:5000/uploads/remarks/${uploadId}`, {
+        status: remarkValue,   // keep it as number now
+        remarks: remarks,
+      });
 
-    if (selectedPerson?.applicant_number) {
-      await fetchUploadsByApplicantNumber(selectedPerson.applicant_number);
-      setEditingRemarkId(null);
+      if (selectedPerson?.applicant_number) {
+        await fetchUploadsByApplicantNumber(selectedPerson.applicant_number);
+        setEditingRemarkId(null);
+      }
+    } catch (err) {
+      console.error('Error updating Status:', err);
     }
-  } catch (err) {
-    console.error('Error updating Status:', err);
-  }
-};
+  };
 
 
 
@@ -448,76 +448,138 @@ const handleStatusChange = async (uploadId, remarkValue) => {
       textTransform: 'none',
     };
 
+    const [newRemarkMode, setNewRemarkMode] = useState({}); // { [upload_id]: true|false }
+
+    const handleSaveRemarks = async (uploadId) => {
+      const newRemark = (remarksMap[uploadId] ?? "").trim();
+      if (!newRemark || newRemark === "__NEW__" || newRemark === "New Remarks") {
+        // do not save the trigger/empty
+        setEditingRemarkId(null);
+        setNewRemarkMode((prev) => ({ ...prev, [uploadId]: false }));
+        return;
+      }
+
+      try {
+        await axios.put(`http://localhost:5000/uploads/remarks/${uploadId}`, {
+          remarks: newRemark,
+          status: uploads.find((u) => u.upload_id === uploadId)?.status || "0",
+        });
+
+        if (selectedPerson?.applicant_number) {
+          await fetchUploadsByApplicantNumber(selectedPerson.applicant_number);
+        }
+      } catch (err) {
+        console.error("Failed to save remarks:", err);
+      } finally {
+        setEditingRemarkId(null);
+        setNewRemarkMode((prev) => ({ ...prev, [uploadId]: false }));
+      }
+    };
+
 
     return (
       <TableRow key={doc.key}>
         <TableCell sx={{ fontWeight: 'bold', width: '20%', border: "1px solid maroon" }}>{doc.label}</TableCell>
 
-        <TableCell sx={{ width: '20%', border: "1px solid maroon" }}>
-          {editingRemarkId === uploaded?.upload_id ? (
-            <TextField
-              select
-              size="small"
-
-              fullWidth
-              autoFocus
-              value={remarksMap[uploaded.upload_id] || ""}
-              onChange={(e) => {
-                const value = e.target.value;
-                setRemarksMap((prev) => ({
-                  ...prev,
-                  [uploaded.upload_id]: value,
-                }));
-              }}
-              onBlur={() => {
-                handleSaveRemarks(uploaded.upload_id);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleSaveRemarks(uploaded.upload_id);
-                }
-              }}
-              SelectProps={{
-                MenuProps: {
-                  PaperProps: {
-                    style: { maxHeight: 200 } // optional max height for dropdown
-                  }
-                }
-              }}
-            >
-              <MenuItem value="">
-                <em>Select Remarks</em>
-              </MenuItem>
-              {remarksOptions.map((option, index) => (
-                <MenuItem key={index} value={option}>
-                  {option}
-                </MenuItem>
-              ))}
-            </TextField>
-          ) : (
-            <Box
-              onClick={() => {
-                setEditingRemarkId(uploaded.upload_id);
-                setRemarksMap((prev) => ({
-                  ...prev,
-                  [uploaded.upload_id]: uploaded.remarks || "",
-                }));
-              }}
-              sx={{
-                cursor: 'pointer',
-                fontStyle: uploaded?.remarks ? 'normal' : 'italic',
-                color: uploaded?.remarks ? 'inherit' : '#888',
-                minHeight: '40px',
-                display: 'flex',
-                alignItems: 'center',
-                px: 1,
-              }}
-            >
-              {uploaded?.remarks || "Click to add remarks"}
-            </Box>
-          )}
-        </TableCell>
+      <TableCell sx={{ width: '20%', border: "1px solid maroon" }}>
+  {editingRemarkId === uploaded?.upload_id ? (
+    newRemarkMode[uploaded.upload_id] ? (
+      // === Free-text editor mode ===
+      <TextField
+        size="small"
+        fullWidth
+        autoFocus
+        placeholder="Enter custom remark"
+        value={remarksMap[uploaded.upload_id] || ""}
+        onChange={(e) =>
+          setRemarksMap((prev) => ({
+            ...prev,
+            [uploaded.upload_id]: e.target.value,
+          }))
+        }
+        onBlur={async () => {
+          const finalRemark = (remarksMap[uploaded.upload_id] || "").trim();
+          if (finalRemark) {
+            await handleSaveRemarks(uploaded.upload_id);
+          }
+          setNewRemarkMode((prev) => ({ ...prev, [uploaded.upload_id]: false }));
+        }}
+        onKeyDown={async (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            const finalRemark = (remarksMap[uploaded.upload_id] || "").trim();
+            if (finalRemark) {
+              await handleSaveRemarks(uploaded.upload_id);
+            }
+            setNewRemarkMode((prev) => ({ ...prev, [uploaded.upload_id]: false }));
+          }
+        }}
+      />
+    ) : (
+      // === Predefined dropdown mode ===
+      <TextField
+        select
+        size="small"
+        fullWidth
+        autoFocus
+        value={remarksMap[uploaded.upload_id] ?? uploaded?.remarks ?? ""}
+        onChange={async (e) => {
+          const value = e.target.value;
+          if (value === "__NEW__") {
+            // Switch to text mode; don't store the marker
+            setNewRemarkMode((prev) => ({ ...prev, [uploaded.upload_id]: true }));
+            // If there was a previous preset value, keep it until they type
+            setRemarksMap((prev) => ({
+              ...prev,
+              [uploaded.upload_id]: (prev[uploaded.upload_id] ?? uploaded?.remarks ?? "")
+            }));
+            return;
+          }
+          // Normal preset value → save immediately
+          setRemarksMap((prev) => ({ ...prev, [uploaded.upload_id]: value }));
+          await handleSaveRemarks(uploaded.upload_id);
+        }}
+        SelectProps={{
+          MenuProps: { PaperProps: { style: { maxHeight: 200 } } },
+        }}
+      >
+        <MenuItem value="">
+          <em>Select Remarks</em>
+        </MenuItem>
+        {remarksOptions.map((option, index) => (
+          <MenuItem key={index} value={option}>
+            {option}
+          </MenuItem>
+        ))}
+        {/* Trigger for custom text */}
+        <MenuItem value="__NEW__">New Remarks</MenuItem>
+      </TextField>
+    )
+  ) : (
+    // === Display mode ===
+    <Box
+      onClick={() => {
+        setEditingRemarkId(uploaded.upload_id);
+        setNewRemarkMode((prev) => ({ ...prev, [uploaded.upload_id]: false }));
+        setRemarksMap((prev) => ({
+          ...prev,
+          [uploaded.upload_id]: uploaded?.remarks || "",
+        }));
+      }}
+      sx={{
+        cursor: "pointer",
+        fontStyle: uploaded?.remarks ? "normal" : "italic",
+        color: uploaded?.remarks ? "inherit" : "#888",
+        minHeight: "40px",
+        display: "flex",
+        alignItems: "center",
+        px: 1,
+      }}
+    >
+      {uploaded?.remarks || "Click to add remarks"}
+    </Box>
+  )}
+</TableCell>
 
 
 
@@ -707,7 +769,7 @@ const handleStatusChange = async (uploadId, remarkValue) => {
             justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
-        
+
             mb: 2,
             px: 2,
           }}
@@ -776,6 +838,7 @@ const handleStatusChange = async (uploadId, remarkValue) => {
                   fontSize: "14px",
                   fontFamily: "Arial Black",
                   minWidth: "100px",
+
                   mr: 1,
                 }}
               >
@@ -786,10 +849,10 @@ const handleStatusChange = async (uploadId, remarkValue) => {
                 name="generalAverage1"
                 placeholder="Enter SHS GWA"
                 value={person.generalAverage1 || ""}
-                sx={{ width: "300px" }}
+                sx={{ width: "250px" }}
                 InputProps={{
                   sx: {
-                    height: 30, // control outer height
+                    height: 35, // control outer height
                   },
                 }}
                 inputProps={{
@@ -815,12 +878,11 @@ const handleStatusChange = async (uploadId, remarkValue) => {
               <TextField
                 size="small"
                 name="height"
-
                 value={person.height || ""}
                 sx={{ width: "100px" }}
                 InputProps={{
                   sx: {
-                    height: 30,
+                    height: 35,
                   },
                 }}
                 inputProps={{
@@ -869,7 +931,7 @@ const handleStatusChange = async (uploadId, remarkValue) => {
                   value={person.applyingAs || ""}
                   placeholder="Select applyingAs"
                   sx={{ width: "300px" }}
-                  InputProps={{ sx: { height: 30 } }}
+                  InputProps={{ sx: { height: 35 } }}
                   inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
                 >
 
@@ -886,7 +948,7 @@ const handleStatusChange = async (uploadId, remarkValue) => {
               </Box>
 
               {/* Document Status */}
-              <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                 <Typography
                   sx={{
                     fontSize: "14px",
@@ -904,7 +966,7 @@ const handleStatusChange = async (uploadId, remarkValue) => {
                   value={person.document_status || ""}
                   onChange={handleChange} // ✅ this stays
                   sx={{ width: "300px" }}
-                  InputProps={{ sx: { height: 30 } }}
+                  InputProps={{ sx: { height: 35 } }}
                   inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
                 >
                   <MenuItem value=""><em>Select Document Status</em></MenuItem>
@@ -1042,11 +1104,11 @@ const handleStatusChange = async (uploadId, remarkValue) => {
             {person.profile_img && (
               <Box
                 sx={{
-                  width: "2in", // standard 2×2 size
-                  height: "2in",
+                  width: "2.10in", // standard 2×2 size
+                  height: "2.10in",
                   border: "1px solid #ccc",
                   overflow: "hidden",
-                  marginTop: "-220px",
+                  marginTop: "-280px",
                   borderRadius: "4px",
                 }}
               >

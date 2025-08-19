@@ -5,6 +5,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import LockResetIcon from '@mui/icons-material/LockReset';
+import { HistoryOutlined } from "@mui/icons-material";
 import '../styles/SideBar.css'
 import { Avatar } from '@mui/material';
 
@@ -14,45 +15,45 @@ const SideBar = ({ setIsAuthenticated }) => {
   const [role, setRole] = useState('');
 
   useEffect(() => {
-  const token = localStorage.getItem('token');
-  const savedRole = localStorage.getItem('role');
-  
-  if (token && savedRole) {
-    try {
-      const decoded = JSON.parse(atob(token.split('.')[1]));
-      const currentTime = Date.now() / 1000;
-      
-      if (decoded.exp < currentTime) {
-        // Token expired
+    const token = localStorage.getItem('token');
+    const savedRole = localStorage.getItem('role');
+
+    if (token && savedRole) {
+      try {
+        const decoded = JSON.parse(atob(token.split('.')[1]));
+        const currentTime = Date.now() / 1000;
+
+        if (decoded.exp < currentTime) {
+          // Token expired
+          localStorage.removeItem('token');
+          localStorage.removeItem('role');
+          setIsAuthenticated(false);
+          navigate('/');
+        } else {
+          setRole(savedRole); // ✅ Load from saved value
+          setIsAuthenticated(true);
+        }
+      } catch (err) {
+        console.log("Token decode error:", err);
         localStorage.removeItem('token');
         localStorage.removeItem('role');
         setIsAuthenticated(false);
         navigate('/');
-      } else {
-        setRole(savedRole); // ✅ Load from saved value
-        setIsAuthenticated(true);
       }
-    } catch (err) {
-      console.log("Token decode error:", err);
-      localStorage.removeItem('token');
-      localStorage.removeItem('role');
+    } else {
+      console.log("Missing token or role");
       setIsAuthenticated(false);
       navigate('/');
     }
-  } else {
-    console.log("Missing token or role");
+  }, []);
+
+
+  const Logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role'); // ✅ remove role
     setIsAuthenticated(false);
     navigate('/');
   }
-}, []);
-
-
- const Logout = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('role'); // ✅ remove role
-  setIsAuthenticated(false);
-  navigate('/');
-}
 
   return (
     <div className='h-full w-enough hidden-print'>
@@ -122,6 +123,12 @@ const SideBar = ({ setIsAuthenticated }) => {
               <li className={`w-full flex items-center border border-maroon-500 px-2 rounded m-2 mx-0 button-hover ${location.pathname === "/account_dashboard" ? "bg-maroon-500 text-white" : ""}`}>
                 <People />
                 <span className='pl-4 p-2 px-0 pointer-events-none'>Accounts</span>
+              </li>
+            </Link>
+            <Link to="/history_logs">
+              <li className="w-full flex items-center border border-maroon-500 px-2 rounded m-2 mx-0 cursor-pointer button-hover">
+                <HistoryOutlined />
+                <button className="pl-4 p-2 px-0 pointer-events-none">History Logs</button>
               </li>
             </Link>
           </>
@@ -197,7 +204,7 @@ const SideBar = ({ setIsAuthenticated }) => {
                 <span className='pl-4 p-2 px-0 pointer-events-none'>Schedule</span>
               </li>
             </Link>
-              <Link to="/faculty_reset_password">
+            <Link to="/faculty_reset_password">
               <li className={`w-full flex items-center border border-maroon-500 px-2 rounded m-2 mx-0 button-hover ${location.pathname === "/faculty_reset_password" ? "bg-maroon-500 text-white" : ""}`}>
                 <LockResetIcon />
                 <span className='pl-4 p-2 px-0 pointer-events-none'>Reset Password</span>
@@ -213,19 +220,21 @@ const SideBar = ({ setIsAuthenticated }) => {
                 <span className='pl-4 p-2 px-0 pointer-events-none'>Dashboard</span>
               </li>
             </Link>
-               <Link to="/student_reset_password">
+            <Link to="/student_reset_password">
               <li className={`w-full flex items-center border border-maroon-500 px-2 rounded m-2 mx-0 button-hover ${location.pathname === "/student_reset_password" ? "bg-maroon-500 text-white" : ""}`}>
                 <LockResetIcon />
                 <span className='pl-4 p-2 px-0 pointer-events-none'>Reset Password</span>
               </li>
             </Link>
-            
+
           </>
         )}
+
         <li className='w-full flex items-center border border-maroon-500 px-2 rounded m-2 mx-0 cursor-pointer button-hover' onClick={Logout}>
           <LogoutOutlined />
           <button className='pl-4 p-2 px-0 pointer-events-none'>Logout</button>
         </li>
+
       </ul>
 
     </div>

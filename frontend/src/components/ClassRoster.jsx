@@ -45,10 +45,35 @@ const ClassRoster = () => {
 
   return (
     <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, p: 4 }}>
-      <Typography variant="h4" fontWeight="bold" color="#800000" textAlign="center" gutterBottom>
-        Class Roster
-      </Typography>
+      {/* Top header: DOCUMENTS SUBMITTED + Search */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+       
+          mb: 2,
+          px: 2,
+        }}
+      >
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 'bold',
+            color: 'maroon',
+            fontSize: '36px',
+          }}
+        >
+         CLASS ROSTER
+        </Typography>
 
+
+      </Box>
+
+      <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+
+      <br />
       <Paper elevation={3} sx={{ p: 3, mb: 2 }}>
         <Typography fontWeight={700} fontSize={16} gutterBottom>
           Select a Department

@@ -14,8 +14,12 @@ const app = express();
 const http = require("http").createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(http, {
-  cors: { origin: "*" }
+  cors: {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST"]
+  }
 });
+
 
 //MIDDLEWARE
 app.use(express.json());
@@ -64,6 +68,26 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: multer.memoryStorage() });
 const nodemailer = require("nodemailer");
+
+
+
+// ---------------- TRANSPORTER ----------------
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// ✅ Verify transporter at startup
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("❌ Email transporter error:", error);
+  } else {
+    console.log("✅ Email transporter is ready");
+  }
+});
 
 
 //MYSQL CONNECTION FOR ADMISSION
@@ -925,14 +949,20 @@ app.get("/api/all-applicants", async (req, res) => {
   try {
     const [rows] = await db.execute(`
       SELECT 
-        p.*, 
+        p.person_id,
+        p.last_name,
+        p.first_name,
+        p.middle_name,
+        p.extension,
+        p.emailAddress,
         a.applicant_number,
+        ea.schedule_id,                 -- 🔥 Always include this
         es.exam_date,
         yt.year_id AS school_year,
         yt.year_description,
         sy.semester_id, 
         sy.astatus,
-        ru.upload_id,              -- ✅ Add this
+        ru.upload_id,              
         ru.document_status,
         ru.submitted_documents,
         ru.registrar_status,
@@ -955,8 +985,8 @@ app.get("/api/all-applicants", async (req, res) => {
           FROM admission.requirement_uploads
           WHERE person_id = p.person_id
         )
-      WHERE sy.astatus = 1
-      ORDER BY p.person_id ASC;
+      WHERE sy.astatus = 1 OR sy.astatus IS NULL   -- 🔥 keep both assigned & unassigned
+      ORDER BY p.last_name ASC, p.first_name ASC;
     `);
 
     res.json(rows);
@@ -1116,7 +1146,7 @@ app.put("/api/person/:id", async (req, res) => {
     chestXray, cbc, urinalysis, otherworkups, symptomsToday, remarks, termsOfAgreement, created_at
   } = req.body;
 
-  
+
 
   try {
     const [result] = await db.execute(`UPDATE person_table SET
@@ -1631,45 +1661,50 @@ app.post("/login", async (req, res) => {
 
     const user = results[0];
 
+    // ✅ Compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid password" });
     }
 
-    if (user.source === 'prof' && user.status === 0) {
+    // ✅ Block inactive faculty
+    if (user.source === "prof" && user.status === 0) {
       return res.status(400).json({ message: "The Account is Inactive" });
     }
 
-    // ✅ OTP with cooldown (copied from /request-otp)
-    const now = Date.now();
-    const existing = otpStore[user.email];
-    if (existing && existing.cooldownUntil > now) {
-      const secondsLeft = Math.ceil((existing.cooldownUntil - now) / 1000);
-      return res.status(429).json({ message: `OTP already sent. Please wait ${secondsLeft}s.` });
-    }
-
+    // ✅ Generate OTP
     const otp = generateOTP();
+    const now = Date.now();
     otpStore[user.email] = {
       otp,
-      expiresAt: now + 60 * 1000, // valid for 1 minute
-      cooldownUntil: now + 60 * 1000 // 60s cooldown
+      expiresAt: now + 60 * 1000, // valid 1 min
+      cooldownUntil: now + 60 * 1000,
     };
 
+    // ✅ Gmail SMTP transporter (App Password required)
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true, // use TLS 465
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
     });
 
-    await transporter.sendMail({
-      from: `"EARIST OTP Verification" <noreply-earistmis@gmail.com>`,
-      to: user.email,
-      subject: "Your EARIST OTP Code",
-      text: `Your OTP is: ${otp} (Valid for 1 minute)`,
-    });
+    try {
+      await transporter.sendMail({
+        from: `"EARIST OTP Verification" <${process.env.EMAIL_USER}>`,
+        to: user.email,
+        subject: "Your EARIST OTP Code",
+        text: `Your OTP is: ${otp} (Valid for 1 minute)`,
+      });
+    } catch (err) {
+      console.error("⚠️ Failed to send OTP email:", err.message);
+      // We still respond so modal opens
+    }
 
+    // ✅ Create JWT
     const token = webtoken.sign(
       { person_id: user.person_id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
@@ -1688,7 +1723,149 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ message: "Server error during login" });
   }
 });
-  
+
+// ---------------- Applicant: Get Info ----------------
+app.post("/superadmin-get-applicant", async (req, res) => {
+  const { email } = req.body;
+  try {
+    const [rows] = await db.query(
+      `SELECT ua.user_id, ua.email, ua.status, 
+              pt.first_name, pt.middle_name, pt.last_name, pt.birthOfDate
+       FROM user_accounts ua
+       JOIN person_table pt ON ua.person_id = pt.person_id
+       WHERE ua.email = ? AND ua.role = 'applicant'`,
+      [email]
+    );
+    if (!rows.length) return res.status(404).json({ message: "Applicant not found" });
+
+    const user = rows[0];
+    res.json({
+      user_id: user.user_id,
+      email: user.email,
+      fullName: `${user.first_name} ${user.middle_name || ""} ${user.last_name}`,
+      birthdate: user.birthOfDate,
+      status: user.status   // ✅ now returns 0 or 1 directly
+    });
+  } catch (err) {
+    console.error("Get applicant error:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// ---------------- Applicant: Update Status ---------------- //
+app.post("/superadmin-update-status-applicant", async (req, res) => {
+  const { email, status } = req.body;
+  try {
+    await db.query(
+      `UPDATE user_accounts SET status = ? WHERE email = ? AND role = 'applicant'`,
+      [status, email]
+    );
+    res.json({ message: "Applicant status updated successfully" });
+  } catch (err) {
+    console.error("Update applicant status error:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
+
+// ---------------- Student: Get Info ----------------
+app.post("/superadmin-get-student", async (req, res) => {
+  const { email } = req.body;
+  try {
+    const [rows] = await db3.query(
+      `SELECT ua.id, ua.email, ua.status,
+              pt.first_name, pt.middle_name, pt.last_name, pt.birthOfDate
+       FROM user_accounts ua
+       JOIN person_table pt ON ua.person_id = pt.person_id
+       WHERE ua.email = ? AND ua.role = 'student'`,
+      [email]
+    );
+
+    if (!rows.length) return res.status(404).json({ message: "Student not found" });
+
+    const user = rows[0];
+    res.json({
+      user_id: user.id, // ✅ enrollment DB uses "id"
+      email: user.email,
+      fullName: `${user.first_name} ${user.middle_name || ""} ${user.last_name}`,
+      birthdate: user.birthOfDate,
+      status: user.status ?? 0
+    });
+  } catch (err) {
+    console.error("Get student error:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// ---------------- Student: Update Status ----------------
+app.post("/superadmin-update-status-student", async (req, res) => {
+  const { email, status } = req.body;
+  try {
+    const [result] = await db3.query(
+      `UPDATE user_accounts SET status = ? WHERE email = ? AND role = 'student'`,
+      [status, email]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    res.json({ message: "Student status updated successfully", status });
+  } catch (err) {
+    console.error("Update student status error:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// ---------------- Faculty: Get Info ----------------
+app.post("/superadmin-get-faculty", async (req, res) => {
+  const { email } = req.body;
+  try {
+    const [rows] = await db3.query(
+      `SELECT ua.id, ua.email, ua.status,
+              pt.first_name, pt.middle_name, pt.last_name, pt.birthOfDate
+       FROM user_accounts ua
+       JOIN person_table pt ON ua.person_id = pt.person_id
+       WHERE ua.email = ? AND ua.role = 'faculty'`,
+      [email]
+    );
+
+    if (!rows.length) return res.status(404).json({ message: "Faculty not found" });
+
+    const user = rows[0];
+    res.json({
+      user_id: user.id, // ✅ enrollment DB uses "id"
+      email: user.email,
+      fullName: `${user.first_name} ${user.middle_name || ""} ${user.last_name}`,
+      birthdate: user.birthOfDate,
+      status: user.status ?? 0
+    });
+  } catch (err) {
+    console.error("Get faculty error:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// ---------------- Faculty: Update Status ----------------
+app.post("/superadmin-update-status-faculty", async (req, res) => {
+  const { email, status } = req.body;
+  try {
+    const [result] = await db3.query(
+      `UPDATE user_accounts SET status = ? WHERE email = ? AND role = 'faculty'`,
+      [status, email]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Faculty not found" });
+    }
+
+    res.json({ message: "Faculty status updated successfully", status });
+  } catch (err) {
+    console.error("Update faculty status error:", err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 
 
 // Applicant Change Password 
@@ -2104,7 +2281,243 @@ http://localhost:5173/login
 });
 
 
+// ============================
+// GET - Day List (from schedule table)
+// ============================
+app.get("/day_list", async (req, res) => {
+  try {
+    const [results] = await db.query(
+      "SELECT DISTINCT day_description FROM entrance_exam_schedule ORDER BY FIELD(day_description, 'Monday','Tuesday','Wednesday','Thursday','Friday')"
+    );
+    res.json(results);
+  } catch (err) {
+    console.error("Error fetching days:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
 
+// ============================
+// GET - Room List (from enrollment.room_table)
+// ============================
+app.get("/room_list", async (req, res) => {
+  try {
+    const [results] = await db.query(
+      "SELECT room_id, room_description FROM enrollment.room_table ORDER BY room_description ASC"
+    );
+    res.json(results);
+  } catch (err) {
+    console.error("Error fetching rooms:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+// ============================
+// POST - Insert Entrance Exam Schedule
+// ============================
+app.post("/insert_exam_schedule", async (req, res) => {
+  const { day_description, room_description, start_time, end_time } = req.body;
+
+  if (!day_description || !room_description || !start_time || !end_time) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  try {
+    await db.query(
+      `INSERT INTO entrance_exam_schedule (day_description, room_description, start_time, end_time)
+       VALUES (?, ?, ?, ?)`,
+      [day_description.trim(), room_description.trim(), start_time, end_time]
+    );
+    res.status(200).json({ message: "Schedule saved successfully" });
+  } catch (err) {
+    console.error("Error saving schedule:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+// GET schedules from admission.entrance_exam_schedule
+app.get("/exam_schedules", async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT schedule_id, day_description, room_description, start_time, end_time
+      FROM admission.entrance_exam_schedule
+      ORDER BY schedule_id DESC
+    `);
+    res.json(rows);
+  } catch (err) {
+    console.error("Error fetching schedules:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+
+io.on("connection", (socket) => {
+  console.log("✅ Socket.IO client connected");
+
+  // === ASSIGN SCHEDULE ===
+  socket.on("update_schedule", async ({ schedule_id, applicant_numbers }) => {
+    try {
+      if (!schedule_id || !applicant_numbers || applicant_numbers.length === 0) {
+        return socket.emit("update_schedule_result", {
+          success: false,
+          error: "Schedule ID and applicants required.",
+        });
+      }
+
+      const assigned = [];
+      const skipped = [];
+
+      for (const applicant_number of applicant_numbers) {
+        const [check] = await db.query(
+          `SELECT * FROM exam_applicants WHERE applicant_id = ?`,
+          [applicant_number]
+        );
+
+        if (check.length > 0) {
+          skipped.push(applicant_number);
+          continue;
+        }
+
+        await db.query(
+          `INSERT INTO exam_applicants (applicant_id, schedule_id) VALUES (?, ?)`,
+          [applicant_number, schedule_id]
+        );
+
+        assigned.push(applicant_number);
+      }
+
+      socket.emit("update_schedule_result", { success: true, assigned, skipped });
+    } catch (error) {
+      console.error("❌ Error assigning schedule:", error);
+      socket.emit("update_schedule_result", {
+        success: false,
+        error: "Failed to assign schedule.",
+      });
+    }
+  });
+
+
+// === SEND SCHEDULE EMAILS ===
+socket.on("send_schedule_emails", async ({ schedule_id }) => {
+  try {
+    const [rows] = await db.query(
+      `SELECT 
+         ea.schedule_id,
+         s.day_description,
+         s.room_description,
+         s.start_time,
+         s.end_time,
+         an.applicant_number,
+         p.person_id,
+         p.first_name,
+         p.last_name,
+         p.emailAddress
+       FROM exam_applicants ea
+       JOIN entrance_exam_schedule s 
+         ON ea.schedule_id = s.schedule_id
+       JOIN applicant_numbering_table an 
+         ON ea.applicant_id = an.applicant_number
+       JOIN person_table p 
+         ON an.person_id = p.person_id
+       WHERE ea.schedule_id = ?`,
+      [schedule_id]
+    );
+
+    if (rows.length === 0) {
+      socket.emit("send_schedule_emails_result", {
+        success: false,
+        error: "No applicants found for this schedule.",
+      });
+      return;
+    }
+
+    for (const row of rows) {
+      if (!row.emailAddress) {
+        console.warn(`⚠️ Applicant ${row.applicant_number} has no email`);
+        continue;
+      }
+
+      const mailOptions = {
+        from: `"EARIST MIS" <${process.env.EMAIL_USER}>`,
+        to: row.emailAddress,
+        subject: "Your Entrance Exam Schedule",
+        text: `Hello ${row.first_name} ${row.last_name},
+
+You have been assigned to the following entrance exam schedule:
+
+📅 Day: ${row.day_description}
+🏫 Room: ${row.room_description}
+🕒 Time: ${row.start_time} - ${row.end_time}
+🆔 Applicant No: ${row.applicant_number}
+
+Please arrive on time and bring your requirements.
+📌 𝑾𝒉𝒂𝒕 𝒕𝒐 𝑩𝒓𝒊𝒏𝒈:
+- Long Blue Folder
+- Examination Permit
+- Ballpen
+
+👕 𝐀𝐓𝐓𝐈𝐑𝐄: 𝐒𝐭𝐫𝐢𝐜𝐭𝐥𝐲 𝐰𝐞𝐚𝐫 𝐖𝐇𝐈𝐓𝐄 𝐬𝐡𝐢𝐫𝐭 𝐚𝐧𝐝 𝐩𝐚𝐧𝐭𝐬.
+
+- Eulogio "Amang" Rodriguez Institute of Science and Technology`,
+      };
+
+      try {
+        // Send email
+        await transporter.sendMail(mailOptions);
+        console.log(`✅ Email sent to ${row.emailAddress}`);
+
+        // 🔥 Mark applicant as emailed in person_status_table
+        await db.query(
+          `UPDATE person_status_table 
+           SET exam_status = 1 
+           WHERE applicant_id = ?`,
+          [row.applicant_number]
+        );
+
+      } catch (err) {
+        console.error(`❌ Failed to send email to ${row.emailAddress}:`, err.message);
+      }
+    }
+
+    socket.emit("send_schedule_emails_result", {
+      success: true,
+      message: `Emails sent to ${rows.length} applicants and status updated.`,
+    });
+  } catch (err) {
+    console.error("Error in send_schedule_emails:", err);
+    socket.emit("send_schedule_emails_result", {
+      success: false,
+      error: "Server error sending emails.",
+    });
+  }
+});
+
+});
+
+
+// Unassign schedule from an applicant
+app.post("/unassign_schedule", async (req, res) => {
+  const { applicant_number } = req.body;
+
+  if (!applicant_number) {
+    return res.status(400).json({ error: "Applicant number is required." });
+  }
+
+  try {
+    const [result] = await db.query(
+      `DELETE FROM admission.exam_applicants WHERE applicant_id = ?`,
+      [applicant_number]
+    );
+
+    if (result.affectedRows > 0) {
+      res.json({ success: true, message: `Applicant ${applicant_number} unassigned.` });
+    } else {
+      res.status(404).json({ error: "Applicant not found or not assigned." });
+    }
+  } catch (err) {
+    console.error("Error unassigning schedule:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
 
 // Login for Applicants
 app.post("/login_applicant", async (req, res) => {
@@ -3349,8 +3762,8 @@ app.put("/add_grades", async (req, res) => {
 });
 
 app.get('/get_class_details/:selectedActiveSchoolYear/:profID', async (req, res) => {
-  const {selectedActiveSchoolYear, profID} = req.params;
-  try{
+  const { selectedActiveSchoolYear, profID } = req.params;
+  try {
     const query = `
     SELECT 
         cst.course_id, 
@@ -3385,13 +3798,13 @@ app.get('/get_class_details/:selectedActiveSchoolYear/:profID', async (req, res)
     res.json(result);
   } catch (err) {
     console.error("Server Error: ", err);
-    res.status(500).send({message: "Internal Error", err});
+    res.status(500).send({ message: "Internal Error", err });
   }
 });
 
 app.get('/get_student_list/:course_id/:department_section_id/:school_year_id', async (req, res) => {
-  const {course_id, department_section_id, school_year_id} = req.params;
-  try{
+  const { course_id, department_section_id, school_year_id } = req.params;
+  try {
     const query = `
     SELECT es.id as enrolled_id,snt.student_number,pst.first_name, pst.middle_name, pst.last_name, pt.program_code, st.description AS section_description, ct.course_description, ct.course_code FROM enrolled_subject AS es
       INNER JOIN student_numbering_table AS snt ON es.student_number = snt.student_number
@@ -3409,7 +3822,7 @@ app.get('/get_student_list/:course_id/:department_section_id/:school_year_id', a
     res.json(result);
   } catch (err) {
     console.error("Server Error: ", err);
-    res.status(500).send({message: "Internal Error", err});
+    res.status(500).send({ message: "Internal Error", err });
   }
 });
 
@@ -4246,8 +4659,8 @@ app.put("/api/update-active-curriculum", async (req, res) => {
     const result = await db3.query(updateQuery, [curriculumId, studentId]);
     const data = result[0];
     console.log(data)
-    res.status(200).json({ 
-      message: "Active curriculum updated successfully", 
+    res.status(200).json({
+      message: "Active curriculum updated successfully",
     });
 
   } catch (err) {
@@ -4257,8 +4670,8 @@ app.put("/api/update-active-curriculum", async (req, res) => {
 });
 
 app.get('/api/search-student/:sectionId', async (req, res) => {
-  const {sectionId} = req.params
-  try{
+  const { sectionId } = req.params
+  try {
     const getProgramQuery = `
       SELECT dst.curriculum_id, pt.program_description, pt.program_code 
       FROM dprtmnt_section_table AS dst
@@ -4268,7 +4681,7 @@ app.get('/api/search-student/:sectionId', async (req, res) => {
     `;
     const [programResult] = await db3.query(getProgramQuery, [sectionId]);
     res.status(200).json(programResult);
-  }catch(err){
+  } catch (err) {
     console.error("Error updating active curriculum:", err);
     res.status(500).json({ error: "Database error", details: err.message });
   }
@@ -4391,9 +4804,9 @@ app.get("/get_prof_data/:id", async (req, res) => {
 });
 
 app.get('/course_assigned_to/:userID', async (req, res) => {
-  const {userID} = req.params;
+  const { userID } = req.params;
 
-  try{
+  try {
     const sql = `
     SELECT DISTINCT tt.course_id, ct.course_description, ct.course_code FROM time_table AS tt
       INNER JOIN course_table AS ct ON tt.course_id = ct.course_id
@@ -4403,17 +4816,17 @@ app.get('/course_assigned_to/:userID', async (req, res) => {
     `
     const [result] = await db3.query(sql, [userID]);
     res.json(result);
-  }catch(err){
+  } catch (err) {
     console.error("Server Error: ", err);
-    res.status(500).send({message: "Internal Error", err});
+    res.status(500).send({ message: "Internal Error", err });
   }
 });
 
 app.get('/handle_section_of/:userID/:selectedCourse/:selectedActiveSchoolYear', async (req, res) => {
-  const {userID, selectedCourse, selectedActiveSchoolYear} = req.params;
-  
+  const { userID, selectedCourse, selectedActiveSchoolYear } = req.params;
 
-  try{
+
+  try {
     const sql = `
     SELECT tt.department_section_id, ptbl.program_code, st.description AS section_description FROM time_table AS tt
       INNER JOIN prof_table AS pt ON tt.professor_id = pt.prof_id
@@ -4427,14 +4840,14 @@ app.get('/handle_section_of/:userID/:selectedCourse/:selectedActiveSchoolYear', 
     `
     const [result] = await db3.query(sql, [userID, selectedCourse, selectedActiveSchoolYear]);
     res.json(result);
-  }catch(err){
+  } catch (err) {
     console.error("Server Error: ", err);
-    res.status(500).send({message: "Internal Error", err});
+    res.status(500).send({ message: "Internal Error", err });
   }
 });
 
 app.get('/get_school_year', async (req, res) => {
-  try{
+  try {
     const query = `
       SELECT DISTINCT 
         year_id, 
@@ -4447,12 +4860,12 @@ app.get('/get_school_year', async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error("Server Error: ", err);
-    res.status(500).send({message: "Internal Error", err});
+    res.status(500).send({ message: "Internal Error", err });
   }
 });
 
 app.get('/get_school_semester', async (req, res) => {
-  try{
+  try {
     const query = `
       SELECT DISTINCT 
         semester_id,semester_description, semester_code
@@ -4463,12 +4876,12 @@ app.get('/get_school_semester', async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error("Server Error: ", err);
-    res.status(500).send({message: "Internal Error", err});
+    res.status(500).send({ message: "Internal Error", err });
   }
 });
 
 app.get('/active_school_year', async (req, res) => {
-  try{
+  try {
     const query = `
     SELECT
     asyt.id AS school_year_id,
@@ -4487,13 +4900,13 @@ app.get('/active_school_year', async (req, res) => {
     res.json(result);
   } catch (err) {
     console.error("Server Error: ", err);
-    res.status(500).send({message: "Internal Error", err});
+    res.status(500).send({ message: "Internal Error", err });
   }
 });
 
 app.get('/get_selecterd_year/:selectedSchoolYear/:selectedSchoolSemester', async (req, res) => {
-  const {selectedSchoolYear, selectedSchoolSemester} = req.params;
-  try{
+  const { selectedSchoolYear, selectedSchoolSemester } = req.params;
+  try {
     const query = `
     SELECT
     asyt.id AS school_year_id
@@ -4507,15 +4920,15 @@ app.get('/get_selecterd_year/:selectedSchoolYear/:selectedSchoolSemester', async
     res.json(result);
   } catch (err) {
     console.error("Server Error: ", err);
-    res.status(500).send({message: "Internal Error", err});
+    res.status(500).send({ message: "Internal Error", err });
   }
 });
 
 
 app.get('/enrolled_student_list/:userID/:selectedCourse/:department_section_id', async (req, res) => {
-  const {userID,selectedCourse, department_section_id} = req.params;
+  const { userID, selectedCourse, department_section_id } = req.params;
 
-  try{
+  try {
     const sql = `
     SELECT DISTINCT
       es.student_number, 
@@ -4541,9 +4954,9 @@ app.get('/enrolled_student_list/:userID/:selectedCourse/:department_section_id',
     `
     const [result] = await db3.query(sql, [userID, selectedCourse, department_section_id]);
     res.json(result);
-  }catch(err){
+  } catch (err) {
     console.error("Server Error: ", err);
-    res.status(500).send({message: "Internal Error", err});
+    res.status(500).send({ message: "Internal Error", err });
   }
 });
 

@@ -37,35 +37,35 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
 
   const navigate = useNavigate();
   const handleLogin = async () => {
-  if (isLoggingIn) return; // 🚫 Prevent multiple clicks
-  setIsLoggingIn(true);
+    if (isLoggingIn) return;
+    setIsLoggingIn(true);
 
-  if (!email || !password) {
-    setSnack({ open: true, message: "Please fill in all fields", severity: "warning" });
-    setIsLoggingIn(false);
-    return;
-  }
+    if (!email || !password) {
+      setSnack({ open: true, message: "Please fill in all fields", severity: "warning" });
+      setIsLoggingIn(false);
+      return;
+    }
 
-  try {
-    const res = await axios.post("http://localhost:5000/login", { email, password });
-    setTempLoginData(res.data);
+    try {
+      const res = await axios.post("http://localhost:5000/login", { email, password });
+      setTempLoginData(res.data);
 
-    // Show OTP modal right away
-    setShowOtpModal(true);
-    startResendTimer();
+      // Show OTP modal right away
+      setShowOtpModal(true);
+      startResendTimer();
 
-    setSnack({ open: true, message: "OTP sent to your email", severity: "success" });
+      setSnack({ open: true, message: "OTP sent to your email", severity: "success" });
 
-  } catch (error) {
-    setSnack({
-      open: true,
-      message: error.response?.data?.message || "Login failed",
-      severity: "error"
-    });
-  } finally {
-    setIsLoggingIn(false); // ✅ Allow login again if failed
-  }
-};
+    } catch (error) {
+      setSnack({
+        open: true,
+        message: error.response?.data?.message || "Login failed",
+        severity: "error"
+      });
+    } finally {
+      setIsLoggingIn(false); // ✅ Allow login again if failed
+    }
+  };
 
 
 

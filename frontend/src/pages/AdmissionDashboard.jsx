@@ -64,6 +64,30 @@ const AdmissionDashboardPanel = () => {
           </Link>
         </div>
 
+        
+
+        <div className="relative mb-5">
+          <Link to={'/assign_schedule_applicant'}>
+            <div className="bg-white p-4 border-4 rounded-lg border-solid border-maroon-500 absolute left-16 top-12 w-enough">
+              <CollectionsBookmark className="text-maroon-500 text-2xl" />
+            </div>
+            <button className="bg-white text-maroon-500 border-4 rounded-lg border-solid border-maroon-500 p-4 w-80 h-32 font-medium mr-4 mt-20 ml-8 flex items-end justify-center">
+              ASSIGN SCHEDULE TO APPLICANTS
+            </button>
+          </Link>
+        </div>
+
+         <div className="relative mb-5">
+          <Link to={'/assign_entrance_exam'}>
+            <div className="bg-white p-4 border-4 rounded-lg border-solid border-maroon-500 absolute left-16 top-12 w-enough">
+              <CollectionsBookmark className="text-maroon-500 text-2xl" />
+            </div>
+            <button className="bg-white text-maroon-500 border-4 rounded-lg border-solid border-maroon-500 p-4 w-80 h-32 font-medium mr-4 mt-20 ml-8 flex items-end justify-center">
+              ASSIGN ENTRANCE EXAM
+            </button>
+          </Link>
+        </div>
+
         <div className="relative">
           <Link to={'/class_roster'}>
             <div className="bg-white p-4 border-4 rounded-lg border-solid border-maroon-500 absolute left-16 top-12 w-enough">

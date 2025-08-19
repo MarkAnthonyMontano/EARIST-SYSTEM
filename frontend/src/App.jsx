@@ -9,7 +9,9 @@ import RegistrarForgotPassword from './components/RegistrarForgotPassword';
 import RegistrarResetPassword from './components/RegistrarResetPassword';
 import StudentResetPassword from './components/StudentResetPassword';
 import FacultyResetPassword from './components/FacultyResetPassword';
-
+import SuperAdminApplicantResetPassword from './components/SuperAdminApplicantResetPassword';
+import SuperAdminStudentResetPassword from './components/SuperAdminStudentResetPassword';
+import SuperAdminFacultyResetPassword from './components/SuperAdminFacultyResetPassword';
 
 import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
 import Navbar from './components/Navbar';
@@ -38,6 +40,7 @@ import RequirementsForm from './components/RequirementsForm';
 import AdmissionDashboardPanel from './pages/AdmissionDashboard';
 import SystemDashboardPanel from './pages/SystemDashboard';
 import DepartmentManagement from './pages/DepartmentDashboard';
+import HistoryLogs from './pages/HistoryLogs';
 import StudentNumbering from './components/StudentNumbering';
 import CourseTagging from './components/CourseTagging';
 import ChangeGradingPeriod from './components/ChangeYearGradPer';
@@ -79,6 +82,8 @@ import SuperAdminDashboard5 from './components/SuperAdminDashboard5';
 
 
 import ExaminationProfile from './components/ExaminationProfile';
+import AssignScheduleToApplicants from './components/AssignScheduleToApplicants';
+import AssignEntranceExam from './components/AssignEntranceExam';
 import Dashboard1 from './components/Dashboard1';
 import Dashboard2 from './components/Dashboard2';
 import Dashboard3 from './components/Dashboard3';
@@ -155,6 +160,10 @@ function App() {
 
               <Route path="/student_reset_password" element={<ProtectedRoute><StudentResetPassword /></ProtectedRoute>} />
               <Route path="/faculty_reset_password" element={<ProtectedRoute><FacultyResetPassword /></ProtectedRoute>} />
+              <Route path="/superadmin_applicant_reset_password" element={<ProtectedRoute><SuperAdminApplicantResetPassword /></ProtectedRoute>} />
+              <Route path="/superadmin_student_reset_password" element={<ProtectedRoute><SuperAdminStudentResetPassword /></ProtectedRoute>} />
+              <Route path="/superadmin_faculty_reset_password" element={<ProtectedRoute><SuperAdminFacultyResetPassword /></ProtectedRoute>} />
+
 
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/faculty_dashboard" element={<ProtectedRoute allowedRoles={['faculty']}><FacultyDashboard /></ProtectedRoute>} />
@@ -178,7 +187,7 @@ function App() {
               <Route path="/semester_panel" element={<ProtectedRoute><SemesterPanel /></ProtectedRoute>} />
               <Route path="/school_year_panel" element={<ProtectedRoute><SchoolYearPanel /></ProtectedRoute>} />
               <Route path="/school_year_activator_panel" element={<ProtectedRoute><SchoolYearActivatorPanel /></ProtectedRoute>} />
-
+              <Route path="/history_logs" element={<ProtectedRoute><HistoryLogs /></ProtectedRoute>} />
               <Route path="/requirements_form" element={<ProtectedRoute><RequirementsForm /></ProtectedRoute>} />
               <Route path="/admission_dashboard" element={<ProtectedRoute><AdmissionDashboardPanel /></ProtectedRoute>} />
               <Route path="/department_dashboard" element={<ProtectedRoute><DepartmentManagement /></ProtectedRoute>} />
@@ -192,6 +201,8 @@ function App() {
               <Route path="/search_cor" element={<ProtectedRoute><SearchCertificateOfRegistration /></ProtectedRoute>} />
               <Route path="/select_college" element={<ProtectedRoute><ScheduleFilterer /></ProtectedRoute>} />
               <Route path="/examination_profile" element={<ProtectedRoute><ExaminationProfile /></ProtectedRoute>} />
+              <Route path="/assign_entrance_exam" element={<ProtectedRoute><AssignEntranceExam /></ProtectedRoute>} />
+              <Route path="/assign_schedule_applicant" element={<ProtectedRoute><AssignScheduleToApplicants /></ProtectedRoute>} />
 
               <Route path="/grading_sheet" element={<ProtectedRoute><GradingSheet /></ProtectedRoute>} />
               <Route path="/faculty_workload" element={<ProtectedRoute><FacultyWorkload /></ProtectedRoute>} />

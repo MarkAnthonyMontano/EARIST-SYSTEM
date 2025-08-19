@@ -232,8 +232,8 @@ const ApplicantList = () => {
             // (keep your registrar filter; shown here with the earlier mapping)
             const matchesRegistrarStatus =
                 selectedRegistrarStatus === "" ||
-                (selectedRegistrarStatus === "Enrolled" && personData.registrar_status === 1) ||
-                (selectedRegistrarStatus === "Unenrolled" && personData.registrar_status === 0);
+                (selectedRegistrarStatus === "Submitted" && personData.registrar_status === 1) ||
+                (selectedRegistrarStatus === "Unsubmitted / Incomplete" && personData.registrar_status === 0);
 
             const programInfo = allCurriculums.find(
                 (opt) => opt.curriculum_id?.toString() === personData.program?.toString()
@@ -509,9 +509,9 @@ const ApplicantList = () => {
       <td>${person.generalAverage1 ?? ""}</td>
       <td>${new Date(person.created_at).toLocaleDateString("en-PH")}</td>
       <td>${person.registrar_status === 1
-                ? "ENROLLED"
+                ? "Submitted"
                 : person.registrar_status === 0
-                    ? "UNENROLLED"
+                    ? "Unsubmitted / Incomplete"
                     : ""
             }</td>
     </tr>
@@ -935,8 +935,8 @@ const ApplicantList = () => {
                                     displayEmpty
                                 >
                                     <MenuItem value="">Select status</MenuItem>
-                                    <MenuItem value="Enrolled">Enrolled</MenuItem>
-                                    <MenuItem value="Unenrolled">Unenrolled</MenuItem>
+                                    <MenuItem value="Submitted">Submitted</MenuItem>
+                                    <MenuItem value="Unsubmitted / Incomplete">Unsubmitted / Incomplete</MenuItem>
                                 </Select>
                             </FormControl>
 
@@ -1052,7 +1052,7 @@ const ApplicantList = () => {
                             <TableCell sx={{ color: "white", textAlign: "center", width: "3%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
                                 Submitted Orig Documents
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "10%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "8%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
                                 Applicant ID
                             </TableCell>
                             <TableCell sx={{ color: "white", textAlign: "center", width: "30%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
@@ -1064,10 +1064,10 @@ const ApplicantList = () => {
                             <TableCell sx={{ color: "white", textAlign: "center", width: "6%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
                                 SHS GWA
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "5%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "8%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
                                 Date Applied
                             </TableCell>
-                            <TableCell sx={{ color: "white", textAlign: "center", width: "5%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
+                            <TableCell sx={{ color: "white", textAlign: "center", width: "8%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
                                 Date Last Updated
                             </TableCell>
                             <TableCell sx={{ color: "white", textAlign: "center", width: "16%", py: 0.5, fontSize: "12px", border: "1px solid maroon" }}>
@@ -1180,7 +1180,7 @@ const ApplicantList = () => {
                                                 backgroundColor: "#4CAF50",
                                                 color: "white",
                                                 borderRadius: 1,
-                                                width: 120,
+                                                width: 250,
                                                 height: 30,
                                                 display: "flex",
                                                 alignItems: "center",
@@ -1188,7 +1188,7 @@ const ApplicantList = () => {
                                                 margin: "0 auto",
                                             }}
                                         >
-                                            <Typography sx={{ fontWeight: "bold" }}>ENROLLED</Typography>
+                                            <Typography sx={{ fontWeight: "bold" }}>Submitted</Typography>
                                         </Box>
                                     ) : person.registrar_status === 0 ? (
                                         <Box
@@ -1196,7 +1196,7 @@ const ApplicantList = () => {
                                                 backgroundColor: "#F44336",
                                                 color: "white",
                                                 borderRadius: 1,
-                                                width: 120,
+                                                width: 250,
                                                 height: 30,
                                                 display: "flex",
                                                 alignItems: "center",
@@ -1204,25 +1204,25 @@ const ApplicantList = () => {
                                                 margin: "0 auto",
                                             }}
                                         >
-                                            <Typography sx={{ fontWeight: "bold" }}>UNENROLLED</Typography>
+                                            <Typography sx={{ fontWeight: "bold" }}>Unsubmitted / Incomplete</Typography>
                                         </Box>
                                     ) : (
                                         <Box display="flex" justifyContent="center" gap={1}>
                                             <Button
-                                                key={`enrolled-${person.person_id}`}
+                                                key={`submitted-${person.person_id}`}
                                                 variant="contained"
                                                 onClick={() => handleRegistrarStatusChange(person.person_id, 1)}
-                                                sx={{ backgroundColor: "green", color: "white", width: 120, height: 30, }}
+                                                sx={{ backgroundColor: "green", color: "white", width: 150, height: 30, }}
                                             >
-                                                ENROLLED
+                                                Submitted
                                             </Button>
                                             <Button
-                                                key={`unenrolled-${person.person_id}`}
+                                                key={`unsubmitted / incomplete-${person.person_id}`}
                                                 variant="contained"
                                                 onClick={() => handleRegistrarStatusChange(person.person_id, 0)}
-                                                sx={{ backgroundColor: "red", color: "white", width: 120, height: 30, }}
+                                                sx={{ backgroundColor: "red", color: "white", width: 150, height: 30, }}
                                             >
-                                                UNENROLLED
+                                                Unsubmitted
                                             </Button>
                                         </Box>
                                     )}

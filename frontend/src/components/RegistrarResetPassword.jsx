@@ -110,13 +110,14 @@ const RegistrarResetPassword = () => {
         overflow: 'auto',
       }}
     >
-      <Container maxWidth="sm" sx={{ height: '90%', overflowY: 'auto', marginTop: "-40px" }}>
+      <Container maxWidth="sm" sx={{ height: '90%', overflowY: 'auto', marginTop: "-40px", }}>
         <Box
           sx={{
             borderRadius: 4,
             boxShadow: 3,
             p: 3,
             mt: 1,
+            border: "3px solid maroon",
             backgroundColor: '#fff',
           }}
         >
