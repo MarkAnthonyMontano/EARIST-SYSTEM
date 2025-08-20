@@ -7,7 +7,7 @@ const AdmissionDashboardPanel = () => {
     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
       <div className="p-2 px-10 w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
 
-    
+
 
         <div className="relative">
           <Link to={'/applicant_list'}>
@@ -21,12 +21,23 @@ const AdmissionDashboardPanel = () => {
         </div>
 
         <div className="relative">
+          <Link to={'/applicant_list_admin'}>
+            <div className="bg-white p-4 border-4 rounded-lg border-solid border-maroon-500 absolute left-16 top-12 w-enough">
+              <CollectionsBookmark className="text-maroon-500 text-2xl" />
+            </div>
+            <button className="bg-white text-maroon-500 border-4 rounded-lg border-solid border-maroon-500 p-4 w-80 h-32 font-medium mr-4 mt-20 ml-8 flex items-end justify-center">
+              ADMISSION PROCESS FOR ADMIN
+            </button>
+          </Link>
+        </div>
+
+        <div className="relative">
           <Link to={'/super_admin_dashboard1'}>
             <div className="bg-white p-4 border-4 rounded-lg border-solid border-maroon-500 absolute left-16 top-12 w-enough">
               <CollectionsBookmark className="text-maroon-500 text-2xl" />
             </div>
             <button className="bg-white text-maroon-500 border-4 rounded-lg border-solid border-maroon-500 p-4 w-80 h-32 font-medium mr-4 mt-20 ml-8 flex items-end justify-center">
-              APPLICANT FORM
+              INFORMATION
             </button>
           </Link>
         </div>
@@ -54,17 +65,15 @@ const AdmissionDashboardPanel = () => {
         </div>
 
         <div className="relative mb-5">
-          <Link to={'/examination_profile'}>
+          <Link to={'/assign_entrance_exam'}>
             <div className="bg-white p-4 border-4 rounded-lg border-solid border-maroon-500 absolute left-16 top-12 w-enough">
               <CollectionsBookmark className="text-maroon-500 text-2xl" />
             </div>
             <button className="bg-white text-maroon-500 border-4 rounded-lg border-solid border-maroon-500 p-4 w-80 h-32 font-medium mr-4 mt-20 ml-8 flex items-end justify-center">
-              ADMISSION EXAM
+              ASSIGN ENTRANCE EXAM
             </button>
           </Link>
         </div>
-
-        
 
         <div className="relative mb-5">
           <Link to={'/assign_schedule_applicant'}>
@@ -77,13 +86,24 @@ const AdmissionDashboardPanel = () => {
           </Link>
         </div>
 
-         <div className="relative mb-5">
-          <Link to={'/assign_entrance_exam'}>
+        <div className="relative mb-5">
+          <Link to={'/examination_profile'}>
             <div className="bg-white p-4 border-4 rounded-lg border-solid border-maroon-500 absolute left-16 top-12 w-enough">
               <CollectionsBookmark className="text-maroon-500 text-2xl" />
             </div>
             <button className="bg-white text-maroon-500 border-4 rounded-lg border-solid border-maroon-500 p-4 w-80 h-32 font-medium mr-4 mt-20 ml-8 flex items-end justify-center">
-              ASSIGN ENTRANCE EXAM
+              ADMISSION EXAMINATION PERMIT
+            </button>
+          </Link>
+        </div>
+
+        <div className="relative">
+          <Link to={'/medical_clearance'}>
+            <div className="bg-white p-4 border-4 rounded-lg border-solid border-maroon-500 absolute left-16 top-12 w-enough">
+              <CollectionsBookmark className="text-maroon-500 text-2xl" />
+            </div>
+            <button className="bg-white text-maroon-500 border-4 rounded-lg border-solid border-maroon-500 p-4 w-80 h-32 font-medium mr-4 mt-20 ml-8 flex items-end justify-center">
+              MEDICAL CLEARANCE
             </button>
           </Link>
         </div>
@@ -98,6 +118,8 @@ const AdmissionDashboardPanel = () => {
             </button>
           </Link>
         </div>
+
+
 
         <div className="relative">
           <Link to={'/admin_dashboard1'}>

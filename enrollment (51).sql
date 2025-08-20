@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 16, 2025 at 11:24 PM
+-- Generation Time: Aug 20, 2025 at 10:56 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -1209,7 +1209,7 @@ CREATE TABLE `person_table` (
 --
 
 INSERT INTO `person_table` (`person_id`, `profile_img`, `campus`, `academicProgram`, `classifiedAs`, `applyingAs`, `program`, `program2`, `program3`, `yearLevel`, `last_name`, `first_name`, `middle_name`, `extension`, `nickname`, `height`, `weight`, `lrnNumber`, `nolrnNumber`, `gender`, `pwdMember`, `pwdType`, `pwdId`, `birthOfDate`, `age`, `birthPlace`, `languageDialectSpoken`, `citizenship`, `religion`, `civilStatus`, `tribeEthnicGroup`, `cellphoneNumber`, `emailAddress`, `presentStreet`, `presentBarangay`, `presentZipCode`, `presentRegion`, `presentProvince`, `presentMunicipality`, `presentDswdHouseholdNumber`, `sameAsPresentAddress`, `permanentStreet`, `permanentBarangay`, `permanentZipCode`, `permanentRegion`, `permanentProvince`, `permanentMunicipality`, `permanentDswdHouseholdNumber`, `solo_parent`, `father_deceased`, `father_family_name`, `father_given_name`, `father_middle_name`, `father_ext`, `father_nickname`, `father_education`, `father_education_level`, `father_last_school`, `father_course`, `father_year_graduated`, `father_school_address`, `father_contact`, `father_occupation`, `father_employer`, `father_income`, `father_email`, `mother_deceased`, `mother_family_name`, `mother_given_name`, `mother_middle_name`, `mother_ext`, `mother_nickname`, `mother_education`, `mother_education_level`, `mother_last_school`, `mother_course`, `mother_year_graduated`, `mother_school_address`, `mother_contact`, `mother_occupation`, `mother_employer`, `mother_income`, `mother_email`, `guardian`, `guardian_family_name`, `guardian_given_name`, `guardian_middle_name`, `guardian_ext`, `guardian_nickname`, `guardian_address`, `guardian_contact`, `guardian_email`, `annual_income`, `schoolLevel`, `schoolLastAttended`, `schoolAddress`, `courseProgram`, `honor`, `generalAverage`, `yearGraduated`, `schoolLevel1`, `schoolLastAttended1`, `schoolAddress1`, `courseProgram1`, `honor1`, `generalAverage1`, `yearGraduated1`, `strand`, `cough`, `colds`, `fever`, `asthma`, `faintingSpells`, `heartDisease`, `tuberculosis`, `frequentHeadaches`, `hernia`, `chronicCough`, `headNeckInjury`, `hiv`, `highBloodPressure`, `diabetesMellitus`, `allergies`, `cancer`, `smokingCigarette`, `alcoholDrinking`, `hospitalized`, `hospitalizationDetails`, `medications`, `hadCovid`, `covidDate`, `vaccine1Brand`, `vaccine1Date`, `vaccine2Brand`, `vaccine2Date`, `booster1Brand`, `booster1Date`, `booster2Brand`, `booster2Date`, `chestXray`, `cbc`, `urinalysis`, `otherworkups`, `symptomsToday`, `remarks`, `termsOfAgreement`, `created_at`) VALUES
-(3, '1_1by1_2025.jpg', 0, 'Undergraduate', 'Freshman (First Year)', NULL, '16', '6', '16', 'First Year', 'Montaño', 'Mark Anthony', 'Placido', '', 'Johnny', '5\'11', '65kg', 'No LRN Number', 0, 0, 0, '', '', '2003-06-20', 21, 'Manila, Philippines', 'Tagalog, English', 'FILIPINO', 'Born Again', 'Single', 'Agta', '09171234567999999', 'montano.ma.bsinfotech@gmail.com', '19 G Dona Yayang Street ', 'Libis', '1000', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'Quezon City', 'DSWD123456', 0, '19 G Dona Yayang Street ', 'Libis', '1000', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'Quezon City', 'DSWD123456', 0, 0, 'Doe Sr.', 'Jonathan', 'Smiths', 'III', 'Jon', 0, '', '', '', '', '', '09181234567', 'Engineer', 'ABC Corp', '50000', 'jon.doe@abc.com', 0, 'Jane', 'Mary', 'Anne', '', 'Janey', 0, '', '', '', '', '', '09221234567', 'Accountant', 'XYZ Corp', '100000', 'jane.doe@xyz.com', 'StepFather', 'Parker', 'Ben', 'Jose', 'IV', 'Benny', '789 Recto Av', '09192233445', '', '135,000 to 250,000', 'Senior High School', 'CGEAHS', 'Pasig City', 'STEM', 'With Honors', 92.50, 2022, 'Senior High School', 'CGEAHS', 'Rizal High School', 'Rizal High School', '0', 100.00, 0, 'Information and Communications Technology (ICT)', 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 'Wala ngani', 'Vitamins C', 1, '2022-02-11', 'Pfizer', '2022-03-14', 'Pfizer', '2022-04-13', 'Moderna', '2022-07-14', 'Pfizer', '2023-01-14', 'Normal', 'Normal', 'Normal', 'Normal', 1, 'Fit to enroll', 1, NULL),
+(14, '1_1by1_2025.jpg', 0, 'Undergraduate', 'Freshman (First Year)', NULL, '16', '6', '16', 'First Year', 'Montaño', 'Mark Anthony', 'Placido', '', 'Johnny', '5\'11', '65kg', 'No LRN Number', 0, 0, 0, '', '', '2003-06-20', 21, 'Manila, Philippines', 'Tagalog, English', 'FILIPINO', 'Born Again', 'Single', 'Agta', '09171234567999999', 'montano.ma.bsinfotech@gmail.com', '19 G Dona Yayang Street ', 'Libis', '1000', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'Quezon City', 'DSWD123456', 0, '19 G Dona Yayang Street ', 'Libis', '1000', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'Quezon City', 'DSWD123456', 0, 0, 'Doe Sr.', 'Jonathan', 'Smiths', 'III', 'Jon', 0, '', '', '', '', '', '09181234567', 'Engineer', 'ABC Corp', '50000', 'jon.doe@abc.com', 0, 'Jane', 'Mary', 'Anne', '', 'Janey', 0, '', '', '', '', '', '09221234567', 'Accountant', 'XYZ Corp', '100000', 'jane.doe@xyz.com', 'StepFather', 'Parker', 'Ben', 'Jose', 'IV', 'Benny', '789 Recto Av', '09192233445', '', '135,000 to 250,000', 'Senior High School', 'CGEAHS', 'Pasig City', 'STEM', 'With Honors', 92.50, 2022, 'Senior High School', 'CGEAHS', 'Rizal High School', 'Rizal High School', '0', 100.00, 0, 'Information and Communications Technology (ICT)', 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 'Wala ngani', 'Vitamins C', 1, '2022-02-11', 'Pfizer', '2022-03-14', 'Pfizer', '2022-04-13', 'Moderna', '2022-07-14', 'Pfizer', '2023-01-14', 'Normal', 'Normal', 'Normal', 'Normal', 1, 'Fit to enroll', 1, NULL),
 (2, '3_1by1_2025.jpg', 1, 'Techvoc', 'Freshman (First Year)', 'Senior High School Graduate', '14', '4', '3', 'First Year', 'Montano', 'Mark Anthony', 'p.', '', 'MARK', '5\'11', '65', '123456789012', 0, 0, 0, '', '', '2003-06-26', 21, 'Manila, Philippines', 'Tagalog, English', 'ALGERIAN', 'Iglesia Ni Cristo', 'Single', 'Cebuano', '09953242510', 'montano.ma.bsinfotech@gmail.com', '19 G Dona yayang Street Libis', 'Pag-asa', '4100', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'City Of Mandaluyong', 'DSWD123456', 0, '19 G Dona yayang Street Libis', 'Malipayon', '4100', 'Region X (Northern Mindanao)', 'Bukidnon', 'Pangantucan', 'DSWD123456', 0, 0, '', '', '', '', '', 0, '', '', '', '', '', '', '', '', '', '', NULL, '', '', '', '', '', 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'fgdsgfasftrasf', '', '', '', 0.00, 0, '', '', '', '', '', 0.00, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0, '', '', '', '', '', '', '', '', '', '', '', '', '', 0, '', 0, ''),
 (202, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'fasf', 'fasf', 'fsafbh', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'markmontano522@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (201, NULL, NULL, NULL, NULL, NULL, '18', NULL, NULL, NULL, '2r4qrasf', 'fas', 'dhgdfa', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'markmontano0626@gmail.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
@@ -1661,7 +1661,9 @@ INSERT INTO `room_table` (`room_id`, `room_description`) VALUES
 (18, 'CAS Room 406'),
 (19, 'CAS Room 409'),
 (20, 'CAS Room 411'),
-(21, 'CAFA');
+(21, 'CAFA'),
+(22, 'MIS'),
+(23, 'MIS101');
 
 -- --------------------------------------------------------
 
@@ -1908,24 +1910,25 @@ CREATE TABLE `user_accounts` (
   `person_id` int(11) DEFAULT NULL,
   `role` varchar(255) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `password` varchar(255) NOT NULL
+  `password` varchar(255) NOT NULL,
+  `status` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `user_accounts`
 --
 
-INSERT INTO `user_accounts` (`id`, `person_id`, `role`, `email`, `password`) VALUES
-(1, 20, 'registrar', 'markmontano522@gmail.com', '$2b$10$1z0TPyKFo6qtCrVAaA1D4e3qANATLI.pyTLqZinmmT8sF2zMALkDu'),
-(2, 4, 'student', 'ardenhello@gmail.com', '$2b$10$FR.08E3pPApsIbU0uQ3H9.IbjjWvc70cwRk4Bu2BwBwSFLGCp0o4.'),
-(12, 13, 'student', 'markmontao2671@gmail.com', '$2b$10$C3aCAR68k/gwdW87qSijAOt1peY6a97IO/VtuZDSfrU2wGIINndpG'),
-(13, 14, 'student', 'montano.ma.bsinfotech@gmail.com', '$2b$10$22emRbSCyIjPpe7zr2jGD.ThJz18wZ5lHyFTvhmN6Aa1iZnX9tG4W'),
-(14, 15, 'student', 'james@gmail.com', '$2b$10$Co4BlhU8i0/a4lLQ/cp7u.9ZdIuWgkZJkVbMmi/aqVpUhTd/akjtG'),
-(15, 18, 'student', 'markmontano522@gmail.com', '$2b$10$LpZY2sIonsckF6ysaHwDHu0FoNxM2XMwZZCnP.snpGd4.hSlZIv8G'),
-(17, 92, 'student', 'mecasio123@gmail.com', '$2b$10$CHRiC06CY6QQS4ZpiBlJYePp1TjQti.BlwIXJkc83ojxPM3H11vG.'),
-(18, 1, 'student', 'markmontano062612@gmail.com', '$2b$10$TjYekgXIRZbIau.fHxRseO44zSREQeJUHoRizlJpPKh1W7JkBZ9NC'),
-(19, 2, 'student', 'markmontano0626@gmail.com', '$2b$10$V8F7mMR2iYtSmRq/al/KOOqT.vXOEL9eaRUTSaDLJxLRq52WgZRZ2'),
-(20, 204, 'student', 'markmontano0626@gmail.com', '$2b$10$lDL/0s7dOdohXxChj2EegOXYTKi2FV1IAIKqso4xT7ymlP52Dm5om');
+INSERT INTO `user_accounts` (`id`, `person_id`, `role`, `email`, `password`, `status`) VALUES
+(1, 20, 'registrar', 'markmontano522@gmail.com', '$2b$10$1z0TPyKFo6qtCrVAaA1D4e3qANATLI.pyTLqZinmmT8sF2zMALkDu', NULL),
+(2, 4, 'student', 'ardenhello@gmail.com', '$2b$10$FR.08E3pPApsIbU0uQ3H9.IbjjWvc70cwRk4Bu2BwBwSFLGCp0o4.', NULL),
+(12, 13, 'student', 'markmontao2671@gmail.com', '$2b$10$C3aCAR68k/gwdW87qSijAOt1peY6a97IO/VtuZDSfrU2wGIINndpG', NULL),
+(13, 14, 'student', 'montano.ma.bsinfotech@gmail.com', '$2b$10$22emRbSCyIjPpe7zr2jGD.ThJz18wZ5lHyFTvhmN6Aa1iZnX9tG4W', 1),
+(14, 15, 'student', 'james@gmail.com', '$2b$10$Co4BlhU8i0/a4lLQ/cp7u.9ZdIuWgkZJkVbMmi/aqVpUhTd/akjtG', NULL),
+(15, 18, 'student', 'markmontano522@gmail.com', '$2b$10$LpZY2sIonsckF6ysaHwDHu0FoNxM2XMwZZCnP.snpGd4.hSlZIv8G', NULL),
+(17, 92, 'student', 'mecasio123@gmail.com', '$2b$10$CHRiC06CY6QQS4ZpiBlJYePp1TjQti.BlwIXJkc83ojxPM3H11vG.', NULL),
+(18, 1, 'student', 'markmontano062612@gmail.com', '$2b$10$TjYekgXIRZbIau.fHxRseO44zSREQeJUHoRizlJpPKh1W7JkBZ9NC', NULL),
+(19, 2, 'student', 'markmontano0626@gmail.com', '$2b$10$V8F7mMR2iYtSmRq/al/KOOqT.vXOEL9eaRUTSaDLJxLRq52WgZRZ2', NULL),
+(20, 204, 'student', 'markmontano0626@gmail.com', '$2b$10$lDL/0s7dOdohXxChj2EegOXYTKi2FV1IAIKqso4xT7ymlP52Dm5om', NULL);
 
 -- --------------------------------------------------------
 
@@ -2298,7 +2301,7 @@ ALTER TABLE `room_day_table`
 -- AUTO_INCREMENT for table `room_table`
 --
 ALTER TABLE `room_table`
-  MODIFY `room_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `room_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `school_time_table`

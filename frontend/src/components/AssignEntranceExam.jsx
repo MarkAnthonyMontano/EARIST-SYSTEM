@@ -1,14 +1,37 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Box, Button, Grid, MenuItem, TextField, Typography, Paper } from "@mui/material";
+import { Link, useLocation } from "react-router-dom";
 
 const AssignEntranceExam = () => {
+  const tabs = [
+    { label: "Room Scheduling", to: "/assign_entrance_exam" },
+    { label: "Applicant Scheduling", to: "/assign_schedule_applicant" },
+    { label: "Examination Profile", to: "/examination_profile" },
+  ];
+
+  const tabs1 = [
+    { label: "Applicant Form", to: "/admin_dashboard1" },
+    { label: "Documents Submitted", to: "/student_requirements" },
+    { label: "Admission Exam", to: "/assign_entrance_exam" },
+    { label: "Interview", to: "/interview" },
+    { label: "Qualifying Exam", to: "/qualifying_exam" },
+    { label: "College Approval", to: "/college_approval" },
+    { label: "Medical Clearance", to: "/medical_clearance" },
+    { label: "Applicant Status", to: "/applicant_status" },
+    { label: "View List", to: "/view_list" },
+  ];
   const [day, setDay] = useState("");
   const [roomId, setRoomId] = useState("");            // store selected room_id
   const [rooms, setRooms] = useState([]);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [message, setMessage] = useState("");
+  const [roomQuota, setRoomQuota] = useState("");
+  const [proctor, setProctor] = useState("");
+
+
+
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -24,44 +47,84 @@ const AssignEntranceExam = () => {
     fetchRooms();
   }, []);
 
-  const handleSaveSchedule = async (e) => {
-    e.preventDefault();
-    setMessage("");
+  const [schedules, setSchedules] = useState([]);
 
-    // find selected room's description
-    const sel = rooms.find((r) => String(r.room_id) === String(roomId));
-    if (!sel) {
-      setMessage("Please select a valid room.");
-      return;
-    }
+  useEffect(() => {
+    const fetchSchedules = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/exam_schedules_with_count");
+        setSchedules(res.data);
+      } catch (err) {
+        console.error("Error fetching schedules:", err);
+      }
+    };
+    fetchSchedules();
+  }, []);
 
-    try {
-      await axios.post("http://localhost:5000/insert_exam_schedule", {
-        day_description: day,
-        room_description: sel.room_description,
-        start_time: startTime,
-        end_time: endTime,
-      });
-      setMessage("Entrance exam schedule saved successfully.");
-      setDay("");
-      setRoomId("");
-      setStartTime("");
-      setEndTime("");
-    } catch (err) {
-      console.error("Error saving schedule:", err);
-      setMessage("Failed to save schedule.");
-    }
-  };
+  
+const handleSaveSchedule = async (e) => {
+  e.preventDefault();
+  setMessage("");
+
+  const sel = rooms.find((r) => String(r.room_id) === String(roomId));
+  if (!sel) {
+    setMessage("Please select a valid room.");
+    return;
+  }
+
+  // 🔎 Check conflict
+  const conflict = schedules.some(s =>
+    s.day_description === day &&
+    s.room_description === sel.room_description &&
+    !(
+      endTime <= s.start_time || startTime >= s.end_time // no overlap
+    )
+  );
+
+  if (conflict) {
+    setMessage("Conflict detected: This room is already booked for that time.");
+    return;
+  }
+
+  try {
+    await axios.post("http://localhost:5000/insert_exam_schedule", {
+      day_description: day,
+      room_description: sel.room_description,
+      start_time: startTime,
+      end_time: endTime,
+      proctor,
+      room_quota: roomQuota || 40,
+    });
+
+    setMessage("Entrance exam schedule saved successfully.");
+    setDay("");
+    setRoomId("");
+    setStartTime("");
+    setEndTime("");
+    setProctor("");
+    setRoomQuota("");
+
+    // refresh schedules so conflicts update
+    const res = await axios.get("http://localhost:5000/exam_schedules_with_count");
+    setSchedules(res.data);
+
+  } catch (err) {
+    console.error("Error saving schedule:", err);
+    setMessage("Failed to save schedule.");
+  }
+};
+
 
   return (
-    <Box display="flex" flexDirection="column" minHeight="100vh" bgcolor="#fdfdfd" px={2} pt={2}>
+    <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
+
       <Box
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-
+          mt: 2,
           mb: 2,
           px: 2,
         }}
@@ -74,7 +137,7 @@ const AssignEntranceExam = () => {
             fontSize: '36px',
           }}
         >
-          ASSIGN ENTRANCE EXAMINATION ROOM
+          ROOM SCHEDULING
         </Typography>
 
 
@@ -83,6 +146,84 @@ const AssignEntranceExam = () => {
       <hr style={{ border: "1px solid #ccc", width: "100%" }} />
 
       <br />
+
+      <Box display="flex" sx={{ border: "2px solid maroon", borderRadius: "4px", overflow: "hidden" }}>
+        {tabs1.map((tab1, index) => {
+          const isActive = location.pathname === tab1.to; // check active route
+
+          return (
+            <Link
+              key={index}
+              to={tab1.to}
+              style={{ textDecoration: "none", flex: 1 }}
+            >
+              <Box
+                sx={{
+                  backgroundColor: isActive ? "#6D2323" : "white", // active tab bg
+                  padding: "16px",
+                  height: "75px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  cursor: "pointer",
+                  textAlign: "center",
+                  borderRight: index !== tabs.length - 1 ? "2px solid maroon" : "none",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    backgroundColor: "#6D2323",
+                    "& .MuiTypography-root": {
+                      color: "white",
+                    },
+                  },
+                }}
+              >
+                <Typography
+                  sx={{
+                    color: isActive ? "white" : "maroon", // active tab text
+                    fontWeight: "bold",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {tab1.label}
+                </Typography>
+              </Box>
+            </Link>
+          );
+        })}
+      </Box>
+
+      <br />
+      <Box display="flex" sx={{ border: "2px solid maroon", borderRadius: "4px", overflow: "hidden" }}>
+        {tabs.map((tab, index) => (
+          <Link
+            key={index}
+            to={tab.to}
+            style={{ textDecoration: "none", flex: 1 }}
+          >
+            <Box
+              sx={{
+                backgroundColor: "#6D2323",
+                padding: "16px",
+                color: "#ffffff",
+                textAlign: "center",
+                cursor: "pointer",
+                borderRight: index !== tabs.length - 1 ? "2px solid white" : "none", // changed here
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  backgroundColor: "#f9f9f9",
+                  color: "#6D2323", // font color on hover
+                },
+              }}
+            >
+              <Typography sx={{ color: "inherit", fontWeight: "bold", wordBreak: "break-word" }}>
+                {tab.label}
+              </Typography>
+            </Box>
+          </Link>
+        ))}
+      </Box>
+
 
       <Box
         display="flex"
@@ -116,7 +257,7 @@ const AssignEntranceExam = () => {
             <Grid container spacing={1}>
               {/* Day */}
               <Grid item xs={12}>
-                <Typography  fontWeight={500}>
+                <Typography fontWeight={500}>
                   Day
                 </Typography>
                 <TextField
@@ -191,6 +332,36 @@ const AssignEntranceExam = () => {
                   variant="outlined"
                 />
               </Grid>
+
+              {/* Proctor */}
+              <Grid item xs={12}>
+                <Typography fontWeight={500}>
+                  Proctor
+                </Typography>
+                <TextField
+                  fullWidth
+                  value={proctor}
+                  onChange={(e) => setProctor(e.target.value)}
+                  required
+                  variant="outlined"
+                  placeholder="Enter proctor name"
+                />
+              </Grid>
+
+              {/* Room Quota */}
+              <Grid item xs={12}>
+                <Typography fontWeight={500}>Room Quota</Typography>
+                <TextField
+                  fullWidth
+                  type="number"
+                  value={roomQuota}
+                  onChange={(e) => setRoomQuota(e.target.value)}
+                  required
+                  variant="outlined"
+                  inputProps={{ min: 1 }}
+                />
+              </Grid>
+
 
               {/* Submit Button */}
               <Grid item xs={12} display="flex" justifyContent="center">

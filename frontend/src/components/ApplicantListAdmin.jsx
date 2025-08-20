@@ -540,7 +540,7 @@ const ApplicantList = () => {
         <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, p: 2 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h4" fontWeight="bold" color="maroon">
-                    ADMISSION PROCESS FOR REGISTRAR
+                    ADMISSION PROCESS FOR ADMIN
                 </Typography>
                 <Box sx={{ position: 'absolute', top: 10, right: 24 }}>
                     <Button
@@ -1100,7 +1100,7 @@ const ApplicantList = () => {
                     <TableBody>
                         {currentPersons.map((person, index) => (
                             <TableRow key={person.person_id}>
-                                <TableCell
+                                <TableCell disabled
                                     sx={{
                                         color: "black",
                                         textAlign: "center",
@@ -1112,14 +1112,14 @@ const ApplicantList = () => {
                                 >
                                     {index + 1}
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", border: "1px solid maroon", py: 0.5 }}>
-                                    <Checkbox
+                                <TableCell sx={{ textAlign: "center", border: "1px solid gray", py: 0.5 }}>
+                                    <Checkbox disabled
                                         checked={person.submitted_documents === 1}
                                         onChange={(e) =>
                                             handleSubmittedDocumentsChange(person.upload_id, e.target.checked)
                                         }
                                         sx={{
-                                            color: "maroon",
+                                            color: "gray",
                                             "&.Mui-checked": { color: "maroon" },
                                             transform: "scale(1.1)",
                                             p: 0,

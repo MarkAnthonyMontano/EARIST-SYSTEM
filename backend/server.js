@@ -810,7 +810,82 @@ app.get('/uploads/all', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch uploads' });
   }
 });
+// === Upload for Medical Clearance (Vaccination Card only) ===
+app.post("/api/upload/vaccine", upload.single("file"), async (req, res) => {
+  try {
+    const { person_id, remarks } = req.body;
 
+    if (!person_id) {
+      return res.status(400).json({ message: "Missing person_id" });
+    }
+
+    // ✅ Find requirement ID for Vaccine Card dynamically
+    const [rows] = await db.query(
+      "SELECT id, description FROM requirements_table WHERE LOWER(description) LIKE '%vaccine%' LIMIT 1"
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Vaccination Card requirement not found" });
+    }
+
+    const vaccineRequirementId = rows[0].id;
+    const description = rows[0].description;
+    const year = new Date().getFullYear();
+    const ext = path.extname(req.file.originalname).toLowerCase();
+
+    // ✅ Fetch applicant_number for filename
+    const [[applicant]] = await db.query(
+      "SELECT applicant_number FROM applicant_numbering_table WHERE person_id = ?",
+      [person_id]
+    );
+
+    if (!applicant) {
+      return res.status(404).json({ message: "Applicant number not found" });
+    }
+
+    const applicant_number = applicant.applicant_number;
+
+    // ✅ Standardized short label
+    const filename = `${applicant_number}_VaccineCard_${year}${ext}`;
+    const finalPath = path.join(__dirname, "uploads", filename);
+
+    // ✅ Remove old vaccine uploads for this applicant
+    const [existingFiles] = await db.query(
+      "SELECT upload_id, file_path FROM requirement_uploads WHERE person_id = ? AND requirements_id = ?",
+      [person_id, vaccineRequirementId]
+    );
+
+    for (const file of existingFiles) {
+      try {
+        await fs.promises.unlink(path.join(__dirname, "uploads", file.file_path));
+      } catch (err) {
+        console.warn("File delete warning:", err.message);
+      }
+      await db.query("DELETE FROM requirement_uploads WHERE upload_id = ?", [file.upload_id]);
+    }
+
+    // ✅ Save file physically
+    await fs.promises.writeFile(finalPath, req.file.buffer);
+
+    // ✅ Insert into DB with proper path
+    await db.query(
+      "INSERT INTO requirement_uploads (requirements_id, person_id, file_path, original_name, remarks, status) VALUES (?, ?, ?, ?, ?, ?)",
+      [
+        vaccineRequirementId,
+        person_id,
+        filename, // ✅ store just the filename (not null)
+        req.file.originalname,
+        remarks || "",
+        "0"
+      ]
+    );
+
+    res.status(200).json({ message: "✅ Vaccine Card uploaded successfully" });
+  } catch (err) {
+    console.error("❌ Vaccine upload failed:", err);
+    res.status(500).json({ message: "Upload failed", error: err.message });
+  }
+});
 
 // ✅ Get uploads by applicant_number (Admin use)
 // ✅ FETCH FILES by applicant number — for registrar to view student uploads
@@ -956,10 +1031,11 @@ app.get("/api/all-applicants", async (req, res) => {
         p.extension,
         p.program,
         p.emailAddress,
-        p.generalAverage1,         -- ✅ Add this back
-        p.created_at,              -- ✅ Add this back
+        p.generalAverage1,
+        p.campus,        
+        p.created_at,              
         a.applicant_number,
-        ea.schedule_id,                 -- 🔥 Always include this
+        ea.schedule_id,                 
         es.exam_date,
         yt.year_id AS school_year,
         yt.year_description,
@@ -969,7 +1045,8 @@ app.get("/api/all-applicants", async (req, res) => {
         ru.document_status,
         ru.submitted_documents,
         ru.registrar_status,
-        ru.created_at AS last_updated
+        ru.created_at AS last_updated,
+        ps.exam_status
       FROM admission.person_table AS p
       LEFT JOIN admission.applicant_numbering_table AS a 
         ON p.person_id = a.person_id
@@ -988,7 +1065,10 @@ app.get("/api/all-applicants", async (req, res) => {
           FROM admission.requirement_uploads
           WHERE person_id = p.person_id
         )
-      WHERE sy.astatus = 1 OR sy.astatus IS NULL   -- 🔥 keep both assigned & unassigned
+      LEFT JOIN admission.person_status_table AS ps
+        ON p.person_id = ps.person_id
+      WHERE (sy.astatus = 1 OR sy.astatus IS NULL)
+        AND (ps.exam_status IS NULL OR ps.exam_status = 0)   -- 🔥 exclude already emailed
       ORDER BY p.last_name ASC, p.first_name ASC;
     `);
 
@@ -1727,6 +1807,139 @@ app.post("/login", async (req, res) => {
   }
 });
 
+
+// Login for Applicants
+app.post("/login_applicant", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  try {
+    const query = `
+      SELECT * FROM user_accounts AS ua
+      LEFT JOIN person_table AS pt ON pt.person_id = ua.person_id
+      WHERE email = ?
+    `;
+    const [results] = await db.query(query, [email]);
+
+    if (results.length === 0) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    const user = results[0];
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    const person_id = user.person_id;
+
+    // ✅ Check if applicant_number already exists
+    const [existing] = await db.query(
+      "SELECT applicant_number FROM applicant_numbering_table WHERE person_id = ?",
+      [person_id]
+    );
+
+    if (existing.length === 0) {
+      // ✅ Get active school year & semester
+      const [activeYear] = await db3.query(`
+        SELECT yt.year_description, st.semester_description, st.semester_code
+        FROM active_school_year_table AS sy
+        JOIN year_table AS yt ON yt.year_id = sy.year_id
+        JOIN semester_table AS st ON st.semester_id = sy.semester_id
+        WHERE sy.astatus = 1
+        LIMIT 1
+      `);
+
+      if (activeYear.length === 0) {
+        return res.status(500).json({ message: "No active school year found" });
+      }
+
+      const year = activeYear[0].year_description.split("-")[0]; // Get starting year (e.g., 2025)
+      const semCode = activeYear[0].semester_code; // Assumes values like 1, 2, 3
+
+      // ✅ Get next number (count + 1, padded to 5 digits)
+      const [countRes] = await db.query("SELECT COUNT(*) AS count FROM applicant_numbering_table");
+      const next = countRes[0].count + 1;
+      const padded = String(next).padStart(5, "0");
+
+      const applicantNumber = `${year}${semCode}${padded}`;
+
+      // ✅ Insert into table
+      await db.query(
+        "INSERT INTO applicant_numbering_table (applicant_number, person_id) VALUES (?, ?)",
+        [applicantNumber, person_id]
+      );
+    }
+
+    // ✅ Generate JWT token
+    const token = webtoken.sign(
+      { person_id: user.person_id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" }
+    );
+
+    res.json({
+      message: "Login successful",
+      token,
+      email: user.email,
+      role: user.role,
+      person_id: user.person_id,
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Server error during login" });
+  }
+});
+
+// Login for Proffesor
+app.post("/login_prof", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  try {
+    const query = `SELECT * FROM prof_table as ua
+      LEFT JOIN person_prof_table as pt
+      ON pt.person_id = ua.person_id
+    WHERE email = ?`;
+
+    const [results] = await db3.query(query, [email]);
+
+    if (results.length === 0) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    const user = results[0];
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    const token = webtoken.sign({ person_id: user.person_id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+    console.log("Login response:", { token, person_id: user.person_id, email: user.email, role: user.role });
+
+    res.json({
+      message: "Login successful",
+      token,
+      email: user.email,
+      role: user.role,
+      person_id: user.person_id,
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Server error during login" });
+  }
+});
+
+
 // ---------------- Applicant: Get Info ----------------
 app.post("/superadmin-get-applicant", async (req, res) => {
   const { email } = req.body;
@@ -2314,22 +2527,42 @@ app.get("/room_list", async (req, res) => {
   }
 });
 
+
 // ============================
 // POST - Insert Entrance Exam Schedule
 // ============================
 app.post("/insert_exam_schedule", async (req, res) => {
-  const { day_description, room_description, start_time, end_time } = req.body;
+  const { day_description, room_description, start_time, end_time, proctor, room_quota } = req.body;
 
-  if (!day_description || !room_description || !start_time || !end_time) {
-    return res.status(400).json({ error: "All fields are required" });
+  if (!day_description || !room_description || !start_time || !end_time || !room_quota) {
+    return res.status(400).json({ error: "All fields are required, including room quota." });
   }
 
   try {
-    await db.query(
-      `INSERT INTO entrance_exam_schedule (day_description, room_description, start_time, end_time)
-       VALUES (?, ?, ?, ?)`,
+    // 🔎 Check for conflicts in the same day + room
+    const [conflict] = await db.query(
+      `SELECT * 
+       FROM entrance_exam_schedule
+       WHERE day_description = ?
+         AND room_description = ?
+         AND NOT (end_time <= ? OR start_time >= ?)`,
       [day_description.trim(), room_description.trim(), start_time, end_time]
     );
+
+    if (conflict.length > 0) {
+      return res.status(400).json({
+        error: "Conflict: Another schedule already exists in this room with overlapping time.",
+      });
+    }
+
+    // ✅ If no conflict, insert the schedule
+    await db.query(
+      `INSERT INTO entrance_exam_schedule 
+         (day_description, room_description, start_time, end_time, proctor, room_quota)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [day_description.trim(), room_description.trim(), start_time, end_time, proctor, room_quota]
+    );
+
     res.status(200).json({ message: "Schedule saved successfully" });
   } catch (err) {
     console.error("Error saving schedule:", err);
@@ -2337,13 +2570,23 @@ app.post("/insert_exam_schedule", async (req, res) => {
   }
 });
 
-// GET schedules from admission.entrance_exam_schedule
+
 app.get("/exam_schedules", async (req, res) => {
   try {
     const [rows] = await db.query(`
-      SELECT schedule_id, day_description, room_description, start_time, end_time
-      FROM admission.entrance_exam_schedule
-      ORDER BY schedule_id DESC
+      SELECT 
+        s.schedule_id,
+        s.day_description,
+        s.room_description,
+        s.start_time,
+        s.end_time,
+        s.proctor,
+        s.room_quota,
+        COUNT(ea.applicant_id) AS assigned_count
+      FROM entrance_exam_schedule s
+      LEFT JOIN exam_applicants ea ON s.schedule_id = ea.schedule_id
+      GROUP BY s.schedule_id
+      ORDER BY s.schedule_id DESC
     `);
     res.json(rows);
   } catch (err) {
@@ -2352,43 +2595,10 @@ app.get("/exam_schedules", async (req, res) => {
   }
 });
 
-app.get("/applicants", async (req, res) => {
-  try {
-    const [rows] = await db.query(`
-      SELECT 
-        an.applicant_number,
-        CONCAT(
-          p.last_name, ', ', p.first_name,
-          CASE 
-            WHEN p.middle_name IS NOT NULL AND p.middle_name <> '' 
-              THEN CONCAT(' ', p.middle_name) 
-            ELSE '' 
-          END,
-          CASE 
-            WHEN p.extension IS NOT NULL AND p.extension <> '' 
-              THEN CONCAT(' ', p.extension) 
-            ELSE '' 
-          END
-        ) AS applicant_name,
-        ea.schedule_id
-      FROM admission.applicant_numbering_table an
-      JOIN admission.person_table p
-        ON an.person_id = p.person_id
-      LEFT JOIN admission.exam_applicants ea
-        ON ea.applicant_id = an.applicant_number
-      ORDER BY p.last_name ASC, p.first_name ASC
-    `);
-    res.json(rows);
-  } catch (err) {
-    console.error("Error fetching applicants:", err);
-    res.status(500).json({ error: "Database error" });
-  }
-});
 
 io.on("connection", (socket) => {
   console.log("✅ Socket.IO client connected");
 
-  // === ASSIGN SCHEDULE ===
   socket.on("update_schedule", async ({ schedule_id, applicant_numbers }) => {
     try {
       if (!schedule_id || !applicant_numbers || applicant_numbers.length === 0) {
@@ -2398,7 +2608,35 @@ io.on("connection", (socket) => {
         });
       }
 
+      // 🔎 Get room quota
+      const [[scheduleInfo]] = await db.query(
+        `SELECT room_quota FROM entrance_exam_schedule WHERE schedule_id = ?`,
+        [schedule_id]
+      );
+      if (!scheduleInfo) {
+        return socket.emit("update_schedule_result", {
+          success: false,
+          error: "Schedule not found.",
+        });
+      }
+      const roomQuota = scheduleInfo.room_quota;
+
+      // 🔎 Count how many are already assigned
+      const [[{ currentCount }]] = await db.query(
+        `SELECT COUNT(*) AS currentCount FROM exam_applicants WHERE schedule_id = ?`,
+        [schedule_id]
+      );
+
+      // If total would exceed quota, reject
+      if (currentCount + applicant_numbers.length > roomQuota) {
+        return socket.emit("update_schedule_result", {
+          success: false,
+          error: `Room quota exceeded! Capacity: ${roomQuota}, Currently Assigned: ${currentCount}, Trying to add: ${applicant_numbers.length}.`,
+        });
+      }
+
       const assigned = [];
+      const updated = [];
       const skipped = [];
 
       for (const applicant_number of applicant_numbers) {
@@ -2408,19 +2646,34 @@ io.on("connection", (socket) => {
         );
 
         if (check.length > 0) {
-          skipped.push(applicant_number);
-          continue;
+          if (check[0].schedule_id === schedule_id) {
+            skipped.push(applicant_number); // already in this schedule
+          } else {
+            await db.query(
+              `UPDATE exam_applicants SET schedule_id = ? WHERE applicant_id = ?`,
+              [schedule_id, applicant_number]
+            );
+            updated.push(applicant_number);
+          }
+        } else {
+          await db.query(
+            `INSERT INTO exam_applicants (applicant_id, schedule_id) VALUES (?, ?)`,
+            [applicant_number, schedule_id]
+          );
+          assigned.push(applicant_number);
         }
-
-        await db.query(
-          `INSERT INTO exam_applicants (applicant_id, schedule_id) VALUES (?, ?)`,
-          [applicant_number, schedule_id]
-        );
-
-        assigned.push(applicant_number);
       }
 
-      socket.emit("update_schedule_result", { success: true, assigned, skipped });
+      console.log("✅ Assigned:", assigned);
+      console.log("✏️ Updated:", updated);
+      console.log("⚠️ Skipped:", skipped);
+
+      socket.emit("update_schedule_result", {
+        success: true,
+        assigned,
+        updated,
+        skipped,
+      });
     } catch (error) {
       console.error("❌ Error assigning schedule:", error);
       socket.emit("update_schedule_result", {
@@ -2430,38 +2683,37 @@ io.on("connection", (socket) => {
     }
   });
 
-
-// === SEND SCHEDULE EMAILS ===
+  // === SEND SCHEDULE EMAILS ===
   socket.on("send_schedule_emails", async ({ schedule_id }) => {
     try {
       const [rows] = await db.query(
         `SELECT 
-           ea.schedule_id,
-           s.day_description,
-           s.room_description,
-           s.start_time,
-           s.end_time,
-           an.applicant_number,
-           p.first_name,
-           p.last_name,
-           p.emailAddress
-         FROM exam_applicants ea
-         JOIN entrance_exam_schedule s 
-           ON ea.schedule_id = s.schedule_id
-         JOIN applicant_numbering_table an 
-           ON ea.applicant_id = an.applicant_number
-         JOIN person_table p 
-           ON an.person_id = p.person_id
-         WHERE ea.schedule_id = ?`,
+         ea.schedule_id,
+         s.day_description,
+         s.room_description,
+         s.start_time,
+         s.end_time,
+         an.applicant_number,
+         p.person_id,
+         p.first_name,
+         p.last_name,
+         p.emailAddress
+       FROM exam_applicants ea
+       JOIN entrance_exam_schedule s 
+         ON ea.schedule_id = s.schedule_id
+       JOIN applicant_numbering_table an 
+         ON ea.applicant_id = an.applicant_number
+       JOIN person_table p 
+         ON an.person_id = p.person_id
+       WHERE ea.schedule_id = ?`,
         [schedule_id]
       );
 
       if (rows.length === 0) {
-        socket.emit("send_schedule_emails_result", {
+        return socket.emit("send_schedule_emails_result", {
           success: false,
           error: "No applicants found for this schedule.",
         });
-        return;
       }
 
       for (const row of rows) {
@@ -2484,27 +2736,38 @@ You have been assigned to the following entrance exam schedule:
 🆔 Applicant No: ${row.applicant_number}
 
 Please arrive on time and bring your requirements.
-📌 𝑾𝒉𝒂𝒕 𝒕𝒐 𝑩𝒓𝒊𝒏𝒈:
-- Long Blue Folder
-- Examination Permit
-- Ballpen
 
-👕 𝐀𝐓𝐓𝐈𝐑𝐄: 𝐒𝐭𝐫𝐢𝐜𝐭𝐥𝐲 𝐰𝐞𝐚𝐫 𝐖𝐇𝐈𝐓𝐄 𝐬𝐡𝐢𝐫𝐭 𝐚𝐧𝐝 𝐩𝐚𝐧𝐭𝐬.
-
-- Eulogio "Amang" Rodriguez Institute of Science and Technology`,
+- EARIST MIS`,
         };
 
         try {
           await transporter.sendMail(mailOptions);
-          console.log(`✅ Email sent to ${row.emailAddress}`);
+
+          // ✅ Mark applicant as emailed in BOTH tables
+          await db.query(
+            `UPDATE exam_applicants 
+       SET email_sent = 1 
+       WHERE applicant_id = ? AND schedule_id = ?`,
+            [row.applicant_number, row.schedule_id]
+          );
+
+          await db.query(
+            `UPDATE person_status_table 
+       SET exam_status = 1 
+       WHERE person_id = ?`,
+            [row.person_id]
+          );
+
+          console.log(`✅ Email sent + flags updated for ${row.emailAddress}`);
         } catch (err) {
           console.error(`❌ Failed to send email to ${row.emailAddress}:`, err.message);
         }
       }
 
+
       socket.emit("send_schedule_emails_result", {
         success: true,
-        message: `Emails sent to ${rows.length} applicants.`,
+        message: `Emails sent and statuses updated for ${rows.length} applicants.`,
       });
     } catch (err) {
       console.error("Error in send_schedule_emails:", err);
@@ -2514,6 +2777,20 @@ Please arrive on time and bring your requirements.
       });
     }
   });
+
+});
+
+// Unassign ALL applicants from a schedule
+app.post("/unassign_all_from_schedule", async (req, res) => {
+  const { schedule_id } = req.body;
+  try {
+    // ✅ Correct table: exam_applicants
+    await db.execute("UPDATE exam_applicants SET schedule_id = NULL WHERE schedule_id = ?", [schedule_id]);
+    res.json({ success: true, message: `All applicants unassigned from schedule ${schedule_id}` });
+  } catch (err) {
+    console.error("Error unassigning all applicants:", err);
+    res.status(500).json({ error: "Failed to unassign all applicants" });
+  }
 });
 
 
@@ -2542,136 +2819,49 @@ app.post("/unassign_schedule", async (req, res) => {
   }
 });
 
-// Login for Applicants
-app.post("/login_applicant", async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
-
+// Get current number of applicants assigned to a schedule
+app.get("/api/exam-schedule-count/:schedule_id", async (req, res) => {
+  const { schedule_id } = req.params;
   try {
-    const query = `
-      SELECT * FROM user_accounts AS ua
-      LEFT JOIN person_table AS pt ON pt.person_id = ua.person_id
-      WHERE email = ?
-    `;
-    const [results] = await db.query(query, [email]);
-
-    if (results.length === 0) {
-      return res.status(400).json({ message: "Invalid email or password" });
-    }
-
-    const user = results[0];
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(400).json({ message: "Invalid email or password" });
-    }
-
-    const person_id = user.person_id;
-
-    // ✅ Check if applicant_number already exists
-    const [existing] = await db.query(
-      "SELECT applicant_number FROM applicant_numbering_table WHERE person_id = ?",
-      [person_id]
+    const [rows] = await db.query(
+      `SELECT COUNT(*) AS count 
+       FROM exam_applicants 
+       WHERE schedule_id = ?`,
+      [schedule_id]
     );
-
-    if (existing.length === 0) {
-      // ✅ Get active school year & semester
-      const [activeYear] = await db3.query(`
-        SELECT yt.year_description, st.semester_description, st.semester_code
-        FROM active_school_year_table AS sy
-        JOIN year_table AS yt ON yt.year_id = sy.year_id
-        JOIN semester_table AS st ON st.semester_id = sy.semester_id
-        WHERE sy.astatus = 1
-        LIMIT 1
-      `);
-
-      if (activeYear.length === 0) {
-        return res.status(500).json({ message: "No active school year found" });
-      }
-
-      const year = activeYear[0].year_description.split("-")[0]; // Get starting year (e.g., 2025)
-      const semCode = activeYear[0].semester_code; // Assumes values like 1, 2, 3
-
-      // ✅ Get next number (count + 1, padded to 5 digits)
-      const [countRes] = await db.query("SELECT COUNT(*) AS count FROM applicant_numbering_table");
-      const next = countRes[0].count + 1;
-      const padded = String(next).padStart(5, "0");
-
-      const applicantNumber = `${year}${semCode}${padded}`;
-
-      // ✅ Insert into table
-      await db.query(
-        "INSERT INTO applicant_numbering_table (applicant_number, person_id) VALUES (?, ?)",
-        [applicantNumber, person_id]
-      );
-    }
-
-    // ✅ Generate JWT token
-    const token = webtoken.sign(
-      { person_id: user.person_id, email: user.email, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "24h" }
-    );
-
-    res.json({
-      message: "Login successful",
-      token,
-      email: user.email,
-      role: user.role,
-      person_id: user.person_id,
-    });
-  } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ message: "Server error during login" });
+    res.json({ count: rows[0].count });
+  } catch (err) {
+    console.error("Error fetching schedule count:", err);
+    res.status(500).json({ error: "Database error" });
   }
 });
 
-// Login for Proffesor
-app.post("/login_prof", async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
-
+// GET schedules with current occupancy
+app.get("/exam_schedules_with_count", async (req, res) => {
   try {
-    const query = `SELECT * FROM prof_table as ua
-      LEFT JOIN person_prof_table as pt
-      ON pt.person_id = ua.person_id
-    WHERE email = ?`;
-
-    const [results] = await db3.query(query, [email]);
-
-    if (results.length === 0) {
-      return res.status(400).json({ message: "Invalid email or password" });
-    }
-
-    const user = results[0];
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(400).json({ message: "Invalid email or password" });
-    }
-
-    const token = webtoken.sign({ person_id: user.person_id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
-
-    console.log("Login response:", { token, person_id: user.person_id, email: user.email, role: user.role });
-
-    res.json({
-      message: "Login successful",
-      token,
-      email: user.email,
-      role: user.role,
-      person_id: user.person_id,
-    });
-  } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ message: "Server error during login" });
+    const [rows] = await db.query(`
+      SELECT 
+        s.schedule_id,
+        s.day_description,
+        s.room_description,
+        s.start_time,
+        s.end_time,
+        s.proctor,
+        s.room_quota,
+        COUNT(ea.applicant_id) AS current_occupancy
+      FROM entrance_exam_schedule s
+      LEFT JOIN exam_applicants ea
+        ON s.schedule_id = ea.schedule_id
+      GROUP BY s.schedule_id
+      ORDER BY s.schedule_id DESC
+    `);
+    res.json(rows);
+  } catch (err) {
+    console.error("Error fetching schedules with count:", err);
+    res.status(500).json({ error: "Database error" });
   }
 });
+
 
 //READ ENROLLED USERS (UPDATED!)
 app.get("/enrolled_users", async (req, res) => {

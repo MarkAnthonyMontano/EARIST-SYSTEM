@@ -22,7 +22,19 @@ import { motion } from "framer-motion";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 
 
+
 const AdminDashboard1 = () => {
+  const tabs = [
+    { label: "Applicant Form", to: "/admin_dashboard1" },
+    { label: "Documents Submitted", to: "/student_requirements" },
+    { label: "Admission Exam", to: "/assign_entrance_exam" },
+    { label: "Interview", to: "/interview" },
+    { label: "Qualifying Exam", to: "/qualifying_exam" },
+    { label: "College Approval", to: "/college_approval" },
+    { label: "Medical Clearance", to: "/medical_clearance" },
+    { label: "Applicant Status", to: "/applicant_status" },
+    { label: "View List", to: "/view_list" },
+  ];
   const navigate = useNavigate();
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
@@ -566,7 +578,7 @@ const AdminDashboard1 = () => {
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          mt: 3,
+          mt: 2,
           mb: 2,
           px: 2,
         }}
@@ -595,6 +607,53 @@ const AdminDashboard1 = () => {
       {searchError && <Typography color="error">{searchError}</Typography>}
       <hr style={{ border: "1px solid #ccc", width: "100%" }} />
       <br />
+     <Box display="flex" sx={{ border: "2px solid maroon", borderRadius: "4px", overflow: "hidden" }}>
+         {tabs.map((tab, index) => {
+           const isActive = location.pathname === tab.to; // check active route
+   
+           return (
+             <Link
+               key={index}
+               to={tab.to}
+               style={{ textDecoration: "none", flex: 1 }}
+             >
+               <Box
+                 sx={{
+                   backgroundColor: isActive ? "#6D2323" : "white", // active tab bg
+                   padding: "16px",
+                   height: "75px",
+                   display: "flex",
+                   flexDirection: "column",
+                   justifyContent: "center",
+                   alignItems: "center",
+                   cursor: "pointer",
+                   textAlign: "center",
+                   borderRight: index !== tabs.length - 1 ? "2px solid maroon" : "none",
+                   transition: "all 0.3s ease",
+                   "&:hover": {
+                     backgroundColor: "#6D2323",
+                     "& .MuiTypography-root": {
+                       color: "white",
+                     },
+                   },
+                 }}
+               >
+                 <Typography
+                   sx={{
+                     color: isActive ? "white" : "maroon", // active tab text
+                     fontWeight: "bold",
+                     wordBreak: "break-word",
+                   }}
+                 >
+                   {tab.label}
+                 </Typography>
+               </Box>
+             </Link>
+           );
+         })}
+       </Box>
+      <br />
+
 
 
       <TableContainer component={Paper} sx={{ width: '100%', mb: 1 }}>

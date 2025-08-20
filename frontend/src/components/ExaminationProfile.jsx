@@ -5,15 +5,38 @@ import EaristLogo from "../assets/EaristLogo.png";
 import '../styles/Print.css'
 import { FcPrint } from "react-icons/fc";
 import Search from '@mui/icons-material/Search';
-
+import { Link, useLocation } from "react-router-dom";
 
 const ExaminationProfile = () => {
+
+    const tabs = [
+        { label: "Room Scheduling", to: "/assign_entrance_exam" },
+        { label: "Applicant Scheduling", to: "/assign_schedule_applicant" },
+        { label: "Examination Profile", to: "/examination_profile" },
+    ];
+
+
+    const tabs1 = [
+        { label: "Applicant Form", to: "/admin_dashboard1" },
+        { label: "Documents Submitted", to: "/student_requirements" },
+        { label: "Admission Exam", to: "/assign_entrance_exam" },
+        { label: "Interview", to: "/interview" },
+        { label: "Qualifying Exam", to: "/qualifying_exam" },
+        { label: "College Approval", to: "/college_approval" },
+        { label: "Medical Clearance", to: "/medical_clearance" },
+        { label: "Applicant Status", to: "/applicant_status" },
+        { label: "View List", to: "/view_list" },
+    ];
+
     const [searchQuery, setSearchQuery] = useState('');
     const [persons, setPersons] = useState([]);
     const [selectedPerson, setSelectedPerson] = useState(null);
     const [userID, setUserID] = useState("");
     const [user, setUser] = useState("");
     const [userRole, setUserRole] = useState("");
+    const location = useLocation();
+
+
     const [person, setPerson] = useState({
         profile_img: "",
         generalAverage1: "",
@@ -42,7 +65,7 @@ const ExaminationProfile = () => {
             setUserID(storedID);
 
             if (storedRole === "registrar") {
-             
+
             } else {
                 window.location.href = "/login";
             }
@@ -274,7 +297,7 @@ const ExaminationProfile = () => {
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         flexWrap: 'wrap',
-                        mt: 3,
+                        mt: 2,
                         mb: 2,
                         px: 2,
                     }}
@@ -304,7 +327,87 @@ const ExaminationProfile = () => {
                 <hr style={{ border: "1px solid #ccc", width: "100%" }} />
 
                 <br />
-                {/* Applicant ID and Name */}
+
+                <Box display="flex" sx={{ border: "2px solid maroon", borderRadius: "4px", overflow: "hidden" }}>
+                    {tabs1.map((tabs1, index) => {
+                        const isActive = location.pathname === tabs1.to; // check active route
+
+                        return (
+                            <Link
+                                key={index}
+                                to={tabs1.to}
+                                style={{ textDecoration: "none", flex: 1 }}
+                            >
+                                <Box
+                                    sx={{
+                                        backgroundColor: isActive ? "#6D2323" : "white", // active tab bg
+                                        padding: "16px",
+                                        height: "75px",
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                        cursor: "pointer",
+                                        textAlign: "center",
+                                        borderRight: index !== tabs1.length - 1 ? "2px solid maroon" : "none",
+                                        transition: "all 0.3s ease",
+                                        "&:hover": {
+                                            backgroundColor: "#6D2323",
+                                            "& .MuiTypography-root": {
+                                                color: "white",
+                                            },
+                                        },
+                                    }}
+                                >
+                                    <Typography
+                                        sx={{
+                                            color: isActive ? "white" : "maroon", // active tab text
+                                            fontWeight: "bold",
+                                            wordBreak: "break-word",
+                                        }}
+                                    >
+                                        {tabs1.label}
+                                    </Typography>
+                                </Box>
+                            </Link>
+                        );
+                    })}
+                </Box>
+                <br />
+
+
+                <Box display="flex" sx={{ border: "2px solid maroon", borderRadius: "4px", overflow: "hidden" }}>
+                    {tabs.map((tab, index) => (
+                        <Link
+                            key={index}
+                            to={tab.to}
+                            style={{ textDecoration: "none", flex: 1 }}
+                        >
+                            <Box
+                                sx={{
+                                    backgroundColor: "#6D2323",
+                                    padding: "16px",
+                                    color: "#ffffff",
+                                    textAlign: "center",
+                                    cursor: "pointer",
+                                    borderRight: index !== tabs.length - 1 ? "2px solid white" : "none", // changed here
+                                    transition: "all 0.3s ease",
+                                    "&:hover": {
+                                        backgroundColor: "#f9f9f9",
+                                        color: "#6D2323", // font color on hover
+                                    },
+                                }}
+                            >
+                                <Typography sx={{ color: "inherit", fontWeight: "bold", wordBreak: "break-word" }}>
+                                    {tab.label}
+                                </Typography>
+                            </Box>
+                        </Link>
+                    ))}
+                </Box>
+
+
+                <div style={{ height: "20px" }}></div>
                 <TableContainer component={Paper} sx={{ width: '100%', mb: 1, }}>
                     <Table>
                         <TableHead sx={{ backgroundColor: '#6D2323' }}>
@@ -603,7 +706,6 @@ const ExaminationProfile = () => {
                                                 style={{
                                                     display: "flex",
                                                     alignItems: "center",
-                                                    justifyContent: "flex-start",
                                                     width: "100%",
                                                     gap: "10px",
                                                 }}
@@ -618,9 +720,11 @@ const ExaminationProfile = () => {
                                                         fontWeight: "normal",
                                                         fontSize: "15px",
                                                         minWidth: "265px",
-                                                        height: "1.2em",
+                                                        width: "100%", // make it extend to available space
                                                         display: "flex",
                                                         alignItems: "center",
+                                                        paddingRight: "5px",
+                                                        overflowWrap: "break-word", // allows long course names to wrap
                                                     }}
                                                 >
                                                     {curriculumOptions.length > 0
@@ -634,16 +738,26 @@ const ExaminationProfile = () => {
                                         </td>
 
                                         <td colSpan={20}>
-                                            <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-                                                <label style={{ fontWeight: "bold", whiteSpace: "nowrap", marginRight: "10px" }}>Major:</label>
-                                                <span
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    width: "100%",
+                                                    gap: "10px",
+                                                }}
+                                            >
+                                                <label style={{ fontWeight: "bold", whiteSpace: "nowrap" }}>Major:</label>
+                                                <div
                                                     style={{
-                                                        flexGrow: 1,
                                                         borderBottom: "1px solid black",
-                                                        height: "1.2em",
-                                                        display: "flex",
                                                         fontFamily: "Arial",
+                                                        fontWeight: "normal",
+                                                        fontSize: "15px",
+                                                        width: "100%",
+                                                        display: "flex",
                                                         alignItems: "center",
+                                                        paddingRight: "5px",
+                                                        overflowWrap: "break-word", // allows long major names to wrap
                                                     }}
                                                 >
                                                     {curriculumOptions.length > 0
@@ -652,11 +766,11 @@ const ExaminationProfile = () => {
                                                                 item?.curriculum_id?.toString() === (person?.program ?? "").toString()
                                                         )?.major || ""
                                                         : "Loading..."}
-                                                </span>
-
+                                                </div>
                                             </div>
                                         </td>
                                     </tr>
+
 
                                     <tr style={{ fontFamily: "Times New Roman", fontSize: "15px" }}>
                                         <td colSpan={20}>

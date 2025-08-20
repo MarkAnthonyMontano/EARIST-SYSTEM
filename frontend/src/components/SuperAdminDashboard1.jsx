@@ -506,7 +506,7 @@ const SuperAdminDashboard1 = () => {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     flexWrap: 'wrap',
-                    mt: 3,
+                    mt: 2,
                     mb: 2,
                     px: 2,
                 }}

@@ -11,6 +11,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  Grid,
   DialogActions,
   Table,
   TableRow,
@@ -21,18 +22,38 @@ import {
   TableCell,
   TableBody,
   TableHead,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { Search } from '@mui/icons-material';
+import { Link, useLocation } from "react-router-dom";
 
 const socket = io("http://localhost:5000");
 
 
 const AssignScheduleToApplicants = () => {
-  const [schedules, setSchedules] = useState([]);
+  const tabs = [
+    { label: "Room Scheduling", to: "/assign_entrance_exam" },
+    { label: "Applicant Scheduling", to: "/assign_schedule_applicant" },
+    { label: "Examination Profile", to: "/examination_profile" },
+  ];
+
+
+  const tabs1 = [
+    { label: "Applicant Form", to: "/admin_dashboard1" },
+    { label: "Documents Submitted", to: "/student_requirements" },
+    { label: "Admission Exam", to: "/assign_entrance_exam" },
+    { label: "Interview", to: "/interview" },
+    { label: "Qualifying Exam", to: "/qualifying_exam" },
+    { label: "College Approval", to: "/college_approval" },
+    { label: "Medical Clearance", to: "/medical_clearance" },
+    { label: "Applicant Status", to: "/applicant_status" },
+    { label: "View List", to: "/view_list" },
+  ];
+
   const [applicants, setApplicants] = useState([]);
   const [selectedSchedule, setSelectedSchedule] = useState("");
   const [selectedApplicants, setSelectedApplicants] = useState(new Set());
-  const [message, setMessage] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [persons, setPersons] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -45,14 +66,8 @@ const AssignScheduleToApplicants = () => {
     extension: "",
     emailAddress: "",
     program: "",
-
-
   });
-
-
   const [selectedApplicantStatus, setSelectedApplicantStatus] = useState("");
-
-
   const [curriculumOptions, setCurriculumOptions] = useState([]);
 
   useEffect(() => {
@@ -80,6 +95,12 @@ const AssignScheduleToApplicants = () => {
 
 
   const [allCurriculums, setAllCurriculums] = useState([]);
+  const [snack, setSnack] = useState({ open: false, message: "", severity: "info" });
+
+  const handleCloseSnack = (_, reason) => {
+    if (reason === "clickaway") return;
+    setSnack(prev => ({ ...prev, open: false }));
+  };
 
 
   useEffect(() => {
@@ -114,26 +135,32 @@ const AssignScheduleToApplicants = () => {
     }
   };
 
+  // ================= FUNCTIONS =================
+  const [customCount, setCustomCount] = useState(0);
 
 
+  // toggleSelectApplicant
   const toggleSelectApplicant = (id) => {
     const newSelected = new Set(selectedApplicants);
+
     if (newSelected.has(id)) {
       newSelected.delete(id);
     } else {
       newSelected.add(id);
+      setConfirmOpen(true);
     }
+
     setSelectedApplicants(newSelected);
-    setMessage("");
   };
 
+  // handleAssign
   const handleAssign = () => {
     if (!selectedSchedule) {
-      setMessage("Please select a schedule.");
+      setSnack({ open: true, message: "Please select a schedule.", severity: "warning" });
       return;
     }
     if (selectedApplicants.size === 0) {
-      setMessage("Please select at least one applicant.");
+      setSnack({ open: true, message: "Please select at least one applicant.", severity: "warning" });
       return;
     }
 
@@ -143,59 +170,81 @@ const AssignScheduleToApplicants = () => {
 
     socket.once("update_schedule_result", (res) => {
       if (res.success) {
-        setMessage(`Assigned: ${res.assigned.length}, Skipped: ${res.skipped.length}`);
+        setSnack({
+          open: true,
+          message: `Assigned: ${res.assigned?.length || 0}, Updated: ${res.updated?.length || 0}, Skipped: ${res.skipped?.length || 0}`,
+          severity: "success"
+        });
         setSelectedApplicants(new Set());
         fetchAllApplicants();
       } else {
-        setMessage(res.error || "Failed to assign applicants.");
+        setSnack({ open: true, message: res.error || "Failed to assign applicants.", severity: "error" });
       }
     });
   };
 
-  const handleAssign40 = () => {
-    if (!selectedSchedule) {
-      setMessage("Please select a schedule first.");
-      return;
+  // handleAssign40 (assign max up to room_quota)
+const handleAssign40 = () => {
+  if (!selectedSchedule) {
+    setSnack({ open: true, message: "Please select a schedule first.", severity: "warning" });
+    return;
+  }
+
+  const schedule = schedules.find(s => s.schedule_id === selectedSchedule);
+  if (!schedule) {
+    setSnack({ open: true, message: "Selected schedule not found.", severity: "error" });
+    return;
+  }
+
+  const currentCount = schedule.current_occupancy || 0;   // ✅ define it here
+  const maxSlots = schedule.room_quota || 40;             // ✅ use DB quota if available
+  const availableSlots = maxSlots - currentCount;
+
+  if (availableSlots <= 0) {
+    setSnack({ open: true, message: `This schedule is already full (${maxSlots} applicants).`, severity: "error" });
+    return;
+  }
+
+  // take as many unassigned as we can up to availableSlots
+  const unassigned = persons
+    .filter(a => a.schedule_id == null)
+    .slice(0, availableSlots)
+    .map(a => a.applicant_number);
+
+  if (unassigned.length === 0) {
+    setSnack({ open: true, message: "No unassigned applicants available.", severity: "warning" });
+    return;
+  }
+
+  socket.emit("update_schedule", { schedule_id: selectedSchedule, applicant_numbers: unassigned });
+
+  socket.once("update_schedule_result", (res) => {
+    if (res.success) {
+      setSnack({
+        open: true,
+        message: `Assigned: ${res.assigned?.length || 0}, Updated: ${res.updated?.length || 0}, Skipped: ${res.skipped?.length || 0}`,
+        severity: "success"
+      });
+      fetchAllApplicants();
+      setSchedules(prev =>
+        prev.map(s =>
+          s.schedule_id === selectedSchedule
+            ? { ...s, current_occupancy: currentCount + (res.assigned?.length || 0) }
+            : s
+        )
+      );
+    } else {
+      setSnack({ open: true, message: res.error || "Failed to assign applicants.", severity: "error" });
     }
-
-    // ✅ Grab first 40 applicants with no schedule
-    const first40 = persons
-      .filter((a) => a.schedule_id === null) // only unassigned
-      .slice(0, 40)
-      .map((a) => a.applicant_number);
-
-    if (first40.length === 0) {
-      setMessage("No unassigned applicants available.");
-      return;
-    }
-
-    // ✅ Step 1: Mark them as 'Selected' in the UI
-    setSelectedApplicants(new Set(first40));
-
-    // ✅ Step 2: Immediately send them to backend
-    socket.emit("update_schedule", {
-      schedule_id: selectedSchedule,
-      applicant_numbers: first40,
-    });
-
-    // ✅ Step 3: Handle response
-    socket.once("update_schedule_result", (res) => {
-      if (res.success) {
-        setMessage(`Assigned 40 applicants: ${res.assigned.length}, Skipped: ${res.skipped.length}`);
-        fetchAllApplicants(); // refresh table
-        setSelectedApplicants(new Set()); // clear after assign
-      } else {
-        setMessage(res.error || "Failed to assign applicants.");
-      }
-    });
-  };
+  });
+};
 
 
+  // handleUnassignImmediate
   const handleUnassignImmediate = async (applicant_number) => {
     try {
       await axios.post("http://localhost:5000/unassign_schedule", { applicant_number });
 
-      // Update UI state
       setPersons(prev =>
         prev.map(p =>
           p.applicant_number === applicant_number
@@ -204,48 +253,168 @@ const AssignScheduleToApplicants = () => {
         )
       );
 
-      // 🔥 Remove from selectedApplicants too
       setSelectedApplicants(prev => {
         const newSet = new Set(prev);
         newSet.delete(applicant_number);
         return newSet;
       });
 
-      setMessage(`Applicant ${applicant_number} unassigned successfully.`);
+      setSnack({ open: true, message: `Applicant ${applicant_number} unassigned successfully.`, severity: "success" });
     } catch (err) {
       console.error("Error unassigning applicant:", err);
-      setMessage(err.response?.data?.error || "Failed to unassign applicant.");
+      setSnack({ open: true, message: err.response?.data?.error || "Failed to unassign applicant.", severity: "error" });
     }
   };
 
+  // handleAssignCustom
+  const handleAssignCustom = () => {
+    if (!selectedSchedule) {
+      setSnack({ open: true, message: "Please select a schedule first.", severity: "warning" });
+      return;
+    }
+    if (customCount <= 0) {
+      setSnack({ open: true, message: "Please enter a valid number of applicants.", severity: "warning" });
+      return;
+    }
 
+    const schedule = schedules.find(s => s.schedule_id === selectedSchedule);
+    if (!schedule) {
+      setSnack({ open: true, message: "Selected schedule not found.", severity: "error" });
+      return;
+    }
 
+    const currentCount = schedule.current_occupancy || 0;
+    const maxSlots = schedule.room_quota || 40; // <-- ✅ use DB quota, fallback 40
+    const availableSlots = maxSlots - currentCount;
+
+    if (availableSlots <= 0) {
+      setSnack({ open: true, message: `This schedule is already full (${maxSlots} applicants).`, severity: "error" });
+      return;
+    }
+
+    const assignCount = Math.min(customCount, availableSlots);
+
+    const unassigned = persons
+      .filter(a => a.schedule_id == null)
+      .slice(0, assignCount)
+      .map(a => a.applicant_number);
+
+    if (unassigned.length === 0) {
+      setSnack({ open: true, message: "No unassigned applicants available.", severity: "warning" });
+      return;
+    }
+
+    socket.emit("update_schedule", { schedule_id: selectedSchedule, applicant_numbers: unassigned });
+
+    socket.once("update_schedule_result", (res) => {
+      if (res.success) {
+        setSnack({
+          open: true,
+          message: `Assigned: ${res.assigned?.length || 0}, Updated: ${res.updated?.length || 0}, Skipped: ${res.skipped?.length || 0}`,
+          severity: "success"
+        });
+        fetchAllApplicants();
+        setSchedules(prev =>
+          prev.map(s =>
+            s.schedule_id === selectedSchedule
+              ? { ...s, current_occupancy: currentCount + (res.assigned?.length || 0) }
+              : s
+          )
+        );
+      } else {
+        setSnack({ open: true, message: res.error || "Failed to assign applicants.", severity: "error" });
+      }
+    });
+  };
+
+  // handleUnassignAll
+  const handleUnassignAll = async () => {
+    if (!selectedSchedule) {
+      setSnack({ open: true, message: "Please select a schedule first.", severity: "warning" });
+      return;
+    }
+
+    try {
+      const res = await axios.post("http://localhost:5000/unassign_all_from_schedule", { schedule_id: selectedSchedule });
+      setSnack({ open: true, message: res.data.message, severity: "success" });
+
+      fetchAllApplicants();
+      setSchedules(prev =>
+        prev.map(s =>
+          s.schedule_id === selectedSchedule
+            ? { ...s, current_occupancy: 0 }
+            : s
+        )
+      );
+    } catch (err) {
+      console.error("Error unassigning all:", err);
+      setSnack({ open: true, message: err.response?.data?.error || "Failed to unassign all applicants.", severity: "error" });
+    }
+  };
+
+  // handleSendEmails
   const handleSendEmails = () => {
     if (!selectedSchedule) {
-      setMessage("Please select a schedule first.");
+      setSnack({ open: true, message: "Please select a schedule first.", severity: "warning" });
       return;
     }
     setConfirmOpen(true);
   };
 
-  const confirmSendEmails = () => {
-    setConfirmOpen(false);
-    socket.emit("send_schedule_emails", { schedule_id: selectedSchedule });
+const confirmSendEmails = () => {
+  setConfirmOpen(false);
 
-    socket.removeAllListeners("send_schedule_emails_result");
-    socket.once("send_schedule_emails_result", (res) => {
-      if (res.success) {
-        setMessage(res.message || "Emails sent successfully.");
+  if (!selectedSchedule) {
+    setSnack({ open: true, message: "Please select a schedule first.", severity: "warning" });
+    return;
+  }
 
-        // 🔥 Remove emailed applicants from the list
-        setPersons(prev =>
-          prev.filter(p => p.schedule_id !== selectedSchedule)
-        );
-      } else {
-        setMessage(res.error || "Failed to send emails.");
+  // ✅ get applicants from persons already assigned to this schedule
+  const assignedApplicants = persons
+    .filter(p => p.schedule_id === selectedSchedule)
+    .map(p => p.applicant_number);
+
+  if (assignedApplicants.length === 0) {
+    setSnack({ open: true, message: "No applicants assigned to this schedule.", severity: "warning" });
+    return;
+  }
+
+  // ✅ directly send the emails
+  socket.emit("send_schedule_emails", { schedule_id: selectedSchedule, applicant_numbers: assignedApplicants });
+
+  socket.once("send_schedule_emails_result", (emailRes) => {
+    if (emailRes.success) {
+      setSnack({
+        open: true,
+        message: emailRes.message || "Emails sent successfully.",
+        severity: "success"
+      });
+      fetchAllApplicants(); // refresh list
+      setSelectedApplicants(new Set()); // clear selections
+    } else {
+      setSnack({
+        open: true,
+        message: emailRes.error || "Failed to send emails.",
+        severity: "error"
+      });
+    }
+  });
+};
+
+  const [schedules, setSchedules] = useState([]);
+
+  useEffect(() => {
+    const fetchSchedules = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/exam_schedules_with_count");
+        setSchedules(res.data);
+      } catch (err) {
+        console.error("Error fetching schedules:", err);
       }
-    });
-  };
+    };
+
+    fetchSchedules();
+  }, []);
 
 
   const [itemsPerPage, setItemsPerPage] = useState(100);
@@ -384,7 +553,7 @@ const AssignScheduleToApplicants = () => {
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
-          mt: 1,
+          mt: 2,
           mb: 2,
           px: 2,
         }}
@@ -397,7 +566,7 @@ const AssignScheduleToApplicants = () => {
             fontSize: '36px',
           }}
         >
-          ASSIGN SCHEDULE TO APPLICANT
+          APPLICANT SCHEDULING
         </Typography>
 
         <TextField
@@ -418,10 +587,88 @@ const AssignScheduleToApplicants = () => {
 
 
       </Box>
-
       <hr style={{ border: "1px solid #ccc", width: "100%" }} />
 
       <br />
+      <Box display="flex" sx={{ border: "2px solid maroon", borderRadius: "4px", overflow: "hidden" }}>
+        {tabs1.map((tab1, index) => {
+          const isActive = location.pathname === tab1.to; // check active route
+
+          return (
+            <Link
+              key={index}
+              to={tab1.to}
+              style={{ textDecoration: "none", flex: 1 }}
+            >
+              <Box
+                sx={{
+                  backgroundColor: isActive ? "#6D2323" : "white",
+                  padding: "16px",
+                  height: "75px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  cursor: "pointer",
+                  textAlign: "center",
+                  borderRight: index !== tabs1.length - 1 ? "2px solid maroon" : "none", // fixed to tabs1
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    backgroundColor: "#6D2323",
+                    "& .MuiTypography-root": {
+                      color: "white",
+                    },
+                  },
+                }}
+              >
+                <Typography
+                  sx={{
+                    color: isActive ? "white" : "maroon", // active tab text
+                    fontWeight: "bold",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {tab1.label}
+                </Typography>
+              </Box>
+            </Link>
+          );
+        })}
+      </Box>
+      <br />
+      <Box display="flex" sx={{ border: "2px solid maroon", borderRadius: "4px", overflow: "hidden" }}>
+        {tabs.map((tab, index) => (
+          <Link
+            key={index}
+            to={tab.to}
+            style={{ textDecoration: "none", flex: 1 }}
+          >
+            <Box
+              sx={{
+                backgroundColor: "#6D2323",
+                padding: "16px",
+                color: "#ffffff",
+                textAlign: "center",
+                cursor: "pointer",
+                borderRight: index !== tabs.length - 1 ? "2px solid white" : "none", // changed here
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  backgroundColor: "#f9f9f9",
+                  color: "#6D2323", // font color on hover
+                },
+              }}
+            >
+              <Typography sx={{ color: "inherit", fontWeight: "bold", wordBreak: "break-word" }}>
+                {tab.label}
+              </Typography>
+            </Box>
+          </Link>
+        ))}
+      </Box>
+
+
+
+      <div style={{ height: "20px" }}></div>
 
 
       <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", }}>
@@ -447,34 +694,105 @@ const AssignScheduleToApplicants = () => {
       >
         <Box >
 
-          <Typography textAlign="left" color="maroon" >
+          <Typography textAlign="left" color="maroon" sx={{ mb: 1 }}>
             Select Schedule:
           </Typography>
-          <TextField
-            select
-            fullWidth
-            label="Select a Schedule"
-            value={selectedSchedule}
-            onChange={(e) => setSelectedSchedule(e.target.value)}
-            variant="outlined"
-            sx={{
-              border: "3px solid maroon",
-              borderRadius: 2,
-              "& .MuiOutlinedInput-notchedOutline": { border: "none" },
-              bgcolor: "white",
-              p: 0.5,
-              mb: 2,
-            }}
-          >
-            <MenuItem value="" disabled>
-              -- Select Schedule --
-            </MenuItem>
-            {schedules.map((s) => (
-              <MenuItem key={s.schedule_id} value={s.schedule_id}>
-                {s.day_description} | {s.room_description} | {s.start_time} - {s.end_time}
-              </MenuItem>
-            ))}
-          </TextField>
+
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            {/* Select Schedule */}
+            <Grid item xs={12} md={3}>
+              <TextField
+                select
+                fullWidth
+                label="Select Schedule"
+                value={selectedSchedule}
+                onChange={(e) => setSelectedSchedule(e.target.value)}
+                variant="outlined"
+                sx={{
+                  border: "3px solid maroon",
+                  borderRadius: 2,
+                  "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+                  bgcolor: "white",
+                }}
+              >
+                <MenuItem value="">
+                  -- Select Schedule --
+                </MenuItem>
+                {schedules.map((s) => (
+                  <MenuItem key={s.schedule_id} value={s.schedule_id}>
+                    {s.day_description} | {s.room_description} | {s.start_time} - {s.end_time}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Grid>
+
+            {/* Proctor */}
+            <Grid item xs={12} md={3}>
+              <TextField
+                fullWidth
+                label="Proctor"
+                value={
+                  selectedSchedule
+                    ? schedules.find((s) => s.schedule_id === selectedSchedule)?.proctor || "Not assigned"
+                    : ""
+                }
+                InputProps={{ readOnly: true }}
+                variant="outlined"
+                sx={{
+                  border: "3px solid maroon",
+                  borderRadius: 2,
+                  "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+                  bgcolor: "#f9f9f9",
+                }}
+              />
+            </Grid>
+
+            {/* Room Quota */}
+            <Grid item xs={12} md={3}>
+              <TextField
+                fullWidth
+                label="Room Quota"
+                value={
+                  selectedSchedule
+                    ? schedules.find((s) => s.schedule_id === selectedSchedule)?.room_quota || "N/A"
+                    : ""
+                }
+                InputProps={{ readOnly: true }}
+                variant="outlined"
+                sx={{
+                  border: "3px solid maroon",
+                  borderRadius: 2,
+                  "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+                  bgcolor: "#f9f9f9",
+                }}
+              />
+            </Grid>
+
+            {/* Current Occupancy */}
+            <Grid item xs={12} md={3}>
+              <TextField
+                fullWidth
+                label="Current Occupancy"
+                value={
+                  selectedSchedule
+                    ? (() => {
+                      const s = schedules.find((x) => x.schedule_id === selectedSchedule);
+                      return s ? `${s.current_occupancy}/${s.room_quota}` : "";
+                    })()
+                    : ""
+                }
+                InputProps={{ readOnly: true }}
+                variant="outlined"
+                sx={{
+                  border: "3px solid maroon",
+                  borderRadius: 2,
+                  "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+                  bgcolor: "#f9f9f9",
+                }}
+              />
+            </Grid>
+          </Grid>
+
         </Box>
         {/* === ROW 1: Sort + Buttons === */}
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -502,7 +820,7 @@ const AssignScheduleToApplicants = () => {
               <Typography fontSize={13} sx={{ minWidth: "80px", textAlign: "right" }}>
                 Sort Order:
               </Typography>
-              <FormControl size="small" sx={{ width: "200px" }}>
+              <FormControl size="small" sx={{ width: "150px" }}>
                 <Select
                   value={sortOrder}
                   onChange={(e) => setSortOrder(e.target.value)}
@@ -516,15 +834,16 @@ const AssignScheduleToApplicants = () => {
 
 
           {/* RIGHT SIDE: Action Buttons */}
-          <Box display="flex" gap={2}>
+          <Box display="flex" gap={2} alignItems="center">
             <Button
               variant="contained"
               color="secondary"
               onClick={handleAssign40}
               sx={{ minWidth: 150 }}
             >
-              Assign First 40
+              Assign Max
             </Button>
+
             <Button
               variant="contained"
               color="primary"
@@ -533,6 +852,35 @@ const AssignScheduleToApplicants = () => {
             >
               Assign Selected
             </Button>
+
+            {/* 🔥 New Custom Assign Input + Button */}
+            <TextField
+              type="number"
+              size="small"
+              label="Custom Count"
+              value={customCount}
+              onChange={(e) => setCustomCount(Number(e.target.value))}
+              sx={{ width: 120 }}
+            />
+            <Button
+              variant="contained"
+              color="warning"
+              onClick={handleAssignCustom}
+              sx={{ minWidth: 150 }}
+            >
+              Assign Custom
+            </Button>
+
+            {/* 🔥 New Unassign All Button */}
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleUnassignAll}
+              sx={{ minWidth: 150 }}
+            >
+              Unassign All
+            </Button>
+
             <Button
               variant="contained"
               color="success"
@@ -542,6 +890,7 @@ const AssignScheduleToApplicants = () => {
               Send Emails
             </Button>
           </Box>
+
         </Box>
 
         {/* === ROW 2: Department + Program === */}
@@ -589,12 +938,7 @@ const AssignScheduleToApplicants = () => {
           </Box>
         </Box>
 
-        {/* Message inside Paper */}
-        {message && (
-          <Typography textAlign="center" color="maroon" mt={1}>
-            {message}
-          </Typography>
-        )}
+
       </Paper>
 
       <TableContainer component={Paper} sx={{ width: '100%', }}>
@@ -858,7 +1202,16 @@ const AssignScheduleToApplicants = () => {
 
 
 
-
+      <Snackbar
+        open={snack.open}
+        autoHideDuration={5000}
+        onClose={handleCloseSnack}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity={snack.severity} onClose={handleCloseSnack} sx={{ width: "100%" }}>
+          {snack.message}
+        </Alert>
+      </Snackbar>
 
 
 
@@ -869,7 +1222,7 @@ const AssignScheduleToApplicants = () => {
         <DialogTitle>Confirm Email Sending</DialogTitle>
         <DialogContent>
           Are you sure you want to send exam schedule emails? Please confirm that
-          the applicants' Email addresses are correct.
+          the Applicant's Emailed Address are correct.
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConfirmOpen(false)} color="error">

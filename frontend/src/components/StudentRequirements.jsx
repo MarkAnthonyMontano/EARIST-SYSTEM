@@ -16,16 +16,28 @@ import {
 } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import Search from '@mui/icons-material/Search';
+import { Link, useLocation } from "react-router-dom";
 
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import io from 'socket.io-client';
-
 
 const requiredDocs = [
   { label: 'PSA Birth Certificate', key: 'BirthCertificate' },
   { label: 'Form 138 (4th Quarter / No failing Grades)', key: 'Form138' },
   { label: 'Certificate of Good Moral Character', key: 'GoodMoralCharacter' },
   { label: 'Certificate Belonging to Graduating Class', key: 'CertificateOfGraduatingClass' }
+];
+
+const tabs = [
+  { label: "Applicant Form", to: "/admin_dashboard1" },
+  { label: "Documents Submitted", to: "/student_requirements" },
+  { label: "Admission Exam", to: "/assign_entrance_exam" },
+  { label: "Interview", to: "/interview" },
+  { label: "Qualifying Exam", to: "/qualifying_exam" },
+  { label: "College Approval", to: "/college_approval" },
+  { label: "Medical Clearance", to: "/medical_clearance" },
+  { label: "Applicant Status", to: "/applicant_status" },
+  { label: "View List", to: "/view_list" },
 ];
 
 const remarksOptions = [
@@ -118,6 +130,7 @@ const remarksOptions = [
 
 
 const StudentRequirements = () => {
+  const location = useLocation();
   const [uploads, setUploads] = useState([]);
   const [persons, setPersons] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -481,105 +494,105 @@ const StudentRequirements = () => {
       <TableRow key={doc.key}>
         <TableCell sx={{ fontWeight: 'bold', width: '20%', border: "1px solid maroon" }}>{doc.label}</TableCell>
 
-      <TableCell sx={{ width: '20%', border: "1px solid maroon" }}>
-  {editingRemarkId === uploaded?.upload_id ? (
-    newRemarkMode[uploaded.upload_id] ? (
-      // === Free-text editor mode ===
-      <TextField
-        size="small"
-        fullWidth
-        autoFocus
-        placeholder="Enter custom remark"
-        value={remarksMap[uploaded.upload_id] || ""}
-        onChange={(e) =>
-          setRemarksMap((prev) => ({
-            ...prev,
-            [uploaded.upload_id]: e.target.value,
-          }))
-        }
-        onBlur={async () => {
-          const finalRemark = (remarksMap[uploaded.upload_id] || "").trim();
-          if (finalRemark) {
-            await handleSaveRemarks(uploaded.upload_id);
-          }
-          setNewRemarkMode((prev) => ({ ...prev, [uploaded.upload_id]: false }));
-        }}
-        onKeyDown={async (e) => {
-          if (e.key === "Enter") {
-            e.preventDefault();
-            const finalRemark = (remarksMap[uploaded.upload_id] || "").trim();
-            if (finalRemark) {
-              await handleSaveRemarks(uploaded.upload_id);
-            }
-            setNewRemarkMode((prev) => ({ ...prev, [uploaded.upload_id]: false }));
-          }
-        }}
-      />
-    ) : (
-      // === Predefined dropdown mode ===
-      <TextField
-        select
-        size="small"
-        fullWidth
-        autoFocus
-        value={remarksMap[uploaded.upload_id] ?? uploaded?.remarks ?? ""}
-        onChange={async (e) => {
-          const value = e.target.value;
-          if (value === "__NEW__") {
-            // Switch to text mode; don't store the marker
-            setNewRemarkMode((prev) => ({ ...prev, [uploaded.upload_id]: true }));
-            // If there was a previous preset value, keep it until they type
-            setRemarksMap((prev) => ({
-              ...prev,
-              [uploaded.upload_id]: (prev[uploaded.upload_id] ?? uploaded?.remarks ?? "")
-            }));
-            return;
-          }
-          // Normal preset value → save immediately
-          setRemarksMap((prev) => ({ ...prev, [uploaded.upload_id]: value }));
-          await handleSaveRemarks(uploaded.upload_id);
-        }}
-        SelectProps={{
-          MenuProps: { PaperProps: { style: { maxHeight: 200 } } },
-        }}
-      >
-        <MenuItem value="">
-          <em>Select Remarks</em>
-        </MenuItem>
-        {remarksOptions.map((option, index) => (
-          <MenuItem key={index} value={option}>
-            {option}
-          </MenuItem>
-        ))}
-        {/* Trigger for custom text */}
-        <MenuItem value="__NEW__">New Remarks</MenuItem>
-      </TextField>
-    )
-  ) : (
-    // === Display mode ===
-    <Box
-      onClick={() => {
-        setEditingRemarkId(uploaded.upload_id);
-        setNewRemarkMode((prev) => ({ ...prev, [uploaded.upload_id]: false }));
-        setRemarksMap((prev) => ({
-          ...prev,
-          [uploaded.upload_id]: uploaded?.remarks || "",
-        }));
-      }}
-      sx={{
-        cursor: "pointer",
-        fontStyle: uploaded?.remarks ? "normal" : "italic",
-        color: uploaded?.remarks ? "inherit" : "#888",
-        minHeight: "40px",
-        display: "flex",
-        alignItems: "center",
-        px: 1,
-      }}
-    >
-      {uploaded?.remarks || "Click to add remarks"}
-    </Box>
-  )}
-</TableCell>
+        <TableCell sx={{ width: '20%', border: "1px solid maroon" }}>
+          {editingRemarkId === uploaded?.upload_id ? (
+            newRemarkMode[uploaded.upload_id] ? (
+              // === Free-text editor mode ===
+              <TextField
+                size="small"
+                fullWidth
+                autoFocus
+                placeholder="Enter custom remark"
+                value={remarksMap[uploaded.upload_id] || ""}
+                onChange={(e) =>
+                  setRemarksMap((prev) => ({
+                    ...prev,
+                    [uploaded.upload_id]: e.target.value,
+                  }))
+                }
+                onBlur={async () => {
+                  const finalRemark = (remarksMap[uploaded.upload_id] || "").trim();
+                  if (finalRemark) {
+                    await handleSaveRemarks(uploaded.upload_id);
+                  }
+                  setNewRemarkMode((prev) => ({ ...prev, [uploaded.upload_id]: false }));
+                }}
+                onKeyDown={async (e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    const finalRemark = (remarksMap[uploaded.upload_id] || "").trim();
+                    if (finalRemark) {
+                      await handleSaveRemarks(uploaded.upload_id);
+                    }
+                    setNewRemarkMode((prev) => ({ ...prev, [uploaded.upload_id]: false }));
+                  }
+                }}
+              />
+            ) : (
+              // === Predefined dropdown mode ===
+              <TextField
+                select
+                size="small"
+                fullWidth
+                autoFocus
+                value={remarksMap[uploaded.upload_id] ?? uploaded?.remarks ?? ""}
+                onChange={async (e) => {
+                  const value = e.target.value;
+                  if (value === "__NEW__") {
+                    // Switch to text mode; don't store the marker
+                    setNewRemarkMode((prev) => ({ ...prev, [uploaded.upload_id]: true }));
+                    // If there was a previous preset value, keep it until they type
+                    setRemarksMap((prev) => ({
+                      ...prev,
+                      [uploaded.upload_id]: (prev[uploaded.upload_id] ?? uploaded?.remarks ?? "")
+                    }));
+                    return;
+                  }
+                  // Normal preset value → save immediately
+                  setRemarksMap((prev) => ({ ...prev, [uploaded.upload_id]: value }));
+                  await handleSaveRemarks(uploaded.upload_id);
+                }}
+                SelectProps={{
+                  MenuProps: { PaperProps: { style: { maxHeight: 200 } } },
+                }}
+              >
+                <MenuItem value="">
+                  <em>Select Remarks</em>
+                </MenuItem>
+                {remarksOptions.map((option, index) => (
+                  <MenuItem key={index} value={option}>
+                    {option}
+                  </MenuItem>
+                ))}
+                {/* Trigger for custom text */}
+                <MenuItem value="__NEW__">New Remarks</MenuItem>
+              </TextField>
+            )
+          ) : (
+            // === Display mode ===
+            <Box
+              onClick={() => {
+                setEditingRemarkId(uploaded.upload_id);
+                setNewRemarkMode((prev) => ({ ...prev, [uploaded.upload_id]: false }));
+                setRemarksMap((prev) => ({
+                  ...prev,
+                  [uploaded.upload_id]: uploaded?.remarks || "",
+                }));
+              }}
+              sx={{
+                cursor: "pointer",
+                fontStyle: uploaded?.remarks ? "normal" : "italic",
+                color: uploaded?.remarks ? "inherit" : "#888",
+                minHeight: "40px",
+                display: "flex",
+                alignItems: "center",
+                px: 1,
+              }}
+            >
+              {uploaded?.remarks || "Click to add remarks"}
+            </Box>
+          )}
+        </TableCell>
 
 
 
@@ -715,7 +728,7 @@ const StudentRequirements = () => {
 
   return (
     <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', paddingRight: 1 }}>
-      <Box sx={{ mt: 2, px: 2 }}>
+      <Box sx={{ px: 2 }}>
         <Box sx={{ position: 'absolute', top: 10, right: 24 }}>
           <Button
             sx={{ width: 65, height: 65, borderRadius: '50%', '&:hover': { backgroundColor: '#E8C999' } }}
@@ -769,7 +782,7 @@ const StudentRequirements = () => {
             justifyContent: 'space-between',
             alignItems: 'center',
             flexWrap: 'wrap',
-
+            mt: 2,
             mb: 2,
             px: 2,
           }}
@@ -797,7 +810,53 @@ const StudentRequirements = () => {
         </Box>
 
         <hr style={{ border: "1px solid #ccc", width: "100%" }} />
+        <br />
 
+        <Box display="flex" sx={{ border: "2px solid maroon", borderRadius: "4px", overflow: "hidden" }}>
+          {tabs.map((tab, index) => {
+            const isActive = location.pathname === tab.to; // check active route
+
+            return (
+              <Link
+                key={index}
+                to={tab.to}
+                style={{ textDecoration: "none", flex: 1 }}
+              >
+                <Box
+                  sx={{
+                    backgroundColor: isActive ? "#6D2323" : "white", // active tab bg
+                    padding: "16px",
+                    height: "75px",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    cursor: "pointer",
+                    textAlign: "center",
+                    borderRight: index !== tabs.length - 1 ? "2px solid maroon" : "none",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      backgroundColor: "#6D2323",
+                      "& .MuiTypography-root": {
+                        color: "white",
+                      },
+                    },
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      color: isActive ? "white" : "maroon", // active tab text
+                      fontWeight: "bold",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {tab.label}
+                  </Typography>
+                </Box>
+              </Link>
+            );
+          })}
+        </Box>
         <br />
         {/* Applicant ID and Name */}
         <TableContainer component={Paper} sx={{ width: '100%', border: "1px solid maroon" }}>

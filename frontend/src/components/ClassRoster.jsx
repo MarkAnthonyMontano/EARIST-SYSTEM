@@ -44,7 +44,7 @@ const ClassRoster = () => {
   }, []);
 
   return (
-    <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, p: 4 }}>
+    <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, p: 1 }}>
       {/* Top header: DOCUMENTS SUBMITTED + Search */}
       <Box
         sx={{
