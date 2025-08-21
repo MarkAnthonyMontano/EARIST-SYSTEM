@@ -1692,6 +1692,7 @@ app.post("/verify-otp", (req, res) => {
   res.json({ message: "OTP verified" });
 });
 
+// Login for Registrar, Faculty, Student
 app.post("/login", async (req, res) => {
   const { email: loginCredentials, password } = req.body;
 
@@ -1711,7 +1712,7 @@ app.post("/login", async (req, res) => {
         NULL AS fname,
         NULL AS mname,
         NULL AS lname,
-        NULL AS status,
+        ua.status AS status,
         'user' AS source
       FROM user_accounts AS ua
       LEFT JOIN student_numbering_table AS snt ON snt.person_id = ua.person_id
@@ -1751,7 +1752,7 @@ app.post("/login", async (req, res) => {
     }
 
     // ✅ Block inactive faculty
-    if (user.source === "prof" && user.status === 0) {
+    if ((user.source === "prof" || user.source === "user") && user.status === 0) {
       return res.status(400).json({ message: "The Account is Inactive" });
     }
 
@@ -1807,7 +1808,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-
 // Login for Applicants
 app.post("/login_applicant", async (req, res) => {
   const { email, password } = req.body;
@@ -1833,6 +1833,10 @@ app.post("/login_applicant", async (req, res) => {
 
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    if (user.status === 0) {
+      return res.status(400).json({ message: "The Account is Inactive" });
     }
 
     const person_id = user.person_id;
@@ -1894,6 +1898,7 @@ app.post("/login_applicant", async (req, res) => {
     res.status(500).json({ message: "Server error during login" });
   }
 });
+
 
 // Login for Proffesor
 app.post("/login_prof", async (req, res) => {

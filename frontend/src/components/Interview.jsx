@@ -21,10 +21,6 @@ import { Link, useLocation } from "react-router-dom";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import io from 'socket.io-client';
 
-
-const vaccineDoc = { label: 'Copy of Vaccine Card (1st and 2nd Dose)', key: 'VaccineCard' };
-
-
 const tabs = [
     { label: "Applicant Form", to: "/admin_dashboard1" },
     { label: "Documents Submitted", to: "/student_requirements" },
@@ -37,96 +33,7 @@ const tabs = [
     { label: "View List", to: "/view_list" },
 ];
 
-const remarksOptions = [
-    "75% OF ATTENDANCE IS NEEDED FOR TRANSFEREE",
-    "Attachments were blurry",
-    "Birth Certificate with Sarical Surname",
-    "Card No Name/Details of the Applicant",
-    "Conflict of Lastname with birth certificate",
-    "Conflict of Lastname with birth certificate. Please Check",
-    "Conflict of name on the document submitted",
-    "Did not meet the requirements",
-    "Documents did not match with the Requirement",
-    "Duplicate Application",
-    "FORM 138 IS NOT COMPLETE",
-    "Good Moral is outdated must be 2022",
-    "GWA did not meet the Requirements",
-    "Have failed and incomplete grades",
-    "Have failing Grades",
-    "Kindly submit your vaccine card and good moral certificate to complete your evaluation",
-    "Kindly wait for verification of your credentials (ALS)",
-    "Multiple Accounts",
-    "NO COURSE APPLIED AND NO DOCUMENTS UPLOADED",
-    "NO DOCUMENT UPLOADED",
-    "NO FORM 138 UPLOADED",
-    "NO TOR UPLOADED",
-    "NOT QUALIFIED BASE ON YOUR STRAND",
-    "Please post your form 138 for approval",
-    "Please prepare your birth certificate reflecting the serrano surname",
-    "Please re-submit documents",
-    "Please resolve the lastname (conflict) appeared in your birth certificate",
-    "Please resubmit all documents. They are not clear",
-    "Please resubmit clear copy",
-    "Please resubmit the complete view of your document",
-    "Please submit clear copy of form 138",
-    "Please submit complete documents",
-    "Please submit first page of your TOR",
-    "Please submit full copy of report card with (front page, 1st, 2nd semester)",
-    "Please submit letter of intent or permit to study",
-    "Please submit NSO or PSA Birth certificate",
-    "Please submit NSO/PSA Birth certificate and vaccine card.",
-    "Please submit PSA, form 138, Vaccine card and Good moral",
-    "Please submit the full view of your f138 1st and 2nd semester front and back with name on both for verification",
-    "Please submit the required documents",
-    "Please submit vaccination card with name",
-    "Please upload Form 138, NSO/PSA Birth certificate and good moral",
-    "Please upload official Transcript of Records",
-    "Please upload the whole picture of your form 138",
-    "Please upload your form 138, NSO/PSA Birth certificate and vaccine card",
-    "Please upload your NSO/PSA",
-    "Please upload your photo",
-    "Please submit clear copy",
-    "Re-submit all copy of TOR w/ remarks: Graduated with a Degree of.... signed by key officials of the school and the registrar",
-    "Re-submit photo",
-    "REQUIRED TO SUBMIT COMPLETE GRADES FOR TRANSFEREE",
-    "Re-submit clear copy",
-    "Re-submit clear fill image of form 138",
-    "Re-submit form 138 for 2nd semester",
-    "Re-submit with complete name",
-    "SUBJECTS WERE ALL DROPPED FROM PREVIOUS SCHOOL",
-    "Submit good moral year 2022",
-    "Submit 1st and 2nd semester report card grade 12",
-    "Submit 1st and 2nd semester report card, together with front page",
-    "Submit form 138",
-    "Submit form 138 with name",
-    "Submit form 138 with name and submit photo",
-    "Submit Good Moral",
-    "Submit Good Moral and Vaccine Card",
-    "Submit Goof Moral year 2022",
-    "Submit the course descriptions of all the subjects taken from another school to the EARIST registrar for crediting.",
-    "Submit updated copy of your good moral",
-    "Submit updated Vaccine Card (1st and 2nd dose)",
-    "Submit your document",
-    "Teacher Certificate Program is a Graduate Program",
-    "Temporarily accepted. Please Submit PSA copy of birth certificate",
-    "Temporarily accepted. Submit original document upon enrollment.",
-    "The file cannot be opened",
-    "The form 138 document did not contain the name of the applicant",
-    "The uploaded did not match the name and gender of the applicant (Abela, Mary Jane)",
-    "The uploaded file did not match with the name of applicant (Shane Bamba)",
-    "The uploaded file did not match with the required document",
-    "The Vaccine Card you uploaded does not show your name.",
-    "TOR should be based in the new curriculum for transferee",
-    "Upload clear copy of PSA Birth Certificate in PDF. JPEG. format in full image",
-    "Upload your NSO/PSA Birth Certificate",
-    "Upload your Photo",
-    "You did not meet the grade required for the course",
-    "You have a lower grade"
-];
-
-
-
-const MedicalClearance = () => {
+const Interview = () => {
     const location = useLocation();
     const [uploads, setUploads] = useState([]);
     const [persons, setPersons] = useState([]);
@@ -333,89 +240,39 @@ const MedicalClearance = () => {
     };
 
 
-    const handleUploadSubmit = async () => {
-        if (!selectedPerson?.person_id || !selectedFiles.file) {
-            alert("Please select a file and applicant first.");
-            return;
-        }
+    // Add state at top of Interview component
+    const [interviewData, setInterviewData] = useState({
+        entrance_exam_interviewer: "",
+        college_interviewer: "",
+        entrance_exam_score: 0,
+        college_exam_score: 0,
+        user: user || "",
+        status: "",
+        custom_status: "",
+        remarks: ""
+    });
 
-        try {
-            const formData = new FormData();
-            formData.append("file", selectedFiles.file);
-            formData.append("person_id", selectedPerson.person_id);
-            formData.append("remarks", selectedFiles.remarks || "");
+    const [originalData, setOriginalData] = useState(interviewData);
 
-            await axios.post("http://localhost:5000/api/upload/vaccine", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
-
-            alert("✅ Vaccine Card uploaded successfully!");
-            setSelectedFiles({});
-            if (selectedPerson?.applicant_number) {
-                fetchUploadsByApplicantNumber(selectedPerson.applicant_number);
-            }
-        } catch (error) {
-            console.error("Upload failed:", error);
-            alert("❌ Upload failed.");
-        }
-    };
-
-    const handleDelete = async (uploadId) => {
-        try {
-            await axios.delete(`http://localhost:5000/admin/uploads/${uploadId}`);
-
-            if (selectedPerson?.applicant_number) {
-                fetchUploadsByApplicantNumber(selectedPerson.applicant_number);
-            }
-
-            // Cleanup local state
-            setSelectedFiles((prev) => {
-                const updated = { ...prev };
-                delete updated[vaccineDoc.key];
-                return updated;
-            });
-
-        } catch (err) {
-            console.error("Delete error:", err);
-            alert("Failed to delete. Please try again.");
-        }
-    };
-
-   
-    const handleChange = async (e) => {
+    const handleInterviewChange = (e) => {
         const { name, value } = e.target;
-        setPerson((prev) => ({ ...prev, [name]: value }));
-
-        if (name === "document_status") {
-            const value = e.target.value || "On process"; // default if empty
-            setPerson((prev) => ({ ...prev, document_status: value }));
-
-            if (uploads.length === 0) return;
-
-            try {
-                await Promise.all(
-                    uploads.map((upload) =>
-                        axios.put(`http://localhost:5000/uploads/document-status/${upload.upload_id}`, {
-                            document_status: value,
-                        })
-                    )
-                );
-
-                // 🔹 Emit a socket event so ApplicantList can refresh instantly
-                socket.emit("document_status_updated");
-
-                if (selectedPerson?.applicant_number) {
-                    await fetchUploadsByApplicantNumber(selectedPerson.applicant_number);
-                }
-            } catch (err) {
-                console.error("❌ Failed to update document statuses:", err);
-            }
-        }
-
-
+        setInterviewData(prev => ({ ...prev, [name]: value }));
     };
 
-
+    // Save Interview
+    const saveInterview = async () => {
+        try {
+            await axios.post("http://localhost:5000/api/interview/save", {
+                ...interviewData,
+                applicant_id: selectedPerson?.applicant_number,
+                person_id: selectedPerson?.person_id
+            });
+            alert("✅ Interview Saved!");
+        } catch (err) {
+            console.error(err);
+            alert("❌ Failed to save interview");
+        }
+    };
 
 
     const renderRow = (doc) => {
@@ -431,33 +288,6 @@ const MedicalClearance = () => {
             textTransform: 'none',
         };
 
-        const [newRemarkMode, setNewRemarkMode] = useState({}); // { [upload_id]: true|false }
-
-        const handleSaveRemarks = async (uploadId) => {
-            const newRemark = (remarksMap[uploadId] ?? "").trim();
-            if (!newRemark || newRemark === "__NEW__" || newRemark === "New Remarks") {
-                // do not save the trigger/empty
-                setEditingRemarkId(null);
-                setNewRemarkMode((prev) => ({ ...prev, [uploadId]: false }));
-                return;
-            }
-
-            try {
-                await axios.put(`http://localhost:5000/uploads/remarks/${uploadId}`, {
-                    remarks: newRemark,
-                    status: uploads.find((u) => u.upload_id === uploadId)?.status || "0",
-                });
-
-                if (selectedPerson?.applicant_number) {
-                    await fetchUploadsByApplicantNumber(selectedPerson.applicant_number);
-                }
-            } catch (err) {
-                console.error("Failed to save remarks:", err);
-            } finally {
-                setEditingRemarkId(null);
-                setNewRemarkMode((prev) => ({ ...prev, [uploadId]: false }));
-            }
-        };
 
 
         return (
@@ -765,7 +595,7 @@ const MedicalClearance = () => {
                             fontSize: '36px',
                         }}
                     >
-                        MEDICAL CLEARANCE
+                        INTERVIEW
                     </Typography>
 
                     <TextField
@@ -858,185 +688,43 @@ const MedicalClearance = () => {
                 </TableContainer>
 
                 <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon" }}>
-                    <Box style={{ textAlign: "center", marginTop: "25px", fontSize: "24px", fontFamily: "Arial", color: "maroon", fontWeight: "bold" }}>Medical Clearance</Box>
-                    <br />
-
-                    <br />
+                    {/* Header Row: Centered Title + Right-aligned Photo */}
                     <Box
                         sx={{
                             display: "flex",
-                            justifyContent: "space-between",
+                            justifyContent: "center",
                             alignItems: "center",
-                            mb: 2,
-                            px: 2,
+                            position: "relative",
+                            p: 2,
                         }}
                     >
-                        {/* Left side: Applying As and Strand */}
-                        <Box>
-                            {/* Applying As */}
+                        {/* Centered Title */}
+                        <Typography
+                            sx={{
+                                fontSize: "24px",
+                                fontWeight: "bold",
+                                fontFamily: "Arial",
+                                color: "maroon",
+                                textAlign: "center",
+                                width: "100%",
+                            }}
+                        >
+                            Interview
+                        </Typography>
 
-
-                            {/* Document Status */}
-                            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-                                <Typography
-                                    sx={{
-                                        fontSize: "14px",
-                                        fontFamily: "Arial Black",
-                                        marginRight: "45px",
-
-                                    }}
-                                >
-                                    Status:
-                                </Typography>
-                                <TextField
-                                    select
-                                    size="small"
-                                    name="document_status"
-                                    value={person.document_status || ""}
-                                    onChange={handleChange} // ✅ this stays
-                                    sx={{ width: "500px" }}
-                                    InputProps={{ sx: { height: 40 } }}
-                                    inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
-                                >
-                                    <MenuItem value=""><em>Select Document Status</em></MenuItem>
-                                    <MenuItem value="On process">On process</MenuItem>
-                                    <MenuItem value="Documents Verified & ECAT">Documents Verified & ECAT</MenuItem>
-                                    <MenuItem value="Disapproved">Disapproved</MenuItem>
-                                    <MenuItem value="Program Closed">Program Closed</MenuItem>
-                                </TextField>
-                            </Box>
-
-
-                            {/* Document Type, Remarks, and Document File */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 4, mb: 2 }}>
-
-                                {/* Document Type */}
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, }}>
-                                    <Typography sx={{ fontSize: "14px", fontFamily: "Arial Black", width: "90px" }}>
-                                        Document Type:
-                                    </Typography>
-                                    <TextField
-                                        select
-                                        size="small"
-                                        placeholder="Select Documents"
-                                        value={selectedFiles.requirements_id || ''}
-                                        onChange={(e) =>
-                                            setSelectedFiles(prev => ({
-                                                ...prev,
-                                                requirements_id: e.target.value,
-                                            }))
-                                        }
-                                        sx={{ width: 200 }} // match width
-                                        InputProps={{ sx: { height: 38 } }} // match height
-                                        inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
-                                    >
-                                        <MenuItem value="">
-                                            <em>Select Documents</em>
-                                        </MenuItem>
-                                        <MenuItem value={1}>Copy of Vaccine Card (1st and 2nd Dose)</MenuItem>
-
-                                    </TextField>
-                                </Box>
-
-                                {/* Remarks */}
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <Typography sx={{ fontSize: "14px", fontFamily: "Arial Black", width: "80px" }}>
-                                        Remarks
-                                    </Typography>
-                                    <TextField
-                                        select
-                                        size="small"
-                                        placeholder="Select Remarks"
-                                        value={selectedFiles.remarks || ''}
-                                        onChange={(e) =>
-                                            setSelectedFiles(prev => ({
-                                                ...prev,
-                                                remarks: e.target.value,
-                                            }))
-                                        }
-                                        sx={{ width: 250 }}
-                                        InputProps={{ sx: { height: 38 } }}
-                                        inputProps={{ style: { padding: "4px 8px", fontSize: "12px" } }}
-                                    >
-                                        <MenuItem value="">
-                                            <em>Select Remarks</em>
-                                        </MenuItem>
-                                        {remarksOptions.map((option, index) => (
-                                            <MenuItem key={index} value={option}>
-                                                {option}
-                                            </MenuItem>
-                                        ))}
-                                    </TextField>
-                                </Box>
-
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, marginLeft: "-25px" }}>
-                                    <Typography sx={{ fontSize: "14px", fontFamily: "Arial Black", width: "100px", textAlign: "center" }}>
-                                        Document File:
-                                    </Typography>
-                                    <Button
-                                        variant="contained"
-                                        startIcon={<CloudUploadIcon />}
-                                        onClick={() => document.getElementById("fileInput").click()}
-                                        sx={{
-                                            backgroundColor: '#1976d2',
-                                            color: 'white',
-                                            textTransform: 'none',
-                                            width: 150,
-                                            height: 38,
-                                            fontSize: "15px",
-                                            fontWeight: 'bold',
-                                            justifyContent: "center", // center icon and text
-                                            '&:hover': {
-                                                backgroundColor: '#1565c0'
-                                            }
-                                        }}
-                                    >
-                                        {selectedFiles.file ? selectedFiles.file.name : "Select File"}
-                                    </Button>
-                                    <input
-                                        id="fileInput"
-                                        type="file"
-                                        hidden
-                                        accept=".jpg,.jpeg,.png,.pdf"
-                                        onChange={(e) =>
-                                            setSelectedFiles(prev => ({
-                                                ...prev,
-                                                file: e.target.files[0],
-                                            }))
-                                        }
-                                    />
-                                </Box>
-
-                            </Box>
-
-
-                            <Button
-                                variant="contained"
-                                color="success"
-                                sx={{
-                                    ml: 2,
-                                    textTransform: "none",
-                                    fontWeight: "bold",
-                                    height: "35px",
-                                    width: "200px"
-                                }}
-                                onClick={handleUploadSubmit}
-                                disabled={!selectedFiles.requirements_id || !selectedFiles.file}
-                            >
-                                Submit Documents
-                            </Button>
-                        </Box>
-
-                        {/* Right side: ID Photo */}
+                        {/* Photo on the right */}
                         {person.profile_img && (
                             <Box
                                 sx={{
-                                    width: "2.10in", // standard 2×2 size
+                                    position: "absolute",
+                                    right: 16,
+                                    top: "165%",
+                                    transform: "translateY(-50%)",
+                                    width: "2.10in",
                                     height: "2.10in",
                                     border: "1px solid #ccc",
-                                    overflow: "hidden",
-                                    marginTop: "-140px",
                                     borderRadius: "4px",
+                                    overflow: "hidden",
                                 }}
                             >
                                 <img
@@ -1047,38 +735,137 @@ const MedicalClearance = () => {
                             </Box>
                         )}
                     </Box>
+
+                    <div style={{ height: "175px" }}></div>
+                    {/* Form Section */}
+                    <Box sx={{ borderTop: "2px solid maroon", p: 2 }}>
+                        {/* Entrance Exam Interviewer */}
+                        <TextField
+                            fullWidth
+                            multiline
+                            label="Entrance Exam Interview"
+                            name="entrance_exam_interviewer"
+                            value={interviewData.entrance_exam_interviewer}
+                            onChange={handleInterviewChange}
+                            sx={{ mb: 2 }}
+                        />
+
+                        {/* College Interviewer */}
+                        <TextField
+                            fullWidth
+                            multiline
+                            label="College Interviewer"
+                            name="college_interviewer"
+                            value={interviewData.college_interviewer}
+                            onChange={handleInterviewChange}
+                            sx={{ mb: 2 }}
+                        />
+
+                        {/* Scores */}
+                        <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+                            <TextField
+                                type="number"
+                                label="Entrance Exam Score (0-100)"
+                                name="entrance_exam_score"
+                                value={interviewData.entrance_exam_score || 0}
+                                onChange={handleInterviewChange}
+                            />
+                            <TextField
+                                type="number"
+                                label="College Exam Score (0-100)"
+                                name="college_exam_score"
+                                value={interviewData.college_exam_score || 0}
+                                onChange={handleInterviewChange}
+                            />
+                            <TextField
+                                disabled
+                                label="Total Score (Average)"
+                                value={
+                                    (Number(interviewData.entrance_exam_score || 0) +
+                                        Number(interviewData.college_exam_score || 0)) / 2
+                                }
+                            />
+                        </Box>
+
+                        {/* Status */}
+                        <TextField
+                            select
+                            fullWidth
+                            label="Status"
+                            name="status"
+                            value={interviewData.status}
+                            onChange={handleInterviewChange}
+                            sx={{ mb: 2 }}
+                        >
+                            <MenuItem value="PASSED">PASSED</MenuItem>
+                            <MenuItem value="Proceed to College Interview (College/Program will post the schedule of the Interview)">
+                                Proceed to College Interview (College/Program will post the schedule of the Interview)
+                            </MenuItem>
+                            <MenuItem value="FAILED, Sorry, you did not meet the minimum score for the entrance exam">
+                                FAILED, Sorry, you did not meet the minimum score for the entrance exam
+                            </MenuItem>
+                            <MenuItem value="PASSED">PASSED</MenuItem>
+                            <MenuItem value="FAILED">FAILED</MenuItem>
+                            <MenuItem value="WAIT, For further instructions">WAIT</MenuItem>
+                            <MenuItem value="PASSED FAILED">PASSED FAILED</MenuItem>
+                            <MenuItem value="CUSTOM">Custom</MenuItem>
+                        </TextField>
+
+                        {/* Custom Status */}
+                        {interviewData.status === "CUSTOM" && (
+                            <TextField
+                                fullWidth
+                                label="Custom Status"
+                                name="custom_status"
+                                value={interviewData.custom_status}
+                                onChange={handleInterviewChange}
+                                sx={{ mb: 2 }}
+                            />
+                        )}
+
+                        {/* Remarks */}
+                        <TextField
+                            fullWidth
+                            multiline
+                            rows={4}
+                            label="Remarks"
+                            name="remarks"
+                            value={interviewData.remarks}
+                            onChange={handleInterviewChange}
+                            sx={{ mb: 2 }}
+                        />
+
+                        {/* Buttons */}
+                        <Box sx={{ display: "flex", gap: 2 }}>
+                            <Button variant="contained" color="error" onClick={() => setInterviewData({})}>
+                                Reset
+                            </Button>
+                            <Button variant="contained" color="success" onClick={saveInterview}>
+                                Save
+                            </Button>
+                            <Button
+                                variant="contained"
+                                color="warning"
+                                onClick={() => setInterviewData(originalData)}
+                            >
+                                Cancel
+                            </Button>
+
+                        </Box>
+                    </Box>
                 </TableContainer>
 
 
-
-
                 <>
-                    <TableContainer component={Paper} sx={{ width: '100%', border: "1px solid maroon" }}>
-                        <Table>
-                            <TableHead sx={{ backgroundColor: '#6D2323' }}>
-                                <TableRow>
-                                    <TableCell sx={{ color: 'white', textAlign: "center", border: "1px solid maroon" }}>Document Type</TableCell>
-                                    <TableCell sx={{ color: 'white', textAlign: "center", border: "1px solid maroon" }}>Remarks</TableCell>
-                                    <TableCell sx={{ color: 'white', textAlign: "center", border: "1px solid maroon" }}>Status</TableCell>
-                                    <TableCell sx={{ color: 'white', textAlign: "center", border: "1px solid maroon" }}>Date and Time Submitted</TableCell>
-                                    <TableCell sx={{ color: 'white', textAlign: "center", border: "1px solid maroon" }}>User</TableCell>
-                                    <TableCell sx={{ color: 'white', textAlign: "center", border: "1px solid maroon" }}>Action</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {renderRow(vaccineDoc)}   {/* ✅ only vaccine card */}
-                            </TableBody>
 
-                        </Table>
-                    </TableContainer>
 
 
 
                 </>
 
-            </Box>
+            </Box >
         </Box >
     );
 };
 
-export default MedicalClearance;
+export default Interview;

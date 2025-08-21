@@ -23,7 +23,8 @@
     "react-router-dom": "^7.3.0",
     "select-philippines-address": "^1.0.6",
     "socket.io": "^4.8.1",
-    "socket.io-client": "^4.8.1"
+    "socket.io-client": "^4.8.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

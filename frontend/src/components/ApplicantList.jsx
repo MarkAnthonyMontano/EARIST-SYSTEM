@@ -535,6 +535,7 @@ const ApplicantList = () => {
         newWin.document.close();
     };
 
+    
 
     return (
         <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, p: 2 }}>

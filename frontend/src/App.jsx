@@ -86,6 +86,7 @@ import SuperAdminDashboard5 from './components/SuperAdminDashboard5';
 import ExaminationProfile from './components/ExaminationProfile';
 import AssignScheduleToApplicants from './components/AssignScheduleToApplicants';
 import AssignEntranceExam from './components/AssignEntranceExam';
+import Interview from './components/Interview';
 import Dashboard1 from './components/Dashboard1';
 import Dashboard2 from './components/Dashboard2';
 import Dashboard3 from './components/Dashboard3';
@@ -221,6 +222,8 @@ function App() {
               <Route path="/applicant_list" element={<ProtectedRoute><ApplicantList /></ProtectedRoute>} />
               <Route path="/applicant_list_admin" element={<ProtectedRoute><ApplicantListAdmin /></ProtectedRoute>} />
               <Route path="/medical_clearance" element={<ProtectedRoute><MedicalClearance /></ProtectedRoute>} />
+              <Route path="/interview" element={<ProtectedRoute><Interview /></ProtectedRoute>} />
+           
               <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
 
               <Route path="/admin_dashboard1" element={<ProtectedRoute><AdminDashboard1 /></ProtectedRoute>} />

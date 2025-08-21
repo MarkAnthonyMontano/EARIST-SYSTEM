@@ -97,6 +97,31 @@ const AdmissionDashboardPanel = () => {
           </Link>
         </div>
 
+
+        <div className="relative mb-5">
+          <Link to={'/qualifying_exam'}>
+            <div className="bg-white p-4 border-4 rounded-lg border-solid border-maroon-500 absolute left-16 top-12 w-enough">
+              <CollectionsBookmark className="text-maroon-500 text-2xl" />
+            </div>
+            <button className="bg-white text-maroon-500 border-4 rounded-lg border-solid border-maroon-500 p-4 w-80 h-32 font-medium mr-4 mt-20 ml-8 flex items-end justify-center">
+              QUALIFYING EXAM
+            </button>
+          </Link>
+        </div>
+
+        
+        <div className="relative mb-5">
+          <Link to={'/interview'}>
+            <div className="bg-white p-4 border-4 rounded-lg border-solid border-maroon-500 absolute left-16 top-12 w-enough">
+              <CollectionsBookmark className="text-maroon-500 text-2xl" />
+            </div>
+            <button className="bg-white text-maroon-500 border-4 rounded-lg border-solid border-maroon-500 p-4 w-80 h-32 font-medium mr-4 mt-20 ml-8 flex items-end justify-center">
+              INTERVIEW
+            </button>
+          </Link>
+        </div>
+
+
         <div className="relative">
           <Link to={'/medical_clearance'}>
             <div className="bg-white p-4 border-4 rounded-lg border-solid border-maroon-500 absolute left-16 top-12 w-enough">

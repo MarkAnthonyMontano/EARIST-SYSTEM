@@ -1,11 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { Box, Container, Typography, TextField, TableContainer, Paper, Table, TableHead, TableRow, TableCell } from "@mui/material";
+import { Box, Container, Typography, Button, TextField, TableBody, TableContainer, Paper, Table, TableHead, TableRow, TableCell } from "@mui/material";
 import EaristLogo from "../assets/EaristLogo.png";
 import '../styles/Print.css'
 import { FcPrint } from "react-icons/fc";
 import Search from '@mui/icons-material/Search';
 import { Link, useLocation } from "react-router-dom";
+import * as XLSX from "xlsx";
+
 
 const ExaminationProfile = () => {
 
@@ -279,9 +281,133 @@ const ExaminationProfile = () => {
             setShowPrintView(false); // hide it again after printing
         }, 200);
     };
+    const [applicantNumber, setApplicantNumber] = useState("");
+    const [examData, setExamData] = useState([
+        { TestArea: "English", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+        { TestArea: "Science", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+        { TestArea: "Filipino", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+        { TestArea: "Math", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+        { TestArea: "Abstract", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+    ]);
+
+    useEffect(() => {
+        if (selectedPerson?.person_id) {
+            fetchPersonData(selectedPerson.person_id);
+
+            // 🔹 Make sure applicantNumber is set when person is selected
+            if (selectedPerson.applicant_number) {
+                setApplicantNumber(selectedPerson.applicant_number);
+            }
+        }
+    }, [selectedPerson]);
 
 
+    const [totalScore, setTotalScore] = useState(0);
+    const [totalPercentage, setTotalPercentage] = useState(0);
 
+    // 🔹 Load existing exam data from backend
+    useEffect(() => {
+        if (!applicantNumber) return;
+        axios.get(`http://localhost:5000/exam/${applicantNumber}`).then((res) => {
+            if (res.data.length > 0) {
+                const updated = examData.map((row) => {
+                    const match = res.data.find((e) => e.subject === row.TestArea);
+                    return match
+                        ? {
+                            ...row,
+                            RawScore: match.raw_score,
+                            Percentage: match.percentage,
+                            User: match.user,
+                            DateCreated: match.date_created,
+                        }
+                        : row;
+                });
+                setExamData(updated);
+            }
+        });
+    }, [applicantNumber]);
+
+    const handleChange = (index, field, value) => {
+        const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Manila" });
+        const updated = [...examData];
+        updated[index][field] = value;
+        updated[index].DateCreated = today; // always Asia/Manila date
+        setExamData(updated);
+        calculateTotals(updated);
+    };
+
+
+    const handleImport = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: "array" });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(sheet);
+
+            const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Manila" });
+
+            const updated = examData.map((row) => {
+                const match = rows.find((r) => r.TestArea === row.TestArea);
+                return match
+                    ? {
+                        ...row,
+                        RawScore: match.RawScore || "",
+                        Percentage: match.Percentage || "",
+                        User: match.User || user,
+                        DateCreated: today, // Manila date
+                    }
+                    : row;
+            });
+
+            setExamData(updated);
+            calculateTotals(updated);
+        };
+        reader.readAsArrayBuffer(file);
+    };
+
+    // 🔹 Save to backend
+    const handleSave = async () => {
+        try {
+            const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Manila" });
+            // ✅ Correct Manila date in YYYY-MM-DD
+
+            await axios.post("http://localhost:5000/exam/save", {
+                applicant_number: applicantNumber,
+                exams: examData.map((row) => ({
+                    subject: row.TestArea,
+                    raw_score: row.RawScore,
+                    percentage: row.Percentage,
+                    user: row.User || user,
+                    date_created: row.DateCreated || today, // use row’s value OR today
+                })),
+            });
+
+            alert("✅ Exam data saved!");
+        } catch (err) {
+            console.error("Save error:", err);
+            alert("❌ Failed to save exam data.");
+        }
+    };
+
+
+    // 🔹 Compute totals
+    const calculateTotals = (data) => {
+        const totalScore = data.reduce(
+            (sum, row) => sum + (parseInt(row.RawScore) || 0),
+            0
+        );
+        const totalPercentage = data.reduce(
+            (sum, row) => sum + (parseFloat(row.Percentage) || 0),
+            0
+        );
+
+        setTotalScore(totalScore);
+        setTotalPercentage(totalPercentage);
+    };
 
     return (
         <Box sx={{ height: 'calc(100vh - 120px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
@@ -408,7 +534,7 @@ const ExaminationProfile = () => {
 
 
                 <div style={{ height: "20px" }}></div>
-                <TableContainer component={Paper} sx={{ width: '100%', mb: 1, }}>
+                <TableContainer component={Paper} sx={{ width: '100%', }}>
                     <Table>
                         <TableHead sx={{ backgroundColor: '#6D2323' }}>
                             <TableRow>
@@ -436,7 +562,123 @@ const ExaminationProfile = () => {
                     </Table>
                 </TableContainer>
 
+                <Box
+                    sx={{
+                        width: "100%",
+                        backgroundColor: "white",
+                        padding: 3,
+                        border: "2px solid maroon",
+                        borderRadius: 2,
+                    }}
+                >
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                        <Typography variant="h6" color="maroon">
+                            ECAT SCORE - Applicant {applicantNumber}
+                        </Typography>
 
+                        <Button
+                            variant="contained"
+                            component="label"
+                            sx={{ backgroundColor: "green" }}
+                        >
+                            Import from Excel
+                            <input type="file" accept=".xlsx, .xls" hidden onChange={handleImport} />
+                        </Button>
+                    </Box>
+
+
+
+                    {/* Score Table */}
+                    <Table sx={{ border: "2px solid maroon", width: "100%" }}>
+                        <TableHead sx={{ backgroundColor: "#6D2323" }}>
+                            <TableRow>
+                                <TableCell sx={{ color: "white", textAlign: "center" }}>Test Area</TableCell>
+                                <TableCell sx={{ color: "white", textAlign: "center" }}>Raw Score</TableCell>
+                                <TableCell sx={{ color: "white", textAlign: "center" }}>%</TableCell>
+                                <TableCell sx={{ color: "white", textAlign: "center" }}>User</TableCell>
+                                <TableCell sx={{ color: "white", textAlign: "center" }}>Date Created</TableCell>
+                            </TableRow>
+                        </TableHead>
+
+                        <TableBody>
+                            {examData.map((row, index) => (
+                                <TableRow key={index}>
+                                    <TableCell sx={{ border: "1px solid maroon" }}>{row.TestArea}</TableCell>
+                                    <TableCell sx={{ border: "1px solid maroon" }}>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            size="small"
+                                            value={row.RawScore}
+                                            onChange={(e) => handleChange(index, "RawScore", e.target.value)}
+                                        />
+                                    </TableCell>
+                                    <TableCell sx={{ border: "1px solid maroon" }}>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            size="small"
+                                            value={row.Percentage}
+                                            onChange={(e) => handleChange(index, "Percentage", e.target.value)}
+                                        />
+                                    </TableCell>
+                                    <TableCell sx={{ border: "1px solid maroon" }}>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            size="small"
+                                            value={row.User}
+                                            onChange={(e) => handleChange(index, "User", e.target.value)}
+                                        />
+                                    </TableCell>
+                                    <TableCell sx={{ border: "1px solid maroon" }}>
+                                        <TextField
+                                            fullWidth
+                                            variant="outlined"
+                                            size="small"
+                                            type="date"
+                                            value={
+                                                row.DateCreated ||
+                                                new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Manila" })
+                                            }
+                                            onChange={(e) => {
+                                                const updated = [...examData];
+                                                updated[index].DateCreated = e.target.value;
+                                                setExamData(updated);
+                                            }}
+                                        />
+                                    </TableCell>
+
+
+                                </TableRow>
+                            ))}
+
+                            {/* Total Row */}
+                            <TableRow>
+                                <TableCell sx={{ border: "2px solid maroon" }}>
+                                    <b>Total</b>
+                                </TableCell>
+                                <TableCell sx={{ border: "2px solid maroon" }}>
+                                    <b>{totalScore}</b>
+                                </TableCell>
+                                <TableCell sx={{ border: "2px solid maroon" }}>
+                                    <b>{totalPercentage}</b>
+                                </TableCell>
+                                <TableCell sx={{ border: "2px solid maroon" }} />
+                                <TableCell sx={{ border: "2px solid maroon" }} />
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+
+                    {/* Save Button */}
+                    <Button
+                        variant="contained"
+                        sx={{ mt: 2, backgroundColor: "maroon" }}
+                        onClick={handleSave}
+                    >
+                        Save to Database
+                    </Button>
+                </Box>
                 <button
                     onClick={handlePrintClick}
                     style={{

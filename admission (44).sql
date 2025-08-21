@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 20, 2025 at 10:56 PM
+-- Generation Time: Aug 21, 2025 at 10:35 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,33 @@ SET time_zone = "+00:00";
 --
 -- Database: `admission`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `admission_exam`
+--
+
+CREATE TABLE `admission_exam` (
+  `id` int(11) NOT NULL,
+  `person_id` int(11) NOT NULL,
+  `subject` varchar(100) NOT NULL,
+  `raw_score` int(11) DEFAULT 0,
+  `percentage` decimal(5,2) DEFAULT 0.00,
+  `user` varchar(255) DEFAULT NULL,
+  `date_created` date DEFAULT curdate()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `admission_exam`
+--
+
+INSERT INTO `admission_exam` (`id`, `person_id`, `subject`, `raw_score`, `percentage`, `user`, `date_created`) VALUES
+(11, 1, 'English', 80, 80.00, 'Dhani San Jose', '2025-08-22'),
+(12, 1, 'Science', 86, 100.00, 'Dhani San Jose', '2025-08-22'),
+(13, 1, 'Filipino', 75, 90.00, 'Dhani San Jose', '2025-08-22'),
+(14, 1, 'Math', 100, 80.00, 'Dhani San Jose', '2025-08-22'),
+(15, 1, 'Abstract', 90, 80.00, 'Dhani San Jose', '2025-08-22');
 
 -- --------------------------------------------------------
 
@@ -129,7 +156,8 @@ INSERT INTO `entrance_exam_schedule` (`schedule_id`, `day_description`, `room_de
 (7, 'Wednesday', 'MIS', '07:00:00', '09:00:00', NULL, '2025-08-20 03:37:31', 40),
 (8, 'Wednesday', 'CCS Room 303', '10:00:00', '11:00:00', 'Mark Anthony Montano', '2025-08-20 18:35:49', 40),
 (9, 'Monday', 'CCS Room 301', '10:00:00', '11:00:00', 'JUAN DELA CRUZ', '2025-08-20 19:09:35', 50),
-(10, 'Saturday', 'CAFA', '10:00:00', '11:00:00', 'PEDRO PENDUCO', '2025-08-20 19:17:00', 40);
+(10, 'Saturday', 'CAFA', '10:00:00', '11:00:00', 'PEDRO PENDUCO', '2025-08-20 19:17:00', 40),
+(12, 'Wednesday', 'MIS 4th Floor', '16:00:00', '17:00:00', 'Dhani SanJose', '2025-08-21 08:20:45', 30);
 
 -- --------------------------------------------------------
 
@@ -179,7 +207,6 @@ INSERT INTO `exam_applicants` (`id`, `schedule_id`, `applicant_id`, `email_sent`
 (28, NULL, '2025100028', 0),
 (29, NULL, '2025100029', 0),
 (30, NULL, '2025100030', 0),
-(31, NULL, '2025100031', 0),
 (32, NULL, '2025100032', 0),
 (33, NULL, '2025100033', 0),
 (34, NULL, '2025100034', 0),
@@ -230,6 +257,36 @@ INSERT INTO `exam_schedule` (`exam_id`, `exam_date`, `exam_start_time`, `exam_en
 (2, '2025-05-21', '12:00', '13:30'),
 (3, '2025-05-21', '09:30', '10:30'),
 (4, '2025-05-21', '07:00', '21:00');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `interview_table`
+--
+
+CREATE TABLE `interview_table` (
+  `interview_id` int(11) NOT NULL,
+  `applicant_id` varchar(20) NOT NULL,
+  `person_id` int(11) NOT NULL,
+  `entrance_exam_interviewer` varchar(100) DEFAULT NULL,
+  `college_interviewer` varchar(100) DEFAULT NULL,
+  `entrance_exam_score` int(11) DEFAULT 0 CHECK (`entrance_exam_score` between 0 and 100),
+  `college_exam_score` int(11) DEFAULT 0 CHECK (`college_exam_score` between 0 and 100),
+  `total_score` int(11) GENERATED ALWAYS AS (`entrance_exam_score` + `college_exam_score`) STORED,
+  `interview_date` timestamp NOT NULL DEFAULT current_timestamp(),
+  `user` varchar(100) NOT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `custom_status` varchar(255) DEFAULT NULL,
+  `remarks` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `interview_table`
+--
+
+INSERT INTO `interview_table` (`interview_id`, `applicant_id`, `person_id`, `entrance_exam_interviewer`, `college_interviewer`, `entrance_exam_score`, `college_exam_score`, `interview_date`, `user`, `status`, `custom_status`, `remarks`) VALUES
+(3, '2025100001', 1, 'Dhani SanJose', 'Hazel Anuncio', 100, 90, '2025-08-21 19:23:20', '', 'Proceed to College Interview (College/Program will post the schedule of the Interview)', NULL, 'oo na'),
+(4, '2025100001', 1, 'Dhani SanJose', 'Hazel Anuncio', 100, 90, '2025-08-21 19:31:03', '', 'Proceed to College Interview (College/Program will post the schedule of the Interview)', NULL, 'oo na');
 
 -- --------------------------------------------------------
 
@@ -567,7 +624,7 @@ CREATE TABLE `person_table` (
 --
 
 INSERT INTO `person_table` (`person_id`, `profile_img`, `campus`, `academicProgram`, `classifiedAs`, `applyingAs`, `program`, `program2`, `program3`, `yearLevel`, `last_name`, `first_name`, `middle_name`, `extension`, `nickname`, `height`, `weight`, `lrnNumber`, `nolrnNumber`, `gender`, `pwdMember`, `pwdType`, `pwdId`, `birthOfDate`, `age`, `birthPlace`, `languageDialectSpoken`, `citizenship`, `religion`, `civilStatus`, `tribeEthnicGroup`, `cellphoneNumber`, `emailAddress`, `presentStreet`, `presentBarangay`, `presentZipCode`, `presentRegion`, `presentProvince`, `presentMunicipality`, `presentDswdHouseholdNumber`, `sameAsPresentAddress`, `permanentStreet`, `permanentBarangay`, `permanentZipCode`, `permanentRegion`, `permanentProvince`, `permanentMunicipality`, `permanentDswdHouseholdNumber`, `solo_parent`, `father_deceased`, `father_family_name`, `father_given_name`, `father_middle_name`, `father_ext`, `father_nickname`, `father_education`, `father_education_level`, `father_last_school`, `father_course`, `father_year_graduated`, `father_school_address`, `father_contact`, `father_occupation`, `father_employer`, `father_income`, `father_email`, `mother_deceased`, `mother_family_name`, `mother_given_name`, `mother_middle_name`, `mother_ext`, `mother_nickname`, `mother_education`, `mother_education_level`, `mother_last_school`, `mother_course`, `mother_year_graduated`, `mother_school_address`, `mother_contact`, `mother_occupation`, `mother_employer`, `mother_income`, `mother_email`, `guardian`, `guardian_family_name`, `guardian_given_name`, `guardian_middle_name`, `guardian_ext`, `guardian_nickname`, `guardian_address`, `guardian_contact`, `guardian_email`, `annual_income`, `schoolLevel`, `schoolLastAttended`, `schoolAddress`, `courseProgram`, `honor`, `generalAverage`, `yearGraduated`, `schoolLevel1`, `schoolLastAttended1`, `schoolAddress1`, `courseProgram1`, `honor1`, `generalAverage1`, `yearGraduated1`, `strand`, `cough`, `colds`, `fever`, `asthma`, `faintingSpells`, `heartDisease`, `tuberculosis`, `frequentHeadaches`, `hernia`, `chronicCough`, `headNeckInjury`, `hiv`, `highBloodPressure`, `diabetesMellitus`, `allergies`, `cancer`, `smokingCigarette`, `alcoholDrinking`, `hospitalized`, `hospitalizationDetails`, `medications`, `hadCovid`, `covidDate`, `vaccine1Brand`, `vaccine1Date`, `vaccine2Brand`, `vaccine2Date`, `booster1Brand`, `booster1Date`, `booster2Brand`, `booster2Date`, `chestXray`, `cbc`, `urinalysis`, `otherworkups`, `symptomsToday`, `remarks`, `termsOfAgreement`, `created_at`) VALUES
-(1, '2025100001_1by1_2025.jpg', 0, 'Undergraduate', 'Freshman (First Year)', '', '41', '6', '16', 'First Year', 'Montaño', 'Mark Anthony', 'Placido', '', 'Johnny', '5\'11', '65kg', 'No LRN Number', 0, 0, 0, '', '', '2003-06-20', 21, 'Manila, Philippines', 'Tagalog, English', 'FILIPINO', 'Born Again', 'Single', 'Agta', '09171234567999999', 'markmontano0626@gmail.com', '19 G Dona Yayang Street ', 'Libis', '1000', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'Quezon City', 'DSWD123456', 0, '19 G Dona Yayang Street ', 'Libis', '1000', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'Quezon City', 'DSWD123456', 0, 0, 'Doe Sr.', 'Jonathan', 'Smiths', 'III', 'Jon', 0, 'fafs', '', '', '', '', '09181234567', 'Engineer', 'ABC Corp', '50000', 'jon.doe@abc.com', 0, 'Jane', 'Mary', 'Anne', '', 'Janey', 0, '', '', '', '', '', '09221234567', 'Accountant', 'XYZ Corp', '100000', 'jane.doe@xyz.com', 'StepFather', 'Parker', 'Ben', 'Jose', 'IV', 'Benny', '789 Recto Av', '09192233445', '', '135,000 to 250,000', 'Senior High School', 'CGEAHS', 'Pasig City', 'STEM', 'With Honors', 92.50, 2022, 'Senior High School', 'CGEAHS', 'Rizal High School', 'Rizal High School', '0', 66.00, 0, 'Information and Communications Technology (ICT)', 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 'Wala ngani', 'Vitamins C', 1, '2022-02-11', 'Pfizer', '2022-03-14', 'Pfizer', '2022-04-13', 'Moderna', '2022-07-14', 'Pfizer', '2023-01-14', 'Normal', 'Normal', 'Normal', 'Normal', 1, 'Fit to enroll', 1, '2024-11-08'),
+(1, '2025100001_1by1_2025.jpg', 0, 'Undergraduate', 'Freshman (First Year)', '', '41', '6', '16', 'First Year', 'Montaño', 'Mark Anthony', 'Placido', '', 'Johnny', '5\'11', '65kg', 'No LRN Number', 0, 0, 0, '', '', '2003-06-20', 21, 'Manila, Philippines', 'Tagalog, English', 'FILIPINO', 'Born Again', 'Single', 'Agta', '09171234567999999', 'markmontano999@gmail.com', '19 G Dona Yayang Street ', 'Libis', '1000', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'Quezon City', 'DSWD123456', 0, '19 G Dona Yayang Street ', 'Libis', '1000', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'Quezon City', 'DSWD123456', 0, 0, 'Doe Sr.', 'Jonathan', 'Smiths', 'III', 'Jon', 0, 'fafs', '', '', '', '', '09181234567', 'Engineer', 'ABC Corp', '50000', 'jon.doe@abc.com', 0, 'Jane', 'Mary', 'Anne', '', 'Janey', 0, '', '', '', '', '', '09221234567', 'Accountant', 'XYZ Corp', '100000', 'jane.doe@xyz.com', 'StepFather', 'Parker', 'Ben', 'Jose', 'IV', 'Benny', '789 Recto Av', '09192233445', '', '135,000 to 250,000', 'Senior High School', 'CGEAHS', 'Pasig City', 'STEM', 'With Honors', 92.50, 2022, 'Senior High School', 'CGEAHS', 'Rizal High School', 'Rizal High School', '0', 66.00, 0, 'Information and Communications Technology (ICT)', 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 'Wala ngani', 'Vitamins C', 1, '2022-02-11', 'Pfizer', '2022-03-14', 'Pfizer', '2022-04-13', 'Moderna', '2022-07-14', 'Pfizer', '2023-01-14', 'Normal', 'Normal', 'Normal', 'Normal', 1, 'Fit to enroll', 1, '2024-11-08'),
 (2, '3_1by1_2025.jpg', 1, 'Techvoc', 'Freshman (First Year)', 'Senior High School Graduate', '38', '4', '3', 'Second  Year', 'Emily', 'Johnson', 'Grace', '', 'MARK', '5\'11', '65', '123456789012', 0, 0, 0, '', '', '2003-06-26', 21, 'Manila, Philippines', 'Tagalog, English', 'ALGERIAN', 'Iglesia Ni Cristo', 'Single', 'Cebuano', '09953242510', 'emily.johnson2@example.com', '19 G Dona yayang Street Libis', 'Pag-asa', '4100', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'City Of Mandaluyong', 'DSWD123456', 0, '19 G Dona yayang Street Libis', 'Malipayon', '4100', 'Region X (Northern Mindanao)', 'Bukidnon', 'Pangantucan', 'DSWD123456', 0, 0, '', '', '', '', '', 0, '', '', '', '', '', '', '', '', '', '', 0, '', '', '', '', '', 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'fgdsgfasftrasf', '', '', '', 0.00, 0, '', '', '', '', '', 83.00, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0, '', '', '', '', '', '', '', '', '', '', '', '', '', 0, '', 0, '2024-12-10'),
 (60, NULL, 0, NULL, NULL, NULL, '31', NULL, NULL, NULL, 'Bell', 'Evelyn', 'Faith', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'evelyn.bell60@example.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 63.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2024-08-09'),
 (59, NULL, 0, NULL, NULL, NULL, '5', NULL, NULL, NULL, 'Morgan', 'Levi', 'Anne', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'levi.morgan59@example.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 99.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2023-04-12'),
@@ -715,7 +772,7 @@ CREATE TABLE `user_accounts` (
 --
 
 INSERT INTO `user_accounts` (`user_id`, `person_id`, `email`, `password`, `role`, `status`) VALUES
-(1, 1, 'markmontano0626@gmail.com', '$2b$10$1z0TPyKFo6qtCrVAaA1D4e3qANATLI.pyTLqZinmmT8sF2zMALkDu', 'applicant', NULL),
+(1, 1, 'markmontano999@gmail.com', '$2b$10$PIen6pc9RqhtOtdGXIzzPOopjNsDdPpsF/16qHbt3mJ3d5IuCvgDm', 'applicant', 1),
 (2, 2, 'emily.johnson2@example.com', '$2b$10$cCHtNx0hwdYy3wQA1I/bo.0a3OkYPK94gPuga6o1JDs6ffeG6h71O', 'applicant', 0),
 (3, 3, 'michael.williams3@example.com', '$2b$10$1z0TPyKFo6qtCrVAaA1D4e3qANATLI.pyTLqZinmmT8sF2zMALkDu', 'applicant', NULL),
 (4, 4, 'sarah.brown4@example.com', '$2b$10$1fOEIT/3uxjugXPfnEXtgOMMpldF7e8jBI9HpCVbnt275HrQyy2RS', 'applicant', NULL),
@@ -781,6 +838,13 @@ INSERT INTO `user_accounts` (`user_id`, `person_id`, `email`, `password`, `role`
 --
 
 --
+-- Indexes for table `admission_exam`
+--
+ALTER TABLE `admission_exam`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_exam` (`person_id`,`subject`);
+
+--
 -- Indexes for table `applicant_numbering_table`
 --
 ALTER TABLE `applicant_numbering_table`
@@ -804,6 +868,12 @@ ALTER TABLE `exam_applicants`
 --
 ALTER TABLE `exam_schedule`
   ADD PRIMARY KEY (`exam_id`);
+
+--
+-- Indexes for table `interview_table`
+--
+ALTER TABLE `interview_table`
+  ADD PRIMARY KEY (`interview_id`);
 
 --
 -- Indexes for table `notifications`
@@ -848,22 +918,34 @@ ALTER TABLE `user_accounts`
 --
 
 --
+-- AUTO_INCREMENT for table `admission_exam`
+--
+ALTER TABLE `admission_exam`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+
+--
 -- AUTO_INCREMENT for table `entrance_exam_schedule`
 --
 ALTER TABLE `entrance_exam_schedule`
-  MODIFY `schedule_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `schedule_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `exam_applicants`
 --
 ALTER TABLE `exam_applicants`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
 
 --
 -- AUTO_INCREMENT for table `exam_schedule`
 --
 ALTER TABLE `exam_schedule`
   MODIFY `exam_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `interview_table`
+--
+ALTER TABLE `interview_table`
+  MODIFY `interview_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `notifications`
