@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useState, useEffect } from "react";
 import axios from 'axios';
 import {
     Box,
@@ -17,24 +17,42 @@ import {
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import Search from '@mui/icons-material/Search';
 import { Link, useLocation } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import PersonIcon from "@mui/icons-material/Person";
+import DescriptionIcon from "@mui/icons-material/Description";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
+import SchoolIcon from "@mui/icons-material/School";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
+import HowToRegIcon from "@mui/icons-material/HowToReg";
+import ListAltIcon from "@mui/icons-material/ListAlt";
 import io from 'socket.io-client';
 
 const tabs = [
-    { label: "Applicant Form", to: "/admin_dashboard1" },
-    { label: "Documents Submitted", to: "/student_requirements" },
-    { label: "Admission Exam", to: "/assign_entrance_exam" },
-    { label: "Interview", to: "/interview" },
-    { label: "Qualifying Exam", to: "/qualifying_exam" },
-    { label: "College Approval", to: "/college_approval" },
-    { label: "Medical Clearance", to: "/medical_clearance" },
-    { label: "Applicant Status", to: "/applicant_status" },
-    { label: "View List", to: "/view_list" },
+    { label: "Applicant Form", to: "/admin_dashboard1", icon: <PersonIcon /> },
+    { label: "Documents Submitted", to: "/student_requirements", icon: <DescriptionIcon /> },
+    { label: "Admission Exam", to: "/assign_entrance_exam", icon: <AssignmentIcon /> },
+    { label: "Interview", to: "/interview", icon: <RecordVoiceOverIcon /> },
+    { label: "Qualifying Exam", to: "/qualifying_exam", icon: <SchoolIcon /> },
+    { label: "College Approval", to: "/college_approval", icon: <CheckCircleIcon /> },
+    { label: "Medical Clearance", to: "/medical_clearance", icon: <LocalHospitalIcon /> },
+    { label: "Applicant Status", to: "/applicant_status", icon: <HowToRegIcon /> },
+    { label: "View List", to: "/applicant_list", icon: <ListAltIcon /> },
 ];
 
 const Interview = () => {
     const location = useLocation();
+    const navigate = useNavigate();
+    const [activeStep, setActiveStep] = useState(3);
+    const [clickedSteps, setClickedSteps] = useState(Array(tabs.length).fill(false));
+
+
+    const handleStepClick = (index, to) => {
+        setActiveStep(index);
+        navigate(to); // this will actually change the page
+    };
     const [uploads, setUploads] = useState([]);
     const [persons, setPersons] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -46,8 +64,6 @@ const Interview = () => {
     const [userRole, setUserRole] = useState("");
     const [person, setPerson] = useState({
         profile_img: "",
-
-        document_status: "",
         last_name: "",
         first_name: "",
         middle_name: "",
@@ -56,6 +72,31 @@ const Interview = () => {
     const [editingRemarkId, setEditingRemarkId] = useState(null);
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
+    // New state
+    const [fetchedInterview, setFetchedInterview] = useState(null);
+
+    const fetchInterviewData = async (applicant_number) => {
+        try {
+            const res = await axios.get(`http://localhost:5000/api/interview/${applicant_number}`);
+            if (res.data) {
+                setFetchedInterview(res.data);
+                setInterviewData(res.data);
+                setOriginalData(res.data);
+            } else {
+                setFetchedInterview(null);
+            }
+        } catch (err) {
+            console.error("❌ Failed to fetch interview:", err);
+        }
+    };
+
+    // when a person is selected
+    useEffect(() => {
+        if (selectedPerson?.applicant_number) {
+            fetchInterviewData(selectedPerson.applicant_number);
+        }
+    }, [selectedPerson]);
+
 
     useEffect(() => {
         // Load saved notifications from DB on first load
@@ -166,25 +207,37 @@ const Interview = () => {
         }
     }, [selectedPerson]);
 
-
+    const [examData, setExamData] = useState([]);
+    // scores + percentages
+    const [totalScore, setTotalScore] = useState(0);
+    const [totalPercentage, setTotalPercentage] = useState(0);
+    const [avgScore, setAvgScore] = useState(0);
+    const [avgPercentage, setAvgPercentage] = useState(0);
 
 
     useEffect(() => {
         if (!searchQuery.trim()) {
+            // empty search input: clear everything
             setSelectedPerson(null);
-            setUploads([]);
-            setSelectedFiles({});
-            setPerson({   // clear person data too
+            setPerson({
                 profile_img: "",
                 generalAverage1: "",
                 height: "",
                 applyingAs: "",
-                document_status: "On Process",
+                document_status: "",
                 last_name: "",
                 first_name: "",
                 middle_name: "",
                 extension: "",
             });
+            // reset exam data
+            setExamData([
+                { TestArea: "English", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                { TestArea: "Science", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                { TestArea: "Filipino", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                { TestArea: "Math", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                { TestArea: "Abstract", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+            ]);
             return;
         }
 
@@ -196,21 +249,36 @@ const Interview = () => {
 
         if (match) {
             setSelectedPerson(match);
-            fetchUploadsByApplicantNumber(match.applicant_number);
         } else {
+            // no match found: clear all
             setSelectedPerson(null);
-            setUploads([]);
-            setPerson({   // also clear if no match
+            setPerson({
                 profile_img: "",
-
-                document_status: "On Process",
+                generalAverage1: "",
+                height: "",
+                applyingAs: "",
+                document_status: "",
                 last_name: "",
                 first_name: "",
                 middle_name: "",
                 extension: "",
             });
+
+            setExamData([
+                { TestArea: "English", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                { TestArea: "Science", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                { TestArea: "Filipino", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                { TestArea: "Math", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                { TestArea: "Abstract", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+            ]);
+
+            setTotalScore(0);
+            setTotalPercentage(0);
+            setAvgScore(0);
+            setAvgPercentage(0);
         }
     }, [searchQuery, persons]);
+
 
     const fetchPersons = async () => {
         try {
@@ -246,11 +314,11 @@ const Interview = () => {
         college_interviewer: "",
         entrance_exam_score: 0,
         college_exam_score: 0,
-        user: user || "",
         status: "",
         custom_status: "",
         remarks: ""
     });
+
 
     const [originalData, setOriginalData] = useState(interviewData);
 
@@ -259,269 +327,42 @@ const Interview = () => {
         setInterviewData(prev => ({ ...prev, [name]: value }));
     };
 
-    // Save Interview
     const saveInterview = async () => {
         try {
-            await axios.post("http://localhost:5000/api/interview/save", {
-                ...interviewData,
-                applicant_id: selectedPerson?.applicant_number,
-                person_id: selectedPerson?.person_id
-            });
-            alert("✅ Interview Saved!");
-        } catch (err) {
-            console.error(err);
-            alert("❌ Failed to save interview");
+            if (!selectedPerson?.applicant_number) {
+                alert("❌ Please select a valid applicant first.");
+                return;
+            }
+
+            // ✅ Correct payload field names matching backend
+            const payload = {
+                applicant_number: selectedPerson.applicant_number,
+                entrance_exam_interviewer: interviewData.entrance_exam_interviewer,
+                college_interviewer: interviewData.college_interviewer,
+                entrance_exam_score: interviewData.entrance_exam_score,
+                college_exam_score: interviewData.college_exam_score,
+                total_score:
+                    (Number(interviewData.entrance_exam_score) +
+                        Number(interviewData.college_exam_score)) /
+                    2,
+                status: interviewData.status,
+                custom_status: interviewData.custom_status,
+                remarks: interviewData.remarks,
+            };
+
+            await axios.post("http://localhost:5000/api/interview", payload);
+            alert("✅ Interview saved successfully!");
+
+            setOriginalData(interviewData);
+            setFetchedInterview(interviewData);
+        } catch (error) {
+            console.error("❌ Error saving interview:", error);
+            alert("Failed to save interview.");
         }
     };
 
 
-    const renderRow = (doc) => {
-        const uploaded = uploads.find((u) =>
-            u.description.toLowerCase().includes(doc.label.toLowerCase())
-        );
 
-        const buttonStyle = {
-            minWidth: 120,
-            height: 40,
-            fontWeight: 'bold',
-            fontSize: '14px',
-            textTransform: 'none',
-        };
-
-
-
-        return (
-            <TableRow key={doc.key}>
-                <TableCell sx={{ fontWeight: 'bold', width: '20%', border: "1px solid maroon" }}>{doc.label}</TableCell>
-
-                <TableCell sx={{ width: '20%', border: "1px solid maroon" }}>
-                    {editingRemarkId === uploaded?.upload_id ? (
-                        newRemarkMode[uploaded.upload_id] ? (
-                            // === Free-text editor mode ===
-                            <TextField
-                                size="small"
-                                fullWidth
-                                autoFocus
-                                placeholder="Enter custom remark"
-                                value={remarksMap[uploaded.upload_id] || ""}
-                                onChange={(e) =>
-                                    setRemarksMap((prev) => ({
-                                        ...prev,
-                                        [uploaded.upload_id]: e.target.value,
-                                    }))
-                                }
-                                onBlur={async () => {
-                                    const finalRemark = (remarksMap[uploaded.upload_id] || "").trim();
-                                    if (finalRemark) {
-                                        await handleSaveRemarks(uploaded.upload_id);
-                                    }
-                                    setNewRemarkMode((prev) => ({ ...prev, [uploaded.upload_id]: false }));
-                                }}
-                                onKeyDown={async (e) => {
-                                    if (e.key === "Enter") {
-                                        e.preventDefault();
-                                        const finalRemark = (remarksMap[uploaded.upload_id] || "").trim();
-                                        if (finalRemark) {
-                                            await handleSaveRemarks(uploaded.upload_id);
-                                        }
-                                        setNewRemarkMode((prev) => ({ ...prev, [uploaded.upload_id]: false }));
-                                    }
-                                }}
-                            />
-                        ) : (
-                            // === Predefined dropdown mode ===
-                            <TextField
-                                select
-                                size="small"
-                                fullWidth
-                                autoFocus
-                                value={remarksMap[uploaded.upload_id] ?? uploaded?.remarks ?? ""}
-                                onChange={async (e) => {
-                                    const value = e.target.value;
-                                    if (value === "__NEW__") {
-                                        // Switch to text mode; don't store the marker
-                                        setNewRemarkMode((prev) => ({ ...prev, [uploaded.upload_id]: true }));
-                                        // If there was a previous preset value, keep it until they type
-                                        setRemarksMap((prev) => ({
-                                            ...prev,
-                                            [uploaded.upload_id]: (prev[uploaded.upload_id] ?? uploaded?.remarks ?? "")
-                                        }));
-                                        return;
-                                    }
-                                    // Normal preset value → save immediately
-                                    setRemarksMap((prev) => ({ ...prev, [uploaded.upload_id]: value }));
-                                    await handleSaveRemarks(uploaded.upload_id);
-                                }}
-                                SelectProps={{
-                                    MenuProps: { PaperProps: { style: { maxHeight: 200 } } },
-                                }}
-                            >
-                                <MenuItem value="">
-                                    <em>Select Remarks</em>
-                                </MenuItem>
-                                {remarksOptions.map((option, index) => (
-                                    <MenuItem key={index} value={option}>
-                                        {option}
-                                    </MenuItem>
-                                ))}
-                                {/* Trigger for custom text */}
-                                <MenuItem value="__NEW__">New Remarks</MenuItem>
-                            </TextField>
-                        )
-                    ) : (
-                        // === Display mode ===
-                        <Box
-                            onClick={() => {
-                                setEditingRemarkId(uploaded.upload_id);
-                                setNewRemarkMode((prev) => ({ ...prev, [uploaded.upload_id]: false }));
-                                setRemarksMap((prev) => ({
-                                    ...prev,
-                                    [uploaded.upload_id]: uploaded?.remarks || "",
-                                }));
-                            }}
-                            sx={{
-                                cursor: "pointer",
-                                fontStyle: uploaded?.remarks ? "normal" : "italic",
-                                color: uploaded?.remarks ? "inherit" : "#888",
-                                minHeight: "40px",
-                                display: "flex",
-                                alignItems: "center",
-                                px: 1,
-                            }}
-                        >
-                            {uploaded?.remarks || "Click to add remarks"}
-                        </Box>
-                    )}
-                </TableCell>
-
-
-
-
-
-                <TableCell align="center" sx={{ width: '15%', border: "1px solid maroon" }}>
-                    {uploaded ? (
-                        uploaded.status === 1 ? (
-                            <Box
-                                sx={{
-                                    backgroundColor: '#4CAF50',
-                                    color: 'white',
-                                    borderRadius: 1,
-                                    width: 140,
-                                    height: 40,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    margin: '0 auto',
-                                }}
-                            >
-                                <Typography sx={{ fontWeight: 'bold' }}>Verified</Typography>
-                            </Box>
-                        ) : uploaded.status === 2 ? (
-                            <Box
-                                sx={{
-                                    backgroundColor: '#F44336',
-                                    color: 'white',
-                                    borderRadius: 1,
-                                    width: 140,
-                                    height: 40,
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    margin: '0 auto',
-                                }}
-                            >
-                                <Typography sx={{ fontWeight: 'bold' }}>Rejected</Typography>
-                            </Box>
-                        ) : (
-                            <Box display="flex" justifyContent="center" gap={1}>
-                                <Button
-                                    variant="contained"
-                                    onClick={() => handleStatusChange(uploaded.upload_id, '1')}
-                                    sx={{ ...buttonStyle, backgroundColor: 'green', color: 'white' }}
-                                >
-                                    Verified
-                                </Button>
-                                <Button
-                                    variant="contained"
-                                    onClick={() => handleStatusChange(uploaded.upload_id, '2')}
-                                    sx={{ ...buttonStyle, backgroundColor: 'red', color: 'white' }}
-                                >
-                                    Rejected
-                                </Button>
-                            </Box>
-                        )
-                    ) : null}
-                </TableCell>
-
-                <TableCell style={{ border: "1px solid maroon" }}>
-                    {uploaded?.created_at &&
-                        new Date(uploaded.created_at).toLocaleString('en-PH', {
-                            dateStyle: 'medium',
-                            timeStyle: 'short',
-                            timeZone: 'Asia/Manila',
-                        })}
-                </TableCell>
-
-                <TableCell style={{ border: "1px solid maroon" }}>
-                    {selectedPerson
-                        ? `[${selectedPerson.applicant_number}] ${selectedPerson.last_name?.toUpperCase()}, ${selectedPerson.first_name?.toUpperCase()} ${selectedPerson.middle_name?.toUpperCase() || ''} ${selectedPerson.extension?.toUpperCase() || ''}`
-                        : ''}
-                </TableCell>
-
-                <TableCell style={{ border: "1px solid maroon" }}>
-                    <Box display="flex" justifyContent="center" gap={1}>
-                        {uploaded ? (
-                            <>
-                                <Button
-                                    variant="contained"
-                                    size="small"
-                                    sx={{
-                                        backgroundColor: 'green',
-                                        color: 'white',
-                                        '&:hover': {
-                                            backgroundColor: '#006400'
-                                        }
-                                    }}
-                                    onClick={() => {
-                                        setEditingRemarkId(uploaded.upload_id);
-                                        setRemarksMap((prev) => ({
-                                            ...prev,
-                                            [uploaded.upload_id]: uploaded.remarks || "",
-                                        }));
-                                    }}
-                                >
-                                    Edit
-                                </Button>
-
-                                <Button
-                                    variant="contained"
-                                    sx={{ backgroundColor: '#1976d2', color: 'white' }}
-                                    href={`http://localhost:5000${uploaded.file_path}`}
-                                    target="_blank"
-                                >
-                                    Preview
-                                </Button>
-
-                                <Button
-                                    onClick={() => handleDelete(uploaded.upload_id)}
-                                    sx={{
-                                        backgroundColor: 'maroon',
-                                        color: 'white',
-                                        '&:hover': { backgroundColor: '#600000' },
-                                    }}
-                                >
-                                    Delete
-                                </Button>
-
-                            </>
-                        ) : null}
-                    </Box>
-                </TableCell>
-
-            </TableRow>
-
-        );
-    };
 
 
 
@@ -612,50 +453,60 @@ const Interview = () => {
                 <hr style={{ border: "1px solid #ccc", width: "100%" }} />
                 <br />
 
-                <Box display="flex" sx={{ border: "2px solid maroon", borderRadius: "4px", overflow: "hidden" }}>
-                    {tabs.map((tab, index) => {
-                        const isActive = location.pathname === tab.to; // check active route
 
-                        return (
-                            <Link
-                                key={index}
-                                to={tab.to}
-                                style={{ textDecoration: "none", flex: 1 }}
+                <Box sx={{ display: "flex", justifyContent: "center", width: "100%",  flexWrap: "wrap" }}>
+                    {tabs.map((tab, index) => (
+                        <React.Fragment key={index}>
+                            <Box
+                                sx={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    cursor: "pointer",
+                                    m: 1,
+                                }}
+                                onClick={() => handleStepClick(index, tab.to)}
                             >
                                 <Box
                                     sx={{
-                                        backgroundColor: isActive ? "#6D2323" : "white", // active tab bg
-                                        padding: "16px",
-                                        height: "75px",
+                                        width: 50,
+                                        height: 50,
+                                        borderRadius: "50%",
+                                        backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                                        color: activeStep === index ? "#fff" : "#000",
                                         display: "flex",
-                                        flexDirection: "column",
-                                        justifyContent: "center",
                                         alignItems: "center",
-                                        cursor: "pointer",
-                                        textAlign: "center",
-                                        borderRight: index !== tabs.length - 1 ? "2px solid maroon" : "none",
-                                        transition: "all 0.3s ease",
-                                        "&:hover": {
-                                            backgroundColor: "#6D2323",
-                                            "& .MuiTypography-root": {
-                                                color: "white",
-                                            },
-                                        },
+                                        justifyContent: "center",
                                     }}
                                 >
-                                    <Typography
-                                        sx={{
-                                            color: isActive ? "white" : "maroon", // active tab text
-                                            fontWeight: "bold",
-                                            wordBreak: "break-word",
-                                        }}
-                                    >
-                                        {tab.label}
-                                    </Typography>
+                                    {tab.icon}
                                 </Box>
-                            </Link>
-                        );
-                    })}
+                                <Typography
+                                    sx={{
+                                        mt: 1,
+                                        color: activeStep === index ? "#6D2323" : "#000",
+                                        fontWeight: activeStep === index ? "bold" : "normal",
+                                        fontSize: 12,
+                                        textAlign: "center",
+                                        width: 80,
+                                    }}
+                                >
+                                    {tab.label}
+                                </Typography>
+                            </Box>
+
+                            {index < tabs.length - 1 && (
+                                <Box
+                                    sx={{
+                                        flex: 1,
+                                        height: "2px",
+                                        backgroundColor: "#6D2323",
+                                        alignSelf: "center",
+                                    }}
+                                />
+                            )}
+                        </React.Fragment>
+                    ))}
                 </Box>
                 <br />
                 {/* Applicant ID and Name */}
@@ -687,7 +538,7 @@ const Interview = () => {
                     </Table>
                 </TableContainer>
 
-                <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon" }}>
+                <TableContainer component={Paper} sx={{ width: "100%", border: "2px solid maroon" }}>
                     {/* Header Row: Centered Title + Right-aligned Photo */}
                     <Box
                         sx={{
@@ -737,7 +588,8 @@ const Interview = () => {
                     </Box>
 
                     <div style={{ height: "175px" }}></div>
-                    {/* Form Section */}
+
+                    {/* ===== Form Section ===== */}
                     <Box sx={{ borderTop: "2px solid maroon", p: 2 }}>
                         {/* Entrance Exam Interviewer */}
                         <TextField
@@ -778,7 +630,7 @@ const Interview = () => {
                                 onChange={handleInterviewChange}
                             />
                             <TextField
-                                disabled
+
                                 label="Total Score (Average)"
                                 value={
                                     (Number(interviewData.entrance_exam_score || 0) +
@@ -804,7 +656,6 @@ const Interview = () => {
                             <MenuItem value="FAILED, Sorry, you did not meet the minimum score for the entrance exam">
                                 FAILED, Sorry, you did not meet the minimum score for the entrance exam
                             </MenuItem>
-                            <MenuItem value="PASSED">PASSED</MenuItem>
                             <MenuItem value="FAILED">FAILED</MenuItem>
                             <MenuItem value="WAIT, For further instructions">WAIT</MenuItem>
                             <MenuItem value="PASSED FAILED">PASSED FAILED</MenuItem>
@@ -836,13 +687,15 @@ const Interview = () => {
                         />
 
                         {/* Buttons */}
-                        <Box sx={{ display: "flex", gap: 2 }}>
+                        <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
                             <Button variant="contained" color="error" onClick={() => setInterviewData({})}>
                                 Reset
                             </Button>
                             <Button variant="contained" color="success" onClick={saveInterview}>
                                 Save
                             </Button>
+
+
                             <Button
                                 variant="contained"
                                 color="warning"
@@ -850,10 +703,12 @@ const Interview = () => {
                             >
                                 Cancel
                             </Button>
-
                         </Box>
+
+
                     </Box>
                 </TableContainer>
+
 
 
                 <>

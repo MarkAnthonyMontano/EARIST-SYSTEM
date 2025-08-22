@@ -26,12 +26,45 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import { FcPrint } from "react-icons/fc";
 import EaristLogo from "../assets/EaristLogo.png";
 import { Link } from "react-router-dom";
+import PersonIcon from "@mui/icons-material/Person";
+import DescriptionIcon from "@mui/icons-material/Description";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
+import SchoolIcon from "@mui/icons-material/School";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
+import HowToRegIcon from "@mui/icons-material/HowToReg";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import { Stepper, Step, StepLabel } from "@mui/material";
+
 
 const socket = io("http://localhost:5000");
 
 const ApplicantList = () => {
-    
+
+    const tabs1 = [
+        { label: "Applicant Form", to: "/admin_dashboard1", icon: <PersonIcon /> },
+        { label: "Documents Submitted", to: "/student_requirements", icon: <DescriptionIcon /> },
+        { label: "Admission Exam", to: "/assign_entrance_exam", icon: <AssignmentIcon /> },
+        { label: "Interview", to: "/interview", icon: <RecordVoiceOverIcon /> },
+        { label: "Qualifying Exam", to: "/qualifying_exam", icon: <SchoolIcon /> },
+        { label: "College Approval", to: "/college_approval", icon: <CheckCircleIcon /> },
+        { label: "Medical Clearance", to: "/medical_clearance", icon: <LocalHospitalIcon /> },
+        { label: "Applicant Status", to: "/applicant_status", icon: <HowToRegIcon /> },
+        { label: "View List", to: "/applicant_list", icon: <ListAltIcon /> },
+    ];
+
     const navigate = useNavigate();
+    const [activeStep, setActiveStep] = useState(8);
+    const [clickedSteps, setClickedSteps] = useState(Array(tabs1.length).fill(false));
+
+
+    const handleStepClick = (index, to) => {
+        setActiveStep(index);
+        navigate(to); // this will actually change the page
+    };
+
+
     const [persons, setPersons] = useState([]);
 
     const [selectedPerson, setSelectedPerson] = useState(null);
@@ -535,7 +568,7 @@ const ApplicantList = () => {
         newWin.document.close();
     };
 
-    
+
 
     return (
         <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, p: 2 }}>
@@ -609,8 +642,66 @@ const ApplicantList = () => {
                 </Box>
             </Box>
 
+
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <div style={{ height: "20px" }}></div>
+            <Box sx={{ display: "flex", justifyContent: "center", width: "100%", flexWrap: "wrap" }}>
+                {tabs1.map((tab, index) => (
+                    <React.Fragment key={index}>
+                        <Box
+                            sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                cursor: "pointer",
+                                m: 1,
+                            }}
+                            onClick={() => handleStepClick(index, tab.to)}
+                        >
+                            <Box
+                                sx={{
+                                    width: 50,
+                                    height: 50,
+                                    borderRadius: "50%",
+                                    backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                                    color: activeStep === index ? "#fff" : "#000",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                {tab.icon}
+                            </Box>
+                            <Typography
+                                sx={{
+                                    mt: 1,
+                                    color: activeStep === index ? "#6D2323" : "#000",
+                                    fontWeight: activeStep === index ? "bold" : "normal",
+                                    fontSize: 12,
+                                    textAlign: "center",
+                                    width: 80,
+                                }}
+                            >
+                                {tab.label}
+                            </Typography>
+                        </Box>
+
+                        {index < tabs1.length - 1 && (
+                            <Box
+                                sx={{
+                                    flex: 1,
+                                    height: "2px",
+                                    backgroundColor: "#6D2323",
+                                    alignSelf: "center",
+                                }}
+                            />
+                        )}
+                    </React.Fragment>
+                ))}
+            </Box>
+            <div style={{ height: "20px" }}></div>
+
+
             <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", }}>
                 <Table>
                     <TableHead sx={{ backgroundColor: '#6D2323' }}>
@@ -950,16 +1041,16 @@ const ApplicantList = () => {
                             </FormControl>
 
                             {/* ✅ New Checkbox for Submitted Documents */}
-                         
+
                         </Box>
-                           <FormControl size="small" sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
-                                <Checkbox
-                                    checked={showSubmittedOnly}
-                                    onChange={(e) => setShowSubmittedOnly(e.target.checked)}
-                                    sx={{ color: "maroon", "&.Mui-checked": { color: "maroon" } }}
-                                />
-                                <Typography fontSize={13}>Show Submitted Only</Typography>
-                            </FormControl>
+                        <FormControl size="small" sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                            <Checkbox
+                                checked={showSubmittedOnly}
+                                onChange={(e) => setShowSubmittedOnly(e.target.checked)}
+                                sx={{ color: "maroon", "&.Mui-checked": { color: "maroon" } }}
+                            />
+                            <Typography fontSize={13}>Show Submitted Only</Typography>
+                        </FormControl>
                     </Box>
 
                     {/* MIDDLE COLUMN: SY & Semester */}
@@ -1051,7 +1142,7 @@ const ApplicantList = () => {
                                     ))}
                                 </Select>
                             </FormControl>
-                            
+
                         </Box>
                     </Box>
                 </Box>

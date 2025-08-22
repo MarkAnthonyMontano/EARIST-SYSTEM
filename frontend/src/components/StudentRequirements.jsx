@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import React from "react";
 import axios from 'axios';
 import {
   Box,
@@ -16,7 +17,17 @@ import {
 } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import Search from '@mui/icons-material/Search';
+import PersonIcon from "@mui/icons-material/Person";
+import DescriptionIcon from "@mui/icons-material/Description";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
+import SchoolIcon from "@mui/icons-material/School";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
+import HowToRegIcon from "@mui/icons-material/HowToReg";
+import ListAltIcon from "@mui/icons-material/ListAlt";
 import { Link, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import io from 'socket.io-client';
@@ -29,15 +40,15 @@ const requiredDocs = [
 ];
 
 const tabs = [
-  { label: "Applicant Form", to: "/admin_dashboard1" },
-  { label: "Documents Submitted", to: "/student_requirements" },
-  { label: "Admission Exam", to: "/assign_entrance_exam" },
-  { label: "Interview", to: "/interview" },
-  { label: "Qualifying Exam", to: "/qualifying_exam" },
-  { label: "College Approval", to: "/college_approval" },
-  { label: "Medical Clearance", to: "/medical_clearance" },
-  { label: "Applicant Status", to: "/applicant_status" },
-  { label: "View List", to: "/view_list" },
+  { label: "Applicant Form", to: "/admin_dashboard1", icon: <PersonIcon /> },
+  { label: "Documents Submitted", to: "/student_requirements", icon: <DescriptionIcon /> },
+  { label: "Admission Exam", to: "/assign_entrance_exam", icon: <AssignmentIcon /> },
+  { label: "Interview", to: "/interview", icon: <RecordVoiceOverIcon /> },
+  { label: "Qualifying Exam", to: "/qualifying_exam", icon: <SchoolIcon /> },
+  { label: "College Approval", to: "/college_approval", icon: <CheckCircleIcon /> },
+  { label: "Medical Clearance", to: "/medical_clearance", icon: <LocalHospitalIcon /> },
+  { label: "Applicant Status", to: "/applicant_status", icon: <HowToRegIcon /> },
+  { label: "View List", to: "/applicant_list", icon: <ListAltIcon /> },
 ];
 
 const remarksOptions = [
@@ -130,6 +141,15 @@ const remarksOptions = [
 
 
 const StudentRequirements = () => {
+  const navigate = useNavigate();
+  const [activeStep, setActiveStep] = useState(1);
+  const [clickedSteps, setClickedSteps] = useState(Array(tabs.length).fill(false));
+
+
+  const handleStepClick = (index, to) => {
+    setActiveStep(index);
+    navigate(to); // this will actually change the page
+  };
   const location = useLocation();
   const [uploads, setUploads] = useState([]);
   const [persons, setPersons] = useState([]);
@@ -812,50 +832,59 @@ const StudentRequirements = () => {
         <hr style={{ border: "1px solid #ccc", width: "100%" }} />
         <br />
 
-        <Box display="flex" sx={{ border: "2px solid maroon", borderRadius: "4px", overflow: "hidden" }}>
-          {tabs.map((tab, index) => {
-            const isActive = location.pathname === tab.to; // check active route
-
-            return (
-              <Link
-                key={index}
-                to={tab.to}
-                style={{ textDecoration: "none", flex: 1 }}
+          <Box sx={{ display: "flex", justifyContent: "center", width: "100%",  flexWrap: "wrap" }}>
+          {tabs.map((tab, index) => (
+            <React.Fragment key={index}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  cursor: "pointer",
+                  m: 1,
+                }}
+                onClick={() => handleStepClick(index, tab.to)}
               >
                 <Box
                   sx={{
-                    backgroundColor: isActive ? "#6D2323" : "white", // active tab bg
-                    padding: "16px",
-                    height: "75px",
+                    width: 50,
+                    height: 50,
+                    borderRadius: "50%",
+                    backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                    color: activeStep === index ? "#fff" : "#000",
                     display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
                     alignItems: "center",
-                    cursor: "pointer",
-                    textAlign: "center",
-                    borderRight: index !== tabs.length - 1 ? "2px solid maroon" : "none",
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                      backgroundColor: "#6D2323",
-                      "& .MuiTypography-root": {
-                        color: "white",
-                      },
-                    },
+                    justifyContent: "center",
                   }}
                 >
-                  <Typography
-                    sx={{
-                      color: isActive ? "white" : "maroon", // active tab text
-                      fontWeight: "bold",
-                      wordBreak: "break-word",
-                    }}
-                  >
-                    {tab.label}
-                  </Typography>
+                  {tab.icon}
                 </Box>
-              </Link>
-            );
-          })}
+                <Typography
+                  sx={{
+                    mt: 1,
+                    color: activeStep === index ? "#6D2323" : "#000",
+                    fontWeight: activeStep === index ? "bold" : "normal",
+                    fontSize: 12,
+                    textAlign: "center",
+                    width: 80,
+                  }}
+                >
+                  {tab.label}
+                </Typography>
+              </Box>
+
+              {index < tabs.length - 1 && (
+                <Box
+                  sx={{
+                    flex: 1,
+                    height: "2px",
+                    backgroundColor: "#6D2323",
+                    alignSelf: "center",
+                  }}
+                />
+              )}
+            </React.Fragment>
+          ))}
         </Box>
         <br />
         {/* Applicant ID and Name */}

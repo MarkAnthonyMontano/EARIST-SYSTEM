@@ -1,13 +1,21 @@
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { Box, Container, Typography, Button, TextField, TableBody, TableContainer, Paper, Table, TableHead, TableRow, TableCell } from "@mui/material";
 import EaristLogo from "../assets/EaristLogo.png";
 import '../styles/Print.css'
 import { FcPrint } from "react-icons/fc";
 import Search from '@mui/icons-material/Search';
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
-
+import PersonIcon from "@mui/icons-material/Person";
+import DescriptionIcon from "@mui/icons-material/Description";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
+import SchoolIcon from "@mui/icons-material/School";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
+import HowToRegIcon from "@mui/icons-material/HowToReg";
+import ListAltIcon from "@mui/icons-material/ListAlt";
 
 const ExaminationProfile = () => {
 
@@ -19,16 +27,28 @@ const ExaminationProfile = () => {
 
 
     const tabs1 = [
-        { label: "Applicant Form", to: "/admin_dashboard1" },
-        { label: "Documents Submitted", to: "/student_requirements" },
-        { label: "Admission Exam", to: "/assign_entrance_exam" },
-        { label: "Interview", to: "/interview" },
-        { label: "Qualifying Exam", to: "/qualifying_exam" },
-        { label: "College Approval", to: "/college_approval" },
-        { label: "Medical Clearance", to: "/medical_clearance" },
-        { label: "Applicant Status", to: "/applicant_status" },
-        { label: "View List", to: "/view_list" },
+        { label: "Applicant Form", to: "/admin_dashboard1", icon: <PersonIcon /> },
+        { label: "Documents Submitted", to: "/student_requirements", icon: <DescriptionIcon /> },
+        { label: "Admission Exam", to: "/assign_entrance_exam", icon: <AssignmentIcon /> },
+        { label: "Interview", to: "/interview", icon: <RecordVoiceOverIcon /> },
+        { label: "Qualifying Exam", to: "/qualifying_exam", icon: <SchoolIcon /> },
+        { label: "College Approval", to: "/college_approval", icon: <CheckCircleIcon /> },
+        { label: "Medical Clearance", to: "/medical_clearance", icon: <LocalHospitalIcon /> },
+        { label: "Applicant Status", to: "/applicant_status", icon: <HowToRegIcon /> },
+        { label: "View List", to: "/applicant_list", icon: <ListAltIcon /> },
     ];
+
+      const location = useLocation();
+      const navigate = useNavigate();
+      const [activeStep, setActiveStep] = useState(2);
+      const [clickedSteps, setClickedSteps] = useState(Array(tabs.length).fill(false));
+    
+    
+      const handleStepClick = (index, to) => {
+        setActiveStep(index);
+        navigate(to); // this will actually change the page
+      };
+    
 
     const [searchQuery, setSearchQuery] = useState('');
     const [persons, setPersons] = useState([]);
@@ -36,9 +56,6 @@ const ExaminationProfile = () => {
     const [userID, setUserID] = useState("");
     const [user, setUser] = useState("");
     const [userRole, setUserRole] = useState("");
-    const location = useLocation();
-
-
     const [person, setPerson] = useState({
         profile_img: "",
         generalAverage1: "",
@@ -124,47 +141,63 @@ const ExaminationProfile = () => {
 
     useEffect(() => {
         if (!searchQuery.trim()) {
+            // empty search input: clear everything
             setSelectedPerson(null);
-            setPerson({   // clear person data too
+            setPerson({
                 profile_img: "",
-                generalAverage1: "",
-                height: "",
-                applyingAs: "",
-                document_status: "",
+              
                 last_name: "",
                 first_name: "",
                 middle_name: "",
                 extension: "",
             });
+            // reset exam data
+            setExamData([
+                { TestArea: "English", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                { TestArea: "Science", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                { TestArea: "Filipino", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                { TestArea: "Math", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                { TestArea: "Abstract", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+            ]);
             return;
         }
 
-        const match = persons.find((p) =>
-            `${p.first_name} ${p.middle_name} ${p.last_name} ${p.emailAddress} ${p.applicant_number || ''}`
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase())
-        );
+        const match = persons.find((p) => {
+            const fullString = `${p.first_name} ${p.middle_name} ${p.last_name} ${p.emailAddress}`.toLowerCase();
+            const numberMatch = (p.applicant_number || '').toLowerCase() === searchQuery.toLowerCase();
+            const textMatch = fullString.includes(searchQuery.toLowerCase());
+            return numberMatch || textMatch;
+        });
+
 
         if (match) {
             setSelectedPerson(match);
-
         } else {
+            // no match found: clear all
             setSelectedPerson(null);
-
-            setPerson({   // also clear if no match
+            setPerson({
                 profile_img: "",
-                generalAverage1: "",
-                height: "",
-                applyingAs: "",
-                document_status: "",
+       
                 last_name: "",
                 first_name: "",
                 middle_name: "",
                 extension: "",
             });
+
+            setExamData([
+                { TestArea: "English", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                { TestArea: "Science", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                { TestArea: "Filipino", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                { TestArea: "Math", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                { TestArea: "Abstract", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+            ]);
+
+            setTotalScore(0);
+            setTotalPercentage(0);
+            setAvgScore(0);
+            setAvgPercentage(0);
         }
     }, [searchQuery, persons]);
-
 
     const divToPrintRef = useRef();
 
@@ -307,25 +340,32 @@ const ExaminationProfile = () => {
 
     // 🔹 Load existing exam data from backend
     useEffect(() => {
-        if (!applicantNumber) return;
-        axios.get(`http://localhost:5000/exam/${applicantNumber}`).then((res) => {
-            if (res.data.length > 0) {
-                const updated = examData.map((row) => {
-                    const match = res.data.find((e) => e.subject === row.TestArea);
-                    return match
-                        ? {
+        if (!selectedPerson?.person_id) return;
+
+        axios.get(`http://localhost:5000/api/exam/${selectedPerson.person_id}`)
+            .then(res => {
+                console.log("Exam data received:", res.data);
+                if (res.data && res.data.length > 0) {
+                    const updated = examData.map(row => {
+                        const match = res.data.find(e => e.subject === row.TestArea);
+                        return match ? {
                             ...row,
                             RawScore: match.raw_score,
                             Percentage: match.percentage,
                             User: match.user,
-                            DateCreated: match.date_created,
-                        }
-                        : row;
-                });
-                setExamData(updated);
-            }
-        });
-    }, [applicantNumber]);
+                            // normalize date string for input[type="date"]
+                            DateCreated: match.date_created
+                                ? match.date_created.split("T")[0] // YYYY-MM-DD
+                                : "",
+                        } : row;
+                    });
+                    setExamData(updated);
+                }
+            })
+            .catch(err => console.error(err));
+    }, [selectedPerson]);
+
+
 
     const handleChange = (index, field, value) => {
         const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Manila" });
@@ -394,20 +434,50 @@ const ExaminationProfile = () => {
     };
 
 
-    // 🔹 Compute totals
-    const calculateTotals = (data) => {
-        const totalScore = data.reduce(
-            (sum, row) => sum + (parseInt(row.RawScore) || 0),
-            0
-        );
-        const totalPercentage = data.reduce(
-            (sum, row) => sum + (parseFloat(row.Percentage) || 0),
-            0
-        );
+    // Totals
 
-        setTotalScore(totalScore);
-        setTotalPercentage(totalPercentage);
+
+    const [avgScore, setAvgScore] = useState(0);
+    const [avgPercentage, setAvgPercentage] = useState(0);
+
+    // function
+    // function
+    const calculateTotals = (data) => {
+        let scoreSum = 0;
+        let percentSum = 0;
+
+        data.forEach((row) => {
+            const score = parseFloat(row.RawScore) || 0;
+            const percent = parseFloat(row.Percentage) || 0;
+            scoreSum += score;
+            percentSum += percent;
+        });
+
+        setTotalScore(scoreSum);
+        setTotalPercentage(percentSum);
+
+        const divisor = data.length > 0 ? data.length : 1;
+
+        setAvgScore(scoreSum / divisor);
+        setAvgPercentage(percentSum / divisor);
     };
+
+    // effect
+    useEffect(() => {
+        if (examData && examData.length > 0) {
+            calculateTotals(examData);
+        }
+    }, [examData]);
+
+
+    useEffect(() => {
+        if (examData && examData.length > 0) {
+            calculateTotals(examData);
+        }
+    }, [examData]);
+
+
+
 
     return (
         <Box sx={{ height: 'calc(100vh - 120px)', overflowY: 'auto', paddingRight: 1, backgroundColor: 'transparent' }}>
@@ -454,51 +524,60 @@ const ExaminationProfile = () => {
 
                 <br />
 
-                <Box display="flex" sx={{ border: "2px solid maroon", borderRadius: "4px", overflow: "hidden" }}>
-                    {tabs1.map((tabs1, index) => {
-                        const isActive = location.pathname === tabs1.to; // check active route
-
-                        return (
-                            <Link
-                                key={index}
-                                to={tabs1.to}
-                                style={{ textDecoration: "none", flex: 1 }}
-                            >
-                                <Box
-                                    sx={{
-                                        backgroundColor: isActive ? "#6D2323" : "white", // active tab bg
-                                        padding: "16px",
-                                        height: "75px",
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        justifyContent: "center",
-                                        alignItems: "center",
-                                        cursor: "pointer",
-                                        textAlign: "center",
-                                        borderRight: index !== tabs1.length - 1 ? "2px solid maroon" : "none",
-                                        transition: "all 0.3s ease",
-                                        "&:hover": {
-                                            backgroundColor: "#6D2323",
-                                            "& .MuiTypography-root": {
-                                                color: "white",
-                                            },
-                                        },
-                                    }}
-                                >
-                                    <Typography
-                                        sx={{
-                                            color: isActive ? "white" : "maroon", // active tab text
-                                            fontWeight: "bold",
-                                            wordBreak: "break-word",
-                                        }}
-                                    >
-                                        {tabs1.label}
-                                    </Typography>
-                                </Box>
-                            </Link>
-                        );
-                    })}
-                </Box>
+               <Box sx={{ display: "flex", justifyContent: "center", width: "100%",  flexWrap: "wrap" }}>
+                  {tabs1.map((tab, index) => (
+                     <React.Fragment key={index}>
+                       <Box
+                         sx={{
+                           display: "flex",
+                           flexDirection: "column",
+                           alignItems: "center",
+                           cursor: "pointer",
+                           m: 1,
+                         }}
+                         onClick={() => handleStepClick(index, tab.to)}
+                       >
+                         <Box
+                           sx={{
+                             width: 50,
+                             height: 50,
+                             borderRadius: "50%",
+                             backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                             color: activeStep === index ? "#fff" : "#000",
+                             display: "flex",
+                             alignItems: "center",
+                             justifyContent: "center",
+                           }}
+                         >
+                           {tab.icon}
+                         </Box>
+                         <Typography
+                           sx={{
+                             mt: 1,
+                             color: activeStep === index ? "#6D2323" : "#000",
+                             fontWeight: activeStep === index ? "bold" : "normal",
+                             fontSize: 12,
+                             textAlign: "center",
+                             width: 80,
+                           }}
+                         >
+                           {tab.label}
+                         </Typography>
+                       </Box>
+             
+                       {index < tabs1.length - 1 && (
+                         <Box
+                           sx={{
+                             flex: 1,
+                             height: "2px",
+                             backgroundColor: "#6D2323",
+                             alignSelf: "center",
+                           }}
+                         />
+                       )}
+                     </React.Fragment>
+                   ))}
+                 </Box>
                 <br />
 
 
@@ -638,9 +717,13 @@ const ExaminationProfile = () => {
                                             size="small"
                                             type="date"
                                             value={
-                                                row.DateCreated ||
-                                                new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Manila" })
+                                                row.DateCreated
+                                                    ? row.DateCreated
+                                                    : new Date(
+                                                        new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" })
+                                                    ).toISOString().split("T")[0]
                                             }
+
                                             onChange={(e) => {
                                                 const updated = [...examData];
                                                 updated[index].DateCreated = e.target.value;
@@ -650,23 +733,27 @@ const ExaminationProfile = () => {
                                     </TableCell>
 
 
+
+
                                 </TableRow>
                             ))}
 
-                            {/* Total Row */}
-                            <TableRow>
-                                <TableCell sx={{ border: "2px solid maroon" }}>
-                                    <b>Total</b>
-                                </TableCell>
-                                <TableCell sx={{ border: "2px solid maroon" }}>
-                                    <b>{totalScore}</b>
-                                </TableCell>
-                                <TableCell sx={{ border: "2px solid maroon" }}>
-                                    <b>{totalPercentage}</b>
-                                </TableCell>
-                                <TableCell sx={{ border: "2px solid maroon" }} />
-                                <TableCell sx={{ border: "2px solid maroon" }} />
+                            <TableRow >
+                                <TableCell style={{ border: "2px solid maroon" }}><b>Total</b></TableCell>
+                                <TableCell style={{ border: "2px solid maroon" }}><b>{totalScore}</b></TableCell>
+                                <TableCell style={{ border: "2px solid maroon" }}><b>{totalPercentage.toFixed(2)}</b></TableCell>
+                                <TableCell style={{ border: "2px solid maroon" }} />
+                                <TableCell style={{ border: "2px solid maroon" }} />
                             </TableRow>
+
+                            <TableRow>
+                                <TableCell style={{ border: "2px solid maroon" }}><b>Average</b></TableCell>
+                                <TableCell style={{ border: "2px solid maroon" }}><b>{avgScore.toFixed(2)}</b></TableCell>
+                                <TableCell style={{ border: "2px solid maroon" }}><b>{avgPercentage.toFixed(2)}</b></TableCell>
+                                <TableCell style={{ border: "2px solid maroon" }} />
+                                <TableCell style={{ border: "2px solid maroon" }} />
+                            </TableRow>
+
                         </TableBody>
                     </Table>
 

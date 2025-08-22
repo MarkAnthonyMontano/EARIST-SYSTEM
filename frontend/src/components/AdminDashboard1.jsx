@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Button, Box, TextField, Container, Typography, Card, TableContainer, Paper, Table, TableHead, TableRow, TableCell, FormHelperText, FormControl, InputLabel, Select, MenuItem, Modal, FormControlLabel, Checkbox, IconButton } from "@mui/material";
 import { Link } from "react-router-dom";
-import PersonIcon from "@mui/icons-material/Person";
 import FamilyRestroomIcon from "@mui/icons-material/FamilyRestroom";
-import SchoolIcon from "@mui/icons-material/School";
 import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
 import InfoIcon from "@mui/icons-material/Info";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
@@ -20,22 +18,43 @@ import { useNavigate } from 'react-router-dom';
 import { useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-
+import PersonIcon from "@mui/icons-material/Person";
+import DescriptionIcon from "@mui/icons-material/Description";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
+import SchoolIcon from "@mui/icons-material/School";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
+import HowToRegIcon from "@mui/icons-material/HowToReg";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import { Stepper, Step, StepLabel } from "@mui/material";
 
 
 const AdminDashboard1 = () => {
-  const tabs = [
-    { label: "Applicant Form", to: "/admin_dashboard1" },
-    { label: "Documents Submitted", to: "/student_requirements" },
-    { label: "Admission Exam", to: "/assign_entrance_exam" },
-    { label: "Interview", to: "/interview" },
-    { label: "Qualifying Exam", to: "/qualifying_exam" },
-    { label: "College Approval", to: "/college_approval" },
-    { label: "Medical Clearance", to: "/medical_clearance" },
-    { label: "Applicant Status", to: "/applicant_status" },
-    { label: "View List", to: "/view_list" },
+  const stepsData = [
+    { label: "Applicant Form", to: "/admin_dashboard1", icon: <PersonIcon /> },
+    { label: "Documents Submitted", to: "/student_requirements", icon: <DescriptionIcon /> },
+    { label: "Admission Exam", to: "/assign_entrance_exam", icon: <AssignmentIcon /> },
+    { label: "Interview", to: "/interview", icon: <RecordVoiceOverIcon /> },
+    { label: "Qualifying Exam", to: "/qualifying_exam", icon: <SchoolIcon /> },
+    { label: "College Approval", to: "/college_approval", icon: <CheckCircleIcon /> },
+    { label: "Medical Clearance", to: "/medical_clearance", icon: <LocalHospitalIcon /> },
+    { label: "Applicant Status", to: "/applicant_status", icon: <HowToRegIcon /> },
+    { label: "View List", to: "/applicant_list", icon: <ListAltIcon /> },
   ];
-  const navigate = useNavigate();
+
+  const navigate = useNavigate(); // must come first
+
+  const [currentStep, setCurrentStep] = useState(0);
+  const [visitedSteps, setVisitedSteps] = useState(Array(stepsData.length).fill(false));
+
+  const handleNavigateStep = (index, to) => {
+    setCurrentStep(index);
+    navigate(to);
+  };
+
+
+
   const [userID, setUserID] = useState("");
   const [user, setUser] = useState("");
 
@@ -607,51 +626,61 @@ const AdminDashboard1 = () => {
       {searchError && <Typography color="error">{searchError}</Typography>}
       <hr style={{ border: "1px solid #ccc", width: "100%" }} />
       <br />
-     <Box display="flex" sx={{ border: "2px solid maroon", borderRadius: "4px", overflow: "hidden" }}>
-         {tabs.map((tab, index) => {
-           const isActive = location.pathname === tab.to; // check active route
-   
-           return (
-             <Link
-               key={index}
-               to={tab.to}
-               style={{ textDecoration: "none", flex: 1 }}
-             >
-               <Box
-                 sx={{
-                   backgroundColor: isActive ? "#6D2323" : "white", // active tab bg
-                   padding: "16px",
-                   height: "75px",
-                   display: "flex",
-                   flexDirection: "column",
-                   justifyContent: "center",
-                   alignItems: "center",
-                   cursor: "pointer",
-                   textAlign: "center",
-                   borderRight: index !== tabs.length - 1 ? "2px solid maroon" : "none",
-                   transition: "all 0.3s ease",
-                   "&:hover": {
-                     backgroundColor: "#6D2323",
-                     "& .MuiTypography-root": {
-                       color: "white",
-                     },
-                   },
-                 }}
-               >
-                 <Typography
-                   sx={{
-                     color: isActive ? "white" : "maroon", // active tab text
-                     fontWeight: "bold",
-                     wordBreak: "break-word",
-                   }}
-                 >
-                   {tab.label}
-                 </Typography>
-               </Box>
-             </Link>
-           );
-         })}
-       </Box>
+
+      <Box sx={{ display: "flex", justifyContent: "center", width: "100%", flexWrap: "wrap" }}>
+        {stepsData.map((step, index) => (
+          <React.Fragment key={index}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                cursor: "pointer",
+                m: 1,
+              }}
+              onClick={() => handleNavigateStep(index, step.to)} // click works here
+            >
+              <Box
+                sx={{
+                  width: 50,
+                  height: 50,
+                  borderRadius: "50%",
+                  backgroundColor: currentStep === index ? "#6D2323" : "#E8C999",
+                  color: currentStep === index ? "#fff" : "#000",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {step.icon}
+              </Box>
+              <Typography
+                sx={{
+                  mt: 1,
+                  color: currentStep === index ? "#6D2323" : "#000",
+                  fontWeight: currentStep === index ? "bold" : "normal",
+                  fontSize: 12,
+                  textAlign: "center",
+                  width: 80,
+                }}
+              >
+                {step.label}
+              </Typography>
+            </Box>
+
+            {index < stepsData.length - 1 && (
+              <Box
+                sx={{
+                  flex: 1,
+                  height: "2px",
+                  backgroundColor: "#6D2323",
+                  alignSelf: "center",
+                }}
+              />
+            )}
+          </React.Fragment>
+        ))}
+      </Box>
       <br />
 
 

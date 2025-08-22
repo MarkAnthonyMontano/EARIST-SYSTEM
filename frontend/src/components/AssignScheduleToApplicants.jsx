@@ -26,7 +26,16 @@ import {
   Alert,
 } from "@mui/material";
 import { Search } from '@mui/icons-material';
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import PersonIcon from "@mui/icons-material/Person";
+import DescriptionIcon from "@mui/icons-material/Description";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
+import SchoolIcon from "@mui/icons-material/School";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
+import HowToRegIcon from "@mui/icons-material/HowToReg";
+import ListAltIcon from "@mui/icons-material/ListAlt";
 
 const socket = io("http://localhost:5000");
 
@@ -40,16 +49,28 @@ const AssignScheduleToApplicants = () => {
 
 
   const tabs1 = [
-    { label: "Applicant Form", to: "/admin_dashboard1" },
-    { label: "Documents Submitted", to: "/student_requirements" },
-    { label: "Admission Exam", to: "/assign_entrance_exam" },
-    { label: "Interview", to: "/interview" },
-    { label: "Qualifying Exam", to: "/qualifying_exam" },
-    { label: "College Approval", to: "/college_approval" },
-    { label: "Medical Clearance", to: "/medical_clearance" },
-    { label: "Applicant Status", to: "/applicant_status" },
-    { label: "View List", to: "/view_list" },
+    { label: "Applicant Form", to: "/admin_dashboard1", icon: <PersonIcon /> },
+    { label: "Documents Submitted", to: "/student_requirements", icon: <DescriptionIcon /> },
+    { label: "Admission Exam", to: "/assign_entrance_exam", icon: <AssignmentIcon /> },
+    { label: "Interview", to: "/interview", icon: <RecordVoiceOverIcon /> },
+    { label: "Qualifying Exam", to: "/qualifying_exam", icon: <SchoolIcon /> },
+    { label: "College Approval", to: "/college_approval", icon: <CheckCircleIcon /> },
+    { label: "Medical Clearance", to: "/medical_clearance", icon: <LocalHospitalIcon /> },
+    { label: "Applicant Status", to: "/applicant_status", icon: <HowToRegIcon /> },
+    { label: "View List", to: "/applicant_list", icon: <ListAltIcon /> },
   ];
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [activeStep, setActiveStep] = useState(2);
+  const [clickedSteps, setClickedSteps] = useState(Array(tabs.length).fill(false));
+
+
+  const handleStepClick = (index, to) => {
+    setActiveStep(index);
+    navigate(to); // this will actually change the page
+  };
+
 
   const [applicants, setApplicants] = useState([]);
   const [selectedSchedule, setSelectedSchedule] = useState("");
@@ -112,7 +133,7 @@ const AssignScheduleToApplicants = () => {
   const fetchSchedules = async () => {
     try {
       const res = await axios.get("http://localhost:5000/exam_schedules");
-      setSchedules(res.data);
+      setSchedules(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Error fetching schedules:", err);
     }
@@ -122,7 +143,7 @@ const AssignScheduleToApplicants = () => {
   const fetchSchedulesWithCount = async () => {
     try {
       const res = await axios.get("http://localhost:5000/exam_schedules_with_count");
-      setSchedules(res.data);
+      setSchedules(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Error fetching schedules with count:", err);
     }
@@ -457,7 +478,7 @@ const AssignScheduleToApplicants = () => {
     const fetchSchedules = async () => {
       try {
         const res = await axios.get("http://localhost:5000/exam_schedules_with_count");
-        setSchedules(res.data);
+        setSchedules(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("Error fetching schedules:", err);
       }
@@ -640,50 +661,59 @@ const AssignScheduleToApplicants = () => {
       <hr style={{ border: "1px solid #ccc", width: "100%" }} />
 
       <br />
-      <Box display="flex" sx={{ border: "2px solid maroon", borderRadius: "4px", overflow: "hidden" }}>
-        {tabs1.map((tab1, index) => {
-          const isActive = location.pathname === tab1.to; // check active route
-
-          return (
-            <Link
-              key={index}
-              to={tab1.to}
-              style={{ textDecoration: "none", flex: 1 }}
+         <Box sx={{ display: "flex", justifyContent: "center", width: "100%",  flexWrap: "wrap" }}>
+        {tabs1.map((tab, index) => (
+          <React.Fragment key={index}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                cursor: "pointer",
+                m: 1,
+              }}
+              onClick={() => handleStepClick(index, tab.to)}
             >
               <Box
                 sx={{
-                  backgroundColor: isActive ? "#6D2323" : "white",
-                  padding: "16px",
-                  height: "75px",
+                  width: 50,
+                  height: 50,
+                  borderRadius: "50%",
+                  backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                  color: activeStep === index ? "#fff" : "#000",
                   display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
                   alignItems: "center",
-                  cursor: "pointer",
-                  textAlign: "center",
-                  borderRight: index !== tabs1.length - 1 ? "2px solid maroon" : "none", // fixed to tabs1
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    backgroundColor: "#6D2323",
-                    "& .MuiTypography-root": {
-                      color: "white",
-                    },
-                  },
+                  justifyContent: "center",
                 }}
               >
-                <Typography
-                  sx={{
-                    color: isActive ? "white" : "maroon", // active tab text
-                    fontWeight: "bold",
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {tab1.label}
-                </Typography>
+                {tab.icon}
               </Box>
-            </Link>
-          );
-        })}
+              <Typography
+                sx={{
+                  mt: 1,
+                  color: activeStep === index ? "#6D2323" : "#000",
+                  fontWeight: activeStep === index ? "bold" : "normal",
+                  fontSize: 12,
+                  textAlign: "center",
+                  width: 80,
+                }}
+              >
+                {tab.label}
+              </Typography>
+            </Box>
+
+            {index < tabs1.length - 1 && (
+              <Box
+                sx={{
+                  flex: 1,
+                  height: "2px",
+                  backgroundColor: "#6D2323",
+                  alignSelf: "center",
+                }}
+              />
+            )}
+          </React.Fragment>
+        ))}
       </Box>
       <br />
       <Box display="flex" sx={{ border: "2px solid maroon", borderRadius: "4px", overflow: "hidden" }}>
@@ -766,7 +796,7 @@ const AssignScheduleToApplicants = () => {
                 <MenuItem value="">-- Select Schedule --</MenuItem>
                 {schedules.map((s) => (
                   <MenuItem key={s.schedule_id} value={s.schedule_id}>
-                    {s.day_description} | {s.room_description} | {s.start_time} - {s.end_time}
+                    {s.proctor} - {s.day_description} | {s.room_description} | {s.start_time} - {s.end_time}
                   </MenuItem>
                 ))}
               </TextField>
