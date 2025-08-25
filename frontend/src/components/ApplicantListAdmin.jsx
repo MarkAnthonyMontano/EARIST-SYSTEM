@@ -26,12 +26,53 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import { FcPrint } from "react-icons/fc";
 import EaristLogo from "../assets/EaristLogo.png";
 import { Link } from "react-router-dom";
+import PersonIcon from "@mui/icons-material/Person";
+import DescriptionIcon from "@mui/icons-material/Description";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
+import SchoolIcon from "@mui/icons-material/School";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
+import HowToRegIcon from "@mui/icons-material/HowToReg";
+import ListAltIcon from "@mui/icons-material/ListAlt";
+import { Stepper, Step, StepLabel } from "@mui/material";
+
 
 const socket = io("http://localhost:5000");
 
 const ApplicantList = () => {
-    
+    const handleRowClick = (person_id) => {
+        if (!person_id) return;
+
+        // Store person_id so AdminDashboard1 can use it
+        sessionStorage.setItem("admin_edit_person_id", person_id);
+
+        // Navigate with query param too
+        navigate(`/admin_dashboard1?person_id=${person_id}`);
+    };
+    const tabs1 = [
+        { label: "Applicant Form", to: "/admin_dashboard1", icon: <PersonIcon /> },
+        { label: "Documents Submitted", to: "/student_requirements", icon: <DescriptionIcon /> },
+        { label: "Admission Exam", to: "/assign_entrance_exam", icon: <AssignmentIcon /> },
+        { label: "Interview", to: "/interview", icon: <RecordVoiceOverIcon /> },
+        { label: "Qualifying Exam", to: "/qualifying_exam", icon: <SchoolIcon /> },
+        { label: "College Approval", to: "/college_approval", icon: <CheckCircleIcon /> },
+        { label: "Medical Clearance", to: "/medical_clearance", icon: <LocalHospitalIcon /> },
+        { label: "Applicant Status", to: "/applicant_status", icon: <HowToRegIcon /> },
+        { label: "View List", to: "/applicant_list", icon: <ListAltIcon /> },
+    ];
+
     const navigate = useNavigate();
+    const [activeStep, setActiveStep] = useState(8);
+    const [clickedSteps, setClickedSteps] = useState(Array(tabs1.length).fill(false));
+
+
+    const handleStepClick = (index, to) => {
+        setActiveStep(index);
+        navigate(to); // this will actually change the page
+    };
+
+
     const [persons, setPersons] = useState([]);
 
     const [selectedPerson, setSelectedPerson] = useState(null);
@@ -95,18 +136,24 @@ const ApplicantList = () => {
     };
 
     // ✅ Auto-updates registrar_status when submitted_documents changes
-    const handleSubmittedDocumentsChange = async (upload_id, checked) => {
+    const handleSubmittedDocumentsChange = async (upload_id, checked, person_id) => {
         try {
             const submittedValue = checked ? 1 : 0;
-            const registrarValue = checked ? 1 : 0; // ✅ Auto-sync registrar_status
+            const registrarValue = checked ? 1 : 0;
+            const requirementsValue = checked ? 1 : 0; // ✅ turn into 1 if checked
 
+            // Update requirement_uploads
             await axios.put(`http://localhost:5000/api/submitted-documents/${upload_id}`, {
                 submitted_documents: submittedValue,
-                registrar_status: registrarValue, // ✅ update registrar too
+                registrar_status: registrarValue,
             });
 
-            // Refresh applicants after update
-            fetchApplicants();
+            // ✅ Update person_status_table.requirements
+            await axios.put(`http://localhost:5000/api/update-requirements/${person_id}`, {
+                requirements: requirementsValue,
+            });
+
+            fetchApplicants(); // refresh
         } catch (err) {
             console.error("❌ Failed to update submitted documents:", err);
         }
@@ -225,18 +272,19 @@ const ApplicantList = () => {
             const matchesSearch = fullText.includes(searchQuery.toLowerCase());
 
             const matchesCampus =
-                person.campus === "" || String(personData.campus) === String(person.campus);
+                person.campus === "" || // All Campuses
+                String(personData.campus) === String(person.campus);
+
 
             // ✅ FIX: use document_status and normalize both sides
             const matchesApplicantStatus =
                 selectedApplicantStatus === "" ||
                 normalize(personData.document_status) === normalize(selectedApplicantStatus);
 
-            // (keep your registrar filter; shown here with the earlier mapping)
             const matchesRegistrarStatus =
                 selectedRegistrarStatus === "" ||
-                (selectedRegistrarStatus === "Submitted" && personData.registrar_status === 1) ||
-                (selectedRegistrarStatus === "Unsubmitted / Incomplete" && personData.registrar_status === 0);
+                String(personData.registrar_status) === String(selectedRegistrarStatus);
+
 
             const programInfo = allCurriculums.find(
                 (opt) => opt.curriculum_id?.toString() === personData.program?.toString()
@@ -299,6 +347,18 @@ const ApplicantList = () => {
             } else if (sortBy === "email") {
                 fieldA = a.emailAddress?.toLowerCase() || "";
                 fieldB = b.emailAddress?.toLowerCase() || "";
+            } else if (sortBy === "Date Applied") {
+                fieldA = new Date(a.created_at);
+                fieldB = new Date(b.created_at);
+            } else if (sortBy === "Date Updated") {
+                fieldA = new Date(a.last_updated || 0);
+                fieldB = new Date(b.last_updated || 0);
+            } else if (sortBy === "Registrar Status") {
+                fieldA = a.registrar_status;
+                fieldB = b.registrar_status;
+            } else if (sortBy === "SHS GWA") {
+                fieldA = parseFloat(a.generalAverage1) || 0;
+                fieldB = parseFloat(b.generalAverage1) || 0;
             } else {
                 return 0;
             }
@@ -536,11 +596,12 @@ const ApplicantList = () => {
     };
 
 
+
     return (
         <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', pr: 1, p: 2 }}>
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                 <Typography variant="h4" fontWeight="bold" color="maroon">
-                    ADMISSION PROCESS FOR ADMIN
+                    ADMISSION PROCESS FOR COLLEGE
                 </Typography>
                 <Box sx={{ position: 'absolute', top: 10, right: 24 }}>
                     <Button
@@ -608,8 +669,66 @@ const ApplicantList = () => {
                 </Box>
             </Box>
 
+
             <hr style={{ border: "1px solid #ccc", width: "100%" }} />
             <div style={{ height: "20px" }}></div>
+            <Box sx={{ display: "flex", justifyContent: "center", width: "100%", flexWrap: "wrap" }}>
+                {tabs1.map((tab, index) => (
+                    <React.Fragment key={index}>
+                        <Box
+                            sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                cursor: "pointer",
+                                m: 1,
+                            }}
+                            onClick={() => handleStepClick(index, tab.to)}
+                        >
+                            <Box
+                                sx={{
+                                    width: 50,
+                                    height: 50,
+                                    borderRadius: "50%",
+                                    backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                                    color: activeStep === index ? "#fff" : "#000",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                {tab.icon}
+                            </Box>
+                            <Typography
+                                sx={{
+                                    mt: 1,
+                                    color: activeStep === index ? "#6D2323" : "#000",
+                                    fontWeight: activeStep === index ? "bold" : "normal",
+                                    fontSize: 12,
+                                    textAlign: "center",
+                                    width: 80,
+                                }}
+                            >
+                                {tab.label}
+                            </Typography>
+                        </Box>
+
+                        {index < tabs1.length - 1 && (
+                            <Box
+                                sx={{
+                                    flex: 1,
+                                    height: "2px",
+                                    backgroundColor: "#6D2323",
+                                    alignSelf: "center",
+                                }}
+                            />
+                        )}
+                    </React.Fragment>
+                ))}
+            </Box>
+            <div style={{ height: "20px" }}></div>
+
+
             <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon", }}>
                 <Table>
                     <TableHead sx={{ backgroundColor: '#6D2323' }}>
@@ -690,23 +809,23 @@ const ApplicantList = () => {
                     <Box display="flex" flexDirection="column" gap={1} sx={{ minWidth: 200 }}>
                         <Typography fontSize={13} >Campus:</Typography>
                         <FormControl size="small" sx={{ width: "200px" }}>
-                            <InputLabel id="campus-label">-Campus-</InputLabel>
+                            <InputLabel id="campus-label">Campus</InputLabel>
                             <Select
                                 labelId="campus-label"
                                 id="campus-select"
                                 name="campus"
                                 value={person.campus ?? ""}
-                                label="-Campus-"
                                 onChange={(e) => {
                                     setPerson(prev => ({ ...prev, campus: e.target.value }));
                                     setCurrentPage(1);
                                 }}
                             >
-                                <MenuItem value=""><em>Select Campus</em></MenuItem>
+                                <MenuItem value=""><em>All Campuses</em></MenuItem>
                                 <MenuItem value="0">MANILA</MenuItem>
                                 <MenuItem value="1">CAVITE</MenuItem>
                             </Select>
                         </FormControl>
+
                     </Box>
 
                 </Box>
@@ -902,6 +1021,10 @@ const ApplicantList = () => {
                                     <MenuItem value="name">Applicant's Name</MenuItem>
                                     <MenuItem value="id">Applicant ID</MenuItem>
                                     <MenuItem value="email">Email Address</MenuItem>
+                                    <MenuItem value="Date Applied">Date Applied</MenuItem>
+                                    <MenuItem value="Date Updated">Date Updated</MenuItem>
+                                    <MenuItem value="Registrar Status">Registrar Status</MenuItem>
+                                    <MenuItem value="SHS GWA">SHS GWA</MenuItem>
                                 </Select>
                             </FormControl>
                             <Typography fontSize={13} sx={{ minWidth: "10px" }}>Sort Order:</Typography>
@@ -924,12 +1047,13 @@ const ApplicantList = () => {
                                     onChange={(e) => setSelectedApplicantStatus(e.target.value)}
                                     displayEmpty
                                 >
-                                    <MenuItem value="">Select status</MenuItem>
-                                    <MenuItem value="On process">On process</MenuItem>
+                                    <MenuItem value="">All Applicant Status</MenuItem>
+                                    <MenuItem value="Accepted">Accepted</MenuItem>
+                                    <MenuItem value="Rejected">Rejected</MenuItem>
+                                    <MenuItem value="Waiting List">Waiting List</MenuItem>
                                     <MenuItem value="Documents Verified & ECAT">Documents Verified & ECAT</MenuItem>
-                                    <MenuItem value="Disapproved">Disapproved</MenuItem>
-                                    <MenuItem value="Program Closed">Program Closed</MenuItem>
                                 </Select>
+
                             </FormControl>
                         </Box>
 
@@ -943,22 +1067,24 @@ const ApplicantList = () => {
                                     displayEmpty
                                 >
                                     <MenuItem value="">Select status</MenuItem>
-                                    <MenuItem value="Submitted">Submitted</MenuItem>
-                                    <MenuItem value="Unsubmitted / Incomplete">Unsubmitted / Incomplete</MenuItem>
+                                    <MenuItem value="Accepted">Accepted</MenuItem>
+                                    <MenuItem value="Rejecte">Rejected</MenuItem>
+                                    <MenuItem value="Waiting List">Waiting List</MenuItem>
+                                    <MenuItem value="Documents Verified & ECAT">Documents Verified & ECAT</MenuItem>
                                 </Select>
                             </FormControl>
 
                             {/* ✅ New Checkbox for Submitted Documents */}
-                         
+
                         </Box>
-                           <FormControl size="small" sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
-                                <Checkbox
-                                    checked={showSubmittedOnly}
-                                    onChange={(e) => setShowSubmittedOnly(e.target.checked)}
-                                    sx={{ color: "maroon", "&.Mui-checked": { color: "maroon" } }}
-                                />
-                                <Typography fontSize={13}>Show Submitted Only</Typography>
-                            </FormControl>
+                        <FormControl size="small" sx={{ display: "flex", flexDirection: "row", alignItems: "center" }}>
+                            <Checkbox
+                                checked={showSubmittedOnly}
+                                onChange={(e) => setShowSubmittedOnly(e.target.checked)}
+                                sx={{ color: "maroon", "&.Mui-checked": { color: "maroon" } }}
+                            />
+                            <Typography fontSize={13}>Show Submitted Only</Typography>
+                        </FormControl>
                     </Box>
 
                     {/* MIDDLE COLUMN: SY & Semester */}
@@ -1050,7 +1176,7 @@ const ApplicantList = () => {
                                     ))}
                                 </Select>
                             </FormControl>
-                            
+
                         </Box>
                     </Box>
                 </Box>
@@ -1097,10 +1223,12 @@ const ApplicantList = () => {
                             </TableCell>
                         </TableRow>
                     </TableHead>
+
                     <TableBody>
                         {currentPersons.map((person, index) => (
                             <TableRow key={person.person_id}>
-                                <TableCell disabled
+                                {/* # */}
+                                <TableCell
                                     sx={{
                                         color: "black",
                                         textAlign: "center",
@@ -1112,20 +1240,29 @@ const ApplicantList = () => {
                                 >
                                     {index + 1}
                                 </TableCell>
-                                <TableCell sx={{ textAlign: "center", border: "1px solid gray", py: 0.5 }}>
-                                    <Checkbox disabled
+
+                                {/* Checkbox */}
+                                <TableCell sx={{ textAlign: "center", border: "1px solid maroon", py: 0.5 }}>
+                                    <Checkbox
+                                        disabled
                                         checked={person.submitted_documents === 1}
                                         onChange={(e) =>
-                                            handleSubmittedDocumentsChange(person.upload_id, e.target.checked)
+                                            handleSubmittedDocumentsChange(
+                                                person.upload_id,
+                                                e.target.checked,
+                                                person.person_id
+                                            )
                                         }
                                         sx={{
-                                            color: "gray",
+                                            color: "maroon",
                                             "&.Mui-checked": { color: "maroon" },
                                             transform: "scale(1.1)",
                                             p: 0,
                                         }}
                                     />
                                 </TableCell>
+
+                                {/* Applicant Number */}
                                 <TableCell
                                     sx={{
                                         color: "blue",
@@ -1135,10 +1272,12 @@ const ApplicantList = () => {
                                         fontSize: "12px",
                                         cursor: "pointer",
                                     }}
-                                    onClick={() => navigate(`/admin_dashboard1?person_id=${person.person_id}`)}
+                                    onClick={() => handleRowClick(person.person_id)}
                                 >
                                     {person.applicant_number ?? "N/A"}
                                 </TableCell>
+
+                                {/* Applicant Name */}
                                 <TableCell
                                     sx={{
                                         color: "blue",
@@ -1148,21 +1287,54 @@ const ApplicantList = () => {
                                         fontSize: "12px",
                                         cursor: "pointer",
                                     }}
-                                    onClick={() => navigate(`/admin_dashboard1?person_id=${person.person_id}`)}
+                                    onClick={() => handleRowClick(person.person_id)}
                                 >
-                                    {`${person.last_name}, ${person.first_name} ${person.middle_name ?? ""} ${person.extension ?? ""}`}
+                                    {`${person.last_name}, ${person.first_name} ${person.middle_name ?? ""} ${person.extension ?? ""
+                                        }`}
                                 </TableCell>
-                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px" }}>
+
+                                {/* Program */}
+                                <TableCell
+                                    sx={{
+                                        color: "black",
+                                        textAlign: "center",
+                                        border: "1px solid maroon",
+                                        py: 0.5,
+                                        fontSize: "12px",
+                                    }}
+                                >
                                     {curriculumOptions.find(
                                         (item) => item.curriculum_id?.toString() === person.program?.toString()
                                     )?.program_code ?? "N/A"}
                                 </TableCell>
-                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px" }}>
+
+                                {/* SHS GWA */}
+                                <TableCell
+                                    sx={{
+                                        color: "black",
+                                        textAlign: "center",
+                                        border: "1px solid maroon",
+                                        py: 0.5,
+                                        fontSize: "12px",
+                                    }}
+                                >
                                     {person.generalAverage1}
                                 </TableCell>
-                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px" }}>
+
+                                {/* Created Date */}
+                                <TableCell
+                                    sx={{
+                                        color: "black",
+                                        textAlign: "center",
+                                        border: "1px solid maroon",
+                                        py: 0.5,
+                                        fontSize: "12px",
+                                    }}
+                                >
                                     {person.created_at}
                                 </TableCell>
+
+                                {/* Last Updated */}
                                 <TableCell
                                     sx={{
                                         color: "black",
@@ -1180,21 +1352,34 @@ const ApplicantList = () => {
                                         })
                                         : ""}
                                 </TableCell>
-                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px" }}>
+
+                                {/* Status */}
+                                <TableCell
+                                    sx={{
+                                        color: "black",
+                                        textAlign: "center",
+                                        border: "1px solid maroon",
+                                        py: 0.5,
+                                        fontSize: "12px",
+                                    }}
+                                >
                                     {person.document_status || "N/A"}
                                 </TableCell>
+
+                                {/* Registrar Status */}
                                 <TableCell
+                                    disabled
                                     sx={{
                                         textAlign: "center",
                                         border: "1px solid maroon",
                                         borderRight: "2px solid maroon",
                                         py: 0.5,
-
                                         fontSize: "12px",
                                     }}
                                 >
                                     {person.registrar_status === 1 ? (
                                         <Box
+                                            disabled
                                             sx={{
                                                 backgroundColor: "#4CAF50",
                                                 color: "white",
@@ -1207,11 +1392,14 @@ const ApplicantList = () => {
                                                 margin: "0 auto",
                                             }}
                                         >
-                                            <Typography sx={{ fontWeight: "bold" }}>Submitted</Typography>
+                                            <Typography disabled sx={{ fontWeight: "bold" }}>Submitted</Typography>
                                         </Box>
                                     ) : person.registrar_status === 0 ? (
                                         <Box
+                                            disabled
+
                                             sx={{
+
                                                 backgroundColor: "#F44336",
                                                 color: "white",
                                                 borderRadius: 1,
@@ -1223,23 +1411,38 @@ const ApplicantList = () => {
                                                 margin: "0 auto",
                                             }}
                                         >
-                                            <Typography sx={{ fontWeight: "bold" }}>Unsubmitted / Incomplete</Typography>
+                                            <Typography sx={{ fontWeight: "bold" }}>
+                                                Unsubmitted / Incomplete
+                                            </Typography>
                                         </Box>
                                     ) : (
                                         <Box display="flex" justifyContent="center" gap={1}>
                                             <Button
+
+                                                disabled
                                                 key={`submitted-${person.person_id}`}
                                                 variant="contained"
                                                 onClick={() => handleRegistrarStatusChange(person.person_id, 1)}
-                                                sx={{ backgroundColor: "green", color: "white", width: 150, height: 30, }}
+                                                sx={{
+                                                    backgroundColor: "green",
+                                                    color: "white",
+                                                    width: 150,
+                                                    height: 30,
+                                                }}
                                             >
                                                 Submitted
                                             </Button>
                                             <Button
-                                                key={`unsubmitted / incomplete-${person.person_id}`}
+                                                disabled
+                                                key={`unsubmitted-${person.person_id}`}
                                                 variant="contained"
                                                 onClick={() => handleRegistrarStatusChange(person.person_id, 0)}
-                                                sx={{ backgroundColor: "red", color: "white", width: 150, height: 30, }}
+                                                sx={{
+                                                    backgroundColor: "red",
+                                                    color: "white",
+                                                    width: 150,
+                                                    height: 30,
+                                                }}
                                             >
                                                 Unsubmitted
                                             </Button>
@@ -1249,7 +1452,6 @@ const ApplicantList = () => {
                             </TableRow>
                         ))}
                     </TableBody>
-
 
                 </Table>
             </TableContainer>

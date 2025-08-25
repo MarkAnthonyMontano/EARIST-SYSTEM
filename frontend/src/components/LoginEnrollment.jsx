@@ -331,7 +331,7 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
             {/* OTP Input */}
             <TextField
               fullWidth
-              autoFocus // ✅ instantly focuses
+              autoFocus
               value={otp}
               onChange={(e) => setOtp(e.target.value)}
               placeholder="Enter OTP"
@@ -340,9 +340,13 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
                 maxLength: 6,
                 style: { textAlign: "center", fontSize: "18px" },
               }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  verifyOtp(); // ✅ Trigger OTP verification on Enter key
+                }
+              }}
               sx={{ mb: 3 }}
             />
-
 
 
             <Button

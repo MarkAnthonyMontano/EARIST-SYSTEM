@@ -32,26 +32,46 @@ import { Stepper, Step, StepLabel } from "@mui/material";
 
 const AdminDashboard1 = () => {
   const stepsData = [
+    { label: "Applicant List", to: "/applicant_list", icon: <ListAltIcon /> },
     { label: "Applicant Form", to: "/admin_dashboard1", icon: <PersonIcon /> },
     { label: "Documents Submitted", to: "/student_requirements", icon: <DescriptionIcon /> },
-    { label: "Admission Exam", to: "/assign_entrance_exam", icon: <AssignmentIcon /> },
     { label: "Interview", to: "/interview", icon: <RecordVoiceOverIcon /> },
     { label: "Qualifying Exam", to: "/qualifying_exam", icon: <SchoolIcon /> },
     { label: "College Approval", to: "/college_approval", icon: <CheckCircleIcon /> },
     { label: "Medical Clearance", to: "/medical_clearance", icon: <LocalHospitalIcon /> },
     { label: "Applicant Status", to: "/applicant_status", icon: <HowToRegIcon /> },
-    { label: "View List", to: "/applicant_list", icon: <ListAltIcon /> },
   ];
 
-  const navigate = useNavigate(); // must come first
+  const navigate = useNavigate();
+  const [explicitSelection, setExplicitSelection] = useState(false);
 
-  const [currentStep, setCurrentStep] = useState(0);
+  const fetchByPersonId = async (personID) => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/person_with_applicant/${personID}`);
+      setPerson(res.data);
+      setSelectedPerson(res.data);
+      if (res.data?.applicant_number) {
+      }
+    } catch (err) {
+      console.error("❌ person_with_applicant failed:", err);
+    }
+  };
+
+
+  const [currentStep, setCurrentStep] = useState(1);
   const [visitedSteps, setVisitedSteps] = useState(Array(stepsData.length).fill(false));
 
   const handleNavigateStep = (index, to) => {
     setCurrentStep(index);
-    navigate(to);
+
+    const pid = sessionStorage.getItem("admin_edit_person_id");
+    if (pid) {
+      navigate(`${to}?person_id=${pid}`);
+    } else {
+      navigate(to);
+    }
   };
+
 
 
 
@@ -59,9 +79,6 @@ const AdminDashboard1 = () => {
   const [user, setUser] = useState("");
 
   const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const queryPersonId = queryParams.get("person_id");
-
   const [selectedPerson, setSelectedPerson] = useState(null);
   const [persons, setPersons] = useState([]);
   const [userRole, setUserRole] = useState("");
@@ -114,6 +131,10 @@ const AdminDashboard1 = () => {
     permanentDswdHouseholdNumber: "",
   });
 
+
+  const queryParams = new URLSearchParams(location.search);
+  const queryPersonId = queryParams.get("person_id")?.trim() || "";
+
   useEffect(() => {
     const storedUser = localStorage.getItem("email");
     const storedRole = localStorage.getItem("role");
@@ -144,6 +165,67 @@ const AdminDashboard1 = () => {
 
     window.location.href = "/login";
   }, [queryPersonId]);
+
+
+  useEffect(() => {
+    let consumedFlag = false;
+
+    const tryLoad = async () => {
+      if (queryPersonId) {
+        await fetchByPersonId(queryPersonId);
+        setExplicitSelection(true);
+        consumedFlag = true;
+        return;
+      }
+
+      // fallback only if it's a fresh selection from Applicant List
+      const source = sessionStorage.getItem("admin_edit_person_id_source");
+      const tsStr = sessionStorage.getItem("admin_edit_person_id_ts");
+      const id = sessionStorage.getItem("admin_edit_person_id");
+      const ts = tsStr ? parseInt(tsStr, 10) : 0;
+      const isFresh = source === "applicant_list" && Date.now() - ts < 5 * 60 * 1000;
+
+      if (id && isFresh) {
+        await fetchByPersonId(id);
+        setExplicitSelection(true);
+        consumedFlag = true;
+      }
+    };
+
+    tryLoad().finally(() => {
+      // consume the freshness so it won't auto-load again later
+      if (consumedFlag) {
+        sessionStorage.removeItem("admin_edit_person_id_source");
+        sessionStorage.removeItem("admin_edit_person_id_ts");
+      }
+    });
+  }, [queryPersonId]);
+
+
+
+  // Fetch person by ID (when navigating with ?person_id=... or sessionStorage)
+  useEffect(() => {
+    const fetchPersonById = async () => {
+      if (!userID) return;
+
+      try {
+        const res = await axios.get(`http://localhost:5000/api/person_with_applicant/${userID}`);
+        if (res.data) {
+          setPerson(res.data);
+          setSelectedPerson(res.data);
+        } else {
+          console.warn("⚠️ No person found for ID:", userID);
+        }
+      } catch (err) {
+        console.error("❌ Failed to fetch person by ID:", err);
+      }
+    };
+
+    fetchPersonById();
+  }, [userID]);
+
+
+
 
 
   useEffect(() => {
@@ -178,12 +260,17 @@ const AdminDashboard1 = () => {
   const [activeStep, setActiveStep] = useState(0);
   const [clickedSteps, setClickedSteps] = useState(Array(steps.length).fill(false));
 
-  const handleStepClick = (index) => {
+  const handleStepClick = (index, to) => {
     setActiveStep(index);
-    const newClickedSteps = [...clickedSteps];
-    newClickedSteps[index] = true;
-    setClickedSteps(newClickedSteps);
+
+    const pid = sessionStorage.getItem("admin_edit_person_id");
+    if (pid) {
+      navigate(`${to}?person_id=${pid}`);
+    } else {
+      navigate(to);
+    }
   };
+
 
   // dot not alter
 
@@ -557,32 +644,25 @@ const AdminDashboard1 = () => {
           params: { query: searchQuery }
         });
 
-        console.log("Search result data:", res.data); // See what the backend returns
+        if (res.data && res.data.person_id) {
+          const details = await axios.get(`http://localhost:5000/api/person_with_applicant/${res.data.person_id}`);
+          setPerson(details.data);
 
-        setPerson(res.data);
-
-        // ✅ Adjust key based on backend response
-        const idToStore = res.data.person_id || res.data.id;
-        if (!idToStore) {
+          sessionStorage.setItem("admin_edit_person_id", details.data.person_id);
+          setUserID(details.data.person_id);
+          setSearchError("");
+        } else {
           console.error("No valid person ID found in search result");
           setSearchError("Invalid search result");
-          return;
         }
-
-        // Store globally for ECAT and other dashboards
-        sessionStorage.setItem("admin_edit_person_id", idToStore);
-        setUserID(idToStore);
-
-        setSearchError("");
       } catch (err) {
         console.error("Search failed:", err);
         setSearchError("Applicant not found");
       }
-    }, 500); // debounce so it doesn't search on every keystroke instantly
+    }, 500); // debounce
 
     return () => clearTimeout(delayDebounce);
   }, [searchQuery]);
-
 
 
   // dot not alter
@@ -693,7 +773,8 @@ const AdminDashboard1 = () => {
               <TableCell sx={{ color: 'white', fontSize: '20px', fontFamily: 'Arial Black', border: 'none' }}>
                 Applicant ID:&nbsp;
                 <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
-                  {person?.applicant_number || person?.person_id || "N/A"}
+                  {person?.applicant_number || "N/A"}
+
                 </span>
               </TableCell>
 

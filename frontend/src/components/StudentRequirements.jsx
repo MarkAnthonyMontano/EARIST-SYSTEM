@@ -40,15 +40,14 @@ const requiredDocs = [
 ];
 
 const tabs = [
+  { label: "Applicant List", to: "/applicant_list", icon: <ListAltIcon /> },
   { label: "Applicant Form", to: "/admin_dashboard1", icon: <PersonIcon /> },
   { label: "Documents Submitted", to: "/student_requirements", icon: <DescriptionIcon /> },
-  { label: "Admission Exam", to: "/assign_entrance_exam", icon: <AssignmentIcon /> },
   { label: "Interview", to: "/interview", icon: <RecordVoiceOverIcon /> },
   { label: "Qualifying Exam", to: "/qualifying_exam", icon: <SchoolIcon /> },
   { label: "College Approval", to: "/college_approval", icon: <CheckCircleIcon /> },
   { label: "Medical Clearance", to: "/medical_clearance", icon: <LocalHospitalIcon /> },
   { label: "Applicant Status", to: "/applicant_status", icon: <HowToRegIcon /> },
-  { label: "View List", to: "/applicant_list", icon: <ListAltIcon /> },
 ];
 
 const remarksOptions = [
@@ -142,14 +141,37 @@ const remarksOptions = [
 
 const StudentRequirements = () => {
   const navigate = useNavigate();
-  const [activeStep, setActiveStep] = useState(1);
+  const [activeStep, setActiveStep] = useState(2);
   const [clickedSteps, setClickedSteps] = useState(Array(tabs.length).fill(false));
+
+  const [explicitSelection, setExplicitSelection] = useState(false);
+
+  const fetchByPersonId = async (personID) => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/person_with_applicant/${personID}`);
+      setPerson(res.data);
+      setSelectedPerson(res.data);
+      if (res.data?.applicant_number) {
+        await fetchUploadsByApplicantNumber(res.data.applicant_number);
+      }
+    } catch (err) {
+      console.error("❌ person_with_applicant failed:", err);
+    }
+  };
+
 
 
   const handleStepClick = (index, to) => {
     setActiveStep(index);
-    navigate(to); // this will actually change the page
+
+    const pid = sessionStorage.getItem("admin_edit_person_id");
+    if (pid) {
+      navigate(`${to}?person_id=${pid}`);
+    } else {
+      navigate(to);
+    }
   };
+
   const location = useLocation();
   const [uploads, setUploads] = useState([]);
   const [persons, setPersons] = useState([]);
@@ -234,6 +256,48 @@ const StudentRequirements = () => {
   }, []);
 
 
+
+  const queryParams = new URLSearchParams(location.search);
+  const queryPersonId = queryParams.get("person_id")?.trim() || "";
+
+  useEffect(() => {
+    let consumedFlag = false;
+
+    const tryLoad = async () => {
+      if (queryPersonId) {
+        await fetchByPersonId(queryPersonId);
+        setExplicitSelection(true);
+        consumedFlag = true;
+        return;
+      }
+
+      // fallback only if it's a fresh selection from Applicant List
+      const source = sessionStorage.getItem("admin_edit_person_id_source");
+      const tsStr = sessionStorage.getItem("admin_edit_person_id_ts");
+      const id = sessionStorage.getItem("admin_edit_person_id");
+      const ts = tsStr ? parseInt(tsStr, 10) : 0;
+      const isFresh = source === "applicant_list" && Date.now() - ts < 5 * 60 * 1000;
+
+      if (id && isFresh) {
+        await fetchByPersonId(id);
+        setExplicitSelection(true);
+        consumedFlag = true;
+      }
+    };
+
+    tryLoad().finally(() => {
+      // consume the freshness so it won't auto-load again later
+      if (consumedFlag) {
+        sessionStorage.removeItem("admin_edit_person_id_source");
+        sessionStorage.removeItem("admin_edit_person_id_ts");
+      }
+    });
+  }, [queryPersonId]);
+
+
+
+
+
   useEffect(() => {
     fetchPersons();
   }, []);
@@ -261,18 +325,19 @@ const StudentRequirements = () => {
     }
 
     try {
-      const res = await axios.get(`http://localhost:5000/api/person/${personID}`);
+      const res = await axios.get(`http://localhost:5000/api/person_with_applicant/${personID}`);
 
       const safePerson = {
         ...res.data,
-        document_status: res.data.document_status || "On process", // set default here
+        document_status: res.data.document_status || "On process",
       };
       setPerson(safePerson);
-
+      setSelectedPerson(res.data); // ✅ ensures applicant_number is available
     } catch (error) {
       console.error("❌ Failed to fetch person data:", error?.response?.data || error.message);
     }
   };
+
 
 
   useEffect(() => {
@@ -282,29 +347,33 @@ const StudentRequirements = () => {
   }, [selectedPerson]);
 
 
-
-
   useEffect(() => {
+    // No search text: keep explicit selection if present
     if (!searchQuery.trim()) {
-      setSelectedPerson(null);
-      setUploads([]);
-      setSelectedFiles({});
-      setPerson({   // clear person data too
-        profile_img: "",
-        generalAverage1: "",
-        height: "",
-        applyingAs: "",
-        document_status: "On Process",
-        last_name: "",
-        first_name: "",
-        middle_name: "",
-        extension: "",
-      });
+      if (!explicitSelection) {
+        setSelectedPerson(null);
+        setUploads([]);
+        setSelectedFiles({});
+        setPerson({
+          profile_img: "",
+          generalAverage1: "",
+          height: "",
+          applyingAs: "",
+          document_status: "On Process",
+          last_name: "",
+          first_name: "",
+          middle_name: "",
+          extension: "",
+        });
+      }
       return;
     }
 
+    // User started typing -> manual search takes over
+    if (explicitSelection) setExplicitSelection(false);
+
     const match = persons.find((p) =>
-      `${p.first_name} ${p.middle_name} ${p.last_name} ${p.emailAddress} ${p.applicant_number || ''}`
+      `${p.first_name} ${p.middle_name} ${p.last_name} ${p.emailAddress} ${p.applicant_number || ""}`
         .toLowerCase()
         .includes(searchQuery.toLowerCase())
     );
@@ -315,7 +384,7 @@ const StudentRequirements = () => {
     } else {
       setSelectedPerson(null);
       setUploads([]);
-      setPerson({   // also clear if no match
+      setPerson({
         profile_img: "",
         generalAverage1: "",
         height: "",
@@ -327,7 +396,8 @@ const StudentRequirements = () => {
         extension: "",
       });
     }
-  }, [searchQuery, persons]);
+  }, [searchQuery, persons, explicitSelection]);
+
 
   const fetchPersons = async () => {
     try {
@@ -832,7 +902,7 @@ const StudentRequirements = () => {
         <hr style={{ border: "1px solid #ccc", width: "100%" }} />
         <br />
 
-          <Box sx={{ display: "flex", justifyContent: "center", width: "100%",  flexWrap: "wrap" }}>
+        <Box sx={{ display: "flex", justifyContent: "center", width: "100%", flexWrap: "wrap" }}>
           {tabs.map((tab, index) => (
             <React.Fragment key={index}>
               <Box
@@ -897,6 +967,7 @@ const StudentRequirements = () => {
                   Applicant ID:&nbsp;
                   <span style={{ fontFamily: "Arial", fontWeight: "normal", textDecoration: "underline" }}>
                     {selectedPerson?.applicant_number || "N/A"}
+
                   </span>
                 </TableCell>
 
@@ -935,7 +1006,6 @@ const StudentRequirements = () => {
               <TextField
                 size="small"
                 name="generalAverage1"
-                placeholder="Enter SHS GWA"
                 value={person.generalAverage1 || ""}
                 sx={{ width: "250px" }}
                 InputProps={{

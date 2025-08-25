@@ -14,7 +14,6 @@ import {
     TableRow,
     MenuItem
 } from '@mui/material';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import Search from '@mui/icons-material/Search';
 import { Link, useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
@@ -31,15 +30,15 @@ import ListAltIcon from "@mui/icons-material/ListAlt";
 import io from 'socket.io-client';
 
 const tabs = [
+    { label: "Applicant List", to: "/applicant_list", icon: <ListAltIcon /> },
     { label: "Applicant Form", to: "/admin_dashboard1", icon: <PersonIcon /> },
     { label: "Documents Submitted", to: "/student_requirements", icon: <DescriptionIcon /> },
-    { label: "Admission Exam", to: "/assign_entrance_exam", icon: <AssignmentIcon /> },
     { label: "Interview", to: "/interview", icon: <RecordVoiceOverIcon /> },
     { label: "Qualifying Exam", to: "/qualifying_exam", icon: <SchoolIcon /> },
     { label: "College Approval", to: "/college_approval", icon: <CheckCircleIcon /> },
     { label: "Medical Clearance", to: "/medical_clearance", icon: <LocalHospitalIcon /> },
     { label: "Applicant Status", to: "/applicant_status", icon: <HowToRegIcon /> },
-    { label: "View List", to: "/applicant_list", icon: <ListAltIcon /> },
+
 ];
 
 const Interview = () => {
@@ -47,12 +46,43 @@ const Interview = () => {
     const navigate = useNavigate();
     const [activeStep, setActiveStep] = useState(3);
     const [clickedSteps, setClickedSteps] = useState(Array(tabs.length).fill(false));
+    const [explicitSelection, setExplicitSelection] = useState(false);
 
-
-    const handleStepClick = (index, to) => {
-        setActiveStep(index);
-        navigate(to); // this will actually change the page
+    const fetchByPersonId = async (personID) => {
+        try {
+            const res = await axios.get(`http://localhost:5000/api/person_with_applicant/${personID}`);
+            setPerson(res.data);
+            setSelectedPerson(res.data);
+            if (res.data?.applicant_number) {
+                await fetchUploadsByApplicantNumber(res.data.applicant_number);
+            }
+        } catch (err) {
+            console.error("❌ person_with_applicant failed:", err);
+        }
     };
+
+
+
+
+     const handleStepClick = (index, to) => {
+        setActiveStep(index);
+
+        const pid = sessionStorage.getItem("admin_edit_person_id");
+
+        if (pid) {
+            // ✅ Always attach ?person_id for whichever tab we click
+            navigate(`${to}?person_id=${pid}`);
+        } else {
+            navigate("/qualifying_exam"); // if no pid in session, just go raw
+        }
+    };
+
+
+
+
+
+
+
     const [uploads, setUploads] = useState([]);
     const [persons, setPersons] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -70,9 +100,6 @@ const Interview = () => {
         extension: "",
     });
     const [editingRemarkId, setEditingRemarkId] = useState(null);
-    const [notifications, setNotifications] = useState([]);
-    const [showNotifications, setShowNotifications] = useState(false);
-    // New state
     const [fetchedInterview, setFetchedInterview] = useState(null);
 
     const fetchInterviewData = async (applicant_number) => {
@@ -96,28 +123,6 @@ const Interview = () => {
             fetchInterviewData(selectedPerson.applicant_number);
         }
     }, [selectedPerson]);
-
-
-    useEffect(() => {
-        // Load saved notifications from DB on first load
-        axios.get("http://localhost:5000/api/notifications")
-            .then(res => {
-                setNotifications(res.data.map(n => ({
-                    ...n,
-                    timestamp: n.timestamp
-                })));
-            })
-            .catch(err => console.error("Failed to load saved notifications:", err));
-    }, []);
-
-
-    useEffect(() => {
-        const socket = io("http://localhost:5000");
-        socket.on("notification", (data) => {
-            setNotifications((prev) => [data, ...prev]);
-        });
-        return () => socket.disconnect();
-    }, []);
 
 
     useEffect(() => {
@@ -157,6 +162,45 @@ const Interview = () => {
     }, []);
 
 
+    const queryParams = new URLSearchParams(location.search);
+    const queryPersonId = queryParams.get("person_id")?.trim() || "";
+
+    useEffect(() => {
+        let consumedFlag = false;
+
+        const tryLoad = async () => {
+            if (queryPersonId) {
+                await fetchByPersonId(queryPersonId);
+                setExplicitSelection(true);
+                consumedFlag = true;
+                return;
+            }
+
+            // fallback only if it's a fresh selection from Applicant List
+            const source = sessionStorage.getItem("admin_edit_person_id_source");
+            const tsStr = sessionStorage.getItem("admin_edit_person_id_ts");
+            const id = sessionStorage.getItem("admin_edit_person_id");
+            const ts = tsStr ? parseInt(tsStr, 10) : 0;
+            const isFresh = source === "applicant_list" && Date.now() - ts < 5 * 60 * 1000;
+
+            if (id && isFresh) {
+                await fetchByPersonId(id);
+                setExplicitSelection(true);
+                consumedFlag = true;
+            }
+        };
+
+        tryLoad().finally(() => {
+            // consume the freshness so it won't auto-load again later
+            if (consumedFlag) {
+                sessionStorage.removeItem("admin_edit_person_id_source");
+                sessionStorage.removeItem("admin_edit_person_id_ts");
+            }
+        });
+    }, [queryPersonId]);
+
+
+
     useEffect(() => {
         fetchPersons();
     }, []);
@@ -187,13 +231,14 @@ const Interview = () => {
         }
 
         try {
-            const res = await axios.get(`http://localhost:5000/api/person/${personID}`);
+            const res = await axios.get(`http://localhost:5000/api/person_with_applicant/${personID}`);
 
             const safePerson = {
                 ...res.data,
                 document_status: res.data.document_status || "On process", // set default here
             };
             setPerson(safePerson);
+            setSelectedPerson(res.data);
 
         } catch (error) {
             console.error("❌ Failed to fetch person data:", error?.response?.data || error.message);
@@ -216,30 +261,37 @@ const Interview = () => {
 
 
     useEffect(() => {
+        // No search text: keep explicit selection if present
         if (!searchQuery.trim()) {
-            // empty search input: clear everything
-            setSelectedPerson(null);
-            setPerson({
-                profile_img: "",
-                generalAverage1: "",
-                height: "",
-                applyingAs: "",
-                document_status: "",
-                last_name: "",
-                first_name: "",
-                middle_name: "",
-                extension: "",
-            });
-            // reset exam data
-            setExamData([
-                { TestArea: "English", RawScore: "", Percentage: "", User: "", DateCreated: "" },
-                { TestArea: "Science", RawScore: "", Percentage: "", User: "", DateCreated: "" },
-                { TestArea: "Filipino", RawScore: "", Percentage: "", User: "", DateCreated: "" },
-                { TestArea: "Math", RawScore: "", Percentage: "", User: "", DateCreated: "" },
-                { TestArea: "Abstract", RawScore: "", Percentage: "", User: "", DateCreated: "" },
-            ]);
+            if (!explicitSelection) {
+                setSelectedPerson(null);
+                setPerson({
+                    profile_img: "",
+                    last_name: "",
+                    first_name: "",
+                    middle_name: "",
+                    extension: "",
+                });
+
+                // reset exam data
+                setExamData([
+                    { TestArea: "English", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                    { TestArea: "Science", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                    { TestArea: "Filipino", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                    { TestArea: "Math", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                    { TestArea: "Abstract", RawScore: "", Percentage: "", User: "", DateCreated: "" },
+                ]);
+
+                setTotalScore(0);
+                setTotalPercentage(0);
+                setAvgScore(0);
+                setAvgPercentage(0);
+            }
             return;
         }
+
+        // User started typing -> manual search takes over
+        if (explicitSelection) setExplicitSelection(false);
 
         const match = persons.find((p) =>
             `${p.first_name} ${p.middle_name} ${p.last_name} ${p.emailAddress} ${p.applicant_number || ''}`
@@ -254,10 +306,6 @@ const Interview = () => {
             setSelectedPerson(null);
             setPerson({
                 profile_img: "",
-                generalAverage1: "",
-                height: "",
-                applyingAs: "",
-                document_status: "",
                 last_name: "",
                 first_name: "",
                 middle_name: "",
@@ -277,8 +325,7 @@ const Interview = () => {
             setAvgScore(0);
             setAvgPercentage(0);
         }
-    }, [searchQuery, persons]);
-
+    }, [searchQuery, persons, explicitSelection]);
 
     const fetchPersons = async () => {
         try {
@@ -370,51 +417,7 @@ const Interview = () => {
     return (
         <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', paddingRight: 1 }}>
             <Box sx={{ px: 2 }}>
-                <Box sx={{ position: 'absolute', top: 10, right: 24 }}>
-                    <Button
-                        sx={{ width: 65, height: 65, borderRadius: '50%', '&:hover': { backgroundColor: '#E8C999' } }}
-                        onClick={() => setShowNotifications(!showNotifications)}
-                    >
-                        <NotificationsIcon sx={{ fontSize: 50, color: 'white' }} />
-                        {notifications.length > 0 && (
-                            <Box sx={{
-                                position: 'absolute', top: 5, right: 5,
-                                background: 'red', color: 'white',
-                                borderRadius: '50%', width: 20, height: 20,
-                                display: 'flex', justifyContent: 'center', alignItems: 'center',
-                                fontSize: '12px'
-                            }}>
-                                {notifications.length}
-                            </Box>
-                        )}
-                    </Button>
 
-                    {showNotifications && (
-                        <Paper sx={{
-                            position: 'absolute',
-                            top: 70, right: 0,
-                            width: 300, maxHeight: 400,
-                            overflowY: 'auto',
-                            bgcolor: 'white',
-                            boxShadow: 3,
-                            zIndex: 10,
-                            borderRadius: 1
-                        }}>
-                            {notifications.length === 0 ? (
-                                <Typography sx={{ p: 2 }}>No notifications</Typography>
-                            ) : (
-                                notifications.map((notif, idx) => (
-                                    <Box key={idx} sx={{ p: 1, borderBottom: '1px solid #ccc' }}>
-                                        <Typography sx={{ fontSize: '14px' }}>{notif.message}</Typography>
-                                        <Typography sx={{ fontSize: '10px', color: '#888' }}>
-                                            {new Date(notif.timestamp).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}
-                                        </Typography>
-                                    </Box>
-                                ))
-                            )}
-                        </Paper>
-                    )}
-                </Box>
 
                 {/* Top header: DOCUMENTS SUBMITTED + Search */}
                 <Box
@@ -454,7 +457,7 @@ const Interview = () => {
                 <br />
 
 
-                <Box sx={{ display: "flex", justifyContent: "center", width: "100%",  flexWrap: "wrap" }}>
+                <Box sx={{ display: "flex", justifyContent: "center", width: "100%", flexWrap: "wrap" }}>
                     {tabs.map((tab, index) => (
                         <React.Fragment key={index}>
                             <Box
@@ -539,17 +542,8 @@ const Interview = () => {
                 </TableContainer>
 
                 <TableContainer component={Paper} sx={{ width: "100%", border: "2px solid maroon" }}>
-                    {/* Header Row: Centered Title + Right-aligned Photo */}
-                    <Box
-                        sx={{
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            position: "relative",
-                            p: 2,
-                        }}
-                    >
-                        {/* Centered Title */}
+                    {/* Header Row: Centered Title */}
+                    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", p: 2 }}>
                         <Typography
                             sx={{
                                 fontSize: "24px",
@@ -557,25 +551,59 @@ const Interview = () => {
                                 fontFamily: "Arial",
                                 color: "maroon",
                                 textAlign: "center",
-                                width: "100%",
                             }}
                         >
                             Interview
                         </Typography>
+                    </Box>
 
-                        {/* Photo on the right */}
+                    {/* Interviewer & Image Row */}
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "flex-start",
+                            gap: 2,
+                            p: 2,
+                        }}
+                    >
+                        {/* Interviewer Fields (Left) */}
+                        <Box sx={{ flex: 1 }}>
+                            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+                                <Box sx={{ flex: 1 }}>
+                                    <Typography sx={{ mb: 1, fontWeight: "bold" }}>Entrance Exam Interviewer</Typography>
+                                    <TextField
+                                        fullWidth
+                                        multiline
+                                        name="entrance_exam_interviewer"
+                                        value={interviewData.entrance_exam_interviewer}
+                                        onChange={handleInterviewChange}
+                                    />
+                                </Box>
+
+                                <Box sx={{ flex: 1 }}>
+                                    <Typography sx={{ mb: 1, fontWeight: "bold" }}>College Interviewer</Typography>
+                                    <TextField
+                                        fullWidth
+                                        multiline
+                                        name="college_interviewer"
+                                        value={interviewData.college_interviewer}
+                                        onChange={handleInterviewChange}
+                                    />
+                                </Box>
+                            </Box>
+                        </Box>
+
+                        {/* Profile Image (Right) */}
                         {person.profile_img && (
                             <Box
                                 sx={{
-                                    position: "absolute",
-                                    right: 16,
-                                    top: "165%",
-                                    transform: "translateY(-50%)",
-                                    width: "2.10in",
-                                    height: "2.10in",
+                                    width: "2.1in",
+                                    height: "2.1in",
                                     border: "1px solid #ccc",
                                     borderRadius: "4px",
                                     overflow: "hidden",
+                                    mt: -8,
                                 }}
                             >
                                 <img
@@ -587,63 +615,50 @@ const Interview = () => {
                         )}
                     </Box>
 
-                    <div style={{ height: "175px" }}></div>
-
-                    {/* ===== Form Section ===== */}
-                    <Box sx={{ borderTop: "2px solid maroon", p: 2 }}>
-                        {/* Entrance Exam Interviewer */}
-                        <TextField
-                            fullWidth
-                            multiline
-                            label="Entrance Exam Interview"
-                            name="entrance_exam_interviewer"
-                            value={interviewData.entrance_exam_interviewer}
-                            onChange={handleInterviewChange}
-                            sx={{ mb: 2 }}
-                        />
-
-                        {/* College Interviewer */}
-                        <TextField
-                            fullWidth
-                            multiline
-                            label="College Interviewer"
-                            name="college_interviewer"
-                            value={interviewData.college_interviewer}
-                            onChange={handleInterviewChange}
-                            sx={{ mb: 2 }}
-                        />
-
+                    {/* ===== Rest of Form Section ===== */}
+                    <Box sx={{ p: 2, mt: -5 }}>
                         {/* Scores */}
                         <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-                            <TextField
-                                type="number"
-                                label="Entrance Exam Score (0-100)"
-                                name="entrance_exam_score"
-                                value={interviewData.entrance_exam_score || 0}
-                                onChange={handleInterviewChange}
-                            />
-                            <TextField
-                                type="number"
-                                label="College Exam Score (0-100)"
-                                name="college_exam_score"
-                                value={interviewData.college_exam_score || 0}
-                                onChange={handleInterviewChange}
-                            />
-                            <TextField
+                            <Box sx={{ flex: 1 }}>
+                                <Typography sx={{ mb: 1, fontWeight: "bold" }}>Entrance Exam Score (0-100)</Typography>
+                                <TextField
+                                    type="number"
+                                    fullWidth
+                                    name="entrance_exam_score"
+                                    value={interviewData.entrance_exam_score || 0}
+                                    onChange={handleInterviewChange}
+                                />
+                            </Box>
 
-                                label="Total Score (Average)"
-                                value={
-                                    (Number(interviewData.entrance_exam_score || 0) +
-                                        Number(interviewData.college_exam_score || 0)) / 2
-                                }
-                            />
+                            <Box sx={{ flex: 1 }}>
+                                <Typography sx={{ mb: 1, fontWeight: "bold" }}>College Exam Score (0-100)</Typography>
+                                <TextField
+                                    type="number"
+                                    fullWidth
+                                    name="college_exam_score"
+                                    value={interviewData.college_exam_score || 0}
+                                    onChange={handleInterviewChange}
+                                />
+                            </Box>
+
+                            <Box sx={{ flex: 1 }}>
+                                <Typography sx={{ mb: 1, fontWeight: "bold" }}>Total Score (Average)</Typography>
+                                <TextField
+                                    fullWidth
+                                    value={
+                                        (Number(interviewData.entrance_exam_score || 0) +
+                                            Number(interviewData.college_exam_score || 0)) / 2
+                                    }
+                                    InputProps={{ readOnly: true }}
+                                />
+                            </Box>
                         </Box>
 
                         {/* Status */}
+                        <Typography sx={{ mb: 1, fontWeight: "bold" }}>Status</Typography>
                         <TextField
                             select
                             fullWidth
-                            label="Status"
                             name="status"
                             value={interviewData.status}
                             onChange={handleInterviewChange}
@@ -657,29 +672,29 @@ const Interview = () => {
                                 FAILED, Sorry, you did not meet the minimum score for the entrance exam
                             </MenuItem>
                             <MenuItem value="FAILED">FAILED</MenuItem>
-                            <MenuItem value="WAIT, For further instructions">WAIT</MenuItem>
-                            <MenuItem value="PASSED FAILED">PASSED FAILED</MenuItem>
-                            <MenuItem value="CUSTOM">Custom</MenuItem>
+                            <MenuItem value="WAIT, For further instructions">WAIT FOR FURTHER ANNOUNCEMENT</MenuItem>
+                            <MenuItem value="CUSTOM">New Status</MenuItem>
                         </TextField>
 
-                        {/* Custom Status */}
                         {interviewData.status === "CUSTOM" && (
-                            <TextField
-                                fullWidth
-                                label="Custom Status"
-                                name="custom_status"
-                                value={interviewData.custom_status}
-                                onChange={handleInterviewChange}
-                                sx={{ mb: 2 }}
-                            />
+                            <>
+                                <Typography sx={{ mb: 1, fontWeight: "bold" }}>Custom Status</Typography>
+                                <TextField
+                                    fullWidth
+                                    name="custom_status"
+                                    value={interviewData.custom_status}
+                                    onChange={handleInterviewChange}
+                                    sx={{ mb: 2 }}
+                                />
+                            </>
                         )}
 
                         {/* Remarks */}
+                        <Typography sx={{ mb: 1, fontWeight: "bold" }}>Remarks</Typography>
                         <TextField
                             fullWidth
                             multiline
                             rows={4}
-                            label="Remarks"
                             name="remarks"
                             value={interviewData.remarks}
                             onChange={handleInterviewChange}
@@ -687,29 +702,19 @@ const Interview = () => {
                         />
 
                         {/* Buttons */}
-                        <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+                        <Box sx={{ display: "flex", gap: 2 }}>
                             <Button variant="contained" color="error" onClick={() => setInterviewData({})}>
                                 Reset
                             </Button>
                             <Button variant="contained" color="success" onClick={saveInterview}>
                                 Save
                             </Button>
-
-
-                            <Button
-                                variant="contained"
-                                color="warning"
-                                onClick={() => setInterviewData(originalData)}
-                            >
+                            <Button variant="contained" color="warning" onClick={() => setInterviewData(originalData)}>
                                 Cancel
                             </Button>
                         </Box>
-
-
                     </Box>
                 </TableContainer>
-
-
 
                 <>
 

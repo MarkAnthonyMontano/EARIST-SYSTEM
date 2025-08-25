@@ -21,7 +21,7 @@ import {
 import { Search } from '@mui/icons-material';
 import { io } from "socket.io-client";
 import { Snackbar, Alert } from '@mui/material';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { FcPrint } from "react-icons/fc";
 import EaristLogo from "../assets/EaristLogo.png";
@@ -41,28 +41,61 @@ import { Stepper, Step, StepLabel } from "@mui/material";
 const socket = io("http://localhost:5000");
 
 const ApplicantList = () => {
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const queryPersonId = (queryParams.get("person_id") || "").trim();
+
+    const handleRowClick = (person_id) => {
+        if (!person_id) return;
+
+        sessionStorage.setItem("admin_edit_person_id", String(person_id));
+        sessionStorage.setItem("admin_edit_person_id_source", "applicant_list");
+        sessionStorage.setItem("admin_edit_person_id_ts", String(Date.now()));
+
+        // ✅ Always pass person_id in the URL
+        navigate(`/admin_dashboard1?person_id=${person_id}`);
+    };
+
+
 
     const tabs1 = [
+        { label: "Applicant List", to: "/applicant_list", icon: <ListAltIcon /> },
         { label: "Applicant Form", to: "/admin_dashboard1", icon: <PersonIcon /> },
         { label: "Documents Submitted", to: "/student_requirements", icon: <DescriptionIcon /> },
-        { label: "Admission Exam", to: "/assign_entrance_exam", icon: <AssignmentIcon /> },
         { label: "Interview", to: "/interview", icon: <RecordVoiceOverIcon /> },
         { label: "Qualifying Exam", to: "/qualifying_exam", icon: <SchoolIcon /> },
         { label: "College Approval", to: "/college_approval", icon: <CheckCircleIcon /> },
         { label: "Medical Clearance", to: "/medical_clearance", icon: <LocalHospitalIcon /> },
         { label: "Applicant Status", to: "/applicant_status", icon: <HowToRegIcon /> },
-        { label: "View List", to: "/applicant_list", icon: <ListAltIcon /> },
     ];
 
     const navigate = useNavigate();
-    const [activeStep, setActiveStep] = useState(8);
+    const [activeStep, setActiveStep] = useState(0);
     const [clickedSteps, setClickedSteps] = useState(Array(tabs1.length).fill(false));
 
 
     const handleStepClick = (index, to) => {
         setActiveStep(index);
-        navigate(to); // this will actually change the page
+        const pid = sessionStorage.getItem("admin_edit_person_id");
+
+        if (pid && to !== "/applicant_list") {
+            navigate(`${to}?person_id=${pid}`);
+        } else {
+            navigate(to);
+        }
     };
+
+
+    useEffect(() => {
+        const personIdFromQuery = queryParams.get("person_id");
+        if (personIdFromQuery) {
+            axios.get(`http://localhost:5000/api/person_with_applicant/${personIdFromQuery}`)
+                .then(res => setPersons([res.data]))  // wrap in array so table works
+                .catch(err => console.error("Error fetching single applicant:", err));
+        } else {
+            fetchApplicants();  // your existing all-applicants fetch
+        }
+    }, [queryPersonId]);
 
 
     const [persons, setPersons] = useState([]);
@@ -77,27 +110,28 @@ const ApplicantList = () => {
     useEffect(() => {
         const storedUser = localStorage.getItem("email");
         const storedRole = localStorage.getItem("role");
-        const storedID = localStorage.getItem("person_id");
+        const loggedInPersonId = localStorage.getItem("person_id");
+        const searchedPersonId = sessionStorage.getItem("admin_edit_person_id");
 
-        if (storedUser && storedRole && storedID) {
-            setUser(storedUser);
-            setUserRole(storedRole);
-            setUserID(storedID);
-
-            if (storedRole === "registrar") {
-
-                if (storedID !== "undefined") {
-
-                } else {
-                    console.warn("Stored person_id is invalid:", storedID);
-                }
-            } else {
-                window.location.href = "/login";
-            }
-        } else {
+        if (!storedUser || !storedRole || !loggedInPersonId) {
             window.location.href = "/login";
+            return;
         }
-    }, []);
+
+        setUser(storedUser);
+        setUserRole(storedRole);
+
+        const allowedRoles = ["registrar", "applicant", "superadmin"];
+        if (allowedRoles.includes(storedRole)) {
+            const targetId = queryPersonId || searchedPersonId || loggedInPersonId;
+            sessionStorage.setItem("admin_edit_person_id", targetId);
+            setUserID(targetId);
+            return;
+        }
+
+        window.location.href = "/login";
+    }, [queryPersonId]);
+
 
     const [error, setError] = useState('');
     const [searchQuery, setSearchQuery] = useState('');
@@ -128,18 +162,24 @@ const ApplicantList = () => {
     };
 
     // ✅ Auto-updates registrar_status when submitted_documents changes
-    const handleSubmittedDocumentsChange = async (upload_id, checked) => {
+    const handleSubmittedDocumentsChange = async (upload_id, checked, person_id) => {
         try {
             const submittedValue = checked ? 1 : 0;
-            const registrarValue = checked ? 1 : 0; // ✅ Auto-sync registrar_status
+            const registrarValue = checked ? 1 : 0;
+            const requirementsValue = checked ? 1 : 0; // ✅ turn into 1 if checked
 
+            // Update requirement_uploads
             await axios.put(`http://localhost:5000/api/submitted-documents/${upload_id}`, {
                 submitted_documents: submittedValue,
-                registrar_status: registrarValue, // ✅ update registrar too
+                registrar_status: registrarValue,
             });
 
-            // Refresh applicants after update
-            fetchApplicants();
+            // ✅ Update person_status_table.requirements
+            await axios.put(`http://localhost:5000/api/update-requirements/${person_id}`, {
+                requirements: requirementsValue,
+            });
+
+            fetchApplicants(); // refresh
         } catch (err) {
             console.error("❌ Failed to update submitted documents:", err);
         }
@@ -258,7 +298,8 @@ const ApplicantList = () => {
             const matchesSearch = fullText.includes(searchQuery.toLowerCase());
 
             const matchesCampus =
-                person.campus === "" || String(personData.campus) === String(person.campus);
+                person.campus === "" || // All Campuses
+                String(personData.campus) === String(person.campus);
 
             // ✅ FIX: use document_status and normalize both sides
             const matchesApplicantStatus =
@@ -782,23 +823,23 @@ const ApplicantList = () => {
                     <Box display="flex" flexDirection="column" gap={1} sx={{ minWidth: 200 }}>
                         <Typography fontSize={13} >Campus:</Typography>
                         <FormControl size="small" sx={{ width: "200px" }}>
-                            <InputLabel id="campus-label">-Campus-</InputLabel>
+                            <InputLabel id="campus-label">Campus</InputLabel>
                             <Select
                                 labelId="campus-label"
                                 id="campus-select"
                                 name="campus"
                                 value={person.campus ?? ""}
-                                label="-Campus-"
                                 onChange={(e) => {
                                     setPerson(prev => ({ ...prev, campus: e.target.value }));
                                     setCurrentPage(1);
                                 }}
                             >
-                                <MenuItem value=""><em>Select Campus</em></MenuItem>
+                                <MenuItem value=""><em>All Campuses</em></MenuItem>
                                 <MenuItem value="0">MANILA</MenuItem>
                                 <MenuItem value="1">CAVITE</MenuItem>
                             </Select>
                         </FormControl>
+
                     </Box>
 
                 </Box>
@@ -1189,9 +1230,11 @@ const ApplicantList = () => {
                             </TableCell>
                         </TableRow>
                     </TableHead>
+
                     <TableBody>
                         {currentPersons.map((person, index) => (
                             <TableRow key={person.person_id}>
+                                {/* # */}
                                 <TableCell
                                     sx={{
                                         color: "black",
@@ -1204,11 +1247,17 @@ const ApplicantList = () => {
                                 >
                                     {index + 1}
                                 </TableCell>
+
+                                {/* Checkbox */}
                                 <TableCell sx={{ textAlign: "center", border: "1px solid maroon", py: 0.5 }}>
                                     <Checkbox
                                         checked={person.submitted_documents === 1}
                                         onChange={(e) =>
-                                            handleSubmittedDocumentsChange(person.upload_id, e.target.checked)
+                                            handleSubmittedDocumentsChange(
+                                                person.upload_id,
+                                                e.target.checked,
+                                                person.person_id
+                                            )
                                         }
                                         sx={{
                                             color: "maroon",
@@ -1218,6 +1267,8 @@ const ApplicantList = () => {
                                         }}
                                     />
                                 </TableCell>
+
+                                {/* Applicant Number */}
                                 <TableCell
                                     sx={{
                                         color: "blue",
@@ -1227,10 +1278,12 @@ const ApplicantList = () => {
                                         fontSize: "12px",
                                         cursor: "pointer",
                                     }}
-                                    onClick={() => navigate(`/admin_dashboard1?person_id=${person.person_id}`)}
+                                    onClick={() => handleRowClick(person.person_id)}
                                 >
                                     {person.applicant_number ?? "N/A"}
                                 </TableCell>
+
+                                {/* Applicant Name */}
                                 <TableCell
                                     sx={{
                                         color: "blue",
@@ -1240,21 +1293,54 @@ const ApplicantList = () => {
                                         fontSize: "12px",
                                         cursor: "pointer",
                                     }}
-                                    onClick={() => navigate(`/admin_dashboard1?person_id=${person.person_id}`)}
+                                    onClick={() => handleRowClick(person.person_id)}
                                 >
-                                    {`${person.last_name}, ${person.first_name} ${person.middle_name ?? ""} ${person.extension ?? ""}`}
+                                    {`${person.last_name}, ${person.first_name} ${person.middle_name ?? ""} ${person.extension ?? ""
+                                        }`}
                                 </TableCell>
-                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px" }}>
+
+                                {/* Program */}
+                                <TableCell
+                                    sx={{
+                                        color: "black",
+                                        textAlign: "center",
+                                        border: "1px solid maroon",
+                                        py: 0.5,
+                                        fontSize: "12px",
+                                    }}
+                                >
                                     {curriculumOptions.find(
                                         (item) => item.curriculum_id?.toString() === person.program?.toString()
                                     )?.program_code ?? "N/A"}
                                 </TableCell>
-                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px" }}>
+
+                                {/* SHS GWA */}
+                                <TableCell
+                                    sx={{
+                                        color: "black",
+                                        textAlign: "center",
+                                        border: "1px solid maroon",
+                                        py: 0.5,
+                                        fontSize: "12px",
+                                    }}
+                                >
                                     {person.generalAverage1}
                                 </TableCell>
-                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px" }}>
+
+                                {/* Created Date */}
+                                <TableCell
+                                    sx={{
+                                        color: "black",
+                                        textAlign: "center",
+                                        border: "1px solid maroon",
+                                        py: 0.5,
+                                        fontSize: "12px",
+                                    }}
+                                >
                                     {person.created_at}
                                 </TableCell>
+
+                                {/* Last Updated */}
                                 <TableCell
                                     sx={{
                                         color: "black",
@@ -1272,16 +1358,27 @@ const ApplicantList = () => {
                                         })
                                         : ""}
                                 </TableCell>
-                                <TableCell sx={{ color: "black", textAlign: "center", border: "1px solid maroon", py: 0.5, fontSize: "12px" }}>
+
+                                {/* Status */}
+                                <TableCell
+                                    sx={{
+                                        color: "black",
+                                        textAlign: "center",
+                                        border: "1px solid maroon",
+                                        py: 0.5,
+                                        fontSize: "12px",
+                                    }}
+                                >
                                     {person.document_status || "N/A"}
                                 </TableCell>
+
+                                {/* Registrar Status */}
                                 <TableCell
                                     sx={{
                                         textAlign: "center",
                                         border: "1px solid maroon",
                                         borderRight: "2px solid maroon",
                                         py: 0.5,
-
                                         fontSize: "12px",
                                     }}
                                 >
@@ -1315,7 +1412,9 @@ const ApplicantList = () => {
                                                 margin: "0 auto",
                                             }}
                                         >
-                                            <Typography sx={{ fontWeight: "bold" }}>Unsubmitted / Incomplete</Typography>
+                                            <Typography sx={{ fontWeight: "bold" }}>
+                                                Unsubmitted / Incomplete
+                                            </Typography>
                                         </Box>
                                     ) : (
                                         <Box display="flex" justifyContent="center" gap={1}>
@@ -1323,15 +1422,25 @@ const ApplicantList = () => {
                                                 key={`submitted-${person.person_id}`}
                                                 variant="contained"
                                                 onClick={() => handleRegistrarStatusChange(person.person_id, 1)}
-                                                sx={{ backgroundColor: "green", color: "white", width: 150, height: 30, }}
+                                                sx={{
+                                                    backgroundColor: "green",
+                                                    color: "white",
+                                                    width: 150,
+                                                    height: 30,
+                                                }}
                                             >
                                                 Submitted
                                             </Button>
                                             <Button
-                                                key={`unsubmitted / incomplete-${person.person_id}`}
+                                                key={`unsubmitted-${person.person_id}`}
                                                 variant="contained"
                                                 onClick={() => handleRegistrarStatusChange(person.person_id, 0)}
-                                                sx={{ backgroundColor: "red", color: "white", width: 150, height: 30, }}
+                                                sx={{
+                                                    backgroundColor: "red",
+                                                    color: "white",
+                                                    width: 150,
+                                                    height: 30,
+                                                }}
                                             >
                                                 Unsubmitted
                                             </Button>
@@ -1341,7 +1450,6 @@ const ApplicantList = () => {
                             </TableRow>
                         ))}
                     </TableBody>
-
 
                 </Table>
             </TableContainer>

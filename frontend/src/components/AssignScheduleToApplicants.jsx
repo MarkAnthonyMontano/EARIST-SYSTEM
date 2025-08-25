@@ -49,6 +49,7 @@ const AssignScheduleToApplicants = () => {
 
 
   const tabs1 = [
+    { label: "Applicant List", to: "/applicant_list", icon: <ListAltIcon /> },
     { label: "Applicant Form", to: "/admin_dashboard1", icon: <PersonIcon /> },
     { label: "Documents Submitted", to: "/student_requirements", icon: <DescriptionIcon /> },
     { label: "Admission Exam", to: "/assign_entrance_exam", icon: <AssignmentIcon /> },
@@ -57,12 +58,11 @@ const AssignScheduleToApplicants = () => {
     { label: "College Approval", to: "/college_approval", icon: <CheckCircleIcon /> },
     { label: "Medical Clearance", to: "/medical_clearance", icon: <LocalHospitalIcon /> },
     { label: "Applicant Status", to: "/applicant_status", icon: <HowToRegIcon /> },
-    { label: "View List", to: "/applicant_list", icon: <ListAltIcon /> },
   ];
 
   const location = useLocation();
   const navigate = useNavigate();
-  const [activeStep, setActiveStep] = useState(2);
+  const [activeStep, setActiveStep] = useState(3);
   const [clickedSteps, setClickedSteps] = useState(Array(tabs.length).fill(false));
 
 
@@ -169,7 +169,8 @@ const AssignScheduleToApplicants = () => {
   // ⬇️ Add this inside ApplicantList component, before useEffect
   const fetchAllApplicants = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/all-applicants");
+      const res = await axios.get("http://localhost:5000/api/not-emailed-applicants");
+
       setPersons(res.data);  // ⬅️ keep all applicants
       setSelectedApplicants(prev => {
         const newSet = new Set(prev);
@@ -661,7 +662,7 @@ const AssignScheduleToApplicants = () => {
       <hr style={{ border: "1px solid #ccc", width: "100%" }} />
 
       <br />
-         <Box sx={{ display: "flex", justifyContent: "center", width: "100%",  flexWrap: "wrap" }}>
+      <Box sx={{ display: "flex", justifyContent: "center", width: "100%", flexWrap: "wrap" }}>
         {tabs1.map((tab, index) => (
           <React.Fragment key={index}>
             <Box

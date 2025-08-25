@@ -65,11 +65,6 @@ import FacultyStudentClassList from './components/FacultyStudentClassList';
 import FacultySchedule from './components/FacultySchedule';
 import StudentDashboard from './pages/StudentDashboard';
 
-import ApplicantList from './components/ApplicantList';
-import ApplicantListAdmin from './components/ApplicantListAdmin';
-import MedicalClearance from './components/MedicalClearance';
-import Notifications from './components/Notifications';
-
 import AdminDashboard1 from './components/AdminDashboard1';
 import AdminDashboard2 from './components/AdminDashboard2';
 import AdminDashboard3 from './components/AdminDashboard3';
@@ -82,11 +77,17 @@ import SuperAdminDashboard3 from './components/SuperAdminDashboard3';
 import SuperAdminDashboard4 from './components/SuperAdminDashboard4';
 import SuperAdminDashboard5 from './components/SuperAdminDashboard5';
 
-
+import ApplicantList from './components/ApplicantList';
+import ApplicantListAdmin from './components/ApplicantListAdmin';
+import Notifications from './components/Notifications';
 import ExaminationProfile from './components/ExaminationProfile';
 import AssignScheduleToApplicants from './components/AssignScheduleToApplicants';
 import AssignEntranceExam from './components/AssignEntranceExam';
 import Interview from './components/Interview';
+import QualifyingExam from './components/QualifyingExam';
+import CollegeApproval from './components/CollegeApproval';
+import MedicalClearance from './components/MedicalClearance';
+
 import Dashboard1 from './components/Dashboard1';
 import Dashboard2 from './components/Dashboard2';
 import Dashboard3 from './components/Dashboard3';
@@ -109,6 +110,7 @@ import ClassRoster from './components/ClassRoster';
 import StudentList from './components/StudentListPerCourse';
 import ProfessorListPerSection from './components/ProfessorListPerClass';
 import FacultyStudentList from './components/FacultyStudentList';
+
 
 
 
@@ -223,7 +225,10 @@ function App() {
               <Route path="/applicant_list_admin" element={<ProtectedRoute><ApplicantListAdmin /></ProtectedRoute>} />
               <Route path="/medical_clearance" element={<ProtectedRoute><MedicalClearance /></ProtectedRoute>} />
               <Route path="/interview" element={<ProtectedRoute><Interview /></ProtectedRoute>} />
-           
+              <Route path="/qualifying_exam" element={<ProtectedRoute><QualifyingExam /></ProtectedRoute>} />
+              <Route path="/college_approval" element={<ProtectedRoute><CollegeApproval /></ProtectedRoute>} />
+
+
               <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
 
               <Route path="/admin_dashboard1" element={<ProtectedRoute><AdminDashboard1 /></ProtectedRoute>} />

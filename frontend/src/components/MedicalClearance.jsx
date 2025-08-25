@@ -14,19 +14,17 @@ import {
     TableRow,
     MenuItem
 } from '@mui/material';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import Search from '@mui/icons-material/Search';
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import PersonIcon from "@mui/icons-material/Person";
 import DescriptionIcon from "@mui/icons-material/Description";
 import AssignmentIcon from "@mui/icons-material/Assignment";
-import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import SchoolIcon from "@mui/icons-material/School";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
 import ListAltIcon from "@mui/icons-material/ListAlt";
-
+import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import io from 'socket.io-client';
 
@@ -35,15 +33,14 @@ const vaccineDoc = { label: 'Copy of Vaccine Card (1st and 2nd Dose)', key: 'Vac
 
 
 const tabs = [
+    { label: "Applicant List", to: "/applicant_list", icon: <ListAltIcon /> },
     { label: "Applicant Form", to: "/admin_dashboard1", icon: <PersonIcon /> },
     { label: "Documents Submitted", to: "/student_requirements", icon: <DescriptionIcon /> },
-    { label: "Admission Exam", to: "/assign_entrance_exam", icon: <AssignmentIcon /> },
     { label: "Interview", to: "/interview", icon: <RecordVoiceOverIcon /> },
     { label: "Qualifying Exam", to: "/qualifying_exam", icon: <SchoolIcon /> },
     { label: "College Approval", to: "/college_approval", icon: <CheckCircleIcon /> },
     { label: "Medical Clearance", to: "/medical_clearance", icon: <LocalHospitalIcon /> },
     { label: "Applicant Status", to: "/applicant_status", icon: <HowToRegIcon /> },
-    { label: "View List", to: "/applicant_list", icon: <ListAltIcon /> },
 ];
 
 const remarksOptions = [
@@ -141,11 +138,40 @@ const MedicalClearance = () => {
     const [activeStep, setActiveStep] = useState(6);
     const [clickedSteps, setClickedSteps] = useState(Array(tabs.length).fill(false));
 
+    const [explicitSelection, setExplicitSelection] = useState(false);
 
-    const handleStepClick = (index, to) => {
-        setActiveStep(index);
-        navigate(to); // this will actually change the page
+    const fetchByPersonId = async (personID) => {
+        try {
+            const res = await axios.get(`http://localhost:5000/api/person_with_applicant/${personID}`);
+            setPerson(res.data);
+            setSelectedPerson(res.data);
+            if (res.data?.applicant_number) {
+                await fetchUploadsByApplicantNumber(res.data.applicant_number);
+            }
+        } catch (err) {
+            console.error("❌ person_with_applicant failed:", err);
+        }
     };
+
+
+
+  const handleStepClick = (index, to) => {
+        setActiveStep(index);
+
+        const pid = sessionStorage.getItem("admin_edit_person_id");
+
+        if (pid) {
+            // ✅ Always attach ?person_id for whichever tab we click
+            navigate(`${to}?person_id=${pid}`);
+        } else {
+            navigate("/applicant_status"); // if no pid in session, just go raw
+        }
+    };
+
+
+
+
+
 
     const [uploads, setUploads] = useState([]);
     const [persons, setPersons] = useState([]);
@@ -158,7 +184,6 @@ const MedicalClearance = () => {
     const [userRole, setUserRole] = useState("");
     const [person, setPerson] = useState({
         profile_img: "",
-
         document_status: "",
         last_name: "",
         first_name: "",
@@ -168,28 +193,6 @@ const MedicalClearance = () => {
     const [editingRemarkId, setEditingRemarkId] = useState(null);
     const [notifications, setNotifications] = useState([]);
     const [showNotifications, setShowNotifications] = useState(false);
-
-    useEffect(() => {
-        // Load saved notifications from DB on first load
-        axios.get("http://localhost:5000/api/notifications")
-            .then(res => {
-                setNotifications(res.data.map(n => ({
-                    ...n,
-                    timestamp: n.timestamp
-                })));
-            })
-            .catch(err => console.error("Failed to load saved notifications:", err));
-    }, []);
-
-
-    useEffect(() => {
-        const socket = io("http://localhost:5000");
-        socket.on("notification", (data) => {
-            setNotifications((prev) => [data, ...prev]);
-        });
-        return () => socket.disconnect();
-    }, []);
-
 
     useEffect(() => {
         if (editingRemarkId !== null) {
@@ -227,6 +230,98 @@ const MedicalClearance = () => {
         }
     }, []);
 
+    const queryParams = new URLSearchParams(location.search);
+    const urlPersonId = queryParams.get("person_id")?.trim() || "";
+    let queryPersonId = urlPersonId || sessionStorage.getItem("admin_edit_person_id") || "";
+
+    useEffect(() => {
+        let consumedFlag = false;
+
+        const tryLoad = async () => {
+            if (queryPersonId) {
+                await fetchByPersonId(queryPersonId);
+                setExplicitSelection(true);
+                consumedFlag = true;
+                return;
+            }
+
+            // fallback only if it's a fresh selection from Applicant List
+            const source = sessionStorage.getItem("admin_edit_person_id_source");
+            const tsStr = sessionStorage.getItem("admin_edit_person_id_ts");
+            const id = sessionStorage.getItem("admin_edit_person_id");
+            const ts = tsStr ? parseInt(tsStr, 10) : 0;
+            const isFresh = source === "applicant_list" && Date.now() - ts < 5 * 60 * 1000;
+
+            if (id && isFresh) {
+                await fetchByPersonId(id);
+                setExplicitSelection(true);
+                consumedFlag = true;
+            }
+        };
+
+        tryLoad().finally(() => {
+            // consume the freshness so it won't auto-load again later
+            if (consumedFlag) {
+                sessionStorage.removeItem("admin_edit_person_id_source");
+                sessionStorage.removeItem("admin_edit_person_id_ts");
+            }
+        });
+    }, [queryPersonId]);
+
+    
+    useEffect(() => {
+        // No search text: keep explicit selection if present
+        if (!searchQuery.trim()) {
+            if (!explicitSelection) {
+                setSelectedPerson(null);
+                setUploads([]);
+                setSelectedFiles({});
+                setPerson({
+                    profile_img: "",
+                    generalAverage1: "",
+                    height: "",
+                    applyingAs: "",
+                    document_status: "On Process",
+                    last_name: "",
+                    first_name: "",
+                    middle_name: "",
+                    extension: "",
+                });
+            }
+            return;
+        }
+
+        // User started typing -> manual search takes over
+        if (explicitSelection) setExplicitSelection(false);
+
+        const match = persons.find((p) =>
+            `${p.first_name} ${p.middle_name} ${p.last_name} ${p.emailAddress} ${p.applicant_number || ""}`
+                .toLowerCase()
+                .includes(searchQuery.toLowerCase())
+        );
+
+        if (match) {
+            setSelectedPerson(match);
+            fetchUploadsByApplicantNumber(match.applicant_number);
+        } else {
+            setSelectedPerson(null);
+            setUploads([]);
+            setPerson({
+                profile_img: "",
+                generalAverage1: "",
+                height: "",
+                applyingAs: "",
+                document_status: "On Process",
+                last_name: "",
+                first_name: "",
+                middle_name: "",
+                extension: "",
+            });
+        }
+    }, [searchQuery, persons, explicitSelection]);
+
+
+
 
     useEffect(() => {
         fetchPersons();
@@ -258,13 +353,15 @@ const MedicalClearance = () => {
         }
 
         try {
-            const res = await axios.get(`http://localhost:5000/api/person/${personID}`);
+            const res = await axios.get(`http://localhost:5000/api/person_with_applicant/${personID}`);
+
 
             const safePerson = {
                 ...res.data,
                 document_status: res.data.document_status || "On process", // set default here
             };
             setPerson(safePerson);
+            setSelectedPerson(res.data);
 
         } catch (error) {
             console.error("❌ Failed to fetch person data:", error?.response?.data || error.message);
@@ -279,50 +376,6 @@ const MedicalClearance = () => {
     }, [selectedPerson]);
 
 
-
-
-    useEffect(() => {
-        if (!searchQuery.trim()) {
-            setSelectedPerson(null);
-            setUploads([]);
-            setSelectedFiles({});
-            setPerson({   // clear person data too
-                profile_img: "",
-                generalAverage1: "",
-                height: "",
-                applyingAs: "",
-                document_status: "On Process",
-                last_name: "",
-                first_name: "",
-                middle_name: "",
-                extension: "",
-            });
-            return;
-        }
-
-        const match = persons.find((p) =>
-            `${p.first_name} ${p.middle_name} ${p.last_name} ${p.emailAddress} ${p.applicant_number || ''}`
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase())
-        );
-
-        if (match) {
-            setSelectedPerson(match);
-            fetchUploadsByApplicantNumber(match.applicant_number);
-        } else {
-            setSelectedPerson(null);
-            setUploads([]);
-            setPerson({   // also clear if no match
-                profile_img: "",
-
-                document_status: "On Process",
-                last_name: "",
-                first_name: "",
-                middle_name: "",
-                extension: "",
-            });
-        }
-    }, [searchQuery, persons]);
 
     const fetchPersons = async () => {
         try {
@@ -718,51 +771,7 @@ const MedicalClearance = () => {
     return (
         <Box sx={{ height: 'calc(100vh - 150px)', overflowY: 'auto', paddingRight: 1 }}>
             <Box sx={{ px: 2 }}>
-                <Box sx={{ position: 'absolute', top: 10, right: 24 }}>
-                    <Button
-                        sx={{ width: 65, height: 65, borderRadius: '50%', '&:hover': { backgroundColor: '#E8C999' } }}
-                        onClick={() => setShowNotifications(!showNotifications)}
-                    >
-                        <NotificationsIcon sx={{ fontSize: 50, color: 'white' }} />
-                        {notifications.length > 0 && (
-                            <Box sx={{
-                                position: 'absolute', top: 5, right: 5,
-                                background: 'red', color: 'white',
-                                borderRadius: '50%', width: 20, height: 20,
-                                display: 'flex', justifyContent: 'center', alignItems: 'center',
-                                fontSize: '12px'
-                            }}>
-                                {notifications.length}
-                            </Box>
-                        )}
-                    </Button>
 
-                    {showNotifications && (
-                        <Paper sx={{
-                            position: 'absolute',
-                            top: 70, right: 0,
-                            width: 300, maxHeight: 400,
-                            overflowY: 'auto',
-                            bgcolor: 'white',
-                            boxShadow: 3,
-                            zIndex: 10,
-                            borderRadius: 1
-                        }}>
-                            {notifications.length === 0 ? (
-                                <Typography sx={{ p: 2 }}>No notifications</Typography>
-                            ) : (
-                                notifications.map((notif, idx) => (
-                                    <Box key={idx} sx={{ p: 1, borderBottom: '1px solid #ccc' }}>
-                                        <Typography sx={{ fontSize: '14px' }}>{notif.message}</Typography>
-                                        <Typography sx={{ fontSize: '10px', color: '#888' }}>
-                                            {new Date(notif.timestamp).toLocaleString('en-PH', { timeZone: 'Asia/Manila' })}
-                                        </Typography>
-                                    </Box>
-                                ))
-                            )}
-                        </Paper>
-                    )}
-                </Box>
 
                 {/* Top header: DOCUMENTS SUBMITTED + Search */}
                 <Box
@@ -801,7 +810,7 @@ const MedicalClearance = () => {
                 <hr style={{ border: "1px solid #ccc", width: "100%" }} />
                 <br />
 
-                 <Box sx={{ display: "flex", justifyContent: "center", width: "100%",  flexWrap: "wrap" }}>
+                <Box sx={{ display: "flex", justifyContent: "center", width: "100%", flexWrap: "wrap" }}>
                     {tabs.map((tab, index) => (
                         <React.Fragment key={index}>
                             <Box
@@ -855,9 +864,9 @@ const MedicalClearance = () => {
                         </React.Fragment>
                     ))}
                 </Box>
-                <br />
+
                 {/* Applicant ID and Name */}
-                <TableContainer component={Paper} sx={{ width: '100%', border: "1px solid maroon" }}>
+                <TableContainer component={Paper} sx={{ width: '100%', border: "1px solid maroon", mt: 2 }}>
                     <Table>
                         <TableHead sx={{ backgroundColor: '#6D2323', }}>
                             <TableRow>
@@ -887,14 +896,13 @@ const MedicalClearance = () => {
 
                 <TableContainer component={Paper} sx={{ width: '100%', border: "2px solid maroon" }}>
                     <Box style={{ textAlign: "center", marginTop: "25px", fontSize: "24px", fontFamily: "Arial", color: "maroon", fontWeight: "bold" }}>Medical Clearance</Box>
-                    <br />
 
-                    <br />
                     <Box
                         sx={{
                             display: "flex",
                             justifyContent: "space-between",
                             alignItems: "center",
+                            mt: 5,
                             mb: 2,
                             px: 2,
                         }}
@@ -1094,11 +1102,19 @@ const MedicalClearance = () => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {renderRow(vaccineDoc)}   {/* ✅ only vaccine card */}
+                                {renderRow(vaccineDoc) ? (
+                                    renderRow(vaccineDoc)
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={6} align="center">
+                                            No vaccine documents found
+                                        </TableCell>
+                                    </TableRow>
+                                )}
                             </TableBody>
-
                         </Table>
                     </TableContainer>
+
 
 
 
