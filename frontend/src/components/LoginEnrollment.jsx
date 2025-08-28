@@ -33,11 +33,14 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
   const [tempLoginData, setTempLoginData] = useState(null);
   const [resendTimer, setResendTimer] = useState(60);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [lockout, setLockout] = useState(false);
+  const [lockoutTimer, setLockoutTimer] = useState(0);
 
 
   const navigate = useNavigate();
+  // ---------------- HANDLE LOGIN ----------------
   const handleLogin = async () => {
-    if (isLoggingIn) return;
+    if (isLoggingIn || lockoutTimer > 0) return; // prevent spam clicks
     setIsLoggingIn(true);
 
     if (!email || !password) {
@@ -50,24 +53,89 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
       const res = await axios.post("http://localhost:5000/login", { email, password });
       setTempLoginData(res.data);
 
-      // Show OTP modal right away
+      // ✅ Show OTP modal if login succeeds
       setShowOtpModal(true);
       startResendTimer();
-
       setSnack({ open: true, message: "OTP sent to your email", severity: "success" });
 
     } catch (error) {
-      setSnack({
-        open: true,
-        message: error.response?.data?.message || "Login failed",
-        severity: "error"
-      });
+      const msg = error.response?.data?.message || "Login failed";
+      const remaining = error.response?.data?.remaining;
+
+      // Case 1: Wrong password but still has attempts left
+      if (error.response?.status === 400 && remaining !== undefined) {
+        setSnack({
+          open: true,
+          message: msg, // backend already sends "Invalid password. You have X attempt(s) remaining."
+          severity: "warning",
+        });
+      }
+
+      // Case 2: Locked out after 3 attempts
+      else if (error.response?.status === 429) {
+        setSnack({
+          open: true,
+          message: msg, // backend sends "Too many failed attempts. Locked for 3 minutes."
+          severity: "error",
+        });
+
+        // Extract lock time from message (default 180s)
+        const seconds = parseInt(msg.match(/\d+/)?.[0] || 180, 10);
+        setLockout(true);
+        setLockoutTimer(seconds);
+
+        // countdown timer
+        const interval = setInterval(() => {
+          setLockoutTimer((prev) => {
+            if (prev <= 1) {
+              clearInterval(interval);
+              setLockout(false);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      }
+
+      // Case 3: Other errors
+      else {
+        setSnack({
+          open: true,
+          message: msg,
+          severity: "error",
+        });
+      }
     } finally {
-      setIsLoggingIn(false); // ✅ Allow login again if failed
+      setIsLoggingIn(false);
     }
   };
 
+  // ---------------- VERIFY OTP ----------------
+  const verifyOtp = async () => {
+    try {
+      const res = await axios.post("http://localhost:5000/verify-otp", {
+        email: tempLoginData.email,
+        otp,
+      });
 
+      // ✅ Only after OTP success, reset attempts automatically (backend clears them)
+      localStorage.setItem("token", tempLoginData.token);
+      localStorage.setItem("email", tempLoginData.email);
+      localStorage.setItem("role", tempLoginData.role);
+      localStorage.setItem("person_id", tempLoginData.person_id);
+
+      setIsAuthenticated(true);
+      setShowOtpModal(false);
+
+      navigate(
+        tempLoginData.role === "registrar" ? "/dashboard"
+          : tempLoginData.role === "faculty" ? "/faculty_dashboard"
+            : "/student_dashboard"
+      );
+    } catch (err) {
+      setSnack({ open: true, message: err.response?.data?.message || "Invalid OTP", severity: "error" });
+    }
+  };
 
   const startResendTimer = () => {
     setResendTimer(60);
@@ -96,31 +164,6 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
   const handleClose = (_, reason) => {
     if (reason === 'clickaway') return;
     setSnack(prev => ({ ...prev, open: false }));
-  };
-
-  const verifyOtp = async () => {
-    try {
-      const res = await axios.post("http://localhost:5000/verify-otp", {
-        email: tempLoginData.email, // ✅ this is the real email
-        otp,
-      });
-
-
-      localStorage.setItem("token", tempLoginData.token);
-      localStorage.setItem("email", tempLoginData.email);
-      localStorage.setItem("role", tempLoginData.role);
-      localStorage.setItem("person_id", tempLoginData.person_id);
-      setIsAuthenticated(true);
-      setShowOtpModal(false);
-
-      navigate(
-        tempLoginData.role === "registrar" ? "/dashboard"
-          : tempLoginData.role === "faculty" ? "/faculty_dashboard"
-            : "/student_dashboard"
-      );
-    } catch (err) {
-      setSnack({ open: true, message: "Invalid OTP", severity: "error" });
-    }
   };
 
   const otpInputRef = useRef(null);
@@ -233,9 +276,10 @@ const LoginEnrollment = ({ setIsAuthenticated }) => {
                 <label htmlFor="checkbox">Remember Me</label>
               </div>
 
-              <div className="Button" onClick={handleLogin}>
-                <span>Log In</span>
+              <div className="Button" onClick={!lockout ? handleLogin : null}>
+                <span>{lockout ? `Locked (${lockoutTimer}s)` : "Log In"}</span>
               </div>
+
 
               <div className="LinkContainer">
                 <span><Link to="/registrar_forgot_password">Forgot your password</Link></span>

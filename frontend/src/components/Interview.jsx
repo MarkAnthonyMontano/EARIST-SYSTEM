@@ -8,6 +8,7 @@ import {
     Table,
     TableBody,
     TableCell,
+    Card,
     TableContainer,
     TableHead,
     TextField,
@@ -457,60 +458,73 @@ const Interview = () => {
                 <br />
 
 
-                <Box sx={{ display: "flex", justifyContent: "center", width: "100%", flexWrap: "wrap" }}>
-                    {tabs.map((tab, index) => (
-                        <React.Fragment key={index}>
-                            <Box
-                                sx={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                    cursor: "pointer",
-                                    m: 1,
-                                }}
-                                onClick={() => handleStepClick(index, tab.to)}
-                            >
-                                <Box
-                                    sx={{
-                                        width: 50,
-                                        height: 50,
-                                        borderRadius: "50%",
-                                        backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
-                                        color: activeStep === index ? "#fff" : "#000",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                    }}
-                                >
-                                    {tab.icon}
-                                </Box>
-                                <Typography
-                                    sx={{
-                                        mt: 1,
-                                        color: activeStep === index ? "#6D2323" : "#000",
-                                        fontWeight: activeStep === index ? "bold" : "normal",
-                                        fontSize: 12,
-                                        textAlign: "center",
-                                        width: 80,
-                                    }}
-                                >
-                                    {tab.label}
-                                </Typography>
-                            </Box>
+           <Box
+  sx={{
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    mt: 2,
+    flexWrap: "wrap", // so it wraps on smaller screens
+  }}
+>
+  {tabs.map((tab, index) => (
+    <React.Fragment key={index}>
+      {/* Step Card */}
+      <Card
+        onClick={() => handleStepClick(index, tab.to)}
+        sx={{
+          flex: 1,
+          maxWidth: `${100 / tabs.length}%`, // evenly fit in one row
+          height: 100,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          borderRadius: 2,
+          border: "2px solid #6D2323",
 
-                            {index < tabs.length - 1 && (
-                                <Box
-                                    sx={{
-                                        flex: 1,
-                                        height: "2px",
-                                        backgroundColor: "#6D2323",
-                                        alignSelf: "center",
-                                    }}
-                                />
-                            )}
-                        </React.Fragment>
-                    ))}
-                </Box>
+          backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+          color: activeStep === index ? "#fff" : "#000",
+          boxShadow:
+            activeStep === index
+              ? "0px 4px 10px rgba(0,0,0,0.3)"
+              : "0px 2px 6px rgba(0,0,0,0.15)",
+          transition: "0.3s ease",
+          "&:hover": {
+            backgroundColor: activeStep === index ? "#5a1c1c" : "#f5d98f",
+          },
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Box sx={{ fontSize: 32, mb: 0.5 }}>{tab.icon}</Box>
+          <Typography
+            sx={{ fontSize: 14, fontWeight: "bold", textAlign: "center" }}
+          >
+            {tab.label}
+          </Typography>
+        </Box>
+      </Card>
+
+      {/* Spacer instead of line */}
+      {index < tabs.length - 1 && (
+        <Box
+          sx={{
+            flex: 0.1,
+            mx: 1, // keeps spacing between cards
+          }}
+        />
+      )}
+    </React.Fragment>
+  ))}
+</Box>
+
                 <br />
                 {/* Applicant ID and Name */}
                 <TableContainer component={Paper} sx={{ width: '100%', border: "1px solid maroon" }}>

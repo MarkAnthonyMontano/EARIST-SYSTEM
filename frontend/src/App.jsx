@@ -83,6 +83,8 @@ import Notifications from './components/Notifications';
 import ExaminationProfile from './components/ExaminationProfile';
 import AssignScheduleToApplicants from './components/AssignScheduleToApplicants';
 import AssignEntranceExam from './components/AssignEntranceExam';
+import ProctorApplicantList from './components/ProctorApplicantList';
+import ApplicantScoring from './components/ApplicantScoring';
 import Interview from './components/Interview';
 import QualifyingExam from './components/QualifyingExam';
 import CollegeApproval from './components/CollegeApproval';
@@ -208,6 +210,7 @@ function App() {
               <Route path="/examination_profile" element={<ProtectedRoute><ExaminationProfile /></ProtectedRoute>} />
               <Route path="/assign_entrance_exam" element={<ProtectedRoute><AssignEntranceExam /></ProtectedRoute>} />
               <Route path="/assign_schedule_applicant" element={<ProtectedRoute><AssignScheduleToApplicants /></ProtectedRoute>} />
+              <Route path="/applicant_scoring" element={<ProtectedRoute><ApplicantScoring /></ProtectedRoute>} />
 
               <Route path="/grading_sheet" element={<ProtectedRoute><GradingSheet /></ProtectedRoute>} />
               <Route path="/faculty_workload" element={<ProtectedRoute><FacultyWorkload /></ProtectedRoute>} />
@@ -223,6 +226,7 @@ function App() {
 
               <Route path="/applicant_list" element={<ProtectedRoute><ApplicantList /></ProtectedRoute>} />
               <Route path="/applicant_list_admin" element={<ProtectedRoute><ApplicantListAdmin /></ProtectedRoute>} />
+              <Route path="/proctor_applicant_list" element={<ProtectedRoute><ProctorApplicantList /></ProtectedRoute>} />
               <Route path="/medical_clearance" element={<ProtectedRoute><MedicalClearance /></ProtectedRoute>} />
               <Route path="/interview" element={<ProtectedRoute><Interview /></ProtectedRoute>} />
               <Route path="/qualifying_exam" element={<ProtectedRoute><QualifyingExam /></ProtectedRoute>} />

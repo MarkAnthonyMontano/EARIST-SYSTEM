@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 21, 2025 at 10:35 PM
+-- Generation Time: Aug 29, 2025 at 12:47 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -30,23 +30,81 @@ SET time_zone = "+00:00";
 CREATE TABLE `admission_exam` (
   `id` int(11) NOT NULL,
   `person_id` int(11) NOT NULL,
-  `subject` varchar(100) NOT NULL,
-  `raw_score` int(11) DEFAULT 0,
-  `percentage` decimal(5,2) DEFAULT 0.00,
+  `English` int(11) DEFAULT NULL,
+  `Science` int(11) DEFAULT NULL,
+  `Filipino` int(11) DEFAULT NULL,
+  `Math` int(11) DEFAULT NULL,
+  `Abstract` int(11) DEFAULT NULL,
+  `final_rating` int(11) DEFAULT NULL,
   `user` varchar(255) DEFAULT NULL,
-  `date_created` date DEFAULT curdate()
+  `date_created` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `admission_exam`
 --
 
-INSERT INTO `admission_exam` (`id`, `person_id`, `subject`, `raw_score`, `percentage`, `user`, `date_created`) VALUES
-(11, 1, 'English', 80, 80.00, 'Dhani San Jose', '2025-08-22'),
-(12, 1, 'Science', 86, 100.00, 'Dhani San Jose', '2025-08-22'),
-(13, 1, 'Filipino', 75, 90.00, 'Dhani San Jose', '2025-08-22'),
-(14, 1, 'Math', 100, 80.00, 'Dhani San Jose', '2025-08-22'),
-(15, 1, 'Abstract', 90, 80.00, 'Dhani San Jose', '2025-08-22');
+INSERT INTO `admission_exam` (`id`, `person_id`, `English`, `Science`, `Filipino`, `Math`, `Abstract`, `final_rating`, `user`, `date_created`) VALUES
+(1, 1, 40, 47, 40, 30, 41, 198, '1', '2025-08-29'),
+(2, 2, 46, 33, 43, 42, 50, 214, '1', '2025-08-29'),
+(3, 3, 33, 49, 32, 45, 39, 198, '1', '2025-08-29'),
+(4, 4, 49, 34, 39, 42, 42, 206, '1', '2025-08-29'),
+(5, 5, 33, 33, 35, 46, 34, 181, '1', '2025-08-29'),
+(6, 6, 43, 42, 30, 39, 30, 184, '1', '2025-08-29'),
+(7, 7, 49, 38, 38, 45, 38, 208, '1', '2025-08-29'),
+(8, 8, 47, 30, 41, 44, 46, 208, '1', '2025-08-29'),
+(9, 9, 48, 30, 41, 43, 40, 202, '1', '2025-08-29'),
+(10, 10, 42, 38, 36, 38, 30, 184, '1', '2025-08-29'),
+(11, 11, 47, 32, 32, 34, 44, 189, '1', '2025-08-29'),
+(12, 12, 49, 40, 44, 49, 40, 222, '1', '2025-08-29'),
+(13, 13, 40, 37, 38, 47, 30, 0, '1', '2025-08-29'),
+(14, 14, 47, 45, 31, 32, 40, 195, '1', '2025-08-29'),
+(15, 15, 31, 47, 30, 44, 36, 188, '1', '2025-08-29'),
+(16, 16, 39, 35, 50, 33, 48, 205, '1', '2025-08-29'),
+(17, 17, 50, 32, 43, 48, 40, 213, '1', '2025-08-29'),
+(18, 18, 48, 48, 44, 49, 41, 230, '1', '2025-08-29'),
+(19, 19, 30, 36, 42, 31, 39, 178, '1', '2025-08-29'),
+(20, 20, 30, 47, 31, 50, 40, 198, '1', '2025-08-29'),
+(21, 21, 44, 47, 34, 42, 35, 202, '1', '2025-08-29'),
+(22, 22, 40, 47, 43, 43, 34, 207, '1', '2025-08-29'),
+(23, 23, 36, 48, 37, 33, 48, 202, '1', '2025-08-29'),
+(24, 24, 47, 39, 48, 49, 32, 215, '1', '2025-08-29'),
+(25, 25, 46, 41, 38, 38, 46, 209, '1', '2025-08-29'),
+(26, 26, 46, 41, 35, 47, 36, 205, '1', '2025-08-29'),
+(27, 27, 31, 37, 43, 30, 37, 178, '1', '2025-08-29'),
+(28, 28, 42, 49, 46, 35, 48, 220, '1', '2025-08-29'),
+(29, 29, 42, 36, 46, 50, 43, 217, '1', '2025-08-29'),
+(30, 30, 33, 47, 47, 42, 39, 208, '1', '2025-08-29'),
+(31, 31, 39, 41, 37, 34, 40, 191, 'undefined', '2025-08-29'),
+(32, 32, 40, 32, 32, 34, 47, 185, '1', '2025-08-29'),
+(33, 33, 38, 40, 35, 47, 37, 197, '1', '2025-08-29'),
+(34, 34, 37, 45, 40, 38, 41, 201, '1', '2025-08-29'),
+(35, 35, 39, 43, 48, 39, 43, 212, '1', '2025-08-29'),
+(36, 36, 47, 33, 38, 42, 43, 203, '1', '2025-08-29'),
+(37, 37, 39, 37, 37, 44, 38, 195, '1', '2025-08-29'),
+(38, 38, 49, 41, 49, 48, 46, 233, '1', '2025-08-29'),
+(39, 39, 44, 47, 33, 36, 20, 180, 'undefined', '2025-08-29'),
+(40, 40, 31, 38, 45, 40, 35, 0, '1', '2025-08-29'),
+(41, 41, 33, 39, 48, 50, 33, 203, '1', '2025-08-29'),
+(42, 42, 49, 35, 37, 32, 42, 195, '1', '2025-08-29'),
+(43, 43, 40, 46, 38, 44, 32, 200, '1', '2025-08-29'),
+(44, 44, 44, 30, 50, 48, 38, 210, '1', '2025-08-29'),
+(45, 45, 39, 31, 48, 34, 40, 192, '1', '2025-08-29'),
+(46, 46, 46, 38, 44, 33, 46, 207, '1', '2025-08-29'),
+(47, 47, 38, 46, 44, 33, 43, 204, '1', '2025-08-29'),
+(48, 48, 44, 40, 40, 49, 34, 207, '1', '2025-08-29'),
+(49, 49, 34, 39, 45, 34, 46, 198, '1', '2025-08-29'),
+(50, 50, 39, 47, 47, 42, 42, 217, '1', '2025-08-29'),
+(51, 51, 33, 30, 43, 34, 50, 190, '1', '2025-08-29'),
+(52, 52, 37, 48, 37, 30, 32, 184, '1', '2025-08-29'),
+(53, 53, 41, 38, 36, 36, 42, 193, '1', '2025-08-29'),
+(54, 54, 30, 37, 43, 34, 34, 178, '1', '2025-08-29'),
+(55, 55, 36, 30, 32, 42, 42, 182, '1', '2025-08-29'),
+(56, 56, 34, 35, 43, 40, 41, 193, '1', '2025-08-29'),
+(57, 57, 32, 31, 50, 43, 35, 191, '1', '2025-08-29'),
+(58, 58, 38, 34, 46, 38, 44, 200, '1', '2025-08-29'),
+(59, 59, 35, 33, 32, 30, 47, 177, '1', '2025-08-29'),
+(60, 60, 30, 30, 31, 34, 50, 0, '1', '2025-08-29');
 
 -- --------------------------------------------------------
 
@@ -128,6 +186,21 @@ INSERT INTO `applicant_numbering_table` (`applicant_number`, `person_id`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `college_approval`
+--
+
+CREATE TABLE `college_approval` (
+  `id` int(11) NOT NULL,
+  `person_id` int(11) NOT NULL,
+  `percentage_score` decimal(5,2) NOT NULL,
+  `total` int(11) NOT NULL,
+  `status` varchar(50) DEFAULT NULL,
+  `custom_status` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `entrance_exam_schedule`
 --
 
@@ -157,7 +230,8 @@ INSERT INTO `entrance_exam_schedule` (`schedule_id`, `day_description`, `room_de
 (8, 'Wednesday', 'CCS Room 303', '10:00:00', '11:00:00', 'Mark Anthony Montano', '2025-08-20 18:35:49', 40),
 (9, 'Monday', 'CCS Room 301', '10:00:00', '11:00:00', 'JUAN DELA CRUZ', '2025-08-20 19:09:35', 50),
 (10, 'Saturday', 'CAFA', '10:00:00', '11:00:00', 'PEDRO PENDUCO', '2025-08-20 19:17:00', 40),
-(12, 'Wednesday', 'MIS 4th Floor', '16:00:00', '17:00:00', 'Dhani SanJose', '2025-08-21 08:20:45', 30);
+(12, 'Wednesday', 'MIS 4th Floor', '16:00:00', '17:00:00', 'Dhani SanJose', '2025-08-21 08:20:45', 30),
+(13, 'Wednesday', 'MIS', '15:00:00', '16:00:00', 'jovel advincula', '2025-08-27 07:06:55', 40);
 
 -- --------------------------------------------------------
 
@@ -177,64 +251,66 @@ CREATE TABLE `exam_applicants` (
 --
 
 INSERT INTO `exam_applicants` (`id`, `schedule_id`, `applicant_id`, `email_sent`) VALUES
-(1, NULL, '2025100001', 0),
-(2, NULL, '2025100002', 0),
-(3, NULL, '2025100003', 0),
-(4, NULL, '2025100004', 0),
-(5, NULL, '2025100005', 0),
-(6, NULL, '2025100006', 0),
-(7, NULL, '2025100007', 0),
-(8, NULL, '2025100008', 0),
-(9, NULL, '2025100009', 0),
-(10, NULL, '2025100010', 0),
-(11, NULL, '2025100011', 0),
-(12, NULL, '2025100012', 0),
-(13, NULL, '2025100013', 0),
-(14, NULL, '2025100014', 0),
-(15, NULL, '2025100015', 0),
-(16, NULL, '2025100016', 0),
-(17, NULL, '2025100017', 0),
-(18, NULL, '2025100018', 0),
-(19, NULL, '2025100019', 0),
-(20, NULL, '2025100020', 0),
-(21, NULL, '2025100021', 0),
-(22, NULL, '2025100022', 0),
-(23, NULL, '2025100023', 0),
-(24, NULL, '2025100024', 0),
-(25, NULL, '2025100025', 0),
-(26, NULL, '2025100026', 0),
-(27, NULL, '2025100027', 0),
-(28, NULL, '2025100028', 0),
-(29, NULL, '2025100029', 0),
-(30, NULL, '2025100030', 0),
-(32, NULL, '2025100032', 0),
-(33, NULL, '2025100033', 0),
-(34, NULL, '2025100034', 0),
-(35, NULL, '2025100035', 0),
-(36, NULL, '2025100036', 0),
-(37, NULL, '2025100037', 0),
-(38, NULL, '2025100038', 0),
-(40, NULL, '2025100040', 0),
-(41, NULL, '2025100041', 0),
-(42, NULL, '2025100042', 0),
-(43, NULL, '2025100043', 0),
-(44, NULL, '2025100044', 0),
-(45, NULL, '2025100045', 0),
-(46, NULL, '2025100046', 0),
-(47, NULL, '2025100047', 0),
-(48, NULL, '2025100048', 0),
-(49, NULL, '2025100049', 0),
-(50, NULL, '2025100050', 0),
-(51, NULL, '2025100051', 0),
-(52, NULL, '2025100052', 0),
-(53, NULL, '2025100053', 0),
-(54, NULL, '2025100054', 0),
-(55, NULL, '2025100055', 0),
-(56, NULL, '2025100056', 0),
-(57, NULL, '2025100057', 0),
-(58, NULL, '2025100058', 0),
-(59, NULL, '2025100059', 0),
-(60, NULL, '2025100060', 0);
+(1, NULL, '2025100001', 1),
+(2, NULL, '2025100002', 1),
+(3, 9, '2025100003', 1),
+(4, NULL, '2025100004', 1),
+(5, NULL, '2025100005', 1),
+(6, NULL, '2025100006', 1),
+(7, 10, '2025100007', 1),
+(8, 10, '2025100008', 1),
+(9, 10, '2025100009', 1),
+(10, 10, '2025100010', 1),
+(11, 10, '2025100011', 1),
+(12, 9, '2025100012', 1),
+(13, 10, '2025100013', 1),
+(14, 9, '2025100014', 1),
+(15, 9, '2025100015', 1),
+(16, 10, '2025100016', 1),
+(17, 10, '2025100017', 1),
+(18, 10, '2025100018', 1),
+(19, 10, '2025100019', 1),
+(20, 10, '2025100020', 1),
+(21, 9, '2025100021', 1),
+(22, 9, '2025100022', 1),
+(23, 10, '2025100023', 1),
+(24, 9, '2025100024', 1),
+(25, 10, '2025100025', 1),
+(26, 9, '2025100026', 1),
+(27, 10, '2025100027', 1),
+(28, 9, '2025100028', 1),
+(29, 9, '2025100029', 1),
+(30, 9, '2025100030', 1),
+(31, 10, '2025100031', 1),
+(32, 10, '2025100032', 1),
+(33, 9, '2025100033', 1),
+(34, 9, '2025100034', 1),
+(35, 9, '2025100035', 1),
+(36, 10, '2025100036', 1),
+(37, 10, '2025100037', 1),
+(38, 10, '2025100038', 1),
+(40, 10, '2025100040', 1),
+(41, 10, '2025100041', 1),
+(42, 10, '2025100042', 1),
+(43, 10, '2025100043', 1),
+(44, 10, '2025100044', 1),
+(45, 10, '2025100045', 1),
+(46, 9, '2025100046', 1),
+(47, 10, '2025100047', 1),
+(48, 9, '2025100048', 1),
+(49, 9, '2025100049', 1),
+(50, 10, '2025100050', 1),
+(51, 10, '2025100051', 1),
+(52, 10, '2025100052', 1),
+(53, 10, '2025100053', 1),
+(54, 9, '2025100054', 1),
+(55, 10, '2025100055', 1),
+(56, 9, '2025100056', 1),
+(57, 9, '2025100057', 1),
+(58, 10, '2025100058', 1),
+(59, 10, '2025100059', 1),
+(61, 10, '2025100060', 1),
+(62, 10, '2025100039', 1);
 
 -- --------------------------------------------------------
 
@@ -266,15 +342,13 @@ INSERT INTO `exam_schedule` (`exam_id`, `exam_date`, `exam_start_time`, `exam_en
 
 CREATE TABLE `interview_table` (
   `interview_id` int(11) NOT NULL,
-  `applicant_id` varchar(20) NOT NULL,
   `person_id` int(11) NOT NULL,
-  `entrance_exam_interviewer` varchar(100) DEFAULT NULL,
-  `college_interviewer` varchar(100) DEFAULT NULL,
-  `entrance_exam_score` int(11) DEFAULT 0 CHECK (`entrance_exam_score` between 0 and 100),
-  `college_exam_score` int(11) DEFAULT 0 CHECK (`college_exam_score` between 0 and 100),
-  `total_score` int(11) GENERATED ALWAYS AS (`entrance_exam_score` + `college_exam_score`) STORED,
-  `interview_date` timestamp NOT NULL DEFAULT current_timestamp(),
-  `user` varchar(100) NOT NULL,
+  `entrance_exam_interviewer` varchar(255) DEFAULT NULL,
+  `college_interviewer` varchar(255) DEFAULT NULL,
+  `entrance_exam_score` int(11) DEFAULT 0,
+  `college_exam_score` int(11) DEFAULT 0,
+  `total_score` int(11) DEFAULT 0,
+  `interview_date` datetime DEFAULT current_timestamp(),
   `status` varchar(255) DEFAULT NULL,
   `custom_status` varchar(255) DEFAULT NULL,
   `remarks` text DEFAULT NULL
@@ -284,9 +358,10 @@ CREATE TABLE `interview_table` (
 -- Dumping data for table `interview_table`
 --
 
-INSERT INTO `interview_table` (`interview_id`, `applicant_id`, `person_id`, `entrance_exam_interviewer`, `college_interviewer`, `entrance_exam_score`, `college_exam_score`, `interview_date`, `user`, `status`, `custom_status`, `remarks`) VALUES
-(3, '2025100001', 1, 'Dhani SanJose', 'Hazel Anuncio', 100, 90, '2025-08-21 19:23:20', '', 'Proceed to College Interview (College/Program will post the schedule of the Interview)', NULL, 'oo na'),
-(4, '2025100001', 1, 'Dhani SanJose', 'Hazel Anuncio', 100, 90, '2025-08-21 19:31:03', '', 'Proceed to College Interview (College/Program will post the schedule of the Interview)', NULL, 'oo na');
+INSERT INTO `interview_table` (`interview_id`, `person_id`, `entrance_exam_interviewer`, `college_interviewer`, `entrance_exam_score`, `college_exam_score`, `total_score`, `interview_date`, `status`, `custom_status`, `remarks`) VALUES
+(9, 1, 'MarkMontano', 'SanPedro', 90, 100, 95, '2025-08-25 04:36:06', 'Proceed to College Interview (College/Program will post the schedule of the Interview)', NULL, 'Ready to go'),
+(10, 2, 'MarkMontano', 'SanPedro', 90, 100, 95, '2025-08-23 01:35:23', 'Proceed to College Interview (College/Program will post the schedule of the Interview)', '', 'Ready to go'),
+(11, 3, 'MarkMontano', 'SanPedro', 90, 100, 95, '2025-08-23 01:35:41', 'Proceed to College Interview (College/Program will post the schedule of the Interview)', '', 'Ready to go');
 
 -- --------------------------------------------------------
 
@@ -402,66 +477,66 @@ CREATE TABLE `person_status_table` (
 --
 
 INSERT INTO `person_status_table` (`id`, `person_id`, `applicant_id`, `exam_status`, `requirements`, `residency`, `student_registration_status`, `exam_result`, `hs_ave`, `qualifying_result`, `interview_result`) VALUES
-(1, 1, '2025100001', 0, 0, 0, 0, 0, 0, 0, 0),
-(2, 2, '2025100002', 0, 0, 0, 0, 0, 0, 0, 0),
-(3, 3, '2025100003', 0, 0, 0, 0, 0, 0, 0, 0),
-(4, 4, '2025100004', 0, 0, 0, 0, 0, 0, 0, 0),
-(5, 5, '2025100005', 0, 0, 0, 0, 0, 0, 0, 0),
-(6, 6, '2025100006', 0, 0, 0, 0, 0, 0, 0, 0),
-(7, 7, '2025100007', 0, 0, 0, 0, 0, 0, 0, 0),
-(8, 8, '2025100008', 0, 0, 0, 0, 0, 0, 0, 0),
-(9, 9, '2025100009', 0, 0, 0, 0, 0, 0, 0, 0),
-(10, 10, '2025100010', 0, 0, 0, 0, 0, 0, 0, 0),
-(11, 11, '2025100011', 0, 0, 0, 0, 0, 0, 0, 0),
-(12, 12, '2025100012', 0, 0, 0, 0, 0, 0, 0, 0),
-(13, 13, '2025100013', 0, 0, 0, 0, 0, 0, 0, 0),
-(14, 14, '2025100014', 0, 0, 0, 0, 0, 0, 0, 0),
-(15, 15, '2025100015', 0, 0, 0, 0, 0, 0, 0, 0),
-(16, 16, '2025100016', 0, 0, 0, 0, 0, 0, 0, 0),
-(17, 17, '2025100017', 0, 0, 0, 0, 0, 0, 0, 0),
-(18, 18, '2025100018', 0, 0, 0, 0, 0, 0, 0, 0),
-(19, 19, '2025100019', 0, 0, 0, 0, 0, 0, 0, 0),
-(20, 20, '2025100020', 0, 0, 0, 0, 0, 0, 0, 0),
-(21, 21, '2025100021', 0, 0, 0, 0, 0, 0, 0, 0),
-(22, 22, '2025100022', 0, 0, 0, 0, 0, 0, 0, 0),
-(23, 23, '2025100023', 0, 0, 0, 0, 0, 0, 0, 0),
-(24, 24, '2025100024', 0, 0, 0, 0, 0, 0, 0, 0),
-(25, 25, '2025100025', 0, 0, 0, 0, 0, 0, 0, 0),
-(26, 26, '2025100026', 0, 0, 0, 0, 0, 0, 0, 0),
-(27, 27, '2025100027', 0, 0, 0, 0, 0, 0, 0, 0),
-(28, 28, '2025100028', 0, 0, 0, 0, 0, 0, 0, 0),
-(29, 29, '2025100029', 0, 0, 0, 0, 0, 0, 0, 0),
-(30, 30, '2025100030', 0, 0, 0, 0, 0, 0, 0, 0),
-(31, 31, '2025100031', 0, 0, 0, 0, 0, 0, 0, 0),
-(32, 32, '2025100032', 0, 0, 0, 0, 0, 0, 0, 0),
-(33, 33, '2025100033', 0, 0, 0, 0, 0, 0, 0, 0),
-(34, 34, '2025100034', 0, 0, 0, 0, 0, 0, 0, 0),
-(35, 35, '2025100035', 0, 0, 0, 0, 0, 0, 0, 0),
-(36, 36, '2025100036', 0, 0, 0, 0, 0, 0, 0, 0),
-(37, 37, '2025100037', 0, 0, 0, 0, 0, 0, 0, 0),
-(38, 38, '2025100038', 0, 0, 0, 0, 0, 0, 0, 0),
-(39, 39, '2025100039', 0, 0, 0, 0, 0, 0, 0, 0),
-(40, 40, '2025100040', 0, 0, 0, 0, 0, 0, 0, 0),
-(41, 41, '2025100041', 0, 0, 0, 0, 0, 0, 0, 0),
-(42, 42, '2025100042', 0, 0, 0, 0, 0, 0, 0, 0),
-(43, 43, '2025100043', 0, 0, 0, 0, 0, 0, 0, 0),
-(44, 44, '2025100044', 0, 0, 0, 0, 0, 0, 0, 0),
-(45, 45, '2025100045', 0, 0, 0, 0, 0, 0, 0, 0),
-(46, 46, '2025100046', 0, 0, 0, 0, 0, 0, 0, 0),
-(47, 47, '2025100047', 0, 0, 0, 0, 0, 0, 0, 0),
-(48, 48, '2025100048', 0, 0, 0, 0, 0, 0, 0, 0),
-(49, 49, '2025100049', 0, 0, 0, 0, 0, 0, 0, 0),
-(50, 50, '2025100050', 0, 0, 0, 0, 0, 0, 0, 0),
-(51, 51, '2025100051', 0, 0, 0, 0, 0, 0, 0, 0),
-(52, 52, '2025100052', 0, 0, 0, 0, 0, 0, 0, 0),
-(53, 53, '2025100053', 0, 0, 0, 0, 0, 0, 0, 0),
-(54, 54, '2025100054', 0, 0, 0, 0, 0, 0, 0, 0),
-(55, 55, '2025100055', 0, 0, 0, 0, 0, 0, 0, 0),
-(56, 56, '2025100056', 0, 0, 0, 0, 0, 0, 0, 0),
-(57, 57, '2025100057', 0, 0, 0, 0, 0, 0, 0, 0),
-(58, 58, '2025100058', 0, 0, 0, 0, 0, 0, 0, 0),
-(59, 59, '2025100059', 0, 0, 0, 0, 0, 0, 0, 0),
-(60, 60, '2025100060', 0, 0, 0, 0, 0, 0, 0, 0);
+(1, 1, '2025100001', 1, 0, 0, 0, 95, 0, 90, 100),
+(2, 2, '2025100002', 1, 0, 0, 0, 95, 0, 90, 100),
+(3, 3, '2025100003', 1, 1, 0, 0, 0, 0, 0, 0),
+(4, 4, '2025100004', 1, 0, 0, 0, 0, 0, 0, 0),
+(5, 5, '2025100005', 1, 0, 0, 0, 0, 0, 0, 0),
+(6, 6, '2025100006', 1, 0, 0, 0, 0, 0, 0, 0),
+(7, 7, '2025100007', 1, 0, 0, 0, 0, 0, 0, 0),
+(8, 8, '2025100008', 1, 0, 0, 0, 0, 0, 0, 0),
+(9, 9, '2025100009', 1, 0, 0, 0, 0, 0, 0, 0),
+(10, 10, '2025100010', 1, 0, 0, 0, 0, 0, 0, 0),
+(11, 11, '2025100011', 1, 0, 0, 0, 0, 0, 0, 0),
+(12, 12, '2025100012', 1, 0, 0, 0, 0, 0, 0, 0),
+(13, 13, '2025100013', 1, 0, 0, 0, 0, 0, 0, 0),
+(14, 14, '2025100014', 1, 0, 0, 0, 0, 0, 0, 0),
+(15, 15, '2025100015', 1, 0, 0, 0, 0, 0, 0, 0),
+(16, 16, '2025100016', 1, 0, 0, 0, 0, 0, 0, 0),
+(17, 17, '2025100017', 1, 0, 0, 0, 0, 0, 0, 0),
+(18, 18, '2025100018', 1, 0, 0, 0, 0, 0, 0, 0),
+(19, 19, '2025100019', 1, 0, 0, 0, 0, 0, 0, 0),
+(20, 20, '2025100020', 1, 0, 0, 0, 0, 0, 0, 0),
+(21, 21, '2025100021', 1, 0, 0, 0, 0, 0, 0, 0),
+(22, 22, '2025100022', 1, 0, 0, 0, 0, 0, 0, 0),
+(23, 23, '2025100023', 1, 0, 0, 0, 0, 0, 0, 0),
+(24, 24, '2025100024', 1, 0, 0, 0, 0, 0, 0, 0),
+(25, 25, '2025100025', 1, 0, 0, 0, 0, 0, 0, 0),
+(26, 26, '2025100026', 1, 0, 0, 0, 0, 0, 0, 0),
+(27, 27, '2025100027', 1, 0, 0, 0, 0, 0, 0, 0),
+(28, 28, '2025100028', 1, 0, 0, 0, 0, 0, 0, 0),
+(29, 29, '2025100029', 1, 0, 0, 0, 0, 0, 0, 0),
+(30, 30, '2025100030', 1, 0, 0, 0, 0, 0, 0, 0),
+(31, 31, '2025100031', 1, 0, 0, 0, 0, 0, 0, 0),
+(32, 32, '2025100032', 1, 0, 0, 0, 0, 0, 0, 0),
+(33, 33, '2025100033', 1, 0, 0, 0, 0, 0, 0, 0),
+(34, 34, '2025100034', 1, 0, 0, 0, 0, 0, 0, 0),
+(35, 35, '2025100035', 1, 0, 0, 0, 0, 0, 0, 0),
+(36, 36, '2025100036', 1, 0, 0, 0, 0, 0, 0, 0),
+(37, 37, '2025100037', 1, 0, 0, 0, 0, 0, 0, 0),
+(38, 38, '2025100038', 1, 0, 0, 0, 0, 0, 0, 0),
+(39, 39, '2025100039', 1, 0, 0, 0, 0, 0, 0, 0),
+(40, 40, '2025100040', 1, 0, 0, 0, 0, 0, 0, 0),
+(41, 41, '2025100041', 1, 0, 0, 0, 0, 0, 0, 0),
+(42, 42, '2025100042', 1, 0, 0, 0, 0, 0, 0, 0),
+(43, 43, '2025100043', 1, 0, 0, 0, 0, 0, 0, 0),
+(44, 44, '2025100044', 1, 0, 0, 0, 0, 0, 0, 0),
+(45, 45, '2025100045', 1, 0, 0, 0, 0, 0, 0, 0),
+(46, 46, '2025100046', 1, 0, 0, 0, 0, 0, 0, 0),
+(47, 47, '2025100047', 1, 0, 0, 0, 0, 0, 0, 0),
+(48, 48, '2025100048', 1, 0, 0, 0, 0, 0, 0, 0),
+(49, 49, '2025100049', 1, 0, 0, 0, 0, 0, 0, 0),
+(50, 50, '2025100050', 1, 0, 0, 0, 0, 0, 0, 0),
+(51, 51, '2025100051', 1, 0, 0, 0, 0, 0, 0, 0),
+(52, 52, '2025100052', 1, 0, 0, 0, 0, 0, 0, 0),
+(53, 53, '2025100053', 1, 0, 0, 0, 0, 0, 0, 0),
+(54, 54, '2025100054', 1, 0, 0, 0, 0, 0, 0, 0),
+(55, 55, '2025100055', 1, 0, 0, 0, 0, 0, 0, 0),
+(56, 56, '2025100056', 1, 0, 0, 0, 0, 0, 0, 0),
+(57, 57, '2025100057', 1, 0, 0, 0, 0, 0, 0, 0),
+(58, 58, '2025100058', 1, 0, 0, 0, 0, 0, 0, 0),
+(59, 59, '2025100059', 1, 0, 0, 0, 0, 0, 0, 0),
+(60, 60, '2025100060', 1, 0, 0, 0, 0, 0, 0, 0);
 
 -- --------------------------------------------------------
 
@@ -624,7 +699,7 @@ CREATE TABLE `person_table` (
 --
 
 INSERT INTO `person_table` (`person_id`, `profile_img`, `campus`, `academicProgram`, `classifiedAs`, `applyingAs`, `program`, `program2`, `program3`, `yearLevel`, `last_name`, `first_name`, `middle_name`, `extension`, `nickname`, `height`, `weight`, `lrnNumber`, `nolrnNumber`, `gender`, `pwdMember`, `pwdType`, `pwdId`, `birthOfDate`, `age`, `birthPlace`, `languageDialectSpoken`, `citizenship`, `religion`, `civilStatus`, `tribeEthnicGroup`, `cellphoneNumber`, `emailAddress`, `presentStreet`, `presentBarangay`, `presentZipCode`, `presentRegion`, `presentProvince`, `presentMunicipality`, `presentDswdHouseholdNumber`, `sameAsPresentAddress`, `permanentStreet`, `permanentBarangay`, `permanentZipCode`, `permanentRegion`, `permanentProvince`, `permanentMunicipality`, `permanentDswdHouseholdNumber`, `solo_parent`, `father_deceased`, `father_family_name`, `father_given_name`, `father_middle_name`, `father_ext`, `father_nickname`, `father_education`, `father_education_level`, `father_last_school`, `father_course`, `father_year_graduated`, `father_school_address`, `father_contact`, `father_occupation`, `father_employer`, `father_income`, `father_email`, `mother_deceased`, `mother_family_name`, `mother_given_name`, `mother_middle_name`, `mother_ext`, `mother_nickname`, `mother_education`, `mother_education_level`, `mother_last_school`, `mother_course`, `mother_year_graduated`, `mother_school_address`, `mother_contact`, `mother_occupation`, `mother_employer`, `mother_income`, `mother_email`, `guardian`, `guardian_family_name`, `guardian_given_name`, `guardian_middle_name`, `guardian_ext`, `guardian_nickname`, `guardian_address`, `guardian_contact`, `guardian_email`, `annual_income`, `schoolLevel`, `schoolLastAttended`, `schoolAddress`, `courseProgram`, `honor`, `generalAverage`, `yearGraduated`, `schoolLevel1`, `schoolLastAttended1`, `schoolAddress1`, `courseProgram1`, `honor1`, `generalAverage1`, `yearGraduated1`, `strand`, `cough`, `colds`, `fever`, `asthma`, `faintingSpells`, `heartDisease`, `tuberculosis`, `frequentHeadaches`, `hernia`, `chronicCough`, `headNeckInjury`, `hiv`, `highBloodPressure`, `diabetesMellitus`, `allergies`, `cancer`, `smokingCigarette`, `alcoholDrinking`, `hospitalized`, `hospitalizationDetails`, `medications`, `hadCovid`, `covidDate`, `vaccine1Brand`, `vaccine1Date`, `vaccine2Brand`, `vaccine2Date`, `booster1Brand`, `booster1Date`, `booster2Brand`, `booster2Date`, `chestXray`, `cbc`, `urinalysis`, `otherworkups`, `symptomsToday`, `remarks`, `termsOfAgreement`, `created_at`) VALUES
-(1, '2025100001_1by1_2025.jpg', 0, 'Undergraduate', 'Freshman (First Year)', '', '41', '6', '16', 'First Year', 'Montaño', 'Mark Anthony', 'Placido', '', 'Johnny', '5\'11', '65kg', 'No LRN Number', 0, 0, 0, '', '', '2003-06-20', 21, 'Manila, Philippines', 'Tagalog, English', 'FILIPINO', 'Born Again', 'Single', 'Agta', '09171234567999999', 'markmontano999@gmail.com', '19 G Dona Yayang Street ', 'Libis', '1000', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'Quezon City', 'DSWD123456', 0, '19 G Dona Yayang Street ', 'Libis', '1000', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'Quezon City', 'DSWD123456', 0, 0, 'Doe Sr.', 'Jonathan', 'Smiths', 'III', 'Jon', 0, 'fafs', '', '', '', '', '09181234567', 'Engineer', 'ABC Corp', '50000', 'jon.doe@abc.com', 0, 'Jane', 'Mary', 'Anne', '', 'Janey', 0, '', '', '', '', '', '09221234567', 'Accountant', 'XYZ Corp', '100000', 'jane.doe@xyz.com', 'StepFather', 'Parker', 'Ben', 'Jose', 'IV', 'Benny', '789 Recto Av', '09192233445', '', '135,000 to 250,000', 'Senior High School', 'CGEAHS', 'Pasig City', 'STEM', 'With Honors', 92.50, 2022, 'Senior High School', 'CGEAHS', 'Rizal High School', 'Rizal High School', '0', 66.00, 0, 'Information and Communications Technology (ICT)', 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 'Wala ngani', 'Vitamins C', 1, '2022-02-11', 'Pfizer', '2022-03-14', 'Pfizer', '2022-04-13', 'Moderna', '2022-07-14', 'Pfizer', '2023-01-14', 'Normal', 'Normal', 'Normal', 'Normal', 1, 'Fit to enroll', 1, '2024-11-08'),
+(1, '2025100001_1by1_2025.jpg', 0, 'Undergraduate', 'Freshman (First Year)', '', '40', '11', '14', 'First Year', 'Montaño', 'Mark Anthony', 'Placido', '', 'Johnny', '5\'11', '65kg', 'No LRN Number', 0, 0, 0, '', '', '2003-06-20', 21, 'Manila, Philippines', 'Tagalog, English', 'FILIPINO', 'Born Again', 'Single', 'Agta', '09171234567999999', 'markmontano999@gmail.com', '19 G Dona Yayang Street ', 'Libis', '1000', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'Quezon City', 'DSWD123456', 0, '19 G Dona Yayang Street ', 'Libis', '1000', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'Quezon City', 'DSWD123456', 0, 0, 'Doe Sr.', 'Jonathan', 'Smiths', 'III', 'Jon', 0, 'fafs', '', '', '', '', '09181234567', 'Engineer', 'ABC Corp', '50000', 'jon.doe@abc.com', 0, 'Jane', 'Mary', 'Anne', '', 'Janey', 0, '', '', '', '', '', '09221234567', 'Accountant', 'XYZ Corp', '100000', 'jane.doe@xyz.com', 'StepFather', 'Parker', 'Ben', 'Jose', 'IV', 'Benny', '789 Recto Av', '09192233445', '', '135,000 to 250,000', 'Senior High School', 'CGEAHS', 'Pasig City', 'STEM', 'With Honors', 92.50, 2022, 'Senior High School', 'CGEAHS', 'Rizal High School', 'Rizal High School', '0', 66.00, 0, 'Information and Communications Technology (ICT)', 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 'Wala ngani', 'Vitamins C', 1, '2022-02-11', 'Pfizer', '2022-03-14', 'Pfizer', '2022-04-13', 'Moderna', '2022-07-14', 'Pfizer', '2023-01-14', 'Normal', 'Normal', 'Normal', 'Normal', 1, 'Fit to enroll', 1, '2024-11-08'),
 (2, '3_1by1_2025.jpg', 1, 'Techvoc', 'Freshman (First Year)', 'Senior High School Graduate', '38', '4', '3', 'Second  Year', 'Emily', 'Johnson', 'Grace', '', 'MARK', '5\'11', '65', '123456789012', 0, 0, 0, '', '', '2003-06-26', 21, 'Manila, Philippines', 'Tagalog, English', 'ALGERIAN', 'Iglesia Ni Cristo', 'Single', 'Cebuano', '09953242510', 'emily.johnson2@example.com', '19 G Dona yayang Street Libis', 'Pag-asa', '4100', 'National Capital Region (NCR)', 'Metro Manila, Second District', 'City Of Mandaluyong', 'DSWD123456', 0, '19 G Dona yayang Street Libis', 'Malipayon', '4100', 'Region X (Northern Mindanao)', 'Bukidnon', 'Pangantucan', 'DSWD123456', 0, 0, '', '', '', '', '', 0, '', '', '', '', '', '', '', '', '', '', 0, '', '', '', '', '', 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'fgdsgfasftrasf', '', '', '', 0.00, 0, '', '', '', '', '', 83.00, 0, '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0, '', '', '', '', '', '', '', '', '', '', '', '', '', 0, '', 0, '2024-12-10'),
 (60, NULL, 0, NULL, NULL, NULL, '31', NULL, NULL, NULL, 'Bell', 'Evelyn', 'Faith', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'evelyn.bell60@example.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 63.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2024-08-09'),
 (59, NULL, 0, NULL, NULL, NULL, '5', NULL, NULL, NULL, 'Morgan', 'Levi', 'Anne', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'levi.morgan59@example.com', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 99.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2023-04-12'),
@@ -689,6 +764,23 @@ INSERT INTO `person_table` (`person_id`, `profile_img`, `campus`, `academicProgr
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `qualifying_exam`
+--
+
+CREATE TABLE `qualifying_exam` (
+  `id` int(11) NOT NULL,
+  `person_id` int(11) NOT NULL,
+  `score` int(11) NOT NULL,
+  `remarks` varchar(255) DEFAULT NULL,
+  `user` varchar(100) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
+  `custom_status` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `requirements_table`
 --
 
@@ -746,11 +838,11 @@ INSERT INTO `requirement_uploads` (`upload_id`, `requirements_id`, `person_id`, 
 (115, 5, 204, 0, '2025100005_VaccineCard_2025.png', 'Untitled design.png', NULL, 0, 'Program Closed', 0, '2025-08-18 15:09:57'),
 (116, 1, 3, NULL, '2025100003_BirthCertificate_2025.pdf', 'Certifate_of_registration.pdf', 'Attachments were blurry', 1, 'Documents Verified & ECAT', 1, '2025-08-17 04:31:23'),
 (118, 3, 3, NULL, '2025100003_GoodMoralCharacter_2025.pdf', 'Mark.pdf', NULL, 1, 'Documents Verified & ECAT', 1, '2025-08-17 04:31:23'),
-(119, 4, 3, 0, '2025100003_CertificateOfGraduatingClass_2025.pdf', 'MONTAÃ?O, MARK ANTHONY.pdf', NULL, 0, 'Documents Verified & ECAT', 0, '2025-08-17 05:22:05'),
+(119, 4, 3, 1, '2025100003_CertificateOfGraduatingClass_2025.pdf', 'MONTAÃ?O, MARK ANTHONY.pdf', NULL, 0, 'Documents Verified & ECAT', 1, '2025-08-23 15:11:56'),
 (120, 1, 2, NULL, '2025100002_BirthCertificate_2025.pdf', 'National_Skill_Registration_Program_Jobseeker_Registration_Form.pdf', 'Good Moral is outdated must be 2022', 0, 'On process', NULL, '2025-08-17 04:24:14'),
 (121, 1, 2, 0, '2025100002_BirthCertificate_2025.pdf', 'National_Skill_Registration_Program_Jobseeker_Registration_Form.pdf', 'Good Moral is outdated must be 2022', 0, 'On process', 0, '2025-08-20 03:05:16'),
-(126, 1, 1, NULL, '2025100001_BirthCertificate_2025.pdf', 'Certifate_of_registration (1).pdf', 'GWA did not meet the Requirements', 0, 'On process', NULL, '2025-08-21 04:48:10'),
-(127, 5, 1, NULL, '2025100001_VaccineCard_2025.pdf', 'Certifate_of_registration.pdf', 'GWA did not meet the Requirements', 0, NULL, NULL, '2025-08-21 04:52:59');
+(126, 1, 1, NULL, '2025100001_BirthCertificate_2025.pdf', 'Certifate_of_registration (1).pdf', 'GWA did not meet the Requirements', NULL, 'On process', 1, '2025-08-23 21:31:21'),
+(127, 5, 1, 0, '2025100001_VaccineCard_2025.pdf', 'Certifate_of_registration.pdf', 'GWA did not meet the Requirements', NULL, NULL, 1, '2025-08-23 21:31:21');
 
 -- --------------------------------------------------------
 
@@ -842,7 +934,7 @@ INSERT INTO `user_accounts` (`user_id`, `person_id`, `email`, `password`, `role`
 --
 ALTER TABLE `admission_exam`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_exam` (`person_id`,`subject`);
+  ADD UNIQUE KEY `unique_person` (`person_id`);
 
 --
 -- Indexes for table `applicant_numbering_table`
@@ -850,6 +942,12 @@ ALTER TABLE `admission_exam`
 ALTER TABLE `applicant_numbering_table`
   ADD PRIMARY KEY (`applicant_number`),
   ADD UNIQUE KEY `person_id` (`person_id`);
+
+--
+-- Indexes for table `college_approval`
+--
+ALTER TABLE `college_approval`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `entrance_exam_schedule`
@@ -894,6 +992,12 @@ ALTER TABLE `person_table`
   ADD PRIMARY KEY (`person_id`);
 
 --
+-- Indexes for table `qualifying_exam`
+--
+ALTER TABLE `qualifying_exam`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `requirements_table`
 --
 ALTER TABLE `requirements_table`
@@ -921,19 +1025,25 @@ ALTER TABLE `user_accounts`
 -- AUTO_INCREMENT for table `admission_exam`
 --
 ALTER TABLE `admission_exam`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=423;
+
+--
+-- AUTO_INCREMENT for table `college_approval`
+--
+ALTER TABLE `college_approval`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `entrance_exam_schedule`
 --
 ALTER TABLE `entrance_exam_schedule`
-  MODIFY `schedule_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `schedule_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `exam_applicants`
 --
 ALTER TABLE `exam_applicants`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
 
 --
 -- AUTO_INCREMENT for table `exam_schedule`
@@ -945,7 +1055,7 @@ ALTER TABLE `exam_schedule`
 -- AUTO_INCREMENT for table `interview_table`
 --
 ALTER TABLE `interview_table`
-  MODIFY `interview_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `interview_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `notifications`
@@ -964,6 +1074,12 @@ ALTER TABLE `person_status_table`
 --
 ALTER TABLE `person_table`
   MODIFY `person_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=306;
+
+--
+-- AUTO_INCREMENT for table `qualifying_exam`
+--
+ALTER TABLE `qualifying_exam`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `requirements_table`

@@ -43,8 +43,9 @@ const socket = io("http://localhost:5000");
 const AssignScheduleToApplicants = () => {
   const tabs = [
     { label: "Room Scheduling", to: "/assign_entrance_exam" },
-    { label: "Applicant Scheduling", to: "/assign_schedule_applicant" },
+    { label: "Applicant's Scheduling", to: "/assign_schedule_applicant" },
     { label: "Examination Profile", to: "/examination_profile" },
+    { label: "Applicant's Score", to: "/applicant_scoring" },
   ];
 
 
@@ -219,36 +220,6 @@ const AssignScheduleToApplicants = () => {
     });
   };
 
-
-  // handleAssign
-  const handleAssign = () => {
-    if (!selectedSchedule) {
-      setSnack({ open: true, message: "Please select a schedule.", severity: "warning" });
-      return;
-    }
-    if (selectedApplicants.size === 0) {
-      setSnack({ open: true, message: "Please select at least one applicant.", severity: "warning" });
-      return;
-    }
-
-    const applicant_numbers = Array.from(selectedApplicants);
-
-    socket.emit("update_schedule", { schedule_id: selectedSchedule, applicant_numbers });
-
-    socket.once("update_schedule_result", (res) => {
-      if (res.success) {
-        setSnack({
-          open: true,
-          message: `Assigned: ${res.assigned?.length || 0}, Updated: ${res.updated?.length || 0}, Skipped: ${res.skipped?.length || 0}`,
-          severity: "success"
-        });
-        setSelectedApplicants(new Set());
-        fetchAllApplicants();
-      } else {
-        setSnack({ open: true, message: res.error || "Failed to assign applicants.", severity: "error" });
-      }
-    });
-  };
 
   // handleAssign40 (assign max up to room_quota)
   const handleAssign40 = () => {
@@ -797,8 +768,20 @@ const AssignScheduleToApplicants = () => {
                 <MenuItem value="">-- Select Schedule --</MenuItem>
                 {schedules.map((s) => (
                   <MenuItem key={s.schedule_id} value={s.schedule_id}>
-                    {s.proctor} - {s.day_description} | {s.room_description} | {s.start_time} - {s.end_time}
+                    {s.proctor} - {s.day_description} | {s.room_description} |{" "}
+                    {new Date(`1970-01-01T${s.start_time}`).toLocaleTimeString("en-US", {
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}{" "}
+                    -{" "}
+                    {new Date(`1970-01-01T${s.end_time}`).toLocaleTimeString("en-US", {
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
                   </MenuItem>
+
                 ))}
               </TextField>
             </Grid>
@@ -927,14 +910,6 @@ const AssignScheduleToApplicants = () => {
               Assign Max
             </Button>
 
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleAssign}
-              sx={{ minWidth: 150 }}
-            >
-              Assign Selected
-            </Button>
 
             {/* 🔥 New Custom Assign Input + Button */}
             <TextField

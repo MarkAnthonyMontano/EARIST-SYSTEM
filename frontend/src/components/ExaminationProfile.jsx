@@ -21,8 +21,9 @@ const ExaminationProfile = () => {
 
     const tabs = [
         { label: "Room Scheduling", to: "/assign_entrance_exam" },
-        { label: "Applicant Scheduling", to: "/assign_schedule_applicant" },
+        { label: "Applicant's Scheduling", to: "/assign_schedule_applicant" },
         { label: "Examination Profile", to: "/examination_profile" },
+        { label: "Applicant's Score", to: "/applicant_scoring" },
     ];
 
 

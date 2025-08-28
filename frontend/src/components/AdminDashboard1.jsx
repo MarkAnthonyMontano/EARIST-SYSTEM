@@ -707,60 +707,72 @@ const AdminDashboard1 = () => {
       <hr style={{ border: "1px solid #ccc", width: "100%" }} />
       <br />
 
-      <Box sx={{ display: "flex", justifyContent: "center", width: "100%", flexWrap: "wrap" }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          width: "100%",
+          mt: 2,
+        }}
+      >
         {stepsData.map((step, index) => (
           <React.Fragment key={index}>
-            <Box
+            {/* Step Card */}
+            <Card
+              onClick={() => handleNavigateStep(index, step.to)}
               sx={{
+                flex: 1,
+                maxWidth: `${100 / stepsData.length}%`, // evenly fit 100%
+                height: 100,
                 display: "flex",
-                flexDirection: "column",
                 alignItems: "center",
+                justifyContent: "center",
                 cursor: "pointer",
-                m: 1,
+                borderRadius: 2,
+             border: "2px solid #6D2323",
+
+                backgroundColor: currentStep === index ? "#6D2323" : "#E8C999",
+                color: currentStep === index ? "#fff" : "#000",
+                boxShadow:
+                  currentStep === index
+                    ? "0px 4px 10px rgba(0,0,0,0.3)"
+                    : "0px 2px 6px rgba(0,0,0,0.15)",
+                transition: "0.3s ease",
+                "&:hover": {
+                  backgroundColor: currentStep === index ? "#5a1c1c" : "#f5d98f",
+                },
               }}
-              onClick={() => handleNavigateStep(index, step.to)} // click works here
             >
               <Box
                 sx={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: "50%",
-                  backgroundColor: currentStep === index ? "#6D2323" : "#E8C999",
-                  color: currentStep === index ? "#fff" : "#000",
                   display: "flex",
+                  flexDirection: "column",
                   alignItems: "center",
-                  justifyContent: "center",
                 }}
               >
-                {step.icon}
+                <Box sx={{ fontSize: 32, mb: 0.5 }}>{step.icon}</Box>
+                <Typography
+                  sx={{ fontSize: 14, fontWeight: "bold", textAlign: "center" }}
+                >
+                  {step.label}
+                </Typography>
               </Box>
-              <Typography
-                sx={{
-                  mt: 1,
-                  color: currentStep === index ? "#6D2323" : "#000",
-                  fontWeight: currentStep === index ? "bold" : "normal",
-                  fontSize: 12,
-                  textAlign: "center",
-                  width: 80,
-                }}
-              >
-                {step.label}
-              </Typography>
-            </Box>
+            </Card>
 
+            {/* Spacer instead of line */}
             {index < stepsData.length - 1 && (
               <Box
                 sx={{
-                  flex: 1,
-                  height: "2px",
-                  backgroundColor: "#6D2323",
-                  alignSelf: "center",
+                  flex: 0.1,
+                  mx: 1, // margin to keep spacing
                 }}
               />
             )}
           </React.Fragment>
         ))}
       </Box>
+
       <br />
 
 

@@ -17,8 +17,9 @@ import { useNavigate } from "react-router-dom";
 const AssignEntranceExam = () => {
   const tabs = [
     { label: "Room Scheduling", to: "/assign_entrance_exam" },
-    { label: "Applicant Scheduling", to: "/assign_schedule_applicant" },
+    { label: "Applicant's Scheduling", to: "/assign_schedule_applicant" },
     { label: "Examination Profile", to: "/examination_profile" },
+    { label: "Applicant's Score", to: "/applicant_scoring" },
   ];
 
 
@@ -85,58 +86,58 @@ const AssignEntranceExam = () => {
     fetchSchedules();
   }, []);
 
-  
-const handleSaveSchedule = async (e) => {
-  e.preventDefault();
-  setMessage("");
 
-  const sel = rooms.find((r) => String(r.room_id) === String(roomId));
-  if (!sel) {
-    setMessage("Please select a valid room.");
-    return;
-  }
+  const handleSaveSchedule = async (e) => {
+    e.preventDefault();
+    setMessage("");
 
-  // 🔎 Check conflict
-  const conflict = schedules.some(s =>
-    s.day_description === day &&
-    s.room_description === sel.room_description &&
-    !(
-      endTime <= s.start_time || startTime >= s.end_time // no overlap
-    )
-  );
+    const sel = rooms.find((r) => String(r.room_id) === String(roomId));
+    if (!sel) {
+      setMessage("Please select a valid room.");
+      return;
+    }
 
-  if (conflict) {
-    setMessage("Conflict detected: This room is already booked for that time.");
-    return;
-  }
+    // 🔎 Check conflict
+    const conflict = schedules.some(s =>
+      s.day_description === day &&
+      s.room_description === sel.room_description &&
+      !(
+        endTime <= s.start_time || startTime >= s.end_time // no overlap
+      )
+    );
 
-  try {
-    await axios.post("http://localhost:5000/insert_exam_schedule", {
-      day_description: day,
-      room_description: sel.room_description,
-      start_time: startTime,
-      end_time: endTime,
-      proctor,
-      room_quota: roomQuota || 40,
-    });
+    if (conflict) {
+      setMessage("Conflict detected: This room is already booked for that time.");
+      return;
+    }
 
-    setMessage("Entrance exam schedule saved successfully.");
-    setDay("");
-    setRoomId("");
-    setStartTime("");
-    setEndTime("");
-    setProctor("");
-    setRoomQuota("");
+    try {
+      await axios.post("http://localhost:5000/insert_exam_schedule", {
+        day_description: day,
+        room_description: sel.room_description,
+        start_time: startTime,
+        end_time: endTime,
+        proctor,
+        room_quota: roomQuota || 40,
+      });
 
-    // refresh schedules so conflicts update
-    const res = await axios.get("http://localhost:5000/exam_schedules_with_count");
-    setSchedules(res.data);
+      setMessage("Entrance exam schedule saved successfully.");
+      setDay("");
+      setRoomId("");
+      setStartTime("");
+      setEndTime("");
+      setProctor("");
+      setRoomQuota("");
 
-  } catch (err) {
-    console.error("Error saving schedule:", err);
-    setMessage("Failed to save schedule.");
-  }
-};
+      // refresh schedules so conflicts update
+      const res = await axios.get("http://localhost:5000/exam_schedules_with_count");
+      setSchedules(res.data);
+
+    } catch (err) {
+      console.error("Error saving schedule:", err);
+      setMessage("Failed to save schedule.");
+    }
+  };
 
   return (
     <Box sx={{ height: "calc(100vh - 150px)", overflowY: "auto", paddingRight: 1, backgroundColor: "transparent" }}>
@@ -170,60 +171,60 @@ const handleSaveSchedule = async (e) => {
 
       <br />
 
-         <Box sx={{ display: "flex", justifyContent: "center", width: "100%",  flexWrap: "wrap" }}>
-     {tabs1.map((tab, index) => (
-        <React.Fragment key={index}>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              cursor: "pointer",
-              m: 1,
-            }}
-            onClick={() => handleStepClick(index, tab.to)}
-          >
+      <Box sx={{ display: "flex", justifyContent: "center", width: "100%", flexWrap: "wrap" }}>
+        {tabs1.map((tab, index) => (
+          <React.Fragment key={index}>
             <Box
               sx={{
-                width: 50,
-                height: 50,
-                borderRadius: "50%",
-                backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
-                color: activeStep === index ? "#fff" : "#000",
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
-                justifyContent: "center",
+                cursor: "pointer",
+                m: 1,
               }}
+              onClick={() => handleStepClick(index, tab.to)}
             >
-              {tab.icon}
+              <Box
+                sx={{
+                  width: 50,
+                  height: 50,
+                  borderRadius: "50%",
+                  backgroundColor: activeStep === index ? "#6D2323" : "#E8C999",
+                  color: activeStep === index ? "#fff" : "#000",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {tab.icon}
+              </Box>
+              <Typography
+                sx={{
+                  mt: 1,
+                  color: activeStep === index ? "#6D2323" : "#000",
+                  fontWeight: activeStep === index ? "bold" : "normal",
+                  fontSize: 12,
+                  textAlign: "center",
+                  width: 80,
+                }}
+              >
+                {tab.label}
+              </Typography>
             </Box>
-            <Typography
-              sx={{
-                mt: 1,
-                color: activeStep === index ? "#6D2323" : "#000",
-                fontWeight: activeStep === index ? "bold" : "normal",
-                fontSize: 12,
-                textAlign: "center",
-                width: 80,
-              }}
-            >
-              {tab.label}
-            </Typography>
-          </Box>
 
-          {index < tabs1.length - 1 && (
-            <Box
-              sx={{
-                flex: 1,
-                height: "2px",
-                backgroundColor: "#6D2323",
-                alignSelf: "center",
-              }}
-            />
-          )}
-        </React.Fragment>
-      ))}
-    </Box>
+            {index < tabs1.length - 1 && (
+              <Box
+                sx={{
+                  flex: 1,
+                  height: "2px",
+                  backgroundColor: "#6D2323",
+                  alignSelf: "center",
+                }}
+              />
+            )}
+          </React.Fragment>
+        ))}
+      </Box>
 
       <br />
       <Box display="flex" sx={{ border: "2px solid maroon", borderRadius: "4px", overflow: "hidden" }}>
@@ -336,39 +337,34 @@ const handleSaveSchedule = async (e) => {
                 </TextField>
               </Grid>
 
-              {/* Start Time */}
-              <Grid item xs={12}>
-                <Typography fontWeight={500}>
-                  Start Time
-                </Typography>
-                <TextField
-                  fullWidth
-                  type="time"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  InputLabelProps={{ shrink: true }}
-                  inputProps={{ step: 300 }}
-                  required
-                  variant="outlined"
-                />
-              </Grid>
+{/* Start Time */}
+<Grid item xs={12}>
+  <Typography fontWeight={500}>Start Time</Typography>
+  <TextField
+    fullWidth
+    type="time"
+    value={startTime}
+    onChange={(e) => setStartTime(e.target.value)}
+    inputProps={{ step: 300 }} // 5-min step
+    required
+    variant="outlined"
+  />
+</Grid>
 
-              {/* End Time */}
-              <Grid item xs={12}>
-                <Typography fontWeight={500}>
-                  End Time
-                </Typography>
-                <TextField
-                  fullWidth
-                  type="time"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  InputLabelProps={{ shrink: true }}
-                  inputProps={{ step: 300 }}
-                  required
-                  variant="outlined"
-                />
-              </Grid>
+{/* End Time */}
+<Grid item xs={12}>
+  <Typography fontWeight={500}>End Time</Typography>
+  <TextField
+    fullWidth
+    type="time"
+    value={endTime}
+    onChange={(e) => setEndTime(e.target.value)}
+    inputProps={{ step: 300 }}
+    required
+    variant="outlined"
+  />
+</Grid>
+
 
               {/* Proctor */}
               <Grid item xs={12}>

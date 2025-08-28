@@ -13,6 +13,7 @@ require("dotenv").config();
 const app = express();
 const http = require("http").createServer(app);
 const { Server } = require("socket.io");
+const XLSX = require("xlsx");
 const io = new Server(http, {
   cors: {
     origin: "http://localhost:5173",
@@ -34,6 +35,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 const uploadPath = path.join(__dirname, "uploads");
+
 app.use("/uploads", express.static(uploadPath));
 
 if (!fs.existsSync(uploadPath)) {
@@ -100,6 +102,7 @@ const db = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
 });
+
 
 //MYSQL CONNECTION FOR ROOM MANAGEMENT AND OTHERS
 const db3 = mysql.createPool({
@@ -1144,24 +1147,47 @@ app.get("/api/not-emailed-applicants", async (req, res) => {
 });
 
 
-// GET ONLY APPLICANTS WITH AN APPLICANT NUMBER
 app.get("/api/applicants-with-number", async (req, res) => {
   try {
     const [rows] = await db.execute(`
       SELECT 
-        p.*, 
-        a.applicant_number 
+        p.person_id,
+        p.campus,
+        p.first_name,
+        p.middle_name,
+        p.last_name,
+        p.extension,
+        a.applicant_number,
+        p.program,
+        e.English AS english,
+        e.Science AS science,
+        e.Filipino AS filipino,
+        e.Math AS math,
+        e.Abstract AS abstract,
+        COALESCE(
+          e.final_rating,
+          (COALESCE(e.English,0) + COALESCE(e.Science,0) + COALESCE(e.Filipino,0) + COALESCE(e.Math,0) + COALESCE(e.Abstract,0))
+        ) AS final_rating,
+        e.user AS user_id,
+        u.email AS user_email   -- ✅ no extra comma
       FROM admission.person_table p
       INNER JOIN admission.applicant_numbering_table a 
-      ON p.person_id = a.person_id
+        ON p.person_id = a.person_id
+      LEFT JOIN admission.admission_exam e
+        ON p.person_id = e.person_id
+      LEFT JOIN enrollment.user_accounts u
+        ON e.user = u.id   -- ✅ link by user_accounts.id
       ORDER BY p.person_id ASC
     `);
+
     res.json(rows);
   } catch (err) {
     console.error("❌ Error fetching applicants with number:", err);
     res.status(500).send("Server error");
   }
 });
+
+
 
 
 // Get full person info + applicant_number
@@ -1782,10 +1808,17 @@ app.get("/api/search-person", async (req, res) => {
 //   }
 // });
 // OTP storage: otp, expiry, and cooldown
-let otpStore = {}; // { email: { otp, expiresAt, cooldownUntil } }
+// ----------------- GLOBAL STORES -----------------
+let otpStore = {}; 
+// Structure: { email: { otp, expiresAt, cooldownUntil } }
 
+let loginAttempts = {}; 
+// Structure: { emailOrStudentNumber: { count, lockUntil } }
+
+// ----------------- OTP GENERATOR -----------------
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
 
+// ----------------- REQUEST OTP -----------------
 app.post("/request-otp", async (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ message: "Email is required" });
@@ -1793,20 +1826,18 @@ app.post("/request-otp", async (req, res) => {
   const now = Date.now();
   const existing = otpStore[email];
 
-  // ⛔ If already has a valid OTP, block sending a new one until cooldown is over
+  // prevent spamming OTP
   if (existing && existing.cooldownUntil > now) {
-    const secondsLeft = Math.ceil((existing.cooldownUntil - now) / 1000); // ✅ fixed
+    const secondsLeft = Math.ceil((existing.cooldownUntil - now) / 1000);
     return res.status(429).json({ message: `OTP already sent. Please wait ${secondsLeft}s.` });
   }
 
-  // Generate OTP
   const otp = generateOTP();
 
-  // Save immediately to prevent race condition
   otpStore[email] = {
     otp,
-    expiresAt: now + 60 * 1000, // OTP valid for 1 minute
-    cooldownUntil: now + 60 * 1000 // 60s cooldown
+    expiresAt: now + 60 * 1000, // valid 1 min
+    cooldownUntil: now + 60 * 1000, // resend cooldown
   };
 
   try {
@@ -1819,7 +1850,7 @@ app.post("/request-otp", async (req, res) => {
     });
 
     await transporter.sendMail({
-      from: `"EARIST OTP Verification" <noreply-earistmis@gmail.com>`,
+      from: `"EARIST OTP Verification" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Your EARIST OTP Code",
       text: `Your OTP is: ${otp} (Valid for 1 minute)`,
@@ -1828,30 +1859,58 @@ app.post("/request-otp", async (req, res) => {
     res.json({ message: "OTP sent to email" });
   } catch (err) {
     console.error("OTP email error:", err);
-    // If sending fails, clear so user can retry
     delete otpStore[email];
     res.status(500).json({ message: "Failed to send OTP" });
   }
 });
 
+// ----------------- VERIFY OTP -----------------
 app.post("/verify-otp", (req, res) => {
   const { email, otp } = req.body;
-  const stored = otpStore[email];
+  const now = Date.now();
 
-  if (!stored || stored.otp !== otp || stored.expiresAt < Date.now()) {
+  let record = loginAttempts[email] || { count: 0, lockUntil: null };
+
+  // if locked
+  if (record.lockUntil && record.lockUntil > now) {
+    const secondsLeft = Math.ceil((record.lockUntil - now) / 1000);
+    return res.status(429).json({ message: `Too many failed attempts. Try again in ${secondsLeft}s.` });
+  }
+
+  const stored = otpStore[email];
+  if (!stored || stored.otp !== otp || stored.expiresAt < now) {
+    // failed OTP attempt
+    record.count++;
+    if (record.count >= 3) {
+      record.lockUntil = now + 3 * 60 * 1000; // lock 3 min
+      loginAttempts[email] = record;
+      return res.status(429).json({ message: "Too many failed OTP attempts. Locked for 3 minutes." });
+    }
+    loginAttempts[email] = record;
     return res.status(400).json({ message: "Invalid or expired OTP" });
   }
 
+  // ✅ OTP correct → reset everything
+  delete loginAttempts[email];
   delete otpStore[email];
-  res.json({ message: "OTP verified" });
+
+  res.json({ message: "OTP verified successfully" });
 });
 
-// Login for Registrar, Faculty, Student
+// ----------------- LOGIN -----------------
 app.post("/login", async (req, res) => {
   const { email: loginCredentials, password } = req.body;
-
   if (!loginCredentials || !password) {
     return res.status(400).json({ message: "All fields are required" });
+  }
+
+  const now = Date.now();
+  const record = loginAttempts[loginCredentials] || { count: 0, lockUntil: null };
+
+  // check lockout
+  if (record.lockUntil && record.lockUntil > now) {
+    const secondsLeft = Math.ceil((record.lockUntil - now) / 1000);
+    return res.status(429).json({ message: `Too many failed attempts. Try again in ${secondsLeft}s.` });
   }
 
   try {
@@ -1894,40 +1953,58 @@ app.post("/login", async (req, res) => {
     const [results] = await db3.query(query, [loginCredentials, loginCredentials, loginCredentials]);
 
     if (results.length === 0) {
+      record.count++;
+      if (record.count >= 3) {
+        record.lockUntil = now + 3 * 60 * 1000;
+        loginAttempts[loginCredentials] = record;
+        return res.status(429).json({ message: "Too many failed attempts. Locked for 3 minutes." });
+      }
+      loginAttempts[loginCredentials] = record;
       return res.status(400).json({ message: "Invalid email or student number" });
     }
 
     const user = results[0];
 
-    // ✅ Compare password
+    // password check
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid password" });
+      record.count++;
+      let remaining = 3 - record.count;
+
+      if (record.count >= 3) {
+        record.lockUntil = now + 3 * 60 * 1000;
+        loginAttempts[loginCredentials] = record;
+        return res.status(429).json({ message: "Too many failed attempts. Locked for 3 minutes." });
+      }
+
+      loginAttempts[loginCredentials] = record;
+      return res.status(400).json({
+        message: `Invalid password. You have ${remaining} attempt(s) remaining.`,
+        remaining,
+      });
     }
 
-    // ✅ Block inactive faculty
+    // ✅ NOTE: don’t clear loginAttempts yet → clear only after OTP verification
+
+    // block inactive accounts
     if ((user.source === "prof" || user.source === "user") && user.status === 0) {
       return res.status(400).json({ message: "The Account is Inactive" });
     }
 
-    // ✅ Generate OTP
+    // generate OTP
     const otp = generateOTP();
-    const now = Date.now();
     otpStore[user.email] = {
       otp,
-      expiresAt: now + 60 * 1000, // valid 1 min
+      expiresAt: now + 60 * 1000,
       cooldownUntil: now + 60 * 1000,
     };
 
-    // ✅ Gmail SMTP transporter (App Password required)
+    // send OTP
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 465,
-      secure: true, // use TLS 465
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
+      secure: true,
+      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
     });
 
     try {
@@ -1939,10 +2016,9 @@ app.post("/login", async (req, res) => {
       });
     } catch (err) {
       console.error("⚠️ Failed to send OTP email:", err.message);
-      // We still respond so modal opens
     }
 
-    // ✅ Create JWT
+    // generate JWT
     const token = webtoken.sign(
       { person_id: user.person_id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
@@ -1961,6 +2037,7 @@ app.post("/login", async (req, res) => {
     res.status(500).json({ message: "Server error during login" });
   }
 });
+
 
 // Login for Applicants
 app.post("/login_applicant", async (req, res) => {
@@ -2542,77 +2619,267 @@ io.on("connection", (socket) => {
     }
   });
 
-  app.get("/api/exam/:personId", async (req, res) => {
-    try {
-      const { personId } = req.params;
+  // 🔹 Get exam scores for a person
+app.get("/api/exam/:personId", async (req, res) => {
+  try {
+    const { personId } = req.params;
 
-      // ✅ Format the date in MySQL before sending to frontend
-      const [rows] = await db.query(
-        `SELECT 
+    const [rows] = await db.query(
+      `SELECT 
          id,
          person_id,
-         subject,
-         raw_score,
-         percentage,
+         English,
+         Science,
+         Filipino,
+         Math,
+         Abstract,
+         final_rating,
          user,
          DATE_FORMAT(date_created, '%Y-%m-%d') AS date_created
        FROM admission_exam 
        WHERE person_id = ?`,
-        [personId]
-      );
+      [personId]
+    );
 
-      res.json(rows); // returns array with safe YYYY-MM-DD strings
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Database error" });
+    res.json(rows); 
+  } catch (err) {
+    console.error("❌ GET exam error:", err);
+    res.status(500).json({ error: "Database error" });
+  }
+});
+
+// Get applicants assigned to a proctor
+app.get("/api/proctor-applicants/:proctor_id", async (req, res) => {
+  const { proctor_id } = req.params;
+
+  try {
+    const [rows] = await db.query(`
+      SELECT 
+        ea.applicant_id,
+        an.applicant_number,
+        pt.first_name,
+        pt.middle_name,
+        pt.last_name,
+        pt.program,
+        es.exam_date,
+        es.room_name,
+        u.email AS proctor_email
+      FROM exam_applicants ea
+      JOIN applicant_numbering_table an ON ea.applicant_id = an.applicant_number
+      JOIN person_table pt ON an.person_id = pt.person_id
+      JOIN exam_schedule es ON ea.schedule_id = es.exam_id
+      JOIN user_accounts u ON es.proctor_id = u.id
+      WHERE es.proctor_id = ?
+    `, [proctor_id]);
+
+    res.json(rows);
+  } catch (err) {
+    console.error("❌ Error fetching proctor applicants:", err);
+    res.status(500).json({ error: "Failed to fetch applicants for proctor" });
+  }
+});
+
+// Search proctor by name and return their assigned applicants
+app.get("/api/proctor-applicants", async (req, res) => {
+  const { query } = req.query;
+
+  if (!query) {
+    return res.status(400).json({ message: "Query is required" });
+  }
+
+  try {
+    // Find schedules where this proctor is assigned
+    const [schedules] = await db.query(
+      `SELECT schedule_id, day_description, room_description, start_time, end_time, proctor
+       FROM entrance_exam_schedule
+       WHERE proctor LIKE ?`,
+      [`%${query}%`]
+    );
+
+    if (schedules.length === 0) {
+      return res.status(404).json({ message: "Proctor not found in schedules" });
     }
-  });
 
-
-
-  app.post("/exam/save", async (req, res) => {
-    try {
-      const { applicant_number, exams } = req.body;
-
-      // 1️⃣ Find person_id from applicant_number
-      const [rows] = await db.query(
-        "SELECT person_id FROM applicant_numbering_table WHERE applicant_number = ?",
-        [applicant_number]
+    // For each schedule, get assigned applicants with email_sent
+    const results = [];
+    for (const sched of schedules) {
+      const [applicants] = await db.query(
+        `SELECT ea.applicant_id, ea.email_sent,
+                an.applicant_number,
+                p.last_name, p.first_name, p.middle_name, p.program
+         FROM exam_applicants ea
+         JOIN applicant_numbering_table an ON ea.applicant_id = an.applicant_number
+         JOIN person_table p ON an.person_id = p.person_id
+         WHERE ea.schedule_id = ?`,
+        [sched.schedule_id]
       );
 
-      if (rows.length === 0) {
-        return res.status(400).json({ error: "Applicant number not found" });
+      results.push({
+        schedule: sched,
+        applicants
+      });
+    }
+
+    res.json(results);
+  } catch (err) {
+    console.error("❌ Error fetching proctor applicants:", err);
+    res.status(500).json({ error: "Failed to fetch applicants for proctor" });
+  }
+});
+
+
+// Search proctor by name or email
+app.get("/api/search-proctor", async (req, res) => {
+  const { query } = req.query;
+
+  if (!query) {
+    return res.status(400).json({ message: "Query is required" });
+  }
+
+  try {
+    const [rows] = await db.query(`
+      SELECT id, person_id, email, first_name, middle_name, last_name, role
+      FROM user_accounts
+      WHERE role = 'proctor'
+        AND (email LIKE ? OR first_name LIKE ? OR last_name LIKE ?)
+      LIMIT 1
+    `, [`%${query}%`, `%${query}%`, `%${query}%`]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Proctor not found" });
+    }
+
+    res.json({
+      id: rows[0].id,
+      email: rows[0].email,
+      name: `${rows[0].last_name}, ${rows[0].first_name} ${rows[0].middle_name || ""}`
+    });
+  } catch (err) {
+    console.error("❌ Error searching proctor:", err);
+    res.status(500).json({ error: "Failed to search proctor" });
+  }
+});
+
+
+// 🔹 Save exam scores for a single applicant
+app.post("/exam/save", async (req, res) => {
+  try {
+    const { applicant_number, english, science, filipino, math, abstract, final_rating, user } = req.body;
+
+    // 1️⃣ Find person_id from applicant_number
+    const [rows] = await db.query(
+      "SELECT person_id FROM applicant_numbering_table WHERE applicant_number = ?",
+      [applicant_number]
+    );
+
+    if (rows.length === 0) {
+      return res.status(400).json({ error: "Applicant number not found" });
+    }
+
+    const personId = rows[0].person_id;
+
+    // 2️⃣ Insert or update the admission_exam row
+    await db.query(
+      `INSERT INTO admission_exam 
+        (person_id, English, Science, Filipino, Math, Abstract, final_rating, user, date_created)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+       ON DUPLICATE KEY UPDATE
+         English = VALUES(English),
+         Science = VALUES(Science),
+         Filipino = VALUES(Filipino),
+         Math = VALUES(Math),
+         Abstract = VALUES(Abstract),
+         final_rating = VALUES(final_rating),
+         user = VALUES(user),
+         date_created = VALUES(date_created)`,
+      [personId, english, science, filipino, math, abstract, final_rating, user]
+    );
+
+    res.json({ success: true, message: "Exam data saved!" });
+  } catch (err) {
+    console.error("❌ Save error:", err);
+    res.status(500).json({ error: "Failed to save exam data" });
+  }
+});
+
+// 🔹 Import exam scores from Excel (using Applicant ID)
+// ✅ Assuming you have req.user from login/session
+app.post("/api/exam/import", upload.single("file"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const rows = XLSX.utils.sheet_to_json(sheet);
+
+    let insertedCount = 0;
+    let skippedCount = 0;
+
+    // 🔑 Hardcode for now, later get from req.user
+    const loggedInUserId = 1;  
+
+    for (const row of rows) {
+      const applicantNumber = row["Applicant ID"] || row["applicant_number"];
+      if (!applicantNumber) {
+        skippedCount++;
+        continue;
       }
 
-      const personId = rows[0].person_id;
+      const [match] = await db.query(
+        "SELECT person_id FROM applicant_numbering_table WHERE applicant_number = ?",
+        [applicantNumber]
+      );
 
-      // 2️⃣ Insert each exam row
-      for (let exam of exams) {
-        await db.query(
-          `INSERT INTO admission_exam (person_id, subject, raw_score, percentage, user, date_created)
-         VALUES (?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE 
-           raw_score = VALUES(raw_score), 
-           percentage = VALUES(percentage),
+      if (match.length === 0) {
+        skippedCount++;
+        continue;
+      }
+
+      const personId = match[0].person_id;
+
+      await db.query(
+        `INSERT INTO admission_exam 
+           (person_id, English, Science, Filipino, Math, Abstract, final_rating, user, date_created)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+         ON DUPLICATE KEY UPDATE
+           English = VALUES(English),
+           Science = VALUES(Science),
+           Filipino = VALUES(Filipino),
+           Math = VALUES(Math),
+           Abstract = VALUES(Abstract),
+           final_rating = VALUES(final_rating),
            user = VALUES(user),
            date_created = VALUES(date_created)`,
-          [
-            personId,
-            exam.subject,
-            exam.raw_score,
-            exam.percentage,
-            exam.user,
-            exam.date_created,
-          ]
-        );
-      }
+        [
+          personId,
+          row["English"] || 0,
+          row["Science"] || 0,
+          row["Filipino"] || 0,
+          row["Math"] || 0,
+          row["Abstract"] || 0,
+          row["Final Rating"] || 0,
+          loggedInUserId, // ✅ now stores user_accounts.id, not text
+        ]
+      );
 
-      res.json({ success: true, message: "Exam data saved!" });
-    } catch (err) {
-      console.error("❌ Save error:", err);
-      res.status(500).json({ error: "Failed to save exam data" });
+      insertedCount++;
     }
-  });
+
+    res.json({
+      success: true,
+      message: `✅ Import done. Inserted/updated: ${insertedCount}, Skipped: ${skippedCount}`,
+    });
+  } catch (err) {
+    console.error("❌ Excel import error:", err);
+    res.status(500).json({ error: "Failed to import Excel" });
+  }
+});
+
+
+
   // ==================== INTERVIEW ROUTES ====================
   // 1. Get interview by applicant_number (JOIN applicant_numbering_table)
   app.get("/api/interview/:applicant_number", async (req, res) => {
@@ -3152,7 +3419,7 @@ io.on("connection", (socket) => {
         }
 
         const mailOptions = {
-          from: `"EARIST MIS" <${process.env.EMAIL_USER}>`,
+          from: `"EARIST Manila" <${process.env.EMAIL_USER}>`,
           to: row.emailAddress,
           subject: "Your Entrance Exam Schedule",
           text: `Hello ${row.first_name} ${row.last_name},
@@ -3166,7 +3433,7 @@ You have been assigned to the following entrance exam schedule:
 
 Please arrive on time and bring your requirements.
 
-- EARIST MIS`,
+- EARIST Manila`,
         };
 
         try {
